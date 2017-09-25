@@ -1,0 +1,52 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Vim tmp files
+*.swp
+
+# Build directory
+build/
+
+# Test build artefacts
+test/test_xtensor
+test/CMakeCache.txt
+test/Makefile
+test/CMakeFiles/
+test/cmake_install.cmake
+
+# Documentation build artefacts
+docs/CMakeCache.txt
+docs/xml/
+docs/build/
+
+# Jupyter artefacts
+.ipynb_checkpoints/
+
+# Generated files
+*.pc
