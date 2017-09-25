@@ -9,10 +9,10 @@
 #include <cstddef>
 #include <vector>
 #include "gtest/gtest.h"
-#include "xdataframe/xaxis.hpp"
+#include "xframe/xaxis.hpp"
 #include "xtl/xbasic_fixed_string.hpp"
 
-namespace xdf
+namespace xf
 {
     using fstring = xtl::xfixed_string<55>;
     using label_type = std::vector<fstring>;
@@ -51,12 +51,12 @@ namespace xdf
     {
         label_type l = { "a", "b", "c" };
         axis_type a(l);
-        EXPECT_EQ(3, a.size());
+        EXPECT_EQ(3u, a.size());
         EXPECT_FALSE(a.empty());
 
         label_type l2;
         axis_type a2(l2);
-        EXPECT_EQ(0, a2.size());
+        EXPECT_EQ(0u, a2.size());
         EXPECT_TRUE(a2.empty());
     }
 
@@ -77,9 +77,9 @@ namespace xdf
             auto aa = a["a"];
             auto ab = a["b"];
             auto ac = a["c"];
-            EXPECT_EQ(0, aa);
-            EXPECT_EQ(1, ab);
-            EXPECT_EQ(2, ac);
+            EXPECT_EQ(0u, aa);
+            EXPECT_EQ(1u, ab);
+            EXPECT_EQ(2u, ac);
             EXPECT_THROW(a["d"], std::out_of_range);
         }
 
@@ -87,9 +87,9 @@ namespace xdf
             auto aa = a("a");
             auto ab = a("b");
             auto ac = a("c");
-            EXPECT_EQ(0, aa);
-            EXPECT_EQ(1, ab);
-            EXPECT_EQ(2, ac);
+            EXPECT_EQ(0u, aa);
+            EXPECT_EQ(1u, ab);
+            EXPECT_EQ(2u, ac);
             EXPECT_THROW(a["d"], std::out_of_range);
         }
     }

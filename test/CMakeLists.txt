@@ -9,10 +9,10 @@
 cmake_minimum_required(VERSION 3.1)
 
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    project(xdataframe-test)
+    project(xframe-test)
 
-    find_package(xdataframe REQUIRED CONFIG)
-    set(XDATAFRAME_INCLUDE_DIR ${xdataframe_INCLUDE_DIRS})
+    find_package(xframe REQUIRED CONFIG)
+    set(XFRAME_INCLUDE_DIR ${xframe_INCLUDE_DIRS})
 endif ()
 
 message(STATUS "Forcing tests build type to Release")
@@ -23,14 +23,14 @@ include(CheckCXXCompilerFlag)
 string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wunused-parameter -Wextra -Wreorder -Wconversion -Wsign-conversion")
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wunused-parameter -Wextra -Wreorder -Wconversion")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wunused-parameter -Wextra -Wreorder -Wconversion -Wsign-conversion")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wunused-parameter -Wextra -Wreorder -Wconversion")
     CHECK_CXX_COMPILER_FLAG("-std=c++14" HAS_CPP14_FLAG)
 
     if (HAS_CPP14_FLAG)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
     else()
-        message(FATAL_ERROR "Unsupported compiler -- xdataframe requires C++14 support!")
+        message(FATAL_ERROR "Unsupported compiler -- xframe requires C++14 support!")
     endif()
 endif()
 
@@ -73,21 +73,21 @@ endif()
 
 find_package(Threads)
 
-include_directories(${XDATAFRAME_INCLUDE_DIR})
+include_directories(${XFRAME_INCLUDE_DIR})
 include_directories(${GTEST_INCLUDE_DIRS})
 
-set(XDATAFRAME_TESTS
+set(XFRAME_TESTS
     main.cpp
     test_xaxis.cpp
 )
 
-set(XDATAFRAME_TARGET test_xdataframe)
+set(XFRAME_TARGET test_xframe)
 
-add_executable(${XDATAFRAME_TARGET} ${XDATAFRAME_TESTS} ${XDATAFRAME_HEADERS})
+add_executable(${XFRAME_TARGET} ${XFRAME_TESTS} ${XFRAME_HEADERS})
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
-    add_dependencies(${XDATAFRAME_TARGET} gtest_main)
+    add_dependencies(${XFRAME_TARGET} gtest_main)
 endif()
-target_link_libraries(${XDATAFRAME_TARGET} ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${XFRAME_TARGET} ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-add_custom_target(xtest COMMAND test_xdataframe DEPENDS ${XDATAFRAME_TARGET})
+add_custom_target(xtest COMMAND test_xframe DEPENDS ${XFRAME_TARGET})
 

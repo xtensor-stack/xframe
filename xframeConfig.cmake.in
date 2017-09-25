@@ -6,16 +6,16 @@
 # The full license is in the file LICENSE, distributed with this software. #
 ############################################################################
 
-# xdataframe cmake module
+# xframe cmake module
 # This module sets the following variables in your project:
 #
-#   xdataframe_FOUND - true if xdataframe found on the system
-#   xdataframe_INCLUDE_DIRS - the directory containing xdataframe headers
-#   xdataframe_LIBRARY - empty
+#   xframe_FOUND - true if xframe found on the system
+#   xframe_INCLUDE_DIRS - the directory containing xframe headers
+#   xframe_LIBRARY - empty
 
 @PACKAGE_INIT@
 
-set(PN xdataframe)
+set(PN xframe)
 set_and_check(${PN}_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@")
 set(${PN}_LIBRARY "")
 check_required_components(${PN})

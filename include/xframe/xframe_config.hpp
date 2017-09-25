@@ -6,11 +6,11 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XDATAFRAME_CONFIG_HPP
-#define XDATAFRAME_CONFIG_HPP
+#ifndef XFRAME_CONFIG_HPP
+#define XFRAME_CONFIG_HPP
 
-#define XDATAFRAME_VERSION_MAJOR 0
-#define XDATAFRAME_VERSION_MINOR 0
-#define XDATAFRAME_VERSION_PATCH 1
+#define XFRAME_VERSION_MAJOR 0
+#define XFRAME_VERSION_MINOR 0
+#define XFRAME_VERSION_PATCH 1
 
 #endif

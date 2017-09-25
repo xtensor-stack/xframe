@@ -6,15 +6,15 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XDF_XAXIS_LABELS_HPP
-#define XDF_XAXIS_LABELS_HPP
+#ifndef XFRAME_XAXIS_LABELS_HPP
+#define XFRAME_XAXIS_LABELS_HPP
 
 #include <initializer_list>
 #include <iterator>
 #include <type_traits>
 #include <unordered_map>
 
-namespace xdf
+namespace xf
 {
     template <class L, class T>
     class xaxis_iterator;
