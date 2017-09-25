@@ -7,23 +7,23 @@
 ############################################################################
 
 cmake_minimum_required(VERSION 3.1)
-project(xdataframe)
+project(xframe)
 
-set(XDATAFRAME_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(XFRAME_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Versionning
 # ===========
 
-file(STRINGS "${XDATAFRAME_INCLUDE_DIR}/xdataframe/xdataframe_config.hpp" xdataframe_version_defines
-    REGEX "#define XDATAFRAME_VERSION_(MAJOR|MINOR|PATCH)")
-foreach(ver ${xdataframe_version_defines})
-    if(ver MATCHES "#define XDATAFRAME_VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
-        set(XDATAFRAME_VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
+file(STRINGS "${XFRAME_INCLUDE_DIR}/xframe/xframe_config.hpp" xframe_version_defines
+    REGEX "#define XFRAME_VERSION_(MAJOR|MINOR|PATCH)")
+foreach(ver ${xframe_version_defines})
+    if(ver MATCHES "#define XFRAME_VERSION_(MAJOR|MINOR|PATCH) +([^ ]+)$")
+        set(XFRAME_VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
     endif()
 endforeach()
 set(${PROJECT_NAME}_VERSION 
-    ${XDATAFRAME_VERSION_MAJOR}.${XDATAFRAME_VERSION_MINOR}.${XDATAFRAME_VERSION_PATCH})
-message(STATUS "xdataframe v${${PROJECT_NAME}_VERSION}")
+    ${XFRAME_VERSION_MAJOR}.${XFRAME_VERSION_MINOR}.${XFRAME_VERSION_PATCH})
+message(STATUS "xframe v${${PROJECT_NAME}_VERSION}")
 
 # Dependencies
 # ============
@@ -37,12 +37,12 @@ include_directories(${xtl_INCLUDE_DIRS})
 # Build
 # =====
 
-set(XDATAFRAME_HEADERS
-    ${XDATAFRAME_INCLUDE_DIR}/xdataframe/xaxis.hpp
-    ${XDATAFRAME_INCLUDE_DIR}/xdataframe/xdataframe_config.hpp
+set(XFRAME_HEADERS
+    ${XFRAME_INCLUDE_DIR}/xframe/xaxis.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xframe_config.hpp
 )
 
-OPTION(BUILD_TESTS "xdataframe test suite" OFF)
+OPTION(BUILD_TESTS "xframe test suite" OFF)
 OPTION(DOWNLOAD_GTEST "build gtest from downloaded sources" OFF)
 
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
@@ -59,25 +59,25 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-install(FILES ${XDATAFRAME_HEADERS}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xdataframe)
+install(FILES ${XFRAME_HEADERS}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xframe)
 
-    set(XDATAFRAME_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE
-    STRING "install path for xdataframeConfig.cmake")
+    set(XFRAME_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE
+    STRING "install path for xframeConfig.cmake")
 
 configure_package_config_file(${PROJECT_NAME}Config.cmake.in
                               "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-                              INSTALL_DESTINATION ${XDATAFRAME_CMAKECONFIG_INSTALL_DIR})
+                              INSTALL_DESTINATION ${XFRAME_CMAKECONFIG_INSTALL_DIR})
 
-# xdataframe is header-only and does not depend on the architecture.
-# Remove CMAKE_SIZEOF_VOID_P from xdataframeConfigVersion.cmake so that an xdataframeConfig.cmake
+# xframe is header-only and does not depend on the architecture.
+# Remove CMAKE_SIZEOF_VOID_P from xframeConfigVersion.cmake so that an xframeConfig.cmake
 # generated for a 64 bit target can be used for 32 bit targets and vice versa.
-set(_XDATAFRAME_CMAKE_SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
+set(_XFRAME_CMAKE_SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
 unset(CMAKE_SIZEOF_VOID_P)
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
                                  VERSION ${${PROJECT_NAME}_VERSION}
                                  COMPATIBILITY AnyNewerVersion)
-set(CMAKE_SIZEOF_VOID_P ${_XDATAFRAME_CMAKE_SIZEOF_VOID_P})
+set(CMAKE_SIZEOF_VOID_P ${_XFRAME_CMAKE_SIZEOF_VOID_P})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-        DESTINATION ${XDATAFRAME_CMAKECONFIG_INSTALL_DIR})
+        DESTINATION ${XFRAME_CMAKECONFIG_INSTALL_DIR})

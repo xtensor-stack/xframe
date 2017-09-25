@@ -101,7 +101,7 @@ install:
     - mkdir build
     - cd build
     - cmake -DBUILD_TESTS=ON ..;
-    - make -j2 test_xdataframe
+    - make -j2 test_xframe
     - cd test
 script:
-    - ./test_xdataframe
+    - ./test_xframe
