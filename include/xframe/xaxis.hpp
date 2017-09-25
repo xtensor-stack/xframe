@@ -73,7 +73,7 @@ namespace xf
 
         const_reverse_iterator crbegin() const noexcept;
         const_reverse_iterator crend() const noexcept;
-    
+
     private:
 
         void populate_index();
@@ -113,10 +113,10 @@ namespace xf
 
         xaxis_iterator() = default;
         xaxis_iterator(const container_type* c, label_iterator it);
-        
+
         self_type& operator++();
         self_type operator++(int);
-        
+
         self_type& operator--();
         self_type operator--(int);
 
@@ -154,19 +154,19 @@ namespace xf
 
     template <class L, class T>
     bool operator!=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
-    
+
     template <class L, class T>
     bool operator<(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
-    
+
     template <class L, class T>
     bool operator<=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
-    
+
     template <class L, class T>
     bool operator>(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
-    
+
     template <class L, class T>
     bool operator>=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
-    
+
     /*******************************
      * xaxis implementation *
      *******************************/
@@ -203,7 +203,7 @@ namespace xf
     template <class L, class T>
     inline void xaxis<L, T>::populate_index()
     {
-        for(size_type i = 0; i < m_labels.size(); ++i)
+        for (size_type i = 0; i < m_labels.size(); ++i)
         {
             m_index[m_labels[i]] = T(i);
         }
@@ -268,7 +268,7 @@ namespace xf
     {
         return const_iterator(this, m_labels.begin());
     }
-    
+
     template <class L, class T>
     inline auto xaxis<L, T>::cend() const noexcept -> const_iterator
     {
@@ -320,7 +320,7 @@ namespace xf
         : p_c(c), m_it(it)
     {
     }
-        
+
     template <class L, class T>
     inline auto xaxis_iterator<L, T>::operator++() -> self_type&
     {
@@ -335,7 +335,7 @@ namespace xf
         ++(*this);
         return tmp;
     }
-        
+
     template <class L, class T>
     inline auto xaxis_iterator<L, T>::operator--() -> self_type&
     {
@@ -372,19 +372,19 @@ namespace xf
     }
 
     template <class L, class T>
-    inline auto xaxis_iterator<L, T>::operator-(const self_type& rhs) const -> difference_type 
+    inline auto xaxis_iterator<L, T>::operator-(const self_type& rhs) const -> difference_type
     {
         return m_it - rhs.m_it;
     }
 
     template <class L, class T>
-    inline auto xaxis_iterator<L, T>::operator*() const -> reference 
+    inline auto xaxis_iterator<L, T>::operator*() const -> reference
     {
         return *(p_c->find_index(*m_it));
     }
 
     template <class L, class T>
-    inline auto xaxis_iterator<L, T>::operator->() const -> pointer 
+    inline auto xaxis_iterator<L, T>::operator->() const -> pointer
     {
         return &(*(p_c->find_index(*m_it)));
     }
@@ -446,32 +446,30 @@ namespace xf
     {
         return !(lhs == rhs);
     }
-    
+
     template <class L, class T>
     inline bool operator<(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
     {
         return lhs.less_than(rhs);
     }
-    
+
     template <class L, class T>
     inline bool operator<=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
     {
         return rhs > lhs;
     }
-    
+
     template <class L, class T>
     inline bool operator>(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
     {
         return lhs.greater_than(rhs);
     }
-    
+
     template <class L, class T>
     inline bool operator>=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
     {
         return rhs < lhs;
     }
-    
 }
 
 #endif
-
