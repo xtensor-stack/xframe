@@ -82,16 +82,6 @@ namespace xf
             EXPECT_EQ(2u, ac);
             EXPECT_THROW(a["d"], std::out_of_range);
         }
-
-        {
-            auto aa = a("a");
-            auto ab = a("b");
-            auto ac = a("c");
-            EXPECT_EQ(0u, aa);
-            EXPECT_EQ(1u, ab);
-            EXPECT_EQ(2u, ac);
-            EXPECT_THROW(a["d"], std::out_of_range);
-        }
     }
 
 

@@ -60,7 +60,6 @@ namespace xf
 
         bool contains(const key_type& key) const;
         const mapped_type& operator[](const key_type& key) const;
-        const mapped_type& operator()(const key_type& key) const;
 
         const_iterator begin() const noexcept;
         const_iterator end() const noexcept;
@@ -243,12 +242,6 @@ namespace xf
     inline auto xaxis<L, T>::operator[](const key_type& key) const -> const mapped_type&
     {
         return m_index.at(key);
-    }
-
-    template <class L, class T>
-    inline auto xaxis<L, T>::operator()(const key_type& key) const -> const mapped_type&
-    {
-        return this->operator[](key);
     }
 
     template <class L, class T>
