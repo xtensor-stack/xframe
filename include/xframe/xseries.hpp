@@ -9,6 +9,7 @@
 #ifndef XFRAME_XSERIES_HPP
 #define XFRAME_XSERIES_HPP
 
+#include "xtl/xclosure.hpp"
 #include "xaxis.hpp"
 
 namespace xf
@@ -39,7 +40,7 @@ namespace xf
         using iterator = xseries_iterator<E, L, false>;
         using const_iterator = xseries_iterator<E, L, true>;
         using reverse_iterator = std::reverse_iterator<iterator>;
-        using cost_reverse_iterator = std::reverse_iterator<const_iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         template <class AE, class AL>
         xseries(AE&& e, AL&& labels);
@@ -76,7 +77,7 @@ namespace xf
     private:
 
         axis_type m_axis;
-        expression_type m_e;
+        expression_type m_expression;
     };
 
     template <class E, class L>
@@ -90,43 +91,52 @@ namespace xf
      ********************/
 
     template <class E, class L, bool is_const>
-    class xseries_iterator
+    struct xseries_iterator_traits
+    {
+        using container_type = xseries<E, L>;
+        using value_type = typename container_type::value_type;
+        using container_reference = std::conditional_t<is_const,
+                                                       typename container_type::const_reference,
+                                                       typename container_type::reference>;
+        using reference = xtl::xclosure_wrapper<container_reference>;
+        using pointer = xtl::xclosure_pointer<container_reference>;
+        using difference_type = typename container_type::difference_type;
+    };
+
+    template <class E, class L, bool is_const>
+    class xseries_iterator : public xtl::xrandom_access_iterator_base<xseries_iterator<E, L, is_const>,
+                                                                      typename xseries_iterator_traits<E, L, is_const>::value_type,
+                                                                      typename xseries_iterator_traits<E, L, is_const>::difference_type,
+                                                                      typename xseries_iterator_traits<E, L, is_const>::pointer,
+                                                                      typename xseries_iterator_traits<E, L, is_const>::reference>
     {
 
     public:
 
         using self_type = xseries_iterator<E, L, is_const>;
-        using container_type = xseries<E, L>;
-        
+        using traits_type = xseries_iterator_traits<E, L, is_const>;
+        using container_type = typename traits_type::container_type;
         using label_list = typename container_type::label_list;
         using label_iterator = typename label_list::const_iterator;
-        using expression_type = typename container_type::expresion_type;
-        using value_iterator = std::is_conditional_t<is_const,
-                                                     typename expression_type::const_iterator,
-                                                     typename expression_type::iteraotr>;
-
-        using value_type = typename container_type::value_type;
-        using reference = std::conditional_t<is_const,
-                                             typename container_type::const_reference,
-                                             typename container_type::reference>;
-        using pointer = std::conditional_t<is_const,
-                                           typename container_type::const_reference,
-                                           typename container_type::reference>;
-        using difference_type = typename container_type::difference_type;
+        using expression_type = typename container_type::expression_type;
+        using value_iterator = std::conditional_t<is_const,
+                                                  typename expression_type::const_iterator,
+                                                  typename expression_type::iterator>;
+        using container_reference = typename traits_type::container_reference;
+        using value_type = typename traits_type::value_type;
+        using reference = typename traits_type::reference;
+        using pointer = typename traits_type::pointer;
+        using difference_type = typename traits_type::difference_type;
         using iterator_category = std::random_access_iterator_tag;
 
         xseries_iterator() = default;
         xseries_iterator(label_iterator lit, value_iterator vit);
 
         self_type& operator++();
-        self_type operator++(int);
-        
         self_type& operator--();
-        self_type operator--(int);
 
         self_type& operator+=(difference_type n);
         self_type& operator-=(difference_type n);
-        reference operator[](difference_type n);
 
         difference_type operator-(const self_type& rhs) const;
 
@@ -135,7 +145,6 @@ namespace xf
 
         bool equal(const self_type& rhs) const;
         bool less_than(const self_type& rhs) const;
-        bool greater_than(const self_type& rhs) const;
 
     private:
 
@@ -143,33 +152,15 @@ namespace xf
         value_iterator m_vit;
     };
 
-    template <class E, class L>
-    xseries_iterator<E, L> operator+(const xseries_iterator<E, L>& it, typename xseries_iterator<E, L>::difference_type n);
-    template <class E, class L>
-    xseries_iterator<E, L> operator+(typename xseries_iterator<E, L>::difference_type n, const xseries_iterator<E, L>& it);
+    template <class E, class L, bool is_const>
+    typename xseries_iterator<E, L, is_const>::difference_type operator-(const xseries_iterator<E, L, is_const>& lhs,
+                                                                         const xseries_iterator<E, L, is_const>& rhs);
 
-    template <class E, class L>
-    xseries_iterator<E, L> operator-(const xseries_iterator<E, L>& it, typename xseries_iterator<E, L>::difference_type n);
-    template <class E, class L>
-    typename xseries_iterator<E, L>::difference_type operator-(const xseries_iterator<E, L>& lhs, const xseries_iterator<E, L>& rhs);
-
-    template <class E, class L>
-    bool operator==(const xseries_iterator<E, L>& lhs, const xseries_iterator<E, L>& rhs);
-
-    template <class E, class L>
-    bool operator!=(const xseries_iterator<E, L>& lhs, const xseries_iterator<E, L>& rhs);
+    template <class E, class L, bool is_const>
+    bool operator==(const xseries_iterator<E, L, is_const>& lhs, const xseries_iterator<E, L, is_const>& rhs);
     
-    template <class E, class L>
-    bool operator<(const xseries_iterator<E, L>& lhs, const xseries_iterator<E, L>& rhs);
-    
-    template <class E, class L>
-    bool operator<=(const xseries_iterator<E, L>& lhs, const xseries_iterator<E, L>& rhs);
-    
-    template <class E, class L>
-    bool operator>(const xseries_iterator<E, L>& lhs, const xseries_iterator<E, L>& rhs);
-    
-    template <class E, class L>
-    bool operator>=(const xseries_iterator<E, L>& lhs, const xseries_iterator<E, L>& rhs);
+    template <class E, class L, bool is_const>
+    bool operator<(const xseries_iterator<E, L, is_const>& lhs, const xseries_iterator<E, L, is_const>& rhs);
 
     /**************************
      * xseries implementation *
@@ -226,7 +217,7 @@ namespace xf
     }
 
     template <class E, class L>
-    inline auto xseries<E, L>::operator[](const key_type& key) -> const mapped_type&
+    inline auto xseries<E, L>::operator[](const key_type& key) const -> const mapped_type&
     {
         size_type index = m_axis[key];
         return m_expression[index];
@@ -235,13 +226,13 @@ namespace xf
     template <class E, class L>
     inline auto xseries<E, L>::begin() -> iterator
     {
-        return iterator(m_axis.begin(), m_expression.begin());
+        return iterator(m_axis.labels().cbegin(), m_expression.begin());
     }
 
     template <class E, class L>
     inline auto xseries<E, L>::end() -> iterator
     {
-        return iterator(m_axis.end(), m_expression.end());
+        return iterator(m_axis.labels().cend(), m_expression.end());
     }
 
     template <class E, class L>
@@ -259,13 +250,13 @@ namespace xf
     template <class E, class L>
     inline auto xseries<E, L>::cbegin() const -> const_iterator
     {
-        return const_iterator(m_axis.cbegin(), m_expression.cbegin());
+        return const_iterator(m_axis.labels().cbegin(), m_expression.cbegin());
     }
 
     template <class E, class L>
     inline auto xseries<E, L>::cend() const -> const_iterator
     {
-        return const_iterator(m_axis.cend(), m_expression.cend());
+        return const_iterator(m_axis.labels().cend(), m_expression.cend());
     }
 
     template <class E, class L>
@@ -281,25 +272,25 @@ namespace xf
     }
 
     template <class E, class L>
-    inline auto xseries<E, L>::rbegin() const -> const_iterator
+    inline auto xseries<E, L>::rbegin() const -> const_reverse_iterator
     {
         return crbegin();
     }
 
     template <class E, class L>
-    inline auto xseries<E, L>::rend() const -> const_iterator
+    inline auto xseries<E, L>::rend() const -> const_reverse_iterator
     {
         return crend();
     }
 
     template <class E, class L>
-    inline auto xseries<E, L>::crbegin() const -> const_iterator
+    inline auto xseries<E, L>::crbegin() const -> const_reverse_iterator
     {
         return const_reverse_iterator(cend());
     }
         
     template <class E, class L>
-    inline auto xseries<E, L>::crend() const -> const_iterator
+    inline auto xseries<E, L>::crend() const -> const_reverse_iterator
     {
         return const_reverse_iterator(cbegin());
     }
@@ -316,6 +307,96 @@ namespace xf
         return !(lhs == rhs);
     }
 
+    /***********************************
+     * xseries_iterator implementation *
+     ***********************************/
+
+    template <class E, class L, bool is_const>
+    inline xseries_iterator<E, L, is_const>::xseries_iterator(label_iterator lit, value_iterator vit)
+        : m_lit(lit), m_vit(vit)
+    {
+    }
+
+    template <class E, class L, bool is_const>
+    inline auto xseries_iterator<E, L, is_const>::operator++() -> self_type&
+    {
+        ++m_lit;
+        ++m_vit;
+        return *this;
+    }
+
+    template <class E, class L, bool is_const>
+    inline auto xseries_iterator<E, L, is_const>::operator--() -> self_type&
+    {
+        --m_lit;
+        --m_vit;
+        return *this;
+    }
+
+    template <class E, class L, bool is_const>
+    inline auto xseries_iterator<E, L, is_const>::operator+=(difference_type n) -> self_type&
+    {
+        m_lit += n;
+        m_vit += n;
+        return *this;
+    }
+
+    template <class E, class L, bool is_const>
+    inline auto xseries_iterator<E, L, is_const>::operator-=(difference_type n) -> self_type&
+    {
+        m_lit -= n;
+        m_vit -= n;
+        return *this;
+    }
+
+    template <class E, class L, bool is_const>
+    inline auto xseries_iterator<E, L, is_const>::operator-(const self_type& rhs) const -> difference_type
+    {
+        return m_lit - rhs.m_lit;
+    }
+
+    template <class E, class L, bool is_const>
+    inline auto xseries_iterator<E, L, is_const>::operator*() const -> reference
+    {
+        return reference(container_reference(*m_lit, *m_vit));
+    }
+
+    template <class E, class L, bool is_const>
+    inline auto xseries_iterator<E, L, is_const>::operator->() const -> pointer
+    {
+        return pointer(container_reference(*m_lit, *m_vit));
+    }
+
+    template <class E, class L, bool is_const>
+    inline bool xseries_iterator<E, L, is_const>::equal(const self_type& rhs) const
+    {
+        return m_lit == rhs.m_lit && m_vit == rhs.m_vit;
+    }
+
+    template <class E, class L, bool is_const>
+    inline bool xseries_iterator<E, L, is_const>::less_than(const self_type& rhs) const
+    {
+        return m_lit < rhs.m_lit;
+    }
+
+    template <class E, class L, bool is_const>
+    inline typename xseries_iterator<E, L, is_const>::difference_type operator-(const xseries_iterator<E, L, is_const>& lhs,
+                                                                                const xseries_iterator<E, L, is_const>& rhs)
+    {
+        return lhs.operator-(rhs);
+    }
+
+    template <class E, class L, bool is_const>
+    inline bool operator==(const xseries_iterator<E, L, is_const>& lhs, const xseries_iterator<E, L, is_const>& rhs)
+    {
+        return lhs.equal(rhs);
+    }
+    
+    template <class E, class L, bool is_const>
+    inline bool operator<(const xseries_iterator<E, L, is_const>& lhs, const xseries_iterator<E, L, is_const>& rhs)
+    {
+        return lhs.less_than(rhs);
+    }
 }
 
 #endif

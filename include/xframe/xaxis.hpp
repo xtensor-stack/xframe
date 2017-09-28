@@ -14,14 +14,16 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include "xtl/xiterator_base.hpp"
+
 namespace xf
 {
     template <class L, class T>
     class xaxis_iterator;
 
-    /****************
+    /*********
      * xaxis *
-     ****************/
+     *********/
 
     template <class L, class T>
     class xaxis
@@ -90,12 +92,26 @@ namespace xf
     template <class L, class T>
     bool operator!=(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs);
 
-    /*************************
+    /******************
      * xaxis_iterator *
-     *************************/
+     ******************/
 
     template <class L, class T>
-    class xaxis_iterator
+    struct xaxis_traits
+    {
+        using axis_type = xaxis<L, T>;
+        using value_type = typename axis_type::value_type;
+        using reference = typename axis_type::reference;
+        using pointer = typename axis_type::pointer;
+        using difference_type = typename axis_type::difference_type;
+    };
+
+    template <class L, class T>
+    class xaxis_iterator : public xtl::xrandom_access_iterator_base<xaxis_iterator<L, T>,
+                                                                    typename xaxis_traits<L, T>::value_type,
+                                                                    typename xaxis_traits<L, T>::difference_type,
+                                                                    typename xaxis_traits<L, T>::pointer,
+                                                                    typename xaxis_traits<L, T>::reference>
     {
 
     public:
@@ -114,14 +130,10 @@ namespace xf
         xaxis_iterator(const container_type* c, label_iterator it);
 
         self_type& operator++();
-        self_type operator++(int);
-
         self_type& operator--();
-        self_type operator--(int);
 
         self_type& operator+=(difference_type n);
         self_type& operator-=(difference_type n);
-        reference operator[](difference_type n);
 
         difference_type operator-(const self_type& rhs) const;
 
@@ -130,7 +142,6 @@ namespace xf
 
         bool equal(const self_type& rhs) const;
         bool less_than(const self_type& rhs) const;
-        bool greater_than(const self_type& rhs) const;
 
     private:
 
@@ -139,36 +150,17 @@ namespace xf
     };
 
     template <class L, class T>
-    xaxis_iterator<L, T> operator+(const xaxis_iterator<L, T>& it, typename xaxis_iterator<L, T>::difference_type n);
-    template <class L, class T>
-    xaxis_iterator<L, T> operator+(typename xaxis_iterator<L, T>::difference_type n, const xaxis_iterator<L, T>& it);
-
-    template <class L, class T>
-    xaxis_iterator<L, T> operator-(const xaxis_iterator<L, T>& it, typename xaxis_iterator<L, T>::difference_type n);
-    template <class L, class T>
     typename xaxis_iterator<L, T>::difference_type operator-(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
 
     template <class L, class T>
     bool operator==(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
 
     template <class L, class T>
-    bool operator!=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
-
-    template <class L, class T>
     bool operator<(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
-
-    template <class L, class T>
-    bool operator<=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
-
-    template <class L, class T>
-    bool operator>(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
-
-    template <class L, class T>
-    bool operator>=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
-
-    /*******************************
+    
+    /************************
      * xaxis implementation *
-     *******************************/
+     ************************/
 
     template <class L, class T>
     inline xaxis<L, T>::xaxis(const label_list& labels)
@@ -202,7 +194,7 @@ namespace xf
     template <class L, class T>
     inline void xaxis<L, T>::populate_index()
     {
-        for (size_type i = 0; i < m_labels.size(); ++i)
+        for(size_type i = 0; i < m_labels.size(); ++i)
         {
             m_index[m_labels[i]] = T(i);
         }
@@ -304,9 +296,9 @@ namespace xf
         return !(lhs == rhs);
     }
 
-    /****************************************
+    /*********************************
      * xaxis_iterator implementation *
-     ****************************************/
+     *********************************/
 
     template <class L, class T>
     inline xaxis_iterator<L, T>::xaxis_iterator(const container_type* c, label_iterator it)
@@ -322,26 +314,10 @@ namespace xf
     }
 
     template <class L, class T>
-    inline auto xaxis_iterator<L, T>::operator++(int) -> self_type
-    {
-        self_type tmp(*this);
-        ++(*this);
-        return tmp;
-    }
-
-    template <class L, class T>
     inline auto xaxis_iterator<L, T>::operator--() -> self_type&
     {
         --m_it;
         return *this;
-    }
-
-    template <class L, class T>
-    inline auto xaxis_iterator<L, T>::operator--(int) -> self_type
-    {
-        self_type tmp(*this);
-        --(*this);
-        return tmp;
     }
 
     template <class L, class T>
@@ -359,25 +335,19 @@ namespace xf
     }
 
     template <class L, class T>
-    inline auto xaxis_iterator<L, T>::operator[](difference_type n) -> reference
-    {
-        return m_it[n];
-    }
-
-    template <class L, class T>
-    inline auto xaxis_iterator<L, T>::operator-(const self_type& rhs) const -> difference_type
+    inline auto xaxis_iterator<L, T>::operator-(const self_type& rhs) const -> difference_type 
     {
         return m_it - rhs.m_it;
     }
 
     template <class L, class T>
-    inline auto xaxis_iterator<L, T>::operator*() const -> reference
+    inline auto xaxis_iterator<L, T>::operator*() const -> reference 
     {
         return *(p_c->find_index(*m_it));
     }
 
     template <class L, class T>
-    inline auto xaxis_iterator<L, T>::operator->() const -> pointer
+    inline auto xaxis_iterator<L, T>::operator->() const -> pointer 
     {
         return &(*(p_c->find_index(*m_it)));
     }
@@ -395,34 +365,6 @@ namespace xf
     }
 
     template <class L, class T>
-    bool xaxis_iterator<L, T>::greater_than(const self_type& rhs) const
-    {
-        return m_it > rhs.m_it;
-    }
-
-    template <class L, class T>
-    inline xaxis_iterator<L, T> operator+(const xaxis_iterator<L, T>& it, typename xaxis_iterator<L, T>::difference_type n)
-    {
-        xaxis_iterator<L, T> tmp(it);
-        tmp += n;
-        return tmp;
-    }
-
-    template <class L, class T>
-    inline xaxis_iterator<L, T> operator+(typename xaxis_iterator<L, T>::difference_type n, const xaxis_iterator<L, T>& it)
-    {
-        return it + n;
-    }
-
-    template <class L, class T>
-    inline xaxis_iterator<L, T> operator-(const xaxis_iterator<L, T>& it, typename xaxis_iterator<L, T>::difference_type n)
-    {
-        xaxis_iterator<L, T> tmp(it);
-        tmp -= n;
-        return tmp;
-    }
-
-    template <class L, class T>
     inline typename xaxis_iterator<L, T>::difference_type operator-(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
     {
         return lhs.operator-(rhs);
@@ -435,34 +377,11 @@ namespace xf
     }
 
     template <class L, class T>
-    inline bool operator!=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
-    {
-        return !(lhs == rhs);
-    }
-
-    template <class L, class T>
     inline bool operator<(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
     {
         return lhs.less_than(rhs);
     }
-
-    template <class L, class T>
-    inline bool operator<=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
-    {
-        return rhs > lhs;
-    }
-
-    template <class L, class T>
-    inline bool operator>(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
-    {
-        return lhs.greater_than(rhs);
-    }
-
-    template <class L, class T>
-    inline bool operator>=(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
-    {
-        return rhs < lhs;
-    }
 }
 
 #endif
+
