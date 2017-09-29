@@ -9,7 +9,7 @@
 #ifndef XFRAME_XSERIES_HPP
 #define XFRAME_XSERIES_HPP
 
-#include "xtl/xclosure.hpp"
+#include "xtl/xproxy_wrapper.hpp"
 #include "xaxis.hpp"
 
 namespace xf
@@ -98,7 +98,7 @@ namespace xf
         using container_reference = std::conditional_t<is_const,
                                                        typename container_type::const_reference,
                                                        typename container_type::reference>;
-        using reference = xtl::xclosure_wrapper<container_reference>;
+        using reference = xtl::xproxy_wrapper<container_reference>;
         using pointer = xtl::xclosure_pointer<container_reference>;
         using difference_type = typename container_type::difference_type;
     };
