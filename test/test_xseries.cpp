@@ -84,6 +84,8 @@ namespace xf
 
         EXPECT_EQ(it->first, "a");
         EXPECT_EQ(it->second, s["a"]);
+        EXPECT_EQ((*it).first, "a");
+        EXPECT_EQ((*it).second, s["a"]);
         ++it;
         EXPECT_EQ(it->first, "b");
         EXPECT_EQ(it->second, s["b"]);
