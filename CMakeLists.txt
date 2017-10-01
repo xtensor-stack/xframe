@@ -39,7 +39,12 @@ include_directories(${xtl_INCLUDE_DIRS})
 
 set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xframe_assign.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_config.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xframe_math.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xframe_utils.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xseries.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xseries_function.hpp
 )
 
 OPTION(BUILD_TESTS "xframe test suite" OFF)

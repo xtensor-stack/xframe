@@ -8,8 +8,8 @@
 
 #include "gtest/gtest.h"
 #include "xtensor/xtensor.hpp"
-#include "xframe/xseries.hpp"
 #include "xtl/xbasic_fixed_string.hpp"
+#include "xframe/xseries.hpp"
 
 namespace xf
 {

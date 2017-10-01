@@ -9,8 +9,26 @@
 #ifndef XFRAME_XSERIES_HPP
 #define XFRAME_XSERIES_HPP
 
+#include "xtensor/xsemantic.hpp"
 #include "xtl/xproxy_wrapper.hpp"
 #include "xaxis.hpp"
+#include "xframe_assign.hpp"
+#include "xframe_math.hpp"
+
+namespace xf
+{
+    template <class E, class L>
+    class xseries;
+}
+
+namespace xt
+{
+    template <class E, class L>
+    struct xcontainer_inner_types<xf::xseries<E, L>>
+    {
+        using temporary_type = xf::xseries<E, L>;
+    };
+}
 
 namespace xf
 {
@@ -22,11 +40,13 @@ namespace xf
      ***********/
 
     template <class E, class L>
-    class xseries
+    class xseries : public xt::xcontainer_semantic<xseries<E, L>>
     {
 
     public:
 
+        using self_type = xseries<E, L>;
+        using semantic_base = xt::xcontainer_semantic<self_type>;
         using label_list = L;
         using expression_type = E;
         using axis_type = xaxis<L, typename E::size_type>;
@@ -42,8 +62,16 @@ namespace xf
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
+        using expression_tag = xframe_expression_tag;
+
         template <class AE, class AL>
         xseries(AE&& e, AL&& labels);
+
+        template <class AE>
+        xseries(const xt::xexpression<AE>& e);
+
+        template <class AE>
+        self_type& operator=(const xt::xexpression<AE>& e);
 
         const label_list& labels() const;
 
@@ -173,6 +201,20 @@ namespace xf
     {
     }
 
+    template <class E, class L>
+    template <class AE>
+    inline xseries<E, L>::xseries(const xt::xexpression<AE>& e)
+    {
+        semantic_base::assign(e);
+    }
+
+    template <class E, class L>
+    template <class AE>
+    inline auto xseries<E, L>::operator=(const xt::xexpression<AE>& e) -> self_type&
+    {
+        return semantic_base::operator=(e);
+    }
+    
     template <class E, class L>
     inline auto xseries<E, L>::labels() const -> const label_list&
     {
