@@ -80,6 +80,7 @@ set(XFRAME_TESTS
     main.cpp
     test_xaxis.cpp
     test_xseries.cpp
+    test_xseries_math.cpp
 )
 
 set(XFRAME_TARGET test_xframe)

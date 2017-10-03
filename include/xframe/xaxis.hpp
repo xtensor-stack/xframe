@@ -48,6 +48,7 @@ namespace xf
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = reverse_iterator;
 
+        xaxis() = default;
         explicit xaxis(const label_list& labels);
         explicit xaxis(label_list&& labels);
         xaxis(std::initializer_list<key_type> init);
