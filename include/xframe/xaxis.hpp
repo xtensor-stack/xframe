@@ -16,6 +16,8 @@
 
 #include "xtl/xiterator_base.hpp"
 
+#include "xframe_utils.hpp"
+
 namespace xf
 {
     template <class L, class T>
@@ -92,6 +94,9 @@ namespace xf
 
     template <class L, class T>
     bool operator!=(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs);
+
+    template <class L, class T, class... Args>
+    void merge_axes(xaxis<L, T>& output, const Args&... axes);
 
     /******************
      * xaxis_iterator *
@@ -295,6 +300,16 @@ namespace xf
     inline bool operator!=(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs)
     {
         return !(lhs == rhs);
+    }
+
+    template <class L, class T, class... Args>
+    inline void merge_axes(xaxis<L, T>& output, const Args&... axes)
+    {
+        using axis_type = xaxis<L, T>;
+        using label_list = typename axis_type::label_list;
+        label_list l;
+        merge_to(l, axes.labels()...);
+        output = axis_type(std::move(l));
     }
 
     /*********************************

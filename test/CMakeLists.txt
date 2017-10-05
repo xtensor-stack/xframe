@@ -79,6 +79,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 set(XFRAME_TESTS
     main.cpp
     test_xaxis.cpp
+    test_xframe_utils.cpp
     test_xseries.cpp
     test_xseries_math.cpp
 )
