@@ -114,5 +114,22 @@ namespace xf
         EXPECT_EQ(a["b"], (a.end() - 2)->second);
         EXPECT_EQ(3, a.end() - a.begin());
     }
+
+    TEST(xaxis, merge)
+    {
+        label_type l1 = { "a", "b", "d", "e" };
+        label_type l2 = { "b", "c", "d" };
+        label_type l3 = { "c", "g" };
+
+        axis_type a1(l1), a2(l2), a3(l3);
+        axis_type res; 
+        merge_axes(res, a1, a2, a3);
+        EXPECT_EQ(res["a"], 0);
+        EXPECT_EQ(res["b"], 1);
+        EXPECT_EQ(res["c"], 2);
+        EXPECT_EQ(res["d"], 3);
+        EXPECT_EQ(res["e"], 4);
+        EXPECT_EQ(res["g"], 5);
+    }
 }
 
