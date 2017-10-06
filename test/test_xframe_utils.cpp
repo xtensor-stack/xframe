@@ -20,8 +20,18 @@ namespace xf
         std::vector<int> v3 = { 4, 5, 8, 10 };
         std::vector<int> vres = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
 
-        merge_to(v1, v2, v3);
+        bool res1 = merge_to(v1, v2, v3);
         EXPECT_EQ(vres, v1);
+        EXPECT_FALSE(res1);
+
+        bool res2 = merge_to(vres, v1);
+        EXPECT_EQ(vres, v1);
+        EXPECT_TRUE(res2);
+
+        std::vector<int> v4 = {};
+        bool res3 = merge_to(v4, vres);
+        EXPECT_EQ(vres, v4);
+        EXPECT_TRUE(res3);
     }
 }
 
