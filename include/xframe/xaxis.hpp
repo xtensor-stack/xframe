@@ -96,7 +96,7 @@ namespace xf
     bool operator!=(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs);
 
     template <class L, class T, class... Args>
-    void merge_axes(xaxis<L, T>& output, const Args&... axes);
+    bool merge_axes(xaxis<L, T>& output, const Args&... axes);
 
     /******************
      * xaxis_iterator *
@@ -303,13 +303,14 @@ namespace xf
     }
 
     template <class L, class T, class... Args>
-    inline void merge_axes(xaxis<L, T>& output, const Args&... axes)
+    inline bool merge_axes(xaxis<L, T>& output, const Args&... axes)
     {
         using axis_type = xaxis<L, T>;
         using label_list = typename axis_type::label_list;
         label_list l;
-        merge_to(l, axes.labels()...);
+        bool res = merge_to(l, axes.labels()...);
         output = axis_type(std::move(l));
+        return res;
     }
 
     /*********************************

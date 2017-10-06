@@ -16,7 +16,7 @@ namespace xf
     struct xframe_expression_tag {};
 
     template <class CO, class... CI>
-    void merge_to(CO& output, const CI&... input);
+    bool merge_to(CO& output, const CI&... input);
 
     /***************************
      * merge_to implementation *
@@ -25,8 +25,9 @@ namespace xf
     namespace detail
     {
         template <class C0, class C1>
-        inline void merge_containers(C0& output, const C1& input)
+        inline bool merge_containers(C0& output, const C1& input)
         {
+            bool res = true;
             auto output_iter = output.begin();
             auto output_end = output.end();
             auto first = input.begin();
@@ -37,6 +38,7 @@ namespace xf
                 {
                     output_iter = output.insert(output_iter, *first++);
                     output_end = output.end();
+                    res = false;
                 }
                 else if(*first == *output_iter)
                 {
@@ -45,6 +47,7 @@ namespace xf
                 ++output_iter;
             }
             std::copy(first, last, std::back_inserter(output));
+            return res;
         }
 
         template <class C0>
@@ -53,17 +56,18 @@ namespace xf
         }
 
         template <class C0, class C1, class... C>
-        inline void merge_to_impl(C0& out, C1& in, const C&... input)
+        inline bool merge_to_impl(C0& out, C1& in, const C&... input)
         {
-            merge_containers(out, in);
+            bool res = merge_containers(out, in);
             merge_to_impl(out, input...);
+            return res;
         }
     }
 
     template <class CO, class... CI>
-    inline void merge_to(CO& output, const CI&... input)
+    inline bool merge_to(CO& output, const CI&... input)
     {
-        detail::merge_to_impl(output, input...);
+        return detail::merge_to_impl(output, input...);
     }
 }
 
