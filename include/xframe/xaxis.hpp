@@ -13,6 +13,7 @@
 #include <iterator>
 #include <type_traits>
 #include <unordered_map>
+#include <vector>
 
 #include "xtl/xiterator_base.hpp"
 
@@ -32,10 +33,11 @@ namespace xf
     {
     public:
 
-        static_assert(std::is_integral<T>::value, "key_type must be an integral type");
+        static_assert(std::is_integral<T>::value, "index_type must be an integral type");
 
-        using label_list = L;
-        using key_type = typename L::value_type;
+        using self_type = xaxis<L, T>;
+        using label_list = std::vector<L>;
+        using key_type = L;
         using mapped_type = T;
         using index_type = std::unordered_map<key_type, mapped_type>;
         using value_type = typename index_type::value_type;

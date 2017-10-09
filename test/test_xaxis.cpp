@@ -16,7 +16,7 @@ namespace xf
 {
     using fstring = xtl::xfixed_string<55>;
     using label_type = std::vector<fstring>;
-    using axis_type = xaxis<label_type, std::size_t>;
+    using axis_type = xaxis<fstring, std::size_t>;
 
     TEST(xaxis, constructors)
     {
