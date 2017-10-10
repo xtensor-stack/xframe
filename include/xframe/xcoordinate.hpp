@@ -65,7 +65,6 @@ namespace xf
         bool operator!=(const self_type& rhs) const noexcept;
 
     private:
-
         
         template <class LB1, class... LB>
         void insert_impl(std::pair<K, xaxis<LB1, S>> axis, std::pair<K, xaxis<LB, S>>... axes);

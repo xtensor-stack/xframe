@@ -51,15 +51,16 @@ namespace xf
         }
 
         template <class C0>
-        inline void merge_to_impl(C0&)
+        inline bool merge_to_impl(C0&)
         {
+            return true;
         }
 
         template <class C0, class C1, class... C>
         inline bool merge_to_impl(C0& out, C1& in, const C&... input)
         {
             bool res = merge_containers(out, in);
-            merge_to_impl(out, input...);
+            res &= merge_to_impl(out, input...);
             return res;
         }
     }
