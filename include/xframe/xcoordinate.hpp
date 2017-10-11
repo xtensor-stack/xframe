@@ -21,10 +21,6 @@
 #define DEFAULT_LABEL_LIST xtl::mpl::vector<int,std::size_t, std::string, xtl::xfixed_string<55>>
 #endif
 
-#ifndef DEFAULT_TYPE_LIST
-#define DEFAULT_TYPE_LIST xtl::mpl::vector
-#endif
-
 namespace xf
 {
 
@@ -55,8 +51,8 @@ namespace xf
         using self_type = xcoordinate<K, S, L>;
         using axis_type = detail::coordinate_axis_t<S, L>;
         using map_type = std::unordered_map<K, axis_type>;
-        using key_type = K;
-        using mapped_type = axis_type;
+        using key_type = typename map_type::key_type;
+        using mapped_type = typename map_type::mapped_type;
         using index_type = S;
         using value_type = typename map_type::value_type;
         using reference = typename map_type::reference;
@@ -82,11 +78,16 @@ namespace xf
         template <class KB, class LB>
         index_type operator[](const std::pair<KB, LB>& key) const;
 
+        const map_type& data() const noexcept;
+
         const_iterator begin() const noexcept;
         const_iterator end() const noexcept;
 
         const_iterator cbegin() const noexcept;
         const_iterator cend() const noexcept;
+
+        template <class... Args>
+        std::pair<bool, bool> merge(const Args&... coordinates);
 
         bool operator==(const self_type& rhs) const noexcept;
         bool operator!=(const self_type& rhs) const noexcept;
@@ -97,17 +98,31 @@ namespace xf
         void insert_impl(std::pair<K, xaxis<LB1, S>> axis, std::pair<K, xaxis<LB, S>>... axes);
         void insert_impl();
 
+        template <class... Args>
+        std::pair<bool, bool> merge_impl(const self_type& c, const Args&... coordinates);
+        std::pair<bool, bool> merge_impl();
+
+        template <class... Args>
+        std::pair<bool, bool> merge_empty(const self_type& c, const Args&... coordinates);
+        std::pair<bool, bool> merge_empty();
+
         map_type m_coordinate;
     };
 
-    template <class K, class S, class... L>
-    xcoordinate<K, S, DEFAULT_TYPE_LIST<L...>> coordinate(const std::unordered_map<K, xtl::variant<xaxis<L, S>...>>& axes);
+    template <class OS, class K, class S, class L>
+    OS& operator<<(OS& out, const xcoordinate<K, S, L>& c);
 
     template <class K, class S, class... L>
-    xcoordinate<K, S, DEFAULT_TYPE_LIST<L...>> coordinate(std::unordered_map<K, xtl::variant<xaxis<L, S>...>>&& axes);
+    xcoordinate<K, S> coordinate(const std::unordered_map<K, xtl::variant<xaxis<L, S>...>>& axes);
 
     template <class K, class S, class... L>
-    xcoordinate<K, S, DEFAULT_TYPE_LIST<L...>> coordinate(std::pair<K, xaxis<L, S>>... axes);
+    xcoordinate<K, S> coordinate(std::unordered_map<K, xtl::variant<xaxis<L, S>...>>&& axes);
+
+    template <class K, class S, class... L>
+    xcoordinate<K, S> coordinate(std::pair<K, xaxis<L, S>>... axes);
+
+    template <class K, class S, class L, class... Args>
+    std::pair<bool, bool> merge_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates);
 
     /******************************
      * xcoordinate implementation *
@@ -164,6 +179,12 @@ namespace xf
     }
 
     template <class K, class S, class L>
+    inline auto xcoordinate<K, S, L>::data() const noexcept -> const map_type&
+    {
+        return m_coordinate;
+    }
+
+    template <class K, class S, class L>
     inline auto xcoordinate<K, S, L>::begin() const noexcept -> const_iterator
     {
         return cbegin();
@@ -187,6 +208,13 @@ namespace xf
         return m_coordinate.cend();
     }
     
+    template <class K, class S, class L>
+    template <class... Args>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::merge(const Args&... coordinates)
+    {
+        return empty() ? merge_empty(coordinates...) : merge_impl(coordinates...);
+    }
+
     template <class K, class S, class L>
     inline bool xcoordinate<K, S, L>::operator==(const self_type& rhs) const noexcept
     {
@@ -212,24 +240,97 @@ namespace xf
     {
     }
 
-    template <class K, class S, class... L>
-    xcoordinate<K, S, DEFAULT_TYPE_LIST<L...>> coordinate(const std::unordered_map<K, xtl::variant<xaxis<L, S>...>>& axes)
+    namespace detail
     {
-        return xcoordinate<K, S, DEFAULT_TYPE_LIST<L...>>(axes);
+        template <class K, class A, class... Args>
+        inline bool merge_coordinate_axis(const K& key, A& output, const Args&... coordinates)
+        {
+            return xtl::visit([&key, &coordinates...](auto& out)
+                {
+                    using type = std::decay_t<decltype(out)>;
+                    return merge_axes(out, xtl::get<type>(coordinates[key])...);
+                },
+                output);
+        }
+    }
+
+    template <class K, class S, class L>
+    template <class... Args>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::merge_impl(const self_type& c, const Args&... coordinates)
+    {
+        auto res = merge_impl(coordinates...);
+        for(auto iter = c.begin(); iter != c.end(); ++iter)
+        {
+            auto inserted = m_coordinate.insert(*iter);
+            const auto& key = inserted.first->first;
+            auto& axis = inserted.first->second;
+            if(inserted.second)
+            {
+                res.first = false;
+                res.second &= detail::merge_coordinate_axis(key, axis, coordinates...);
+            }
+            else
+            {
+                res.second &= detail::merge_coordinate_axis(key, axis, c, coordinates...);
+            } 
+        }
+        return res;
+    }
+
+    template <class K, class S, class L>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::merge_impl()
+    {
+        return { true, true };
+    }
+
+    template <class K, class S, class L>
+    template <class... Args>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::merge_empty(const self_type& c, const Args&... coordinates)
+    {
+        m_coordinate = c.m_coordinate;
+        return merge_impl(coordinates...);
+    }
+
+    template <class K, class S, class L>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::merge_empty()
+    {
+        return merge_impl();
+    }
+
+    template <class OS, class K, class S, class L>
+    inline OS& operator<<(OS& out, const xcoordinate<K, S, L>& c)
+    {
+        for(auto& v: c)
+        {
+            out << v.first << ": ";
+            xtl::visit([&out](auto&& arg) { out << arg << std::endl; }, v.second);
+        }
+        return out;
     }
 
     template <class K, class S, class... L>
-    xcoordinate<K, S, DEFAULT_TYPE_LIST<L...>> coordinate(std::unordered_map<K, xtl::variant<xaxis<L, S>...>>&& axes)
+    xcoordinate<K, S> coordinate(const std::unordered_map<K, xtl::variant<xaxis<L, S>...>>& axes)
     {
-        return xcoordinate<K, S, DEFAULT_TYPE_LIST<L...>>(std::move(axes));
+        return xcoordinate<K, S>(axes);
     }
 
     template <class K, class S, class... L>
-    inline xcoordinate<K, S, DEFAULT_TYPE_LIST<L...>> coordinate(std::pair<K, xaxis<L, S>>... axes)
+    xcoordinate<K, S> coordinate(std::unordered_map<K, xtl::variant<xaxis<L, S>...>>&& axes)
     {
-        return xcoordinate<K, S, DEFAULT_TYPE_LIST<L...>>(std::move(axes)...);
+        return xcoordinate<K, S>(std::move(axes));
     }
 
+    template <class K, class S, class... L>
+    inline xcoordinate<K, S> coordinate(std::pair<K, xaxis<L, S>>... axes)
+    {
+        return xcoordinate<K, S>(std::move(axes)...);
+    }
+
+    template <class K, class S, class L, class... Args>
+    inline std::pair<bool, bool> merge_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates)
+    {
+        return output.merge(coordinates...);
+    }
 }
 
 #endif

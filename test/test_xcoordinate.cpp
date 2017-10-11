@@ -95,7 +95,14 @@ namespace xf
     }
 
     template <class L>
-    struct iterator_tester;
+    struct iterator_tester
+    {
+        template <class S>
+        static bool run(const xaxis<L, S>& arg)
+        {
+            throw std::runtime_error("should not get caught here");
+        }
+    };
 
     template <>
     struct iterator_tester<fstring>
@@ -134,5 +141,63 @@ namespace xf
         EXPECT_EQ(iter, c.end());
     }
 
+    auto make_test_saxis2()
+    {
+        slabel_type sl = { "a", "d", "e" };
+        saxis_type sa(std::move(sl));
+        return sa;
+    }
+
+    auto make_test_iaxis2()
+    {
+        ilabel_type il = { 1, 4, 5 };
+        iaxis_type ia(std::move(il));
+        return ia;
+    }
+
+    auto make_test_coordinate2()
+    {
+        return coordinate(std::make_pair(fstring("temperature"), make_test_saxis2()),
+                          std::make_pair(fstring("pression"), make_test_iaxis2()),
+                          std::make_pair(fstring("altitude"), make_test_iaxis()));
+    }
+
+    auto make_test_saxis_res()
+    {
+        slabel_type sl = { "a", "c", "d", "e" };
+        saxis_type sa(std::move(sl));
+        return sa;
+    }
+
+    auto make_test_iaxis_res()
+    {
+        ilabel_type il = { 1, 2, 4, 5 };
+        iaxis_type ia(std::move(il));
+        return ia;
+    }
+
+    auto make_test_coordinate_res()
+    {
+        return coordinate(std::make_pair(fstring("temperature"), make_test_saxis_res()),
+                          std::make_pair(fstring("pression"), make_test_iaxis_res()),
+                          std::make_pair(fstring("altitude"), make_test_iaxis()));
+    }
+
+    TEST(xcoordinate, merge)
+    {
+        auto c1 = make_test_coordinate();
+        decltype(c1) cres1;
+        auto res1 = merge_coordinates(cres1, c1, c1);
+        EXPECT_TRUE(res1.first);
+        EXPECT_TRUE(res1.second);
+        EXPECT_EQ(c1, cres1);
+
+        auto c2 = make_test_coordinate2();
+        decltype(c2) cres2;
+        auto res2 = merge_coordinates(cres2, c1, c2);
+        EXPECT_FALSE(res2.first);
+        EXPECT_FALSE(res2.second);
+        EXPECT_EQ(cres2, make_test_coordinate_res());
+    }
 }
 

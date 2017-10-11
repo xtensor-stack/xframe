@@ -135,8 +135,17 @@ namespace xf
         axis_type a4;
         axis_type res2;
         bool t2 = merge_axes(res2, a1, a4);
-        EXPECT_TRUE(t2);
+        EXPECT_FALSE(t2);
         EXPECT_EQ(res2, a1);
+
+        std::vector<int> il1 = {1, 2, 4}, il2 = { 1, 4, 5};
+        xaxis<int, std::size_t> ia1(il1), ia2(il2), iares;
+        bool t3 = merge_axes(iares, ia1, ia2);
+        EXPECT_FALSE(t3);
+        EXPECT_EQ(iares[1], 0);
+        EXPECT_EQ(iares[2], 1);
+        EXPECT_EQ(iares[4], 2);
+        EXPECT_EQ(iares[5], 3);
     }
 }
 

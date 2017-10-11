@@ -27,7 +27,7 @@ namespace xf
         template <class C0, class C1>
         inline bool merge_containers(C0& output, const C1& input)
         {
-            bool res = true;
+            bool res = !(input.size() < output.size());
             auto output_iter = output.begin();
             auto output_end = output.end();
             auto first = input.begin();
@@ -46,6 +46,7 @@ namespace xf
                 }
                 ++output_iter;
             }
+            res &= output.empty() || (first == last);
             std::copy(first, last, std::back_inserter(output));
             return res;
         }
