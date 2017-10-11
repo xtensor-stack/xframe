@@ -32,6 +32,11 @@ namespace xf
         bool res3 = merge_to(v4, vres);
         EXPECT_EQ(vres, v4);
         EXPECT_TRUE(res3);
+
+        std::vector<int> v5 = {};
+        bool res4 = merge_to(v1, v5);
+        EXPECT_EQ(v1, vres);
+        EXPECT_FALSE(res4);
     }
 }
 

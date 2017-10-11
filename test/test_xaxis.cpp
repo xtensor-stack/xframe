@@ -123,13 +123,29 @@ namespace xf
 
         axis_type a1(l1), a2(l2), a3(l3);
         axis_type res; 
-        merge_axes(res, a1, a2, a3);
+        bool t1 = merge_axes(res, a1, a2, a3);
+        EXPECT_FALSE(t1);
         EXPECT_EQ(res["a"], 0);
         EXPECT_EQ(res["b"], 1);
         EXPECT_EQ(res["c"], 2);
         EXPECT_EQ(res["d"], 3);
         EXPECT_EQ(res["e"], 4);
         EXPECT_EQ(res["g"], 5);
+
+        axis_type a4;
+        axis_type res2;
+        bool t2 = merge_axes(res2, a1, a4);
+        EXPECT_FALSE(t2);
+        EXPECT_EQ(res2, a1);
+
+        std::vector<int> il1 = {1, 2, 4}, il2 = { 1, 4, 5};
+        xaxis<int, std::size_t> ia1(il1), ia2(il2), iares;
+        bool t3 = merge_axes(iares, ia1, ia2);
+        EXPECT_FALSE(t3);
+        EXPECT_EQ(iares[1], 0);
+        EXPECT_EQ(iares[2], 1);
+        EXPECT_EQ(iares[4], 2);
+        EXPECT_EQ(iares[5], 3);
     }
 }
 

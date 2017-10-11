@@ -80,10 +80,20 @@ namespace xf
         const_reverse_iterator crbegin() const noexcept;
         const_reverse_iterator crend() const noexcept;
 
+        template <class... Args>
+        bool merge(const Args&... axes);
+
     private:
 
         void populate_index();
         typename index_type::const_iterator find_index(const key_type& key) const;
+
+        template <class... Args>
+        bool merge_impl(const Args&... axes);
+        
+        template <class... Args>
+        bool merge_empty(const self_type& a, const Args&... axes);
+        bool merge_empty();
 
         label_list m_labels;
         index_type m_index;
@@ -96,6 +106,9 @@ namespace xf
 
     template <class L, class T>
     bool operator!=(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs);
+
+    template <class OS, class L, class T>
+    OS& operator<<(OS& out, const xaxis<L, T>& axis);
 
     template <class L, class T, class... Args>
     bool merge_axes(xaxis<L, T>& output, const Args&... axes);
@@ -200,21 +213,6 @@ namespace xf
     }
 
     template <class L, class T>
-    inline void xaxis<L, T>::populate_index()
-    {
-        for(size_type i = 0; i < m_labels.size(); ++i)
-        {
-            m_index[m_labels[i]] = T(i);
-        }
-    }
-
-    template <class L, class T>
-    inline auto xaxis<L, T>::find_index(const key_type& key) const -> typename index_type::const_iterator
-    {
-        return m_index.find(key);
-    }
-
-    template <class L, class T>
     inline auto xaxis<L, T>::labels() const -> const label_list&
     {
         return m_labels;
@@ -293,6 +291,51 @@ namespace xf
     }
 
     template <class L, class T>
+    template <class... Args>
+    inline bool xaxis<L, T>::merge(const Args&... axes)
+    {
+        return empty() ? merge_empty(axes...) : merge_impl(axes...);
+    }
+
+    template <class L, class T>
+    inline void xaxis<L, T>::populate_index()
+    {
+        for(size_type i = 0; i < m_labels.size(); ++i)
+        {
+            m_index[m_labels[i]] = T(i);
+        }
+    }
+
+    template <class L, class T>
+    inline auto xaxis<L, T>::find_index(const key_type& key) const -> typename index_type::const_iterator
+    {
+        return m_index.find(key);
+    }
+
+    template <class L, class T>
+    template <class... Args>
+    inline bool xaxis<L, T>::merge_impl(const Args&... axes)
+    {
+        bool res = merge_to(m_labels, axes.labels()...);
+        populate_index();
+        return res;
+    }
+
+    template <class L, class T>
+    template <class... Args>
+    inline bool xaxis<L, T>::merge_empty(const self_type& a, const Args&... axes)
+    {
+        m_labels = a.labels();
+        return merge_impl(axes...);
+    }
+
+    template <class L, class T>
+    inline bool xaxis<L, T>::merge_empty()
+    {
+        return true;
+    }
+
+    template <class L, class T>
     inline bool operator==(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs)
     {
         return lhs.labels() == rhs.labels();
@@ -304,15 +347,20 @@ namespace xf
         return !(lhs == rhs);
     }
 
+    template <class OS, class L, class T>
+    inline OS& operator<<(OS& out, const xaxis<L, T>& axis)
+    {
+        using iterator = std::ostream_iterator<L, typename OS::char_type, typename OS::traits_type>;
+        out << '(';
+        std::copy(axis.labels().begin(), axis.labels().end(), iterator(out, ", "));
+        out << ')';
+        return out;
+    }
+
     template <class L, class T, class... Args>
     inline bool merge_axes(xaxis<L, T>& output, const Args&... axes)
     {
-        using axis_type = xaxis<L, T>;
-        using label_list = typename axis_type::label_list;
-        label_list l;
-        bool res = merge_to(l, axes.labels()...);
-        output = axis_type(std::move(l));
-        return res;
+        return output.merge(axes...);
     }
 
     /*********************************
