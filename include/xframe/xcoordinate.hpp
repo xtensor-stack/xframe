@@ -66,6 +66,7 @@ namespace xf
 
         explicit xcoordinate(const map_type& axes);
         explicit xcoordinate(map_type&& axes);
+        xcoordinate(std::initializer_list<value_type> init);
         template <class... LB>
         explicit xcoordinate(std::pair<K, xaxis<LB, S>>... axes);
 
@@ -137,6 +138,12 @@ namespace xf
     template <class K, class S, class L>
     xcoordinate<K, S, L>::xcoordinate(map_type&& axes)
         : m_coordinate(std::move(axes))
+    {
+    }
+
+    template <class K, class S, class L>
+    xcoordinate<K, S, L>::xcoordinate(std::initializer_list<value_type> init)
+        : m_coordinate(init)
     {
     }
 

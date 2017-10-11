@@ -49,30 +49,25 @@ namespace xf
 
     TEST(xaxis, size)
     {
-        label_type l = { "a", "b", "c" };
-        axis_type a(l);
+        axis_type a = { "a", "b", "c" };
         EXPECT_EQ(3u, a.size());
         EXPECT_FALSE(a.empty());
 
-        label_type l2;
-        axis_type a2(l2);
+        axis_type a2;
         EXPECT_EQ(0u, a2.size());
         EXPECT_TRUE(a2.empty());
     }
 
     TEST(xaxis, contains)
     {
-        label_type l = { "a", "b", "c" };
-        axis_type a(l);
+        axis_type a = { "a", "b", "c" };
         EXPECT_TRUE(a.contains("a"));
         EXPECT_FALSE(a.contains("d"));
     }
 
     TEST(xaxis, access)
     {
-        label_type l = { "a", "b", "c" };
-        axis_type a(l);
-        
+        axis_type a = { "a", "b", "c" };
         auto aa = a["a"];
         auto ab = a["b"];
         auto ac = a["c"];
@@ -84,8 +79,7 @@ namespace xf
 
     TEST(xaxis, iterator)
     {
-        label_type l = { "a", "b", "c" };
-        axis_type a(l);
+        axis_type a = { "a", "b", "c" };
 
         auto it = a.begin();
 
@@ -117,11 +111,9 @@ namespace xf
 
     TEST(xaxis, merge)
     {
-        label_type l1 = { "a", "b", "d", "e" };
-        label_type l2 = { "b", "c", "d" };
-        label_type l3 = { "c", "g" };
-
-        axis_type a1(l1), a2(l2), a3(l3);
+        axis_type a1 = { "a", "b", "d", "e" };
+        axis_type a2 = { "b", "c", "d" };
+        axis_type a3 = { "c", "g" };
         axis_type res; 
         bool t1 = merge_axes(res, a1, a2, a3);
         EXPECT_FALSE(t1);
@@ -138,8 +130,9 @@ namespace xf
         EXPECT_FALSE(t2);
         EXPECT_EQ(res2, a1);
 
-        std::vector<int> il1 = {1, 2, 4}, il2 = { 1, 4, 5};
-        xaxis<int, std::size_t> ia1(il1), ia2(il2), iares;
+        xaxis<int, std::size_t> ia1 = { 1, 2, 4};
+        xaxis<int, std::size_t> ia2 = { 1, 4, 5};
+        xaxis<int, std::size_t> iares;
         bool t3 = merge_axes(iares, ia1, ia2);
         EXPECT_FALSE(t3);
         EXPECT_EQ(iares[1], 0);

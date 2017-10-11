@@ -21,16 +21,12 @@ namespace xf
 
     auto make_test_saxis()
     {
-        slabel_type sl = { "a", "c", "d" };
-        saxis_type sa(std::move(sl));
-        return sa;
+        return saxis_type({ "a", "c", "d" });
     }
 
     auto make_test_iaxis()
     {
-        ilabel_type il = { 1, 2, 4 };
-        iaxis_type ia(std::move(il));
-        return ia;
+        return iaxis_type({ 1, 2, 4 });
     }
 
     auto make_test_coordinate()
@@ -56,6 +52,12 @@ namespace xf
         EXPECT_EQ(c1, c2);
         EXPECT_EQ(c1, c3);
         EXPECT_FALSE(c1 != c2);
+
+        decltype(c1) c4 = {{ fstring("temperature"), make_test_saxis() }, { fstring("pression"), make_test_iaxis() }};
+        EXPECT_EQ(c1, c4);
+
+        decltype(c1) c5 = {{"temperature", make_test_saxis()}, {"pression", make_test_iaxis()}};
+        EXPECT_EQ(c1, c5);
     }
 
     TEST(xcoordinate, size)
