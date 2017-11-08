@@ -85,6 +85,9 @@ namespace xf
         template <class... Args>
         bool merge(const Args&... axes);
 
+        template <class... Args>
+        bool intersect(const Args&... axes);
+
     private:
 
         void populate_index();
@@ -114,6 +117,9 @@ namespace xf
 
     template <class L, class T, class... Args>
     bool merge_axes(xaxis<L, T>& output, const Args&... axes);
+
+    template <class L, class T, class... Args>
+    bool intersect_axes(xaxis<L, T>& output, const Args&... axes);
 
     /******************
      * xaxis_iterator *
@@ -307,6 +313,15 @@ namespace xf
     }
 
     template <class L, class T>
+    template <class... Args>
+    inline bool xaxis<L, T>::intersect(const Args&... axes)
+    {
+        bool res = intersect_to(m_labels, axes.labels()...);
+        populate_index();
+        return res;
+    }
+
+    template <class L, class T>
     inline void xaxis<L, T>::populate_index()
     {
         for(size_type i = 0; i < m_labels.size(); ++i)
@@ -370,6 +385,12 @@ namespace xf
     inline bool merge_axes(xaxis<L, T>& output, const Args&... axes)
     {
         return output.merge(axes...);
+    }
+
+    template <class L, class T, class... Args>
+    inline bool intersect_axes(xaxis<L, T>& output, const Args&... axes)
+    {
+        return output.intersect(axes...);
     }
 
     /*********************************

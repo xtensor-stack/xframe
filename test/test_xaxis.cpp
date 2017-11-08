@@ -155,5 +155,22 @@ namespace xf
         EXPECT_EQ(iares[4], 2);
         EXPECT_EQ(iares[5], 3);
     }
+
+    TEST(xaxis, intersect)
+    {
+        axis_type a1 = { "a", "b", "d", "e" };
+        axis_type a2 = { "b", "c", "d" };
+        axis_type a3 = { "a", "b", "d", "f" };
+        axis_type res = { "b", "d" };
+        axis_type tmp = a1;
+        bool t1 = intersect_axes(tmp, a2, a3);
+        EXPECT_FALSE(t1);
+        EXPECT_EQ(tmp, res);
+
+        tmp = a1;
+        bool t2 = intersect_axes(tmp, a1);
+        EXPECT_TRUE(t2);
+        EXPECT_EQ(tmp, a1);
+    }
 }
 
