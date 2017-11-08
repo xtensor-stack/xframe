@@ -201,5 +201,23 @@ namespace xf
         EXPECT_FALSE(res2.second);
         EXPECT_EQ(cres2, make_test_coordinate_res());
     }
+
+    TEST(xcoordinate, intersect)
+    {
+        auto c1 = make_test_coordinate();
+        auto c2 = make_test_coordinate2();
+
+        slabel_type sres = { "a", "d" };
+        ilabel_type ires = { 1, 4 };
+        auto coord_res = coordinate(std::make_pair(fstring("temperature"), saxis_type(std::move(sres))),
+                                    std::make_pair(fstring("pression"), iaxis_type(std::move(ires))));
+
+        auto cres = c1;
+        auto res = intersect_coordinates(cres, c2);
+        EXPECT_FALSE(res.first);
+        EXPECT_FALSE(res.second);
+        EXPECT_EQ(cres, coord_res);
+    }
+
 }
 

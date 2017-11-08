@@ -90,6 +90,9 @@ namespace xf
         template <class... Args>
         std::pair<bool, bool> merge(const Args&... coordinates);
 
+        template <class... Args>
+        std::pair<bool, bool> intersect(const Args&... coordinates);
+
         bool operator==(const self_type& rhs) const noexcept;
         bool operator!=(const self_type& rhs) const noexcept;
 
@@ -106,6 +109,10 @@ namespace xf
         template <class... Args>
         std::pair<bool, bool> merge_empty(const self_type& c, const Args&... coordinates);
         std::pair<bool, bool> merge_empty();
+
+        template <class... Args>
+        std::pair<bool, bool> intersect_impl(const self_type& c, const Args&... coordinates);
+        std::pair<bool, bool> intersect_impl();
 
         map_type m_coordinate;
     };
@@ -124,6 +131,9 @@ namespace xf
 
     template <class K, class S, class L, class... Args>
     std::pair<bool, bool> merge_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates);
+
+    template <class K, class S, class L, class... Args>
+    std::pair<bool, bool> intersect_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates);
 
     /******************************
      * xcoordinate implementation *
@@ -223,6 +233,13 @@ namespace xf
     }
 
     template <class K, class S, class L>
+    template <class... Args>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::intersect(const Args&... coordinates)
+    {
+        return empty() ? std::pair<bool, bool>({ false, false }) : intersect_impl(coordinates...);
+    }
+
+    template <class K, class S, class L>
     inline bool xcoordinate<K, S, L>::operator==(const self_type& rhs) const noexcept
     {
         return m_coordinate == rhs.m_coordinate;
@@ -249,13 +266,13 @@ namespace xf
 
     namespace detail
     {
-        template <class K, class A, class... Args>
-        inline bool merge_coordinate_axis(const K& key, A& output, const Args&... coordinates)
+        template <class K, class A, class C>
+        inline bool merge_coordinate_axis(const K& key, A& output, const C& coordinate)
         {
-            return xtl::visit([&key, &coordinates...](auto& out)
+            return xtl::visit([&key, &coordinate](auto& out)
                 {
                     using type = std::decay_t<decltype(out)>;
-                    return merge_axes(out, xtl::get<type>(coordinates[key])...);
+                    return merge_axes(out, xtl::get<type>(coordinate[key]));
                 },
                 output);
         }
@@ -274,11 +291,10 @@ namespace xf
             if(inserted.second)
             {
                 res.first = false;
-                res.second &= detail::merge_coordinate_axis(key, axis, coordinates...);
             }
             else
             {
-                res.second &= detail::merge_coordinate_axis(key, axis, c, coordinates...);
+                res.second &= detail::merge_coordinate_axis(key, axis, c);
             } 
         }
         return res;
@@ -302,6 +318,48 @@ namespace xf
     inline std::pair<bool, bool> xcoordinate<K, S, L>::merge_empty()
     {
         return merge_impl();
+    }
+
+    namespace detail
+    {
+        template <class K, class A, class C>
+        inline bool intersect_coordinate_axis(const K& key, A& output, const C& coordinate)
+        {
+            return xtl::visit([&key, &coordinate](auto& out)
+                {
+                    using type = std::decay_t<decltype(out)>;
+                    return intersect_axes(out, xtl::get<type>(coordinate[key]));
+                },
+                output);
+        }
+    }
+
+    template <class K, class S, class L>
+    template <class... Args>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::intersect_impl(const self_type& c, const Args&... coordinates)
+    {
+        auto res = intersect_impl(coordinates...);
+        res.first &= (size() == c.size());
+        for(auto iter = m_coordinate.begin(); iter != m_coordinate.end(); ++iter)
+        {
+            auto citer = c.data().find(iter->first);
+            if(citer == c.data().end())
+            {
+                iter = m_coordinate.erase(iter);
+                res.first = false;
+            }
+            else
+            {
+                res.second &= detail::intersect_coordinate_axis(iter->first, iter->second, c);
+            }
+        }
+        return res;
+    }
+
+    template <class K, class S, class L>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::intersect_impl()
+    {
+        return { true, true };
     }
 
     template <class OS, class K, class S, class L>
@@ -337,6 +395,12 @@ namespace xf
     inline std::pair<bool, bool> merge_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates)
     {
         return output.merge(coordinates...);
+    }
+
+    template <class K, class S, class L, class... Args>
+    inline std::pair<bool, bool> intersect_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates)
+    {
+        return output.intersect(coordinates...);
     }
 }
 
