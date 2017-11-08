@@ -109,6 +109,21 @@ namespace xf
         EXPECT_EQ(3, a.end() - a.begin());
     }
 
+    TEST(xaxis, find)
+    {
+        axis_type a = { "a", "b", "c" };
+
+        auto ita = a.find("a");
+        auto itb = a.find("b");
+        auto itc = a.find("c");
+        auto itd = a.find("d");
+
+        EXPECT_EQ(ita->first, "a");
+        EXPECT_EQ(itb->first, "b");
+        EXPECT_EQ(itc->first, "c");
+        EXPECT_EQ(itd, a.end());
+    }
+
     TEST(xaxis, merge)
     {
         axis_type a1 = { "a", "b", "d", "e" };
