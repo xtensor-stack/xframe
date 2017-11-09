@@ -6,8 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XFRAME_XAXIS_LABELS_HPP
-#define XFRAME_XAXIS_LABELS_HPP
+#ifndef XFRAME_XAXIS_HPP
+#define XFRAME_XAXIS_HPP
 
 #include <initializer_list>
 #include <iterator>
@@ -107,10 +107,10 @@ namespace xf
     };
 
     template <class L, class T>
-    bool operator==(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs);
+    bool operator==(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs) noexcept;
 
     template <class L, class T>
-    bool operator!=(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs);
+    bool operator!=(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs) noexcept;
 
     template <class OS, class L, class T>
     OS& operator<<(OS& out, const xaxis<L, T>& axis);
@@ -169,8 +169,8 @@ namespace xf
         reference operator*() const;
         pointer operator->() const;
 
-        bool equal(const self_type& rhs) const;
-        bool less_than(const self_type& rhs) const;
+        bool equal(const self_type& rhs) const noexcept;
+        bool less_than(const self_type& rhs) const noexcept;
 
     private:
 
@@ -182,11 +182,33 @@ namespace xf
     typename xaxis_iterator<L, T>::difference_type operator-(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
 
     template <class L, class T>
-    bool operator==(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
+    bool operator==(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs) noexcept;
 
     template <class L, class T>
-    bool operator<(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs);
+    bool operator<(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs) noexcept;
     
+    /************************
+     * is_axis metafunction *
+     ************************/
+
+    namespace detail
+    {
+        template <class T>
+        struct is_axis_impl : std::false_type
+        {
+        };
+
+        template <class L, class T>
+        struct is_axis_impl<xaxis<L, T>> : std::true_type
+        {
+        };
+    }
+
+    template <class T>
+    struct is_axis : detail::is_axis_impl<std::decay_t<T>>
+    {
+    };
+
     /************************
      * xaxis implementation *
      ************************/
@@ -360,13 +382,13 @@ namespace xf
     }
 
     template <class L, class T>
-    inline bool operator==(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs)
+    inline bool operator==(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs) noexcept
     {
         return lhs.labels() == rhs.labels();
     }
 
     template <class L, class T>
-    inline bool operator!=(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs)
+    inline bool operator!=(const xaxis<L, T>& lhs, const xaxis<L, T>& rhs) noexcept
     {
         return !(lhs == rhs);
     }
@@ -450,13 +472,13 @@ namespace xf
     }
 
     template <class L, class T>
-    inline bool xaxis_iterator<L, T>::equal(const self_type& rhs) const
+    inline bool xaxis_iterator<L, T>::equal(const self_type& rhs) const noexcept
     {
         return m_it == rhs.m_it;
     }
 
     template <class L, class T>
-    inline bool xaxis_iterator<L, T>::less_than(const self_type& rhs) const
+    inline bool xaxis_iterator<L, T>::less_than(const self_type& rhs) const noexcept
     {
         return m_it < rhs.m_it;
     }
@@ -468,13 +490,13 @@ namespace xf
     }
 
     template <class L, class T>
-    inline bool operator==(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
+    inline bool operator==(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs) noexcept
     {
         return lhs.equal(rhs);
     }
 
     template <class L, class T>
-    inline bool operator<(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs)
+    inline bool operator<(const xaxis_iterator<L, T>& lhs, const xaxis_iterator<L, T>& rhs) noexcept
     {
         return lhs.less_than(rhs);
     }

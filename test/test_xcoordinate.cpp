@@ -19,22 +19,25 @@ namespace xf
     using ilabel_type = std::vector<int>;
     using iaxis_type = xaxis<int, std::size_t>;
 
-    auto make_test_saxis()
+    namespace
     {
-        return saxis_type({ "a", "c", "d" });
-    }
+        auto make_test_saxis()
+        {
+            return saxis_type({ "a", "c", "d" });
+        }
 
-    auto make_test_iaxis()
-    {
-        return iaxis_type({ 1, 2, 4 });
-    }
+        auto make_test_iaxis()
+        {
+            return iaxis_type({ 1, 2, 4 });
+        }
 
-    auto make_test_coordinate()
-    {
-        fstring n1 = "temperature";
-        fstring n2 = "pression";
+        auto make_test_coordinate()
+        {
+            fstring n1 = "temperature";
+            fstring n2 = "pression";
 
-        return coordinate(std::make_pair(n1, make_test_saxis()), std::make_pair(n2, make_test_iaxis()));
+            return coordinate(std::make_pair(n1, make_test_saxis()), std::make_pair(n2, make_test_iaxis()));
+        }
     }
 
     TEST(xcoordinate, constructor)

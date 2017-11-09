@@ -49,6 +49,7 @@ namespace xf
     public:
 
         using self_type = xcoordinate<K, S, L>;
+        using label_list = L;
         using axis_type = detail::coordinate_axis_t<S, L>;
         using map_type = std::unordered_map<K, axis_type>;
         using key_type = typename map_type::key_type;
@@ -134,6 +135,28 @@ namespace xf
 
     template <class K, class S, class L, class... Args>
     std::pair<bool, bool> intersect_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates);
+
+    /******************************
+     * is_coordinate_metafunction *
+     ******************************/
+
+    namespace detail
+    {
+        template <class T>
+        struct is_coordinate_impl : std::false_type
+        {
+        };
+
+        template <class K, class S, class L>
+        struct is_coordinate_impl<xcoordinate<K, S, L>> : std::true_type
+        {
+        };
+    }
+
+    template <class T>
+    struct is_coordinate : detail::is_coordinate_impl<std::decay_t<T>>
+    {
+    };
 
     /******************************
      * xcoordinate implementation *
