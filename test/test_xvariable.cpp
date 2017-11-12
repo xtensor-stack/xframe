@@ -18,7 +18,7 @@ namespace xf
     using iaxis_type = xaxis<int, std::size_t>;
     using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
     using coordinate_type = xcoordinate<fstring, data_type::size_type>;
-    using variable_type = xvariable<data_type::value_expression, data_type::flag_expression, fstring>;
+    using variable_type = xvariable<fstring, data_type::value_expression, data_type::flag_expression>;
     
     namespace
     {
@@ -35,7 +35,7 @@ namespace xf
         auto make_test_coordinate()
         {
             fstring n1 = "temperature";
-            fstring n2 = "pression";
+            fstring n2 = "pressure";
 
             return coordinate(std::make_pair(n1, make_test_saxis()), std::make_pair(n2, make_test_iaxis()));
         }
@@ -52,20 +52,20 @@ namespace xf
 
         auto make_test_variable()
         {
-            return variable_type(make_test_data(), make_test_coordinate(), saxis_type({"temperature", "pression"}));
+            return variable_type(make_test_data(), make_test_coordinate(), saxis_type({"temperature", "pressure"}));
         }
     }
 
     TEST(xvariable, constructor)
     {
-        auto v1 = variable_type(make_test_data(), make_test_coordinate(), saxis_type({"temperature", "pression"}));
+        auto v1 = variable_type(make_test_data(), make_test_coordinate(), saxis_type({"temperature", "pressure"}));
         
         variable_type::coordinate_map m;
         m["temperature"] = make_test_saxis();
-        m["pression"] = make_test_iaxis();
+        m["pressure"] = make_test_iaxis();
 
         data_type d = make_test_data();
-        saxis_type dim_map = {"temperature", "pression"};
+        saxis_type dim_map = {"temperature", "pressure"};
         auto v2 = variable_type(d, m, dim_map);
         auto v3 = variable_type(d, std::move(m), std::move(dim_map));
 
@@ -73,7 +73,7 @@ namespace xf
         EXPECT_EQ(v1, v3);
         EXPECT_FALSE(v1 != v2);
 
-        auto v4 = variable_type(std::move(d), {{"temperature", make_test_saxis()}, {"pression", make_test_iaxis()}});
+        auto v4 = variable_type(std::move(d), {{"temperature", make_test_saxis()}, {"pressure", make_test_iaxis()}});
         EXPECT_EQ(v1, v4);
     }
 
@@ -98,7 +98,7 @@ namespace xf
     TEST(xvariable, dimension_labels)
     {
         auto v = make_test_variable();
-        saxis_type s = { "temperature", "pression" };
+        saxis_type s = { "temperature", "pressure" };
 
         EXPECT_EQ(v.dimension_labels(), s.labels());
     }
@@ -116,4 +116,15 @@ namespace xf
         EXPECT_EQ(v(2, 1), 8.0);
         EXPECT_EQ(v(2, 2), 9.0);
     }
+
+    TEST(xvariable, select)
+    {
+        auto v = make_test_variable();
+        auto t1 = decltype(v)::selection().set("temperature", "c").set("pressure", 2).apply_to(v);
+        auto t2 = v.select(v.selection().set("temperature", "c").set("pressure", 2));
+
+        EXPECT_EQ(t1, v(1, 1));
+        EXPECT_EQ(t2, v(1, 1));
+    }
+
 }

@@ -15,10 +15,9 @@
 
 #ifndef DEFAULT_LABEL_LIST
 #include <cstddef>
-#include <string>
 #include "xtl/xbasic_fixed_string.hpp"
 #include "xtl/xmeta_utils.hpp"
-#define DEFAULT_LABEL_LIST xtl::mpl::vector<int,std::size_t, std::string, xtl::xfixed_string<55>>
+#define DEFAULT_LABEL_LIST xtl::mpl::vector<int,std::size_t, xtl::xfixed_string<55>>
 #endif
 
 namespace xf
