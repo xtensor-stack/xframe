@@ -19,22 +19,25 @@ namespace xf
     using ilabel_type = std::vector<int>;
     using iaxis_type = xaxis<int, std::size_t>;
 
-    auto make_test_saxis()
+    namespace
     {
-        return saxis_type({ "a", "c", "d" });
-    }
+        auto make_test_saxis()
+        {
+            return saxis_type({ "a", "c", "d" });
+        }
 
-    auto make_test_iaxis()
-    {
-        return iaxis_type({ 1, 2, 4 });
-    }
+        auto make_test_iaxis()
+        {
+            return iaxis_type({ 1, 2, 4 });
+        }
 
-    auto make_test_coordinate()
-    {
-        fstring n1 = "temperature";
-        fstring n2 = "pression";
+        auto make_test_coordinate()
+        {
+            fstring n1 = "temperature";
+            fstring n2 = "pressure";
 
-        return coordinate(std::make_pair(n1, make_test_saxis()), std::make_pair(n2, make_test_iaxis()));
+            return coordinate(std::make_pair(n1, make_test_saxis()), std::make_pair(n2, make_test_iaxis()));
+        }
     }
 
     TEST(xcoordinate, constructor)
@@ -44,7 +47,7 @@ namespace xf
         using map_type = typename std::decay_t<decltype(c1)>::map_type;
         map_type m;
         m["temperature"] = make_test_saxis();
-        m["pression"] = make_test_iaxis();
+        m["pressure"] = make_test_iaxis();
 
         auto c2 = coordinate(m);
         auto c3 = coordinate(std::move(m));
@@ -53,10 +56,10 @@ namespace xf
         EXPECT_EQ(c1, c3);
         EXPECT_FALSE(c1 != c2);
 
-        decltype(c1) c4 = {{ fstring("temperature"), make_test_saxis() }, { fstring("pression"), make_test_iaxis() }};
+        decltype(c1) c4 = {{ fstring("temperature"), make_test_saxis() }, { fstring("pressure"), make_test_iaxis() }};
         EXPECT_EQ(c1, c4);
 
-        decltype(c1) c5 = {{"temperature", make_test_saxis()}, {"pression", make_test_iaxis()}};
+        decltype(c1) c5 = {{"temperature", make_test_saxis()}, {"pressure", make_test_iaxis()}};
         EXPECT_EQ(c1, c5);
     }
 
@@ -84,16 +87,16 @@ namespace xf
         EXPECT_EQ(xtl::get<saxis_type>(c["temperature"])["a"], 0);
         EXPECT_EQ(xtl::get<saxis_type>(c["temperature"])["c"], 1);
         EXPECT_EQ(xtl::get<saxis_type>(c["temperature"])["d"], 2);
-        EXPECT_EQ(xtl::get<iaxis_type>(c["pression"])[1], 0);
-        EXPECT_EQ(xtl::get<iaxis_type>(c["pression"])[2], 1);
-        EXPECT_EQ(xtl::get<iaxis_type>(c["pression"])[4], 2);
+        EXPECT_EQ(xtl::get<iaxis_type>(c["pressure"])[1], 0);
+        EXPECT_EQ(xtl::get<iaxis_type>(c["pressure"])[2], 1);
+        EXPECT_EQ(xtl::get<iaxis_type>(c["pressure"])[4], 2);
 
         EXPECT_EQ(c[std::make_pair("temperature", fstring("a"))], 0);
         EXPECT_EQ(c[std::make_pair("temperature", fstring("c"))], 1);
         EXPECT_EQ(c[std::make_pair("temperature", fstring("d"))], 2);
-        EXPECT_EQ(c[std::make_pair("pression", 1)], 0);
-        EXPECT_EQ(c[std::make_pair("pression", 2)], 1);
-        EXPECT_EQ(c[std::make_pair("pression", 4)], 2);
+        EXPECT_EQ(c[std::make_pair("pressure", 1)], 0);
+        EXPECT_EQ(c[std::make_pair("pressure", 2)], 1);
+        EXPECT_EQ(c[std::make_pair("pressure", 4)], 2);
     }
 
     template <class L>
@@ -160,7 +163,7 @@ namespace xf
     auto make_test_coordinate2()
     {
         return coordinate(std::make_pair(fstring("temperature"), make_test_saxis2()),
-                          std::make_pair(fstring("pression"), make_test_iaxis2()),
+                          std::make_pair(fstring("pressure"), make_test_iaxis2()),
                           std::make_pair(fstring("altitude"), make_test_iaxis()));
     }
 
@@ -181,7 +184,7 @@ namespace xf
     auto make_test_coordinate_res()
     {
         return coordinate(std::make_pair(fstring("temperature"), make_test_saxis_res()),
-                          std::make_pair(fstring("pression"), make_test_iaxis_res()),
+                          std::make_pair(fstring("pressure"), make_test_iaxis_res()),
                           std::make_pair(fstring("altitude"), make_test_iaxis()));
     }
 
@@ -210,7 +213,7 @@ namespace xf
         slabel_type sres = { "a", "d" };
         ilabel_type ires = { 1, 4 };
         auto coord_res = coordinate(std::make_pair(fstring("temperature"), saxis_type(std::move(sres))),
-                                    std::make_pair(fstring("pression"), iaxis_type(std::move(ires))));
+                                    std::make_pair(fstring("pressure"), iaxis_type(std::move(ires))));
 
         auto cres = c1;
         auto res = intersect_coordinates(cres, c2);

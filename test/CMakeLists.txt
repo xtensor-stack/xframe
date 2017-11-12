@@ -81,6 +81,7 @@ set(XFRAME_TESTS
     test_xaxis.cpp
     test_xcoordinate.cpp
     test_xframe_utils.cpp
+    test_xvariable.cpp
 )
 
 set(XFRAME_TARGET test_xframe)
