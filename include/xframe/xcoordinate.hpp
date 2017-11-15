@@ -9,7 +9,7 @@
 #ifndef XFRAME_XCOORDINATE_HPP
 #define XFRAME_XCOORDINATE_HPP
 
-#include <unordered_map>
+#include <map>
 
 #ifndef DEFAULT_LABEL_LIST
 #include <cstddef>
@@ -50,7 +50,7 @@ namespace xf
         using self_type = xcoordinate<K, S, L>;
         using label_list = L;
         using axis_type = xaxis_variant<L, S>;
-        using map_type = std::unordered_map<K, axis_type>;
+        using map_type = std::map<K, axis_type>;
         using key_type = typename map_type::key_type;
         using mapped_type = typename map_type::mapped_type;
         using index_type = S;
@@ -121,10 +121,10 @@ namespace xf
     OS& operator<<(OS& out, const xcoordinate<K, S, L>& c);
 
     template <class K, class S, class L>
-    xcoordinate<K, S> coordinate(const std::unordered_map<K, xaxis_variant<L, S>>& axes);
+    xcoordinate<K, S> coordinate(const std::map<K, xaxis_variant<L, S>>& axes);
 
     template <class K, class S, class L>
-    xcoordinate<K, S> coordinate(std::unordered_map<K, xaxis_variant<L, S>>&& axes);
+    xcoordinate<K, S> coordinate(std::map<K, xaxis_variant<L, S>>&& axes);
 
     template <class K, class S, class... L>
     xcoordinate<K, S> coordinate(std::pair<K, xaxis<L, S>>... axes);
@@ -367,13 +367,13 @@ namespace xf
     }
 
     template <class K, class S, class L>
-    xcoordinate<K, S> coordinate(const std::unordered_map<K, xaxis_variant<L, S>>& axes)
+    xcoordinate<K, S> coordinate(const std::map<K, xaxis_variant<L, S>>& axes)
     {
         return xcoordinate<K, S>(axes);
     }
 
     template <class K, class S, class L>
-    xcoordinate<K, S> coordinate(std::unordered_map<K, xaxis_variant<L, S>>&& axes)
+    xcoordinate<K, S> coordinate(std::map<K, xaxis_variant<L, S>>&& axes)
     {
         return xcoordinate<K, S>(std::move(axes));
     }

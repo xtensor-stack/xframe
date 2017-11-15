@@ -104,9 +104,9 @@ namespace xf
     {
         auto c = make_test_coordinate();
         auto iter = c.begin();
-        EXPECT_EQ((iter->second)["d"], 2);
-        ++iter;
         EXPECT_EQ((iter->second)[2], 1);
+        ++iter;
+        EXPECT_EQ((iter->second)["d"], 2);
         ++iter;
         EXPECT_EQ(iter, c.end());
     }
