@@ -10,8 +10,6 @@
 #define XFRAME_XCOORDINATE_HPP
 
 #include <unordered_map>
-#include "xtl/xvariant.hpp"
-#include "xaxis.hpp"
 
 #ifndef DEFAULT_LABEL_LIST
 #include <cstddef>
@@ -19,6 +17,8 @@
 #include "xtl/xmeta_utils.hpp"
 #define DEFAULT_LABEL_LIST xtl::mpl::vector<int,std::size_t, xtl::xfixed_string<55>>
 #endif
+
+#include "xaxis_variant.hpp"
 
 namespace xf
 {
@@ -49,7 +49,7 @@ namespace xf
 
         using self_type = xcoordinate<K, S, L>;
         using label_list = L;
-        using axis_type = detail::coordinate_axis_t<S, L>;
+        using axis_type = xaxis_variant<L, S>;
         using map_type = std::unordered_map<K, axis_type>;
         using key_type = typename map_type::key_type;
         using mapped_type = typename map_type::mapped_type;
@@ -120,11 +120,11 @@ namespace xf
     template <class OS, class K, class S, class L>
     OS& operator<<(OS& out, const xcoordinate<K, S, L>& c);
 
-    template <class K, class S, class... L>
-    xcoordinate<K, S> coordinate(const std::unordered_map<K, xtl::variant<xaxis<L, S>...>>& axes);
+    template <class K, class S, class L>
+    xcoordinate<K, S> coordinate(const std::unordered_map<K, xaxis_variant<L, S>>& axes);
 
-    template <class K, class S, class... L>
-    xcoordinate<K, S> coordinate(std::unordered_map<K, xtl::variant<xaxis<L, S>...>>&& axes);
+    template <class K, class S, class L>
+    xcoordinate<K, S> coordinate(std::unordered_map<K, xaxis_variant<L, S>>&& axes);
 
     template <class K, class S, class... L>
     xcoordinate<K, S> coordinate(std::pair<K, xaxis<L, S>>... axes);
@@ -214,7 +214,7 @@ namespace xf
     template <class KB, class LB>
     inline auto xcoordinate<K, S, L>::operator[](const std::pair<KB, LB>& key) const -> index_type
     {
-        return xtl::get<xaxis<LB, S>>((*this)[key.first])[key.second];
+        return (*this)[key.first][key.second];
     }
 
     template <class K, class S, class L>
@@ -286,20 +286,6 @@ namespace xf
     {
     }
 
-    namespace detail
-    {
-        template <class K, class A, class C>
-        inline bool merge_coordinate_axis(const K& key, A& output, const C& coordinate)
-        {
-            return xtl::visit([&key, &coordinate](auto& out)
-                {
-                    using type = std::decay_t<decltype(out)>;
-                    return merge_axes(out, xtl::get<type>(coordinate[key]));
-                },
-                output);
-        }
-    }
-
     template <class K, class S, class L>
     template <class... Args>
     inline std::pair<bool, bool> xcoordinate<K, S, L>::merge_impl(const self_type& c, const Args&... coordinates)
@@ -316,7 +302,7 @@ namespace xf
             }
             else
             {
-                res.second &= detail::merge_coordinate_axis(key, axis, c);
+                res.second &= axis.merge(c[key]);
             } 
         }
         return res;
@@ -342,20 +328,6 @@ namespace xf
         return merge_impl();
     }
 
-    namespace detail
-    {
-        template <class K, class A, class C>
-        inline bool intersect_coordinate_axis(const K& key, A& output, const C& coordinate)
-        {
-            return xtl::visit([&key, &coordinate](auto& out)
-                {
-                    using type = std::decay_t<decltype(out)>;
-                    return intersect_axes(out, xtl::get<type>(coordinate[key]));
-                },
-                output);
-        }
-    }
-
     template <class K, class S, class L>
     template <class... Args>
     inline std::pair<bool, bool> xcoordinate<K, S, L>::intersect_impl(const self_type& c, const Args&... coordinates)
@@ -372,7 +344,7 @@ namespace xf
             }
             else
             {
-                res.second &= detail::intersect_coordinate_axis(iter->first, iter->second, c);
+                res.second &= (iter->second).intersect(c[iter->first]);
             }
         }
         return res;
@@ -389,20 +361,19 @@ namespace xf
     {
         for(auto& v: c)
         {
-            out << v.first << ": ";
-            xtl::visit([&out](auto&& arg) { out << arg << std::endl; }, v.second);
+            out << v.first << ": " << v.second << std::endl;
         }
         return out;
     }
 
-    template <class K, class S, class... L>
-    xcoordinate<K, S> coordinate(const std::unordered_map<K, xtl::variant<xaxis<L, S>...>>& axes)
+    template <class K, class S, class L>
+    xcoordinate<K, S> coordinate(const std::unordered_map<K, xaxis_variant<L, S>>& axes)
     {
         return xcoordinate<K, S>(axes);
     }
 
-    template <class K, class S, class... L>
-    xcoordinate<K, S> coordinate(std::unordered_map<K, xtl::variant<xaxis<L, S>...>>&& axes)
+    template <class K, class S, class L>
+    xcoordinate<K, S> coordinate(std::unordered_map<K, xaxis_variant<L, S>>&& axes)
     {
         return xcoordinate<K, S>(std::move(axes));
     }

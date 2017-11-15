@@ -84,12 +84,13 @@ namespace xf
     TEST(xcoordinate, access)
     {
         auto c = make_test_coordinate();
-        EXPECT_EQ(xtl::get<saxis_type>(c["temperature"])["a"], 0);
-        EXPECT_EQ(xtl::get<saxis_type>(c["temperature"])["c"], 1);
-        EXPECT_EQ(xtl::get<saxis_type>(c["temperature"])["d"], 2);
-        EXPECT_EQ(xtl::get<iaxis_type>(c["pressure"])[1], 0);
-        EXPECT_EQ(xtl::get<iaxis_type>(c["pressure"])[2], 1);
-        EXPECT_EQ(xtl::get<iaxis_type>(c["pressure"])[4], 2);
+        EXPECT_EQ(c["temperature"]["a"], 0);
+        EXPECT_EQ(c["temperature"]["a"], 0);
+        EXPECT_EQ(c["temperature"]["c"], 1);
+        EXPECT_EQ(c["temperature"]["d"], 2);
+        EXPECT_EQ(c["pressure"][1], 0);
+        EXPECT_EQ(c["pressure"][2], 1);
+        EXPECT_EQ(c["pressure"][4], 2);
 
         EXPECT_EQ(c[std::make_pair("temperature", fstring("a"))], 0);
         EXPECT_EQ(c[std::make_pair("temperature", fstring("c"))], 1);
@@ -99,49 +100,13 @@ namespace xf
         EXPECT_EQ(c[std::make_pair("pressure", 4)], 2);
     }
 
-    template <class L>
-    struct iterator_tester
-    {
-        template <class S>
-        static bool run(const xaxis<L, S>& arg)
-        {
-            throw std::runtime_error("should not get caught here");
-        }
-    };
-
-    template <>
-    struct iterator_tester<fstring>
-    {
-        template <class S>
-        static bool run(const xaxis<fstring, S>& arg)
-        {
-            return arg["d"] == 2;
-        }
-    };
-
-    template <>
-    struct iterator_tester<int>
-    {
-        template <class S>
-        static bool run(const xaxis<int, S>& arg)
-        {
-            return arg[2] == 1;
-        }
-    };
-
     TEST(xcoordinate, iterator)
     {
         auto c = make_test_coordinate();
-        auto lambda = [](auto&& arg) -> bool
-        {
-            using axis_type = std::decay_t<decltype(arg)>;
-            return iterator_tester<typename axis_type::key_type>::run(arg);
-        };
-
         auto iter = c.begin();
-        EXPECT_TRUE(xtl::visit(lambda, iter->second));
+        EXPECT_EQ((iter->second)["d"], 2);
         ++iter;
-        EXPECT_TRUE(xtl::visit(lambda, iter->second));
+        EXPECT_EQ((iter->second)[2], 1);
         ++iter;
         EXPECT_EQ(iter, c.end());
     }
@@ -221,6 +186,5 @@ namespace xf
         EXPECT_FALSE(res.second);
         EXPECT_EQ(cres, coord_res);
     }
-
 }
 

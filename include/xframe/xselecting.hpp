@@ -100,13 +100,7 @@ namespace xf
         {
             size_type id = dim[c.first];
             const auto& axis_label = c.second;
-            auto lambda = [&axis_label](auto&& arg) -> size_type
-            {
-                using axis_type = std::decay_t<decltype(arg)>;
-                using key_type = typename axis_type::key_type;
-                return arg[xtl::get<key_type>(axis_label)];
-            };
-            res[dim[c.first]] = xtl::visit(lambda, coords[c.first]);
+            res[dim[c.first]] = coords[c.first][c.second];
         }
         return res;
     }

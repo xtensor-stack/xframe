@@ -126,21 +126,11 @@ namespace xf
      ******************/
 
     template <class L, class T>
-    struct xaxis_traits
-    {
-        using axis_type = xaxis<L, T>;
-        using value_type = typename axis_type::value_type;
-        using reference = typename axis_type::reference;
-        using pointer = typename axis_type::pointer;
-        using difference_type = typename axis_type::difference_type;
-    };
-
-    template <class L, class T>
     class xaxis_iterator : public xtl::xrandom_access_iterator_base<xaxis_iterator<L, T>,
-                                                                    typename xaxis_traits<L, T>::value_type,
-                                                                    typename xaxis_traits<L, T>::difference_type,
-                                                                    typename xaxis_traits<L, T>::pointer,
-                                                                    typename xaxis_traits<L, T>::reference>
+                                                                    typename xaxis<L, T>::value_type,
+                                                                    typename xaxis<L, T>::difference_type,
+                                                                    typename xaxis<L, T>::const_pointer,
+                                                                    typename xaxis<L, T>::const_reference>
     {
 
     public:
@@ -150,8 +140,8 @@ namespace xf
         using label_list = typename container_type::label_list;
         using label_iterator = typename label_list::const_iterator;
         using value_type = typename container_type::value_type;
-        using reference = typename container_type::reference;
-        using pointer = typename container_type::pointer;
+        using reference = typename container_type::const_reference;
+        using pointer = typename container_type::const_pointer;
         using difference_type = typename container_type::difference_type;
         using iterator_category = std::random_access_iterator_tag;
 
