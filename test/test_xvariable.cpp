@@ -108,8 +108,8 @@ namespace xf
         auto v = make_test_variable();
         EXPECT_EQ(v(0, 0), 1.0);
         EXPECT_EQ(v(0, 1), 2.0);
-        EXPECT_EQ(v(0, 2), xt::missing<double>());
-        EXPECT_EQ(v(1, 0), xt::missing<double>());
+        EXPECT_EQ(v(0, 2), xtl::missing<double>());
+        EXPECT_EQ(v(1, 0), xtl::missing<double>());
         EXPECT_EQ(v(1, 1), 5.0);
         EXPECT_EQ(v(1, 2), 6.0);
         EXPECT_EQ(v(2, 0), 7.0);
