@@ -120,21 +120,49 @@ namespace xf
     TEST(xvariable, select)
     {
         auto v = make_test_variable();
-        auto t1 = decltype(v)::selection().set("temperature", "c").set("pressure", 2).apply_to(v);
-        auto t2 = v.select(v.selection().set("temperature", "c").set("pressure", 2));
+        auto t00 = v.select({{"temperature", "a"}, {"pressure", 1}});
+        auto t01 = v.select({{"temperature", "a"}, {"pressure", 2}});
+        auto t02 = v.select({{"temperature", "a"}, {"pressure", 4}});
+        auto t10 = v.select({{"temperature", "c"}, {"pressure", 1}});
+        auto t11 = v.select({{"temperature", "c"}, {"pressure", 2}});
+        auto t12 = v.select({{"temperature", "c"}, {"pressure", 4}});
+        auto t20 = v.select({{"temperature", "d"}, {"pressure", 1}});
+        auto t21 = v.select({{"temperature", "d"}, {"pressure", 2}});
+        auto t22 = v.select({{"temperature", "d"}, {"pressure", 4}});
 
-        EXPECT_EQ(t1, v(1, 1));
-        EXPECT_EQ(t2, v(1, 1));
+        EXPECT_EQ(t00, v(0, 0));
+        EXPECT_EQ(t01, v(0, 1));
+        EXPECT_EQ(t02, v(0, 2));
+        EXPECT_EQ(t10, v(1, 0));
+        EXPECT_EQ(t11, v(1, 1));
+        EXPECT_EQ(t12, v(1, 2));
+        EXPECT_EQ(t20, v(2, 0));
+        EXPECT_EQ(t21, v(2, 1));
+        EXPECT_EQ(t22, v(2, 2));
     }
 
     TEST(xvariable, iselect)
     {
         auto v = make_test_variable();
-        auto t1 = decltype(v)::iselection().set("temperature", 1).set("pressure", 1).apply_to(v);
-        auto t2 = v.iselect(v.iselection().set("temperature", 1).set("pressure", 1));
+        auto t00 = v.iselect({{"temperature", 0}, {"pressure", 0}});
+        auto t01 = v.iselect({{"temperature", 0}, {"pressure", 1}});
+        auto t02 = v.iselect({{"temperature", 0}, {"pressure", 2}});
+        auto t10 = v.iselect({{"temperature", 1}, {"pressure", 0}});
+        auto t11 = v.iselect({{"temperature", 1}, {"pressure", 1}});
+        auto t12 = v.iselect({{"temperature", 1}, {"pressure", 2}});
+        auto t20 = v.iselect({{"temperature", 2}, {"pressure", 0}});
+        auto t21 = v.iselect({{"temperature", 2}, {"pressure", 1}});
+        auto t22 = v.iselect({{"temperature", 2}, {"pressure", 2}});
 
-        EXPECT_EQ(t1, v(1, 1));
-        EXPECT_EQ(t2, v(1, 1));
+        EXPECT_EQ(t00, v(0, 0));
+        EXPECT_EQ(t01, v(0, 1));
+        EXPECT_EQ(t02, v(0, 2));
+        EXPECT_EQ(t10, v(1, 0));
+        EXPECT_EQ(t11, v(1, 1));
+        EXPECT_EQ(t12, v(1, 2));
+        EXPECT_EQ(t20, v(2, 0));
+        EXPECT_EQ(t21, v(2, 1));
+        EXPECT_EQ(t22, v(2, 2));
     }
 
 }

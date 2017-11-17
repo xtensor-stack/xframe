@@ -28,6 +28,8 @@ namespace xf
     template <class C, class DM>
     using enable_xvariable_t = typename enable_xvariable<C, DM>::type;
 
+    constexpr std::size_t dynamic();
+
     template <class K, class VE, class FE, class L = DEFAULT_LABEL_LIST>
     class xvariable
     {
@@ -78,28 +80,38 @@ namespace xf
         const coordinate_type& coordinates() const noexcept;
         const dimension_type& dimension_mapping() const noexcept;
 
-        template <std::size_t N>
+        template <std::size_t N = dynamic()>
         using selector_type = xselector<coordinate_type, N>;
-        template <std::size_t N>
+        template <std::size_t N = dynamic()>
+        using selector_map_type = typename selector_type<N>::map_type;
+        template <std::size_t N = dynamic()>
         using iselector_type = xiselector<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using iselector_map_type = typename iselector_type<N>::map_type;
+
+        template <std::size_t N = dynamic()>
+        reference select(const selector_map_type<N>& selector);
 
         template <std::size_t N = std::numeric_limits<size_type>::max()>
-        static constexpr selector_type<N> selection() noexcept;
+        const_reference select(const selector_map_type<N>& selector) const;
 
-        template <std::size_t N = std::numeric_limits<size_type>::max()>
-        reference select(const selector_type<N>& selector);
+        template <std::size_t N = dynamic()>
+        reference select(selector_map_type<N>&& selector);
 
-        template <std::size_t N = std::numeric_limits<size_type>::max()>
-        const_reference select(const selector_type<N>& selector) const;
+        template <std::size_t N = dynamic()>
+        const_reference select(selector_map_type<N>&& selector) const;
 
-        template <std::size_t N = std::numeric_limits<size_type>::max()>
-        static constexpr iselector_type<N> iselection() noexcept;
+        template <std::size_t N = dynamic()>
+        reference iselect(const iselector_map_type<N>& selector);
 
-        template <std::size_t N = std::numeric_limits<size_type>::max()>
-        reference iselect(const iselector_type<N>& selector);
+        template <std::size_t N = dynamic()>
+        const_reference iselect(const iselector_map_type<N>& selector) const;
 
-        template <std::size_t N = std::numeric_limits<size_type>::max()>
-        const_reference iselect(const iselector_type<N>& selector) const;
+        template <std::size_t N = dynamic()>
+        reference iselect(iselector_map_type<N>&& selector);
+
+        template <std::size_t N = dynamic()>
+        const_reference iselect(iselector_map_type<N>&& selector) const;
 
     private:
 
@@ -125,6 +137,11 @@ namespace xf
     /****************************
      * xvariable implementation *
      ****************************/
+
+    constexpr std::size_t dynamic()
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
 
     template <class K, class VE, class FE, class L>
     template <class D, class C, class DM, class>
@@ -210,44 +227,58 @@ namespace xf
 
     template <class K, class VE, class FE, class L>
     template <std::size_t N>
-    constexpr auto xvariable<K, VE, FE, L>::selection() noexcept -> selector_type<N>
+    inline auto xvariable<K, VE, FE, L>::select(const selector_map_type<N>& selector) -> reference
     {
-        return selector_type<N>();
+        return select_impl(selector_type<N>(selector));
     }
 
     template <class K, class VE, class FE, class L>
     template <std::size_t N>
-    inline auto xvariable<K, VE, FE, L>::select(const selector_type<N>& selector) -> reference
+    inline auto xvariable<K, VE, FE, L>::select(const selector_map_type<N>& selector) const -> const_reference
     {
-        return select_impl(selector);
+        return select_impl(selector_type<N>(selector));
     }
 
     template <class K, class VE, class FE, class L>
     template <std::size_t N>
-    inline auto xvariable<K, VE, FE, L>::select(const selector_type<N>& selector) const -> const_reference
+    inline auto xvariable<K, VE, FE, L>::select(selector_map_type<N>&& selector) -> reference
     {
-        return select_impl(selector);
+        return select_impl(selector_type<N>(std::move(selector)));
     }
 
     template <class K, class VE, class FE, class L>
     template <std::size_t N>
-    constexpr auto xvariable<K, VE, FE, L>::iselection() noexcept -> iselector_type<N>
+    inline auto xvariable<K, VE, FE, L>::select(selector_map_type<N>&& selector) const -> const_reference
     {
-        return iselector_type<N>();
+        return select_impl(selector_type<N>(std::move(selector)));
     }
 
     template <class K, class VE, class FE, class L>
     template <std::size_t N>
-    inline auto xvariable<K, VE, FE, L>::iselect(const iselector_type<N>& selector) -> reference
+    inline auto xvariable<K, VE, FE, L>::iselect(const iselector_map_type<N>& selector) -> reference
     {
-        return select_impl(selector);
+        return select_impl(iselector_type<N>(selector));
     }
 
     template <class K, class VE, class FE, class L>
     template <std::size_t N>
-    inline auto xvariable<K, VE, FE, L>::iselect(const iselector_type<N>& selector) const -> const_reference
+    inline auto xvariable<K, VE, FE, L>::iselect(const iselector_map_type<N>& selector) const -> const_reference
     {
-        return select_impl(selector);
+        return select_impl(iselector_type<N>(selector));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::iselect(iselector_map_type<N>&& selector) -> reference
+    {
+        return select_impl(iselector_type<N>(std::move(selector)));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::iselect(iselector_map_type<N>&& selector) const -> const_reference
+    {
+        return select_impl(iselector_type<N>(std::move(selector)));
     }
     
     template <class K, class VE, class FE, class L>
