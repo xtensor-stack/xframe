@@ -127,4 +127,14 @@ namespace xf
         EXPECT_EQ(t2, v(1, 1));
     }
 
+    TEST(xvariable, iselect)
+    {
+        auto v = make_test_variable();
+        auto t1 = decltype(v)::iselection().set("temperature", 1).set("pressure", 1).apply_to(v);
+        auto t2 = v.iselect(v.iselection().set("temperature", 1).set("pressure", 1));
+
+        EXPECT_EQ(t1, v(1, 1));
+        EXPECT_EQ(t2, v(1, 1));
+    }
+
 }

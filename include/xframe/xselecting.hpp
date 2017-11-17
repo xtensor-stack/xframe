@@ -69,7 +69,39 @@ namespace xf
 
     private:
 
-        using map_type = std::unordered_map<key_type, mapped_type>;
+        using map_type = std::map<key_type, mapped_type>;
+        map_type m_coord;
+    };
+
+    /*******************
+     * xindex_selector *
+     *******************/
+
+    template <class C, std::size_t N>
+    class xiselector
+    {
+    public:
+
+        static_assert(is_coordinate<C>::value, "first parameter of xiselector must be xcoordinate");
+
+        using self_type = xiselector<C, N>;
+        using coordinate_type = C;
+        using key_type = typename coordinate_type::key_type;
+        using size_type = typename coordinate_type::index_type;
+        using index_type = detail::xselector_index_t<size_type, N>;
+        using dimension_type = xaxis<key_type, size_type>;
+
+        self_type& set(const key_type& key, size_type i);
+        self_type& set(key_type&& key, size_type i);
+
+        index_type get_index(const coordinate_type& coords, const dimension_type& dim) const;
+
+        template <class V>
+        select_reference_t<V> apply_to(V& variable) const;
+
+    private:
+
+        using map_type = std::map<key_type, size_type>;
         map_type m_coord;
     };
 
@@ -81,7 +113,7 @@ namespace xf
     inline auto xselector<C, N>::set(const key_type& key, const mapped_type& value) -> self_type&
     {
         m_coord[key] = value;
-        return this;
+        return *this;
     }
 
     template <class C, std::size_t N>
@@ -98,8 +130,6 @@ namespace xf
         index_type res = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
         for(const auto& c : m_coord)
         {
-            size_type id = dim[c.first];
-            const auto& axis_label = c.second;
             res[dim[c.first]] = coords[c.first][c.second];
         }
         return res;
@@ -110,6 +140,43 @@ namespace xf
     inline select_reference_t<V> xselector<C, N>::apply_to(V& variable) const
     {
         return variable.select(*this);
+    }
+
+    /*****************************
+     * xiselector implementation *
+     *****************************/
+
+    template <class C, std::size_t N>
+    inline auto xiselector<C, N>::set(const key_type& key, size_type i) -> self_type&
+    {
+        m_coord = i;
+        return *this;
+    }
+
+    template <class C, std::size_t N>
+    inline auto xiselector<C, N>::set(key_type&& key, size_type i) -> self_type&
+    {
+        m_coord.emplace(std::make_pair(std::move(key), i));
+        return *this;
+    }
+
+    template <class C, std::size_t N>
+    inline auto xiselector<C, N>::get_index(const coordinate_type& coords, const dimension_type& dim) const
+        -> index_type
+    {
+        index_type res = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
+        for(const auto& c : m_coord)
+        {
+            res[dim[c.first]] = c.second;
+        }
+        return res;
+    }
+
+    template <class C, std::size_t N>
+    template <class V>
+    inline select_reference_t<V> xiselector<C, N>::apply_to(V& variable) const
+    {
+        return variable.iselect(*this);
     }
 }
 

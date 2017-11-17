@@ -80,6 +80,8 @@ namespace xf
 
         template <std::size_t N>
         using selector_type = xselector<coordinate_type, N>;
+        template <std::size_t N>
+        using iselector_type = xiselector<coordinate_type, N>;
 
         template <std::size_t N = std::numeric_limits<size_type>::max()>
         static constexpr selector_type<N> selection() noexcept;
@@ -90,9 +92,24 @@ namespace xf
         template <std::size_t N = std::numeric_limits<size_type>::max()>
         const_reference select(const selector_type<N>& selector) const;
 
+        template <std::size_t N = std::numeric_limits<size_type>::max()>
+        static constexpr iselector_type<N> iselection() noexcept;
+
+        template <std::size_t N = std::numeric_limits<size_type>::max()>
+        reference iselect(const iselector_type<N>& selector);
+
+        template <std::size_t N = std::numeric_limits<size_type>::max()>
+        const_reference iselect(const iselector_type<N>& selector) const;
+
     private:
 
         static dimension_type make_dimension_mapping(coordinate_initializer coord);
+
+        template <class S>
+        reference select_impl(const S& selector);
+
+        template <class S>
+        const_reference select_impl(const S& selector) const;
 
         data_type m_data;
         coordinate_type m_coordinate;
@@ -202,18 +219,37 @@ namespace xf
     template <std::size_t N>
     inline auto xvariable<K, VE, FE, L>::select(const selector_type<N>& selector) -> reference
     {
-        typename selector_type<N>::index_type idx = selector.get_index(coordinates(), dimension_mapping());
-        return m_data.element(idx.cbegin(), idx.cend());
+        return select_impl(selector);
     }
 
     template <class K, class VE, class FE, class L>
     template <std::size_t N>
     inline auto xvariable<K, VE, FE, L>::select(const selector_type<N>& selector) const -> const_reference
     {
-        typename selector_type<N>::index_type idx = selector.get_index(coordinates(), dimension_mapping());
-        return m_data.element(idx.cbegin(), idx.cend());
+        return select_impl(selector);
     }
 
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    constexpr auto xvariable<K, VE, FE, L>::iselection() noexcept -> iselector_type<N>
+    {
+        return iselector_type<N>();
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::iselect(const iselector_type<N>& selector) -> reference
+    {
+        return select_impl(selector);
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::iselect(const iselector_type<N>& selector) const -> const_reference
+    {
+        return select_impl(selector);
+    }
+    
     template <class K, class VE, class FE, class L>
     inline auto xvariable<K, VE, FE, L>::make_dimension_mapping(coordinate_initializer coord) -> dimension_type
     {
@@ -222,6 +258,22 @@ namespace xf
         return dimension_type(std::move(tmp));
     }
 
+    template <class K, class VE, class FE, class L>
+    template <class S>
+    inline auto xvariable<K, VE, FE, L>::select_impl(const S& selector) -> reference
+    {
+        typename S::index_type idx = selector.get_index(coordinates(), dimension_mapping());
+        return m_data.element(idx.cbegin(), idx.cend());
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <class S>
+    inline auto xvariable<K, VE, FE, L>::select_impl(const S& selector) const -> const_reference
+    {
+        typename S::index_type idx = selector.get_index(coordinates(), dimension_mapping());
+        return m_data.element(idx.cbegin(), idx.cend());
+    }
+    
     template <class K, class VE, class FE, class L>
     inline bool operator==(const xvariable<K, VE, FE, L>& lhs, const xvariable<K, VE, FE, L>& rhs) noexcept
     {
