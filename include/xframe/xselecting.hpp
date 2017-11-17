@@ -29,16 +29,6 @@ namespace xf
         using xselector_index_t = typename xselector_index<S, N>::type;
     }
 
-    // TODO: move this to xtensor
-    template <class E>
-    struct select_reference
-        : std::conditional<std::is_const<E>::value, typename E::reference, typename E::const_reference>
-    {
-    };
-
-    template <class E>
-    using select_reference_t = typename select_reference<E>::type;
-
     /*************
      * xselector *
      *************/
@@ -50,7 +40,6 @@ namespace xf
 
         static_assert(is_coordinate<C>::value, "first parameter of xselector must be xcoordinate");
 
-        using self_type = xselector<C, N>;
         using coordinate_type = C;
         using key_type = typename coordinate_type::key_type;
         using label_list = typename coordinate_type::label_list;
@@ -58,18 +47,72 @@ namespace xf
         using size_type = typename coordinate_type::index_type;
         using index_type = detail::xselector_index_t<size_type, N>;
         using dimension_type = xaxis<key_type, size_type>;
+        using map_type = std::map<key_type, mapped_type>;
         
-        self_type& set(const key_type& key, const mapped_type& value);
-        self_type& set(key_type&& key, mapped_type&& value);
+        xselector() = default;
+        xselector(const map_type& coord);
+        xselector(map_type&& coord);
 
-        index_type get_index(const coordinate_type& coords, const dimension_type& dim) const;
-
-        template <class V>
-        select_reference_t<V> apply_to(V& variable) const;
+        index_type get_index(const coordinate_type& coord, const dimension_type& dim) const;
 
     private:
 
-        using map_type = std::unordered_map<key_type, mapped_type>;
+        map_type m_coord;
+    };
+
+    /**************
+     * xiselector *
+     **************/
+
+    template <class C, std::size_t N>
+    class xiselector
+    {
+    public:
+
+        static_assert(is_coordinate<C>::value, "first parameter of xiselector must be xcoordinate");
+
+        using coordinate_type = C;
+        using key_type = typename coordinate_type::key_type;
+        using size_type = typename coordinate_type::index_type;
+        using index_type = detail::xselector_index_t<size_type, N>;
+        using dimension_type = xaxis<key_type, size_type>;
+        using map_type = std::map<key_type, size_type>;
+
+        xiselector() = default;
+        xiselector(const map_type& coord);
+        xiselector(map_type&& coord);
+
+        index_type get_index(const coordinate_type& coord, const dimension_type& dim) const;
+
+    private:
+
+        map_type m_coord;
+    };
+
+    template <class C, std::size_t N>
+    class xlocator
+    {
+    public:
+
+        static_assert(is_coordinate<C>::value, "Frt parameter of xlocator musy be xcoordinate");
+
+        using coordinate_type = C;
+        using key_type = typename coordinate_type::key_type;
+        using label_list = typename coordinate_type::label_list;
+        using mapped_type = mpl::cast_t<label_list, xtl::variant>;
+        using size_type = typename coordinate_type::index_type;
+        using index_type = detail::xselector_index_t<size_type, N>;
+        using dimension_type = xaxis<key_type, size_type>;
+        using map_type = std::map<size_type, mapped_type>;
+
+        xlocator() = default;
+        xlocator(const map_type& coord);
+        xlocator(map_type&& coord);
+
+        index_type get_index(const coordinate_type& coord, const dimension_type& dim) const;
+
+    private:
+
         map_type m_coord;
     };
 
@@ -78,39 +121,85 @@ namespace xf
      ****************************/
 
     template <class C, std::size_t N>
-    inline auto xselector<C, N>::set(const key_type& key, const mapped_type& value) -> self_type&
+    inline xselector<C, N>::xselector(const map_type& coord)
+        : m_coord(coord)
     {
-        m_coord[key] = value;
-        return this;
     }
 
     template <class C, std::size_t N>
-    inline auto xselector<C, N>::set(key_type&& key, mapped_type&& value) -> self_type&
+    inline xselector<C, N>::xselector(map_type&& coord)
+        : m_coord(std::move(coord))
     {
-        m_coord.emplace(std::make_pair(std::move(key), std::move(value)));
-        return *this;
     }
 
     template <class C, std::size_t N>
-    inline auto xselector<C, N>::get_index(const coordinate_type& coords, const dimension_type& dim) const
+    inline auto xselector<C, N>::get_index(const coordinate_type& coord, const dimension_type& dim) const
         -> index_type
     {
         index_type res = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
         for(const auto& c : m_coord)
         {
-            size_type id = dim[c.first];
-            const auto& axis_label = c.second;
-            res[dim[c.first]] = coords[c.first][c.second];
+            res[dim[c.first]] = coord[c.first][c.second];
         }
         return res;
     }
 
+    /*****************************
+     * xiselector implementation *
+     *****************************/
+
     template <class C, std::size_t N>
-    template <class V>
-    inline select_reference_t<V> xselector<C, N>::apply_to(V& variable) const
+    inline xiselector<C, N>::xiselector(const map_type& coord)
+        : m_coord(coord)
     {
-        return variable.select(*this);
     }
+
+    template <class C, std::size_t N>
+    inline xiselector<C, N>::xiselector(map_type&& coord)
+        : m_coord(std::move(coord))
+    {
+    }
+
+    template <class C, std::size_t N>
+    inline auto xiselector<C, N>::get_index(const coordinate_type& coord, const dimension_type& dim) const
+        -> index_type
+    {
+        index_type res = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
+        for(const auto& c : m_coord)
+        {
+            res[dim[c.first]] = c.second;
+        }
+        return res;
+    }
+
+    /***************************
+     * xlocator implementation *
+     ***************************/
+
+    template <class C, std::size_t N>
+    inline xlocator<C, N>::xlocator(const map_type& coord)
+        : m_coord(coord)
+    {
+    }
+
+    template <class C, std::size_t N>
+    inline xlocator<C, N>::xlocator(map_type&& coord)
+        : m_coord(std::move(coord))
+    {
+    }
+
+    template <class C, std::size_t N>
+    inline auto xlocator<C, N>::get_index(const coordinate_type& coord, const dimension_type& dim) const
+        -> index_type
+    {
+        index_type res = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
+        for(const auto& c : m_coord)
+        {
+            res[c.first] = coord[dim.labels()[c.first]][c.second];
+        }
+        return res;
+    }
+
 }
 
 #endif

@@ -28,6 +28,11 @@ namespace xf
     template <class C, class DM>
     using enable_xvariable_t = typename enable_xvariable<C, DM>::type;
 
+    constexpr std::size_t dynamic()
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
+
     template <class K, class VE, class FE, class L = DEFAULT_LABEL_LIST>
     class xvariable
     {
@@ -78,21 +83,64 @@ namespace xf
         const coordinate_type& coordinates() const noexcept;
         const dimension_type& dimension_mapping() const noexcept;
 
-        template <std::size_t N>
+        template <std::size_t N = dynamic()>
         using selector_type = xselector<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using selector_map_type = typename selector_type<N>::map_type;
+        template <std::size_t N = dynamic()>
+        using iselector_type = xiselector<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using iselector_map_type = typename iselector_type<N>::map_type;
+        template <std::size_t N = dynamic()>
+        using locator_type = xlocator<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using locator_map_type = typename locator_type<N>::map_type;
+
+        template <std::size_t N = dynamic()>
+        reference select(const selector_map_type<N>& selector);
 
         template <std::size_t N = std::numeric_limits<size_type>::max()>
-        static constexpr selector_type<N> selection() noexcept;
+        const_reference select(const selector_map_type<N>& selector) const;
 
-        template <std::size_t N = std::numeric_limits<size_type>::max()>
-        reference select(const selector_type<N>& selector);
+        template <std::size_t N = dynamic()>
+        reference select(selector_map_type<N>&& selector);
 
-        template <std::size_t N = std::numeric_limits<size_type>::max()>
-        const_reference select(const selector_type<N>& selector) const;
+        template <std::size_t N = dynamic()>
+        const_reference select(selector_map_type<N>&& selector) const;
+
+        template <std::size_t N = dynamic()>
+        reference iselect(const iselector_map_type<N>& selector);
+
+        template <std::size_t N = dynamic()>
+        const_reference iselect(const iselector_map_type<N>& selector) const;
+
+        template <std::size_t N = dynamic()>
+        reference iselect(iselector_map_type<N>&& selector);
+
+        template <std::size_t N = dynamic()>
+        const_reference iselect(iselector_map_type<N>&& selector) const;
+
+        template <std::size_t N = dynamic()>
+        reference locate(const locator_map_type<N>& locator);
+
+        template <std::size_t N = dynamic()>
+        const_reference locate(const locator_map_type<N>& locator) const;
+
+        template <std::size_t N = dynamic()>
+        reference locate(locator_map_type<N>&& locator);
+
+        template <std::size_t N = dynamic()>
+        const_reference locate(locator_map_type<N>&& locator) const;
 
     private:
 
         static dimension_type make_dimension_mapping(coordinate_initializer coord);
+
+        template <class S>
+        reference select_impl(const S& selector);
+
+        template <class S>
+        const_reference select_impl(const S& selector) const;
 
         data_type m_data;
         coordinate_type m_coordinate;
@@ -193,27 +241,88 @@ namespace xf
 
     template <class K, class VE, class FE, class L>
     template <std::size_t N>
-    constexpr auto xvariable<K, VE, FE, L>::selection() noexcept -> selector_type<N>
+    inline auto xvariable<K, VE, FE, L>::select(const selector_map_type<N>& selector) -> reference
     {
-        return selector_type<N>();
+        return select_impl(selector_type<N>(selector));
     }
 
     template <class K, class VE, class FE, class L>
     template <std::size_t N>
-    inline auto xvariable<K, VE, FE, L>::select(const selector_type<N>& selector) -> reference
+    inline auto xvariable<K, VE, FE, L>::select(const selector_map_type<N>& selector) const -> const_reference
     {
-        typename selector_type<N>::index_type idx = selector.get_index(coordinates(), dimension_mapping());
-        return m_data.element(idx.cbegin(), idx.cend());
+        return select_impl(selector_type<N>(selector));
     }
 
     template <class K, class VE, class FE, class L>
     template <std::size_t N>
-    inline auto xvariable<K, VE, FE, L>::select(const selector_type<N>& selector) const -> const_reference
+    inline auto xvariable<K, VE, FE, L>::select(selector_map_type<N>&& selector) -> reference
     {
-        typename selector_type<N>::index_type idx = selector.get_index(coordinates(), dimension_mapping());
-        return m_data.element(idx.cbegin(), idx.cend());
+        return select_impl(selector_type<N>(std::move(selector)));
     }
 
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::select(selector_map_type<N>&& selector) const -> const_reference
+    {
+        return select_impl(selector_type<N>(std::move(selector)));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::iselect(const iselector_map_type<N>& selector) -> reference
+    {
+        return select_impl(iselector_type<N>(selector));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::iselect(const iselector_map_type<N>& selector) const -> const_reference
+    {
+        return select_impl(iselector_type<N>(selector));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::iselect(iselector_map_type<N>&& selector) -> reference
+    {
+        return select_impl(iselector_type<N>(std::move(selector)));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::iselect(iselector_map_type<N>&& selector) const -> const_reference
+    {
+        return select_impl(iselector_type<N>(std::move(selector)));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::locate(const locator_map_type<N>& locator) -> reference
+    {
+        return select_impl(locator_type<N>(locator));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::locate(const locator_map_type<N>& locator) const -> const_reference
+    {
+        return select_impl(locator_type<N>(locator));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::locate(locator_map_type<N>&& locator) -> reference
+    {
+        return select_impl(locator_type<N>(std::move(locator)));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::locate(locator_map_type<N>&& locator) const -> const_reference
+    {
+        return select_impl(locator_type<N>(std::move(locator)));
+    }
+    
     template <class K, class VE, class FE, class L>
     inline auto xvariable<K, VE, FE, L>::make_dimension_mapping(coordinate_initializer coord) -> dimension_type
     {
@@ -222,6 +331,22 @@ namespace xf
         return dimension_type(std::move(tmp));
     }
 
+    template <class K, class VE, class FE, class L>
+    template <class S>
+    inline auto xvariable<K, VE, FE, L>::select_impl(const S& selector) -> reference
+    {
+        typename S::index_type idx = selector.get_index(coordinates(), dimension_mapping());
+        return m_data.element(idx.cbegin(), idx.cend());
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <class S>
+    inline auto xvariable<K, VE, FE, L>::select_impl(const S& selector) const -> const_reference
+    {
+        typename S::index_type idx = selector.get_index(coordinates(), dimension_mapping());
+        return m_data.element(idx.cbegin(), idx.cend());
+    }
+    
     template <class K, class VE, class FE, class L>
     inline bool operator==(const xvariable<K, VE, FE, L>& lhs, const xvariable<K, VE, FE, L>& rhs) noexcept
     {
