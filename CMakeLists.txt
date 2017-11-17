@@ -48,6 +48,7 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xseries.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xseries_function.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xvariable_base.hpp
 )
 
 OPTION(BUILD_TESTS "xframe test suite" OFF)
