@@ -28,7 +28,10 @@ namespace xf
     template <class C, class DM>
     using enable_xvariable_t = typename enable_xvariable<C, DM>::type;
 
-    constexpr std::size_t dynamic();
+    constexpr std::size_t dynamic()
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
 
     template <class K, class VE, class FE, class L = DEFAULT_LABEL_LIST>
     class xvariable
@@ -88,6 +91,10 @@ namespace xf
         using iselector_type = xiselector<coordinate_type, N>;
         template <std::size_t N = dynamic()>
         using iselector_map_type = typename iselector_type<N>::map_type;
+        template <std::size_t N = dynamic()>
+        using locator_type = xlocator<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using locator_map_type = typename locator_type<N>::map_type;
 
         template <std::size_t N = dynamic()>
         reference select(const selector_map_type<N>& selector);
@@ -113,6 +120,18 @@ namespace xf
         template <std::size_t N = dynamic()>
         const_reference iselect(iselector_map_type<N>&& selector) const;
 
+        template <std::size_t N = dynamic()>
+        reference locate(const locator_map_type<N>& locator);
+
+        template <std::size_t N = dynamic()>
+        const_reference locate(const locator_map_type<N>& locator) const;
+
+        template <std::size_t N = dynamic()>
+        reference locate(locator_map_type<N>&& locator);
+
+        template <std::size_t N = dynamic()>
+        const_reference locate(locator_map_type<N>&& locator) const;
+
     private:
 
         static dimension_type make_dimension_mapping(coordinate_initializer coord);
@@ -137,11 +156,6 @@ namespace xf
     /****************************
      * xvariable implementation *
      ****************************/
-
-    constexpr std::size_t dynamic()
-    {
-        return std::numeric_limits<std::size_t>::max();
-    }
 
     template <class K, class VE, class FE, class L>
     template <class D, class C, class DM, class>
@@ -279,6 +293,34 @@ namespace xf
     inline auto xvariable<K, VE, FE, L>::iselect(iselector_map_type<N>&& selector) const -> const_reference
     {
         return select_impl(iselector_type<N>(std::move(selector)));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::locate(const locator_map_type<N>& locator) -> reference
+    {
+        return select_impl(locator_type<N>(locator));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::locate(const locator_map_type<N>& locator) const -> const_reference
+    {
+        return select_impl(locator_type<N>(locator));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::locate(locator_map_type<N>&& locator) -> reference
+    {
+        return select_impl(locator_type<N>(std::move(locator)));
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <std::size_t N>
+    inline auto xvariable<K, VE, FE, L>::locate(locator_map_type<N>&& locator) const -> const_reference
+    {
+        return select_impl(locator_type<N>(std::move(locator)));
     }
     
     template <class K, class VE, class FE, class L>
