@@ -32,7 +32,8 @@ namespace xf
     };
 
     template <class K, class VE, class FE, class L>
-    class xvariable : public xvariable_base<xvariable<K, VE, FE, L>>
+    class xvariable : public xvariable_base<xvariable<K, VE, FE, L>>,
+                      public xexpression<xvariable<K, VE, FE, L>>
     {
     public:
 
