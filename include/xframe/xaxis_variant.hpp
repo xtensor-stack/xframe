@@ -118,11 +118,13 @@ namespace xf
 
         storage_type m_data;
 
-        friend std::ostream& operator<<(std::ostream& out, const self_type&);
+        template <class OS, class L1, class T1>
+        friend OS& operator<<(OS&, const xaxis_variant<L1, T1>&);
+
     };
 
-    template <class L, class T>
-    std::ostream& operator<<(std::ostream& out, const xaxis_variant<L, T>& axis);
+    template <class OS, class L, class T>
+    OS& operator<<(OS& out, const xaxis_variant<L, T>& axis);
 
     /**************************
      * xaxis_variant_iterator *
@@ -332,10 +334,10 @@ namespace xf
         return m_data != rhs.m_data;
     }
 
-    template <class L, class T>
-    inline std::ostream& operator<<(std::ostream& out, const xaxis_variant<L, T>& axis)
+    template <class OS, class L, class T>
+    inline OS& operator<<(OS& out, const xaxis_variant<L, T>& axis)
     {
-        xtl::visit([&out](auto&& arg) { out << arg; }, axis);
+        xtl::visit([&out](auto&& arg) { out << arg; }, axis.m_data);
         return out;
     }
 

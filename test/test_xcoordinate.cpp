@@ -157,14 +157,14 @@ namespace xf
     {
         auto c1 = make_test_coordinate();
         decltype(c1) cres1;
-        auto res1 = merge_coordinates(cres1, c1, c1);
+        auto res1 = broadcast_coordinates<broadcast_policy::merge_axes>(cres1, c1, c1);
         EXPECT_TRUE(res1.first);
         EXPECT_TRUE(res1.second);
         EXPECT_EQ(c1, cres1);
 
         auto c2 = make_test_coordinate2();
         decltype(c2) cres2;
-        auto res2 = merge_coordinates(cres2, c1, c2);
+        auto res2 = broadcast_coordinates<broadcast_policy::merge_axes>(cres2, c1, c2);
         EXPECT_FALSE(res2.first);
         EXPECT_FALSE(res2.second);
         EXPECT_EQ(cres2, make_test_coordinate_res());
@@ -178,10 +178,11 @@ namespace xf
         slabel_type sres = { "a", "d" };
         ilabel_type ires = { 1, 4 };
         auto coord_res = coordinate(std::make_pair(fstring("temperature"), saxis_type(std::move(sres))),
-                                    std::make_pair(fstring("pressure"), iaxis_type(std::move(ires))));
+                                    std::make_pair(fstring("pressure"), iaxis_type(std::move(ires))),
+                                    std::make_pair(fstring("altitude"), make_test_iaxis()));
 
         auto cres = c1;
-        auto res = intersect_coordinates(cres, c2);
+        auto res = broadcast_coordinates<broadcast_policy::intersect_axes>(cres, c2);
         EXPECT_FALSE(res.first);
         EXPECT_FALSE(res.second);
         EXPECT_EQ(cres, coord_res);
