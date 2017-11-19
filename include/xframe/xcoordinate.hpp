@@ -22,20 +22,10 @@
 
 namespace xf
 {
-
-    namespace detail
+    namespace broadcast_policy
     {
-        template <class S, class L>
-        struct coordinate_axis;
-
-        template <class S, template <class...> class L, class... T>
-        struct coordinate_axis<S, L<T...>>
-        {
-            using type = xtl::variant<xaxis<T, S>...>;
-        };
-
-        template <class S, class L>
-        using coordinate_axis_t = typename coordinate_axis<S, L>::type;
+        struct merge_axes {};
+        struct intersect_axes {};
     }
 
     /***************
@@ -87,11 +77,8 @@ namespace xf
         const_iterator cbegin() const noexcept;
         const_iterator cend() const noexcept;
 
-        template <class... Args>
-        std::pair<bool, bool> merge(const Args&... coordinates);
-
-        template <class... Args>
-        std::pair<bool, bool> intersect(const Args&... coordinates);
+        template <class Policy, class... Args>
+        std::pair<bool, bool> broadcast(const Args&... coordinates);
 
         bool operator==(const self_type& rhs) const noexcept;
         bool operator!=(const self_type& rhs) const noexcept;
@@ -102,17 +89,15 @@ namespace xf
         void insert_impl(std::pair<K, xaxis<LB1, S>> axis, std::pair<K, xaxis<LB, S>>... axes);
         void insert_impl();
 
-        template <class... Args>
-        std::pair<bool, bool> merge_impl(const self_type& c, const Args&... coordinates);
-        std::pair<bool, bool> merge_impl();
+        template <class Policy, class... Args>
+        std::pair<bool, bool> broadcast_impl(const self_type& c, const Args&... coordinates);
+        template <class Policy>
+        std::pair<bool, bool> broadcast_impl();
 
-        template <class... Args>
-        std::pair<bool, bool> merge_empty(const self_type& c, const Args&... coordinates);
-        std::pair<bool, bool> merge_empty();
-
-        template <class... Args>
-        std::pair<bool, bool> intersect_impl(const self_type& c, const Args&... coordinates);
-        std::pair<bool, bool> intersect_impl();
+        template <class Policy, class... Args>
+        std::pair<bool, bool> broadcast_empty(const self_type& c, const Args&... coordinates);
+        template <class Policy>
+        std::pair<bool, bool> broadcast_empty();
 
         map_type m_coordinate;
     };
@@ -129,11 +114,8 @@ namespace xf
     template <class K, class S, class... L>
     xcoordinate<K, S> coordinate(std::pair<K, xaxis<L, S>>... axes);
 
-    template <class K, class S, class L, class... Args>
-    std::pair<bool, bool> merge_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates);
-
-    template <class K, class S, class L, class... Args>
-    std::pair<bool, bool> intersect_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates);
+    template <class Policy, class K, class S, class L, class... Args>
+    std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates);
 
     /******************************
      * is_coordinate_metafunction *
@@ -248,17 +230,10 @@ namespace xf
     }
     
     template <class K, class S, class L>
-    template <class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::merge(const Args&... coordinates)
+    template <class Policy, class... Args>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast(const Args&... coordinates)
     {
-        return empty() ? merge_empty(coordinates...) : merge_impl(coordinates...);
-    }
-
-    template <class K, class S, class L>
-    template <class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::intersect(const Args&... coordinates)
-    {
-        return empty() ? std::pair<bool, bool>({ false, false }) : intersect_impl(coordinates...);
+        return empty() ? broadcast_empty<Policy>(coordinates...) : broadcast_impl<Policy>(coordinates...);
     }
 
     template <class K, class S, class L>
@@ -286,74 +261,74 @@ namespace xf
     {
     }
 
-    template <class K, class S, class L>
-    template <class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::merge_impl(const self_type& c, const Args&... coordinates)
+    namespace detail
     {
-        auto res = merge_impl(coordinates...);
+        template <class Policy>
+        struct axis_broadcast;
+
+        template <>
+        struct axis_broadcast<broadcast_policy::merge_axes>
+        {
+            template <class A>
+            static bool apply(A& output, const A& input)
+            {
+                return output.merge(input);
+            }
+        };
+
+        template <>
+        struct axis_broadcast<broadcast_policy::intersect_axes>
+        {
+            template <class A>
+            static bool apply(A& output, const A& input)
+            {
+                return output.intersect(input);
+            }
+        };
+    }
+
+    template <class K, class S, class L>
+    template <class Policy, class... Args>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast_impl(const self_type& c, const Args&... coordinates)
+    {
+        auto res = broadcast_impl<Policy>(coordinates...);
         for(auto iter = c.begin(); iter != c.end(); ++iter)
         {
             auto inserted = m_coordinate.insert(*iter);
-            const auto& key = inserted.first->first;
-            auto& axis = inserted.first->second;
             if(inserted.second)
             {
                 res.first = false;
             }
             else
             {
-                res.second &= axis.merge(c[key]);
+                const auto& key = inserted.first->first;
+                auto& axis = inserted.first->second;
+                res.second &= detail::axis_broadcast<Policy>::apply(axis, c[key]);
             } 
         }
         return res;
     }
 
     template <class K, class S, class L>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::merge_impl()
+    template <class Policy>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast_impl()
     {
         return { true, true };
     }
 
     template <class K, class S, class L>
-    template <class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::merge_empty(const self_type& c, const Args&... coordinates)
+    template <class Policy, class... Args>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast_empty(const self_type& c, const Args&... coordinates)
     {
         m_coordinate = c.m_coordinate;
-        return merge_impl(coordinates...);
+        return broadcast_impl<Policy>(coordinates...);
     }
 
     template <class K, class S, class L>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::merge_empty()
+    template <class Policy>
+    inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast_empty()
     {
-        return merge_impl();
-    }
-
-    template <class K, class S, class L>
-    template <class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::intersect_impl(const self_type& c, const Args&... coordinates)
-    {
-        auto res = intersect_impl(coordinates...);
-        res.first &= (size() == c.size());
-        for(auto iter = m_coordinate.begin(); iter != m_coordinate.end(); ++iter)
-        {
-            auto citer = c.data().find(iter->first);
-            if(citer == c.data().end())
-            {
-                iter = m_coordinate.erase(iter);
-                res.first = false;
-            }
-            else
-            {
-                res.second &= (iter->second).intersect(c[iter->first]);
-            }
-        }
-        return res;
-    }
-
-    template <class K, class S, class L>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::intersect_impl()
-    {
-        return { true, true };
+        return broadcast_impl<Policy>();
     }
 
     template <class OS, class K, class S, class L>
@@ -384,16 +359,10 @@ namespace xf
         return xcoordinate<K, S>(std::move(axes)...);
     }
 
-    template <class K, class S, class L, class... Args>
-    inline std::pair<bool, bool> merge_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates)
+    template <class Policy, class K, class S, class L, class... Args>
+    std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates)
     {
-        return output.merge(coordinates...);
-    }
-
-    template <class K, class S, class L, class... Args>
-    inline std::pair<bool, bool> intersect_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates)
-    {
-        return output.intersect(coordinates...);
+        return output.template broadcast<Policy>(coordinates...);
     }
 }
 
