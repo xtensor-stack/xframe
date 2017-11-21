@@ -103,6 +103,22 @@ namespace xf
         EXPECT_EQ(v.dimension_labels(), s.labels());
     }
 
+    TEST(xvariable, reshape)
+    {
+        auto v1 = make_test_variable();
+        auto shape1 = v1.data().shape();
+        decltype(shape1) res1 = { 3, 3 };
+        EXPECT_EQ(shape1, res1);
+
+        saxis_type a = { "a", "c" };
+        saxis_type dim = { "temperature" };
+        auto c = coordinate(std::make_pair(fstring("temperature"), a));
+        v1.reshape(c, dim);
+        auto shape2 = v1.data().shape();
+        decltype(shape2) res2 = { 2 };
+        EXPECT_EQ(shape2, res2);
+    }
+
     TEST(xvariable, access)
     {
         auto v = make_test_variable();
