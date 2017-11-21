@@ -63,6 +63,12 @@ namespace xf
         constexpr size_type dimension() const noexcept;
         const dimension_list& dimension_labels() const noexcept;
         
+        const coordinate_type& coordinates() const noexcept;
+        const dimension_type& dimension_mapping() const noexcept;
+
+        void reshape(const coordinate_type& coords, const dimension_type& dims);
+        void reshape(coordinate_type&& coords, dimension_type&& dims);
+
         template <class... Args>
         reference operator()(Args... args);
 
@@ -71,8 +77,6 @@ namespace xf
 
         data_type& data() noexcept;
         const data_type& data() const noexcept;
-        const coordinate_type& coordinates() const noexcept;
-        const dimension_type& dimension_mapping() const noexcept;
 
         template <std::size_t N = dynamic()>
         using selector_type = xselector<coordinate_type, N>;
@@ -149,6 +153,9 @@ namespace xf
 
         static dimension_type make_dimension_mapping(coordinate_initializer coord);
 
+        template <class C, class DM>
+        void reshape_impl(C&& coords, DM&& dims);
+
         template <class S>
         reference select_impl(const S& selector);
 
@@ -221,6 +228,30 @@ namespace xf
     }
 
     template <class D>
+    inline auto xvariable_base<D>::coordinates() const noexcept -> const coordinate_type&
+    {
+        return m_coordinate;
+    }
+
+    template <class D>
+    inline auto xvariable_base<D>::dimension_mapping() const noexcept -> const dimension_type&
+    {
+        return m_dimension_mapping;
+    }
+
+    template <class D>
+    void xvariable_base<D>::reshape(const coordinate_type& coords, const dimension_type& dims)
+    {
+        reshape_impl(coords, dims);
+    }
+
+    template <class D>
+    void xvariable_base<D>::reshape(coordinate_type&& coords, dimension_type&& dims)
+    {
+        reshape_impl(std::move(coords), std::move(dims));
+    }
+    
+    template <class D>
     template <class... Args>
     inline auto xvariable_base<D>::operator()(Args... args) -> reference
     {
@@ -247,15 +278,18 @@ namespace xf
     }
 
     template <class D>
-    inline auto xvariable_base<D>::coordinates() const noexcept -> const coordinate_type&
+    template <class C, class DM>
+    inline void xvariable_base<D>::reshape_impl(C&& coords, DM&& dims)
     {
-        return m_coordinate;
-    }
-
-    template <class D>
-    inline auto xvariable_base<D>::dimension_mapping() const noexcept -> const dimension_type&
-    {
-        return m_dimension_mapping;
+        using shape_type = typename data_type::shape_type;
+        shape_type shape(dims.size());
+        for(auto& c : coords)
+        {
+            shape[dims[c.first]] = c.second.size();
+        }
+        data().reshape(shape);
+        m_coordinate = std::forward<C>(coords);
+        m_dimension_mapping = std::forward<DM>(dims);
     }
 
     template <class D>
