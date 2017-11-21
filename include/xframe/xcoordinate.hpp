@@ -18,6 +18,11 @@
 #define DEFAULT_LABEL_LIST xtl::mpl::vector<int,std::size_t, xtl::xfixed_string<55>>
 #endif
 
+#ifndef DEFAULT_BROADCAST_POLICY
+#define DEFAULT_BROADCAST_POLICY broadcasting_policy::intersect_axes
+#endif
+
+#include "xtl/xiterator_base.hpp"
 #include "xaxis_variant.hpp"
 
 namespace xf
@@ -27,10 +32,6 @@ namespace xf
         struct merge_axes {};
         struct intersect_axes {};
     }
-
-    /***************
-     * xcoordinate *
-     ***************/
 
     template <class K, class S, class L = DEFAULT_LABEL_LIST>
     class xcoordinate
@@ -53,6 +54,7 @@ namespace xf
         using difference_type = typename map_type::difference_type;
         using iterator = typename map_type::iterator;
         using const_iterator = typename map_type::const_iterator;
+        using key_iterator = xtl::xkey_iterator<map_type>;
 
         explicit xcoordinate(const map_type& axes);
         explicit xcoordinate(map_type&& axes);
@@ -76,6 +78,9 @@ namespace xf
 
         const_iterator cbegin() const noexcept;
         const_iterator cend() const noexcept;
+
+        key_iterator key_begin() const noexcept;
+        key_iterator key_end() const noexcept;
 
         template <class Policy, class... Args>
         std::pair<bool, bool> broadcast(const Args&... coordinates);
@@ -229,6 +234,18 @@ namespace xf
         return m_coordinate.cend();
     }
     
+    template <class K, class S, class L>
+    inline auto xcoordinate<K, S, L>::key_begin() const noexcept -> key_iterator
+    {
+        return key_iterator(begin());
+    }
+
+    template <class K, class S, class L>
+    inline auto xcoordinate<K, S, L>::key_end() const noexcept -> key_iterator
+    {
+        return key_iterator(end());
+    }
+
     template <class K, class S, class L>
     template <class Policy, class... Args>
     inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast(const Args&... coordinates)

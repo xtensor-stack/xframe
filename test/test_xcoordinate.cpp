@@ -8,8 +8,8 @@
 
 
 #include "gtest/gtest.h"
-#include "xframe/xcoordinate.hpp"
 #include "xtl/xbasic_fixed_string.hpp"
+#include "xframe/xcoordinate.hpp"
 
 namespace xf
 {
@@ -109,6 +109,17 @@ namespace xf
         EXPECT_EQ((iter->second)["d"], 2);
         ++iter;
         EXPECT_EQ(iter, c.end());
+    }
+
+    TEST(xcoordinate, key_iterator)
+    {
+        auto c = make_test_coordinate();
+        auto iter = c.key_begin();
+        EXPECT_EQ(*iter, "pressure");
+        ++iter;
+        EXPECT_EQ(*iter, "temperature");
+        ++iter;
+        EXPECT_EQ(iter, c.key_end());
     }
 
     auto make_test_saxis2()
