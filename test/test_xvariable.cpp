@@ -7,65 +7,21 @@
 ****************************************************************************/
 
 #include "gtest/gtest.h"
-#include "xframe/xvariable.hpp"
+#include "test_fixture.hpp"
 
 namespace xf
 {
-    using fstring = xtl::xfixed_string<55>;
-    using slabel_type = std::vector<fstring>;
-    using saxis_type = xaxis<fstring, std::size_t>;
-    using ilabel_type = std::vector<int>;
-    using iaxis_type = xaxis<int, std::size_t>;
-    using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
-    using coordinate_type = xcoordinate<fstring, data_type::size_type>;
-    using variable_type = xvariable<fstring, data_type::value_expression, data_type::flag_expression>;
-    
-    namespace
-    {
-        auto make_test_saxis()
-        {
-            return saxis_type({ "a", "c", "d" });
-        }
-
-        auto make_test_iaxis()
-        {
-            return iaxis_type({ 1, 2, 4 });
-        }
-
-        auto make_test_coordinate()
-        {
-            fstring n1 = "temperature";
-            fstring n2 = "pressure";
-
-            return coordinate(std::make_pair(n1, make_test_saxis()), std::make_pair(n2, make_test_iaxis()));
-        }
-    
-        auto make_test_data()
-        {
-            data_type d = {{ 1., 2., 3.},
-                           { 4., 5., 6.},
-                           { 7., 8., 9.}};
-            d(0, 2).has_value() = false;
-            d(1, 0).has_value() = false;
-            return d;
-        }
-
-        auto make_test_variable()
-        {
-            return variable_type(make_test_data(), make_test_coordinate(), saxis_type({"temperature", "pressure"}));
-        }
-    }
 
     TEST(xvariable, constructor)
     {
-        auto v1 = variable_type(make_test_data(), make_test_coordinate(), saxis_type({"temperature", "pressure"}));
+        auto v1 = variable_type(make_test_data(), make_test_coordinate(), saxis_type({"abscissa", "ordinate"}));
         
         variable_type::coordinate_map m;
-        m["temperature"] = make_test_saxis();
-        m["pressure"] = make_test_iaxis();
+        m["abscissa"] = make_test_saxis();
+        m["ordinate"] = make_test_iaxis();
 
         data_type d = make_test_data();
-        saxis_type dim_map = {"temperature", "pressure"};
+        saxis_type dim_map = {"abscissa", "ordinate"};
         auto v2 = variable_type(d, m, dim_map);
         auto v3 = variable_type(d, std::move(m), std::move(dim_map));
 
@@ -73,7 +29,7 @@ namespace xf
         EXPECT_EQ(v1, v3);
         EXPECT_FALSE(v1 != v2);
 
-        auto v4 = variable_type(std::move(d), {{"temperature", make_test_saxis()}, {"pressure", make_test_iaxis()}});
+        auto v4 = variable_type(std::move(d), {{"abscissa", make_test_saxis()}, {"ordinate", make_test_iaxis()}});
         EXPECT_EQ(v1, v4);
     }
 
@@ -98,7 +54,7 @@ namespace xf
     TEST(xvariable, dimension_labels)
     {
         auto v = make_test_variable();
-        saxis_type s = { "temperature", "pressure" };
+        saxis_type s = { "abscissa", "ordinate" };
 
         EXPECT_EQ(v.dimension_labels(), s.labels());
     }
@@ -111,8 +67,8 @@ namespace xf
         EXPECT_EQ(shape1, res1);
 
         saxis_type a = { "a", "c" };
-        saxis_type dim = { "temperature" };
-        auto c = coordinate(std::make_pair(fstring("temperature"), a));
+        saxis_type dim = { "abscissa" };
+        auto c = coordinate(std::make_pair(fstring("abscissa"), a));
         v1.reshape(c, dim);
         auto shape2 = v1.data().shape();
         decltype(shape2) res2 = { 2 };
@@ -136,15 +92,15 @@ namespace xf
     TEST(xvariable, select)
     {
         auto v = make_test_variable();
-        auto t00 = v.select({{"temperature", "a"}, {"pressure", 1}});
-        auto t01 = v.select({{"temperature", "a"}, {"pressure", 2}});
-        auto t02 = v.select({{"temperature", "a"}, {"pressure", 4}});
-        auto t10 = v.select({{"temperature", "c"}, {"pressure", 1}});
-        auto t11 = v.select({{"temperature", "c"}, {"pressure", 2}});
-        auto t12 = v.select({{"temperature", "c"}, {"pressure", 4}});
-        auto t20 = v.select({{"temperature", "d"}, {"pressure", 1}});
-        auto t21 = v.select({{"temperature", "d"}, {"pressure", 2}});
-        auto t22 = v.select({{"temperature", "d"}, {"pressure", 4}});
+        auto t00 = v.select({{"abscissa", "a"}, {"ordinate", 1}});
+        auto t01 = v.select({{"abscissa", "a"}, {"ordinate", 2}});
+        auto t02 = v.select({{"abscissa", "a"}, {"ordinate", 4}});
+        auto t10 = v.select({{"abscissa", "c"}, {"ordinate", 1}});
+        auto t11 = v.select({{"abscissa", "c"}, {"ordinate", 2}});
+        auto t12 = v.select({{"abscissa", "c"}, {"ordinate", 4}});
+        auto t20 = v.select({{"abscissa", "d"}, {"ordinate", 1}});
+        auto t21 = v.select({{"abscissa", "d"}, {"ordinate", 2}});
+        auto t22 = v.select({{"abscissa", "d"}, {"ordinate", 4}});
 
         EXPECT_EQ(t00, v(0, 0));
         EXPECT_EQ(t01, v(0, 1));
@@ -160,15 +116,15 @@ namespace xf
     TEST(xvariable, iselect)
     {
         auto v = make_test_variable();
-        auto t00 = v.iselect({{"temperature", 0}, {"pressure", 0}});
-        auto t01 = v.iselect({{"temperature", 0}, {"pressure", 1}});
-        auto t02 = v.iselect({{"temperature", 0}, {"pressure", 2}});
-        auto t10 = v.iselect({{"temperature", 1}, {"pressure", 0}});
-        auto t11 = v.iselect({{"temperature", 1}, {"pressure", 1}});
-        auto t12 = v.iselect({{"temperature", 1}, {"pressure", 2}});
-        auto t20 = v.iselect({{"temperature", 2}, {"pressure", 0}});
-        auto t21 = v.iselect({{"temperature", 2}, {"pressure", 1}});
-        auto t22 = v.iselect({{"temperature", 2}, {"pressure", 2}});
+        auto t00 = v.iselect({{"abscissa", 0}, {"ordinate", 0}});
+        auto t01 = v.iselect({{"abscissa", 0}, {"ordinate", 1}});
+        auto t02 = v.iselect({{"abscissa", 0}, {"ordinate", 2}});
+        auto t10 = v.iselect({{"abscissa", 1}, {"ordinate", 0}});
+        auto t11 = v.iselect({{"abscissa", 1}, {"ordinate", 1}});
+        auto t12 = v.iselect({{"abscissa", 1}, {"ordinate", 2}});
+        auto t20 = v.iselect({{"abscissa", 2}, {"ordinate", 0}});
+        auto t21 = v.iselect({{"abscissa", 2}, {"ordinate", 1}});
+        auto t22 = v.iselect({{"abscissa", 2}, {"ordinate", 2}});
 
         EXPECT_EQ(t00, v(0, 0));
         EXPECT_EQ(t01, v(0, 1));

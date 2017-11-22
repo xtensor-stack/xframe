@@ -7,18 +7,12 @@
 ****************************************************************************/
 
 #include "gtest/gtest.h"
-#include "xframe/xvariable.hpp"
+#include "test_fixture.hpp"
 
 namespace xf
 {
     struct xfunction_features
     {
-        using fstring = xtl::xfixed_string<55>;
-        using key_type = fstring;
-        using variable_type = xvariable<key_type, xt::xarray<double>, xt::xarray<bool>>;
-        using saxis_type = xaxis<fstring, std::size_t>;
-        using iaxis_type = xaxis<int, std::size_t>;
-        using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
         variable_type m_a;
 
         xfunction_features();
@@ -26,18 +20,7 @@ namespace xf
 
     xfunction_features::xfunction_features()
     {
-        saxis_type temp_axis({"a", "c", "d"});
-        iaxis_type pres_axis({1, 2, 4});
-        
-        data_type d = {{ 1., 2., 3.},
-                       { 4., 5., 6.},
-                       { 7., 8., 9.}};
-
-        key_type t = "temperature";
-        key_type p = "pressure";
-        saxis_type dims({"pressure", "temperature"});
-        auto coords = coordinate(std::make_pair(t, temp_axis), std::make_pair(p, pres_axis));
-        m_a = variable_type(d, coords, dims);
+        m_a = make_test_variable();
     }
 
     TEST(xvariable_function, access)
