@@ -13,6 +13,7 @@
 
 namespace xf
 {
+    struct xvariable_expression_tag {};
     struct xframe_expression_tag {};
 
     template <class CO, class... CI>

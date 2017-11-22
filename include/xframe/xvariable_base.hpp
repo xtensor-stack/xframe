@@ -61,8 +61,7 @@ namespace xf
 
         size_type size() const noexcept;
         constexpr size_type dimension() const noexcept;
-        const dimension_list& dimension_labels() const noexcept;
-        
+        const dimension_list& dimension_labels() const noexcept;        
         const coordinate_type& coordinates() const noexcept;
         const dimension_type& dimension_mapping() const noexcept;
 
@@ -74,6 +73,9 @@ namespace xf
 
         template <class... Args>
         const_reference operator()(Args... args) const;
+
+        template <class Policy = DEFAULT_BROADCAST_POLICY>
+        std::pair<bool, bool> broadcast_coordinates(coordinate_type& coords) const;
 
         data_type& data() noexcept;
         const data_type& data() const noexcept;
@@ -263,6 +265,13 @@ namespace xf
     inline auto xvariable_base<D>::operator()(Args... args) const -> const_reference
     {
         return data()(args...);
+    }
+
+    template <class D>
+    template <class Policy>
+    inline std::pair<bool, bool> xvariable_base<D>::broadcast_coordinates(coordinate_type& coords) const
+    {
+        return xf::broadcast_coordinates<Policy>(coords, this->coordinates());
     }
 
     template <class D>

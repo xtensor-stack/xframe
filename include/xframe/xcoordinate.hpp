@@ -18,19 +18,33 @@
 #define DEFAULT_LABEL_LIST xtl::mpl::vector<int,std::size_t, xtl::xfixed_string<55>>
 #endif
 
+#ifndef DEFAULT_BROADCAST_POLICY
+#define DEFAULT_BROADCAST_POLICY broadcast_policy::intersect_axes
+#endif
+
+#include "xtl/xiterator_base.hpp"
 #include "xaxis_variant.hpp"
 
 namespace xf
 {
     namespace broadcast_policy
     {
-        struct merge_axes {};
-        struct intersect_axes {};
-    }
+        enum class policy_id
+        {
+            merge_axis_id,
+            intersect_axis_id
+        };
 
-    /***************
-     * xcoordinate *
-     ***************/
+        struct merge_axes
+        {
+            static constexpr policy_id id() { return policy_id::merge_axis_id; }
+        };
+        
+        struct intersect_axes
+        {
+            static constexpr policy_id id() { return policy_id::intersect_axis_id; }
+        };
+    }
 
     template <class K, class S, class L = DEFAULT_LABEL_LIST>
     class xcoordinate
@@ -53,6 +67,7 @@ namespace xf
         using difference_type = typename map_type::difference_type;
         using iterator = typename map_type::iterator;
         using const_iterator = typename map_type::const_iterator;
+        using key_iterator = xtl::xkey_iterator<map_type>;
 
         explicit xcoordinate(const map_type& axes);
         explicit xcoordinate(map_type&& axes);
@@ -62,6 +77,7 @@ namespace xf
 
         bool empty() const;
         size_type size() const;
+        void clear();
         
         bool contains(const key_type& key) const;
         const mapped_type& operator[](const key_type& key) const;
@@ -76,6 +92,9 @@ namespace xf
 
         const_iterator cbegin() const noexcept;
         const_iterator cend() const noexcept;
+
+        key_iterator key_begin() const noexcept;
+        key_iterator key_end() const noexcept;
 
         template <class Policy, class... Args>
         std::pair<bool, bool> broadcast(const Args&... coordinates);
@@ -181,6 +200,12 @@ namespace xf
     }
 
     template <class K, class S, class L>
+    inline void xcoordinate<K, S, L>::clear()
+    {
+        m_coordinate.clear();
+    }
+
+    template <class K, class S, class L>
     inline bool xcoordinate<K, S, L>::contains(const key_type& key) const
     {
         return m_coordinate.find(key) != m_coordinate.end();
@@ -229,6 +254,18 @@ namespace xf
         return m_coordinate.cend();
     }
     
+    template <class K, class S, class L>
+    inline auto xcoordinate<K, S, L>::key_begin() const noexcept -> key_iterator
+    {
+        return key_iterator(begin());
+    }
+
+    template <class K, class S, class L>
+    inline auto xcoordinate<K, S, L>::key_end() const noexcept -> key_iterator
+    {
+        return key_iterator(end());
+    }
+
     template <class K, class S, class L>
     template <class Policy, class... Args>
     inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast(const Args&... coordinates)
