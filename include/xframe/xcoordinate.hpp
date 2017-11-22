@@ -19,7 +19,7 @@
 #endif
 
 #ifndef DEFAULT_BROADCAST_POLICY
-#define DEFAULT_BROADCAST_POLICY broadcasting_policy::intersect_axes
+#define DEFAULT_BROADCAST_POLICY broadcast_policy::intersect_axes
 #endif
 
 #include "xtl/xiterator_base.hpp"
@@ -29,8 +29,21 @@ namespace xf
 {
     namespace broadcast_policy
     {
-        struct merge_axes {};
-        struct intersect_axes {};
+        enum class policy_id
+        {
+            merge_axis_id,
+            intersect_axis_id
+        };
+
+        struct merge_axes
+        {
+            static constexpr policy_id id() { return policy_id::merge_axis_id; }
+        };
+        
+        struct intersect_axes
+        {
+            static constexpr policy_id id() { return policy_id::intersect_axis_id; }
+        };
     }
 
     template <class K, class S, class L = DEFAULT_LABEL_LIST>
@@ -64,6 +77,7 @@ namespace xf
 
         bool empty() const;
         size_type size() const;
+        void clear();
         
         bool contains(const key_type& key) const;
         const mapped_type& operator[](const key_type& key) const;
@@ -183,6 +197,12 @@ namespace xf
     inline auto xcoordinate<K, S, L>::size() const -> size_type
     {
         return m_coordinate.size();
+    }
+
+    template <class K, class S, class L>
+    inline void xcoordinate<K, S, L>::clear()
+    {
+        m_coordinate.clear();
     }
 
     template <class K, class S, class L>

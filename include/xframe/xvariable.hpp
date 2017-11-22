@@ -12,6 +12,7 @@
 #include "xtensor/xoptional_assembly.hpp"
 
 #include "xvariable_base.hpp"
+#include "xvariable_math.hpp"
 
 namespace xf
 {
@@ -43,6 +44,8 @@ namespace xf
         using data_type = typename base_type::data_type;
         using coordinate_map = typename base_type::coordinate_map;
         using coordinate_initializer = typename base_type::coordinate_initializer;
+
+        using expression_tag = xvariable_expression_tag;
 
         xvariable() = default;
 
