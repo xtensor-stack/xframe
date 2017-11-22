@@ -110,5 +110,55 @@ namespace xf
             EXPECT_EQ(a, b);
         }
     }
+
+    TEST(xvariable_function, broadcast_coordinate)
+    {
+        xfunction_features f;
+
+        coordinate_type c1;
+        std::pair<bool, bool> res1 = (f.m_a + f.m_a).broadcast_coordinates(c1);
+        EXPECT_EQ(c1, f.m_a.coordinates());
+        EXPECT_TRUE(res1.first);
+        EXPECT_TRUE(res1.second);
+
+        coordinate_type c2;
+        std::pair<bool, bool> res2 = (f.m_a + f.m_a).broadcast_coordinates<broadcast_policy::merge_axes>(c2);
+        EXPECT_EQ(c2, f.m_a.coordinates());
+        EXPECT_TRUE(res2.first);
+        EXPECT_TRUE(res2.second);
+
+        coordinate_type c3;
+        std::pair<bool, bool> res3 = (f.m_a + f.m_b).broadcast_coordinates(c3);
+        EXPECT_EQ(c3, make_intersect_coordinate());
+        EXPECT_FALSE(res3.first);
+        EXPECT_FALSE(res3.second);
+
+        coordinate_type c4;
+        std::pair<bool, bool> res4 = (f.m_a + f.m_b).broadcast_coordinates<broadcast_policy::merge_axes>(c4);
+        EXPECT_EQ(c4, make_merge_coordinate());
+        EXPECT_FALSE(res4.first);
+        EXPECT_FALSE(res4.second);
+    }
+
+    TEST(xvariable_function, select)
+    {
+        xfunction_features f;
+
+        {
+            SCOPED_TRACE("same shape");
+            xtl::xoptional<double> a = (f.m_a + f.m_a).select({{"abscissa", "d"}, {"ordinate", 4}});
+            xtl::xoptional<double> b = 2 * f.m_a.select({{"abscissa", "d"}, {"ordinate", 4}});
+            EXPECT_EQ(a, b);
+        }
+
+        {
+            SCOPED_TRACE("different shape");
+            
+            xtl::xoptional<double> a = (f.m_a + f.m_b).select({{"abscissa", "d"}, {"ordinate", 4}, {"altitude", 2}});
+            xtl::xoptional<double> b = f.m_a.select({{"abscissa", "d"}, {"ordinate", 4}, {"altitude", 2}}) +
+                                       f.m_b.select({{"abscissa", "d"}, {"ordinate", 4}, {"altitude", 2}});
+            EXPECT_EQ(a, b);
+        }
+    }
 }
 

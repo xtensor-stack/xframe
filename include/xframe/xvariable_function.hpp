@@ -12,6 +12,7 @@
 #include "xtensor/xoptional.hpp"
 
 #include "xcoordinate.hpp"
+#include "xselecting.hpp"
 
 namespace xf
 {
@@ -62,8 +63,27 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const;
         
-        template <class Policy>
+        template <class Policy = DEFAULT_BROADCAST_POLICY>
         std::pair<bool, bool> broadcast_coordinates(coordinate_type& coords) const;
+
+        template <std::size_t N = dynamic()>
+        using selector_type = xselector<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using selector_map_type = typename selector_type<N>::map_type;
+        template <std::size_t N = dynamic()>
+        using iselector_type = xiselector<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using iselector_map_type = typename iselector_type<N>::map_type;
+        template <std::size_t N = dynamic()>
+        using locator_type = xlocator<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using locator_map_type = typename locator_type<N>::map_type;
+
+        template <std::size_t N = std::numeric_limits<size_type>::max()>
+        const_reference select(const selector_map_type<N>& selector) const;
+
+        template <std::size_t N = dynamic()>
+        const_reference select(selector_map_type<N>&& selector) const;
 
     private:
 
@@ -75,6 +95,9 @@ namespace xf
 
         template <class Policy, std::size_t... I>
         std::pair<bool, bool> broadcast_coordinates_impl(std::index_sequence<I...>, coordinate_type& coords) const;
+
+        template <std::size_t... I, class S>
+        const_reference select_impl(std::index_sequence<I...>, S&& selector) const;
 
         template <std::size_t...I>
         bool merge_dimension_mapping(std::index_sequence<I...>, dimension_type& dims) const;
@@ -158,6 +181,20 @@ namespace xf
     }
 
     template <class F, class R, class... CT>
+    template <std::size_t N>
+    inline auto xvariable_function<F, R, CT...>::select(const selector_map_type<N>& selector) const -> const_reference
+    {
+        return select_impl(std::make_index_sequence<sizeof...(CT)>(), selector);
+    }
+
+    template <class F, class R, class... CT>
+    template <std::size_t N>
+    inline auto xvariable_function<F, R, CT...>::select(selector_map_type<N>&& selector) const -> const_reference
+    {
+        return select_impl(std::make_index_sequence<sizeof...(CT)>(), std::move(selector));
+    }
+
+    template <class F, class R, class... CT>
     template <class Policy>
     inline void xvariable_function<F, R, CT...>::compute_coordinates() const
     {
@@ -191,6 +228,13 @@ namespace xf
     xvariable_function<F, R, CT...>::broadcast_coordinates_impl(std::index_sequence<I...>, coordinate_type& coords) const
     {
         return xf::broadcast_coordinates<Policy>(coords, std::get<I>(m_e).coordinates()...);
+    }
+
+    template <class F, class R, class... CT>
+    template <std::size_t... I, class S>
+    inline auto xvariable_function<F, R, CT...>::select_impl(std::index_sequence<I...>, S&& selector) const -> const_reference
+    {
+        return m_f(std::get<I>(m_e).select(selector)...);
     }
 
     template <class F, class R, class... CT>
