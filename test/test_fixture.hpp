@@ -94,6 +94,9 @@ namespace xf
                           std::make_pair(fstring("altitude"), make_test_iaxis()));
     }
 
+    // abscissa: { "a", "d" }
+    // ordinate: { 1, 4 }
+    // altitude: { 1, 2, 4 }
     inline coordinate_type make_intersect_coordinate()
     {
         saxis_type sres = { "a", "d" };
@@ -120,7 +123,23 @@ namespace xf
         return d;
     }
 
-    // abscissa: { "a", "d", "e" }
+    inline data_type make_test_data2()
+    {
+        data_type d2 = {{{ 1., 2., 3.},
+                         { 4., 5., 6.},
+                         { 7., 8., 9.}},
+                        {{ 11., 12., 13.},
+                         { 14., 15., 16.},
+                         { 17., 18., 19.}},
+                        {{ 21., 22., 23.},
+                         { 24., 25., 26.},
+                         { 27., 28., 29.}}};
+        d2(0, 0, 2).has_value() = false;
+        d2(1, 1, 0).has_value() = false;
+        return d2;
+    }
+
+    // abscissa: { "a", "c", "d" }
     // ordinate: { 1, 2, 4 }
     // dims: {{ "abscissa", 0 }, { "ordinate", 1 }}
     // data = {{ 1. ,  2., N/A },
@@ -129,6 +148,16 @@ namespace xf
     inline variable_type make_test_variable()
     {
         return variable_type(make_test_data(), make_test_coordinate(), saxis_type({"abscissa", "ordinate"}));
+    }
+
+    // abscissa: { "a", "d", "e" }
+    // ordinate: { 1, 4, 5 }
+    // altitude: { 1, 2, 4 }
+    // dims: {{ "abscissa", 0 }, { "ordinate", 1 }, {"altitude", 2}}
+    // data = make_test_data2
+    inline variable_type make_test_variable2()
+    {
+        return variable_type(make_test_data2(), make_test_coordinate3(), saxis_type({"abscissa", "ordinate", "altitude"}));
     }
 }
 

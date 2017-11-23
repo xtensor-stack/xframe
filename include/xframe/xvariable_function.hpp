@@ -12,6 +12,7 @@
 #include "xtensor/xoptional.hpp"
 
 #include "xcoordinate.hpp"
+#include "xselecting.hpp"
 
 namespace xf
 {
@@ -44,7 +45,10 @@ namespace xf
         template <class Func, class U = std::enable_if<!std::is_base_of<Func, self_type>::value>>
         xvariable_function(Func&& f, CT... e) noexcept;
 
+        template <class Policy = DEFAULT_BROADCAST_POLICY>
         size_type size() const noexcept;
+
+        template <class Policy = DEFAULT_BROADCAST_POLICY>
         size_type dimension() const noexcept;
 
         template <class Policy = DEFAULT_BROADCAST_POLICY>
@@ -59,8 +63,27 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const;
         
-        template <class Policy>
+        template <class Policy = DEFAULT_BROADCAST_POLICY>
         std::pair<bool, bool> broadcast_coordinates(coordinate_type& coords) const;
+
+        template <std::size_t N = dynamic()>
+        using selector_type = xselector<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using selector_map_type = typename selector_type<N>::map_type;
+        template <std::size_t N = dynamic()>
+        using iselector_type = xiselector<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using iselector_map_type = typename iselector_type<N>::map_type;
+        template <std::size_t N = dynamic()>
+        using locator_type = xlocator<coordinate_type, N>;
+        template <std::size_t N = dynamic()>
+        using locator_map_type = typename locator_type<N>::map_type;
+
+        template <std::size_t N = std::numeric_limits<size_type>::max()>
+        const_reference select(const selector_map_type<N>& selector) const;
+
+        template <std::size_t N = dynamic()>
+        const_reference select(selector_map_type<N>&& selector) const;
 
     private:
 
@@ -72,6 +95,12 @@ namespace xf
 
         template <class Policy, std::size_t... I>
         std::pair<bool, bool> broadcast_coordinates_impl(std::index_sequence<I...>, coordinate_type& coords) const;
+
+        template <std::size_t... I, class S>
+        const_reference select_impl(std::index_sequence<I...>, S&& selector) const;
+
+        template <std::size_t...I>
+        bool merge_dimension_mapping(std::index_sequence<I...>, dimension_type& dims) const;
 
         std::tuple<CT...> m_e;
         functor_type m_f;
@@ -98,17 +127,19 @@ namespace xf
     }
 
     template <class F, class R, class... CT>
+    template <class Policy>
     inline auto xvariable_function<F, R, CT...>::size() const noexcept -> size_type
     {
-        const coordinate_type& coords = coordinates();
+        const coordinate_type& coords = coordinates<Policy>();
         return std::accumulate(coords.begin(), coords.end(), size_type(1),
-                [](size_type init, auto&& arg) { return init * arg.second->size(); });
+                [](size_type init, auto&& arg) { return init * arg.second.size(); });
     }
 
     template <class F, class R, class... CT>
+    template <class Policy>
     inline auto xvariable_function<F, R, CT...>::dimension() const noexcept -> size_type
     {
-        const coordinate_type& coords = coordinates();
+        const coordinate_type& coords = coordinates<Policy>();
         return coords.size();
     }
     
@@ -150,6 +181,20 @@ namespace xf
     }
 
     template <class F, class R, class... CT>
+    template <std::size_t N>
+    inline auto xvariable_function<F, R, CT...>::select(const selector_map_type<N>& selector) const -> const_reference
+    {
+        return select_impl(std::make_index_sequence<sizeof...(CT)>(), selector);
+    }
+
+    template <class F, class R, class... CT>
+    template <std::size_t N>
+    inline auto xvariable_function<F, R, CT...>::select(selector_map_type<N>&& selector) const -> const_reference
+    {
+        return select_impl(std::make_index_sequence<sizeof...(CT)>(), std::move(selector));
+    }
+
+    template <class F, class R, class... CT>
     template <class Policy>
     inline void xvariable_function<F, R, CT...>::compute_coordinates() const
     {
@@ -159,13 +204,14 @@ namespace xf
             auto res = broadcast_coordinates<Policy>(m_coordinate);
             if(res.first)
             {
-                m_dimension_mapping = std::get<0>(this->arguments());
+                m_dimension_mapping = std::get<0>(m_e).dimension_mapping();
             }
             else
             {
-                m_dimension_mapping = dimension_type(m_coordinate.key_begin(), m_coordinate.key_end()); 
+                merge_dimension_mapping(std::make_index_sequence<sizeof...(CT)>(), m_dimension_mapping);
             }
             m_coordinate_computed = true;
+            m_policy_id = Policy::id();
         }
     }
 
@@ -181,7 +227,21 @@ namespace xf
     inline std::pair<bool, bool>
     xvariable_function<F, R, CT...>::broadcast_coordinates_impl(std::index_sequence<I...>, coordinate_type& coords) const
     {
-        return xf::broadcast_coordinates<Policy>(coords, std::get<I>(m_e)...);
+        return xf::broadcast_coordinates<Policy>(coords, std::get<I>(m_e).coordinates()...);
+    }
+
+    template <class F, class R, class... CT>
+    template <std::size_t... I, class S>
+    inline auto xvariable_function<F, R, CT...>::select_impl(std::index_sequence<I...>, S&& selector) const -> const_reference
+    {
+        return m_f(std::get<I>(m_e).select(selector)...);
+    }
+
+    template <class F, class R, class... CT>
+    template <std::size_t...I>
+    bool xvariable_function<F, R, CT...>::merge_dimension_mapping(std::index_sequence<I...>, dimension_type& dims) const
+    {
+        return xf::merge_axes(dims, std::get<I>(m_e).dimension_mapping()...);
     }
 }
 

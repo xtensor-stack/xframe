@@ -139,7 +139,11 @@ namespace xf
         index_type res = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
         for(const auto& c : m_coord)
         {
-            res[dim[c.first]] = coord[c.first][c.second];
+            auto iter = dim.find(c.first);
+            if(iter != dim.end())
+            {
+                res[iter->second] = coord[c.first][c.second];
+            }
         }
         return res;
     }
