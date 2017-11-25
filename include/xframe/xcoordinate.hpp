@@ -46,14 +46,14 @@ namespace xf
         };
     }
 
-    template <class K, class S, class L = DEFAULT_LABEL_LIST>
+    template <class K, class S, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
     class xcoordinate
     {
     public:
 
-        using self_type = xcoordinate<K, S, L>;
+        using self_type = xcoordinate<K, S, MT, L>;
         using label_list = L;
-        using axis_type = xaxis_variant<L, S>;
+        using axis_type = xaxis_variant<L, S, MT>;
         using map_type = std::map<K, axis_type>;
         using key_type = typename map_type::key_type;
         using mapped_type = typename map_type::mapped_type;
@@ -73,7 +73,7 @@ namespace xf
         explicit xcoordinate(map_type&& axes);
         xcoordinate(std::initializer_list<value_type> init);
         template <class... LB>
-        explicit xcoordinate(std::pair<K, xaxis<LB, S>>... axes);
+        explicit xcoordinate(std::pair<K, xaxis<LB, S, MT>>... axes);
 
         bool empty() const;
         size_type size() const;
@@ -105,7 +105,7 @@ namespace xf
     private:
         
         template <class LB1, class... LB>
-        void insert_impl(std::pair<K, xaxis<LB1, S>> axis, std::pair<K, xaxis<LB, S>>... axes);
+        void insert_impl(std::pair<K, xaxis<LB1, S, MT>> axis, std::pair<K, xaxis<LB, S, MT>>... axes);
         void insert_impl();
 
         template <class Policy, class... Args>
@@ -121,20 +121,20 @@ namespace xf
         map_type m_coordinate;
     };
 
-    template <class OS, class K, class S, class L>
-    OS& operator<<(OS& out, const xcoordinate<K, S, L>& c);
+    template <class OS, class K, class S, class MT, class L>
+    OS& operator<<(OS& out, const xcoordinate<K, S, MT, L>& c);
 
-    template <class K, class S, class L>
-    xcoordinate<K, S> coordinate(const std::map<K, xaxis_variant<L, S>>& axes);
+    template <class K, class S, class MT, class L>
+    xcoordinate<K, S, MT, L> coordinate(const std::map<K, xaxis_variant<L, S, MT>>& axes);
 
-    template <class K, class S, class L>
-    xcoordinate<K, S> coordinate(std::map<K, xaxis_variant<L, S>>&& axes);
+    template <class K, class S, class MT, class L>
+    xcoordinate<K, S, MT, L> coordinate(std::map<K, xaxis_variant<L, S, MT>>&& axes);
 
-    template <class K, class S, class... L>
-    xcoordinate<K, S> coordinate(std::pair<K, xaxis<L, S>>... axes);
+    template <class K, class S, class MT, class... L>
+    xcoordinate<K, S, MT> coordinate(std::pair<K, xaxis<L, S, MT>>... axes);
 
-    template <class Policy, class K, class S, class L, class... Args>
-    std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates);
+    template <class Policy, class K, class S, class MT, class L, class... Args>
+    std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates);
 
     /******************************
      * is_coordinate_metafunction *
@@ -147,8 +147,8 @@ namespace xf
         {
         };
 
-        template <class K, class S, class L>
-        struct is_coordinate_impl<xcoordinate<K, S, L>> : std::true_type
+        template <class K, class S, class MT, class L>
+        struct is_coordinate_impl<xcoordinate<K, S, MT, L>> : std::true_type
         {
         };
     }
@@ -162,139 +162,139 @@ namespace xf
      * xcoordinate implementation *
      ******************************/
 
-    template <class K, class S, class L>
-    xcoordinate<K, S, L>::xcoordinate(const map_type& axes)
+    template <class K, class S, class MT, class L>
+    xcoordinate<K, S, MT, L>::xcoordinate(const map_type& axes)
         : m_coordinate(axes)
     {
     }
 
-    template <class K, class S, class L>
-    xcoordinate<K, S, L>::xcoordinate(map_type&& axes)
+    template <class K, class S, class MT, class L>
+    xcoordinate<K, S, MT, L>::xcoordinate(map_type&& axes)
         : m_coordinate(std::move(axes))
     {
     }
 
-    template <class K, class S, class L>
-    xcoordinate<K, S, L>::xcoordinate(std::initializer_list<value_type> init)
+    template <class K, class S, class MT, class L>
+    xcoordinate<K, S, MT, L>::xcoordinate(std::initializer_list<value_type> init)
         : m_coordinate(init)
     {
     }
 
-    template <class K, class S, class L>
+    template <class K, class S, class MT, class L>
     template <class... LB>
-    inline xcoordinate<K, S, L>::xcoordinate(std::pair<K, xaxis<LB, S>>... axes)
+    inline xcoordinate<K, S, MT, L>::xcoordinate(std::pair<K, xaxis<LB, S, MT>>... axes)
     {
         insert_impl(std::move(axes)...);
     }
     
-    template <class K, class S, class L>
-    inline bool xcoordinate<K, S, L>::empty() const
+    template <class K, class S, class MT, class L>
+    inline bool xcoordinate<K, S, MT, L>::empty() const
     {
         return m_coordinate.empty();
     }
 
-    template <class K, class S, class L>
-    inline auto xcoordinate<K, S, L>::size() const -> size_type
+    template <class K, class S, class MT, class L>
+    inline auto xcoordinate<K, S, MT, L>::size() const -> size_type
     {
         return m_coordinate.size();
     }
 
-    template <class K, class S, class L>
-    inline void xcoordinate<K, S, L>::clear()
+    template <class K, class S, class MT, class L>
+    inline void xcoordinate<K, S, MT, L>::clear()
     {
         m_coordinate.clear();
     }
 
-    template <class K, class S, class L>
-    inline bool xcoordinate<K, S, L>::contains(const key_type& key) const
+    template <class K, class S, class MT, class L>
+    inline bool xcoordinate<K, S, MT, L>::contains(const key_type& key) const
     {
         return m_coordinate.find(key) != m_coordinate.end();
     }
 
-    template <class K, class S, class L>
-    inline auto xcoordinate<K, S, L>::operator[](const key_type& key) const -> const mapped_type&
+    template <class K, class S, class MT, class L>
+    inline auto xcoordinate<K, S, MT, L>::operator[](const key_type& key) const -> const mapped_type&
     {
         return m_coordinate.at(key);
     }
 
-    template <class K, class S, class L>
+    template <class K, class S, class MT, class L>
     template <class KB, class LB>
-    inline auto xcoordinate<K, S, L>::operator[](const std::pair<KB, LB>& key) const -> index_type
+    inline auto xcoordinate<K, S, MT, L>::operator[](const std::pair<KB, LB>& key) const -> index_type
     {
         return (*this)[key.first][key.second];
     }
 
-    template <class K, class S, class L>
-    inline auto xcoordinate<K, S, L>::data() const noexcept -> const map_type&
+    template <class K, class S, class MT, class L>
+    inline auto xcoordinate<K, S, MT, L>::data() const noexcept -> const map_type&
     {
         return m_coordinate;
     }
 
-    template <class K, class S, class L>
-    inline auto xcoordinate<K, S, L>::begin() const noexcept -> const_iterator
+    template <class K, class S, class MT, class L>
+    inline auto xcoordinate<K, S, MT, L>::begin() const noexcept -> const_iterator
     {
         return cbegin();
     }
 
-    template <class K, class S, class L>
-    inline auto xcoordinate<K, S, L>::end() const noexcept -> const_iterator
+    template <class K, class S, class MT, class L>
+    inline auto xcoordinate<K, S, MT, L>::end() const noexcept -> const_iterator
     {
         return cend();
     }
 
-    template <class K, class S, class L>
-    inline auto xcoordinate<K, S, L>::cbegin() const noexcept -> const_iterator
+    template <class K, class S, class MT, class L>
+    inline auto xcoordinate<K, S, MT, L>::cbegin() const noexcept -> const_iterator
     {
         return m_coordinate.cbegin();
     }
 
-    template <class K, class S, class L>
-    inline auto xcoordinate<K, S, L>::cend() const noexcept -> const_iterator
+    template <class K, class S, class MT, class L>
+    inline auto xcoordinate<K, S, MT, L>::cend() const noexcept -> const_iterator
     {
         return m_coordinate.cend();
     }
     
-    template <class K, class S, class L>
-    inline auto xcoordinate<K, S, L>::key_begin() const noexcept -> key_iterator
+    template <class K, class S, class MT, class L>
+    inline auto xcoordinate<K, S, MT, L>::key_begin() const noexcept -> key_iterator
     {
         return key_iterator(begin());
     }
 
-    template <class K, class S, class L>
-    inline auto xcoordinate<K, S, L>::key_end() const noexcept -> key_iterator
+    template <class K, class S, class MT, class L>
+    inline auto xcoordinate<K, S, MT, L>::key_end() const noexcept -> key_iterator
     {
         return key_iterator(end());
     }
 
-    template <class K, class S, class L>
+    template <class K, class S, class MT, class L>
     template <class Policy, class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast(const Args&... coordinates)
+    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast(const Args&... coordinates)
     {
         return empty() ? broadcast_empty<Policy>(coordinates...) : broadcast_impl<Policy>(coordinates...);
     }
 
-    template <class K, class S, class L>
-    inline bool xcoordinate<K, S, L>::operator==(const self_type& rhs) const noexcept
+    template <class K, class S, class MT, class L>
+    inline bool xcoordinate<K, S, MT, L>::operator==(const self_type& rhs) const noexcept
     {
         return m_coordinate == rhs.m_coordinate;
     }
 
-    template <class K, class S, class L>
-    inline bool xcoordinate<K, S, L>::operator!=(const self_type& rhs) const noexcept
+    template <class K, class S, class MT, class L>
+    inline bool xcoordinate<K, S, MT, L>::operator!=(const self_type& rhs) const noexcept
     {
         return !(*this == rhs);
     }
 
-    template <class K, class S, class L>
+    template <class K, class S, class MT, class L>
     template <class LB1, class... LB>
-    inline void xcoordinate<K, S, L>::insert_impl(std::pair<K, xaxis<LB1, S>> axis, std::pair<K, xaxis<LB, S>>... axes)
+    inline void xcoordinate<K, S, MT, L>::insert_impl(std::pair<K, xaxis<LB1, S, MT>> axis, std::pair<K, xaxis<LB, S, MT>>... axes)
     {
         m_coordinate.insert(value_type(std::move(axis.first), std::move(axis.second)));
         insert_impl(std::move(axes)...);
     }
 
-    template <class K, class S, class L>
-    inline void xcoordinate<K, S, L>::insert_impl()
+    template <class K, class S, class MT, class L>
+    inline void xcoordinate<K, S, MT, L>::insert_impl()
     {
     }
 
@@ -324,9 +324,9 @@ namespace xf
         };
     }
 
-    template <class K, class S, class L>
+    template <class K, class S, class MT, class L>
     template <class Policy, class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast_impl(const self_type& c, const Args&... coordinates)
+    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_impl(const self_type& c, const Args&... coordinates)
     {
         auto res = broadcast_impl<Policy>(coordinates...);
         for(auto iter = c.begin(); iter != c.end(); ++iter)
@@ -346,30 +346,30 @@ namespace xf
         return res;
     }
 
-    template <class K, class S, class L>
+    template <class K, class S, class MT, class L>
     template <class Policy>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast_impl()
+    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_impl()
     {
         return { true, true };
     }
 
-    template <class K, class S, class L>
+    template <class K, class S, class MT, class L>
     template <class Policy, class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast_empty(const self_type& c, const Args&... coordinates)
+    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_empty(const self_type& c, const Args&... coordinates)
     {
         m_coordinate = c.m_coordinate;
         return broadcast_impl<Policy>(coordinates...);
     }
 
-    template <class K, class S, class L>
+    template <class K, class S, class MT, class L>
     template <class Policy>
-    inline std::pair<bool, bool> xcoordinate<K, S, L>::broadcast_empty()
+    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_empty()
     {
         return broadcast_impl<Policy>();
     }
 
-    template <class OS, class K, class S, class L>
-    inline OS& operator<<(OS& out, const xcoordinate<K, S, L>& c)
+    template <class OS, class K, class S, class MT, class L>
+    inline OS& operator<<(OS& out, const xcoordinate<K, S, MT, L>& c)
     {
         for(auto& v: c)
         {
@@ -378,26 +378,26 @@ namespace xf
         return out;
     }
 
-    template <class K, class S, class L>
-    xcoordinate<K, S> coordinate(const std::map<K, xaxis_variant<L, S>>& axes)
+    template <class K, class S, class MT, class L>
+    xcoordinate<K, S, MT, L> coordinate(const std::map<K, xaxis_variant<L, S, MT>>& axes)
     {
-        return xcoordinate<K, S>(axes);
+        return xcoordinate<K, S, MT, L>(axes);
     }
 
-    template <class K, class S, class L>
-    xcoordinate<K, S> coordinate(std::map<K, xaxis_variant<L, S>>&& axes)
+    template <class K, class S, class MT, class L>
+    xcoordinate<K, S, MT, L> coordinate(std::map<K, xaxis_variant<L, S, MT>>&& axes)
     {
-        return xcoordinate<K, S>(std::move(axes));
+        return xcoordinate<K, S, MT, L>(std::move(axes));
     }
 
-    template <class K, class S, class... L>
-    inline xcoordinate<K, S> coordinate(std::pair<K, xaxis<L, S>>... axes)
+    template <class K, class S, class MT, class... L>
+    inline xcoordinate<K, S, MT> coordinate(std::pair<K, xaxis<L, S, MT>>... axes)
     {
-        return xcoordinate<K, S>(std::move(axes)...);
+        return xcoordinate<K, S, MT>(std::move(axes)...);
     }
 
-    template <class Policy, class K, class S, class L, class... Args>
-    std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, L>& output, const Args&... coordinates)
+    template <class Policy, class K, class S, class MT, class L, class... Args>
+    std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates)
     {
         return output.template broadcast<Policy>(coordinates...);
     }
