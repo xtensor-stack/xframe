@@ -117,13 +117,15 @@ namespace xf
 
     protected:
 
+        void populate_index();
+        void set_labels(const label_list& labels);
+
         template <class Arg, class... Args>
         bool merge_unsorted(bool broadcasting, const Arg& a, const Args&... axes);
         bool merge_unsorted(bool broadcasting);
 
     private:
 
-        void populate_index();
         typename index_type::const_iterator find_index(const key_type& key) const;
 
         template <class... Args>
@@ -395,6 +397,13 @@ namespace xf
     }
 
     template <class L, class T, class MT>
+    void xaxis<L, T, MT>::set_labels(const label_list& labels)
+    {
+        m_labels = labels;
+        populate_index();
+    }
+
+    template <class L, class T, class MT>
     inline auto xaxis<L, T, MT>::find_index(const key_type& key) const -> typename index_type::const_iterator
     {
         return m_index.find(key);
@@ -480,13 +489,11 @@ namespace xf
         }
         else
         {
-            auto insert_pos = m_labels.begin();
             while(input_iter != input_end)
             {
                 if(m_index.find(*input_iter) == m_index.end())
                 {
-                    m_labels.insert(insert_pos, *input_iter);
-                    ++insert_pos;
+                    m_labels.insert(m_labels.begin(), *input_iter);
                 }
                 ++input_iter;
             }
