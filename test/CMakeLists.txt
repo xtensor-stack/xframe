@@ -81,6 +81,7 @@ set(XFRAME_TESTS
     test_fixture.hpp
     test_xaxis.cpp
     test_xcoordinate.cpp
+    test_xdimension.cpp
     test_xframe_utils.cpp
     test_xvariable.cpp
     test_xvariable_function.cpp

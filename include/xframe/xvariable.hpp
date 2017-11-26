@@ -1,5 +1,5 @@
 /***************************************************************************
-* Copyright (c) 2017, Johan Mabille and Sylvain Corlay                     *
+* Copyright (c) 2017, Johan Mabille, Sylvain Corlay and Wolf Vollprecht    *
 *                                                                          *
 * Distributed under the terms of the BSD 3-Clause License.                 *
 *                                                                          *
@@ -28,8 +28,8 @@ namespace xf
     {
         using data_type = xt::xoptional_assembly<VE, FE>;
         using size_type = typename data_type::size_type;
-        using coordinate_type = xcoordinate<K, size_type, L>;
-        using dimension_type = xaxis<K, size_type>;
+        using coordinate_type = xcoordinate<K, size_type, hash_map_tag, L>;
+        using dimension_type = xaxis<K, size_type, map_tag>;
     };
 
     template <class K, class VE, class FE, class L>

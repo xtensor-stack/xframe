@@ -1,5 +1,5 @@
 /***************************************************************************
-* Copyright (c) 2017, Johan Mabille and Sylvain Corlay                     *
+* Copyright (c) 2017, Johan Mabille, Sylvain Corlay and Wolf Vollprecht    *
 *                                                                          *
 * Distributed under the terms of the BSD 3-Clause License.                 *
 *                                                                          *
@@ -154,6 +154,45 @@ namespace xf
         EXPECT_EQ(iares[2], 1);
         EXPECT_EQ(iares[4], 2);
         EXPECT_EQ(iares[5], 3);
+    }
+
+    TEST(xaxis, merge_unsorted)
+    {
+        axis_type a1({ "a", "b", "d", "e" }, false);
+        axis_type a2({ "d", "e" }, false);
+        axis_type a3({ "h", "c", "a", "b", "d", "e" }, false);
+        axis_type a4({ "h", "b", "c", "e" }, false);
+
+        axis_type res1;
+        bool t1 = merge_axes(res1, a1, a2);
+        EXPECT_FALSE(t1);
+        EXPECT_EQ(res1.size(), 4u);
+        EXPECT_EQ(res1["a"], 0);
+        EXPECT_EQ(res1["b"], 1);
+        EXPECT_EQ(res1["d"], 2);
+        EXPECT_EQ(res1["e"], 3);
+
+        axis_type res2;
+        bool t2 = merge_axes(res2, a1, a3);
+        EXPECT_FALSE(t2);
+        EXPECT_EQ(res2.size(), 6u);
+        EXPECT_EQ(res2["h"], 0);
+        EXPECT_EQ(res2["c"], 1);
+        EXPECT_EQ(res2["a"], 2);
+        EXPECT_EQ(res2["b"], 3);
+        EXPECT_EQ(res2["d"], 4);
+        EXPECT_EQ(res2["e"], 5);
+
+        axis_type res3;
+        bool t3 = merge_axes(res3, a1, a4);
+        EXPECT_FALSE(t3);
+        EXPECT_EQ(res3.size(), 6u);
+        EXPECT_EQ(res3["h"], 0);
+        EXPECT_EQ(res3["c"], 1);
+        EXPECT_EQ(res3["a"], 2);
+        EXPECT_EQ(res3["b"], 3);
+        EXPECT_EQ(res3["d"], 4);
+        EXPECT_EQ(res3["e"], 5);
     }
 
     TEST(xaxis, intersect)

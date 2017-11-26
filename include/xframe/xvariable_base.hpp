@@ -1,5 +1,5 @@
 /***************************************************************************
-* Copyright (c) 2017, Johan Mabille and Sylvain Corlay                     *
+* Copyright (c) 2017, Johan Mabille, Sylvain Corlay and Wolf Vollprecht    *
 *                                                                          *
 * Distributed under the terms of the BSD 3-Clause License.                 *
 *                                                                          *
@@ -81,15 +81,15 @@ namespace xf
         const data_type& data() const noexcept;
 
         template <std::size_t N = dynamic()>
-        using selector_type = xselector<coordinate_type, N>;
+        using selector_type = xselector<coordinate_type, dimension_type, N>;
         template <std::size_t N = dynamic()>
         using selector_map_type = typename selector_type<N>::map_type;
         template <std::size_t N = dynamic()>
-        using iselector_type = xiselector<coordinate_type, N>;
+        using iselector_type = xiselector<coordinate_type, dimension_type, N>;
         template <std::size_t N = dynamic()>
         using iselector_map_type = typename iselector_type<N>::map_type;
         template <std::size_t N = dynamic()>
-        using locator_type = xlocator<coordinate_type, N>;
+        using locator_type = xlocator<coordinate_type, dimension_type, N>;
         template <std::size_t N = dynamic()>
         using locator_map_type = typename locator_type<N>::map_type;
 

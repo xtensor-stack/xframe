@@ -1,5 +1,5 @@
 /***************************************************************************
-* Copyright (c) 2017, Johan Mabille and Sylvain Corlay                     *
+* Copyright (c) 2017, Johan Mabille, Sylvain Corlay and Wolf Vollprecht    *
 *                                                                          *
 * Distributed under the terms of the BSD 3-Clause License.                 *
 *                                                                          *
@@ -15,6 +15,7 @@ namespace xf
     using fstring = xtl::xfixed_string<55>;
     using saxis_type = xaxis<fstring, std::size_t>; 
     using iaxis_type = xaxis<int, std::size_t>;
+    using dimension_type = xaxis<fstring, std::size_t, map_tag>;
     using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
     using coordinate_type = xcoordinate<fstring, data_type::size_type>;
     using variable_type = xvariable<fstring, data_type::value_expression, data_type::flag_expression>;
@@ -147,7 +148,7 @@ namespace xf
     //         { 7. ,  8.,  9. }}
     inline variable_type make_test_variable()
     {
-        return variable_type(make_test_data(), make_test_coordinate(), saxis_type({"abscissa", "ordinate"}));
+        return variable_type(make_test_data(), make_test_coordinate(), dimension_type({"abscissa", "ordinate"}));
     }
 
     // abscissa: { "a", "d", "e" }
@@ -157,7 +158,7 @@ namespace xf
     // data = make_test_data2
     inline variable_type make_test_variable2()
     {
-        return variable_type(make_test_data2(), make_test_coordinate3(), saxis_type({"abscissa", "ordinate", "altitude"}));
+        return variable_type(make_test_data2(), make_test_coordinate3(), dimension_type({"abscissa", "ordinate", "altitude"}));
     }
 }
 

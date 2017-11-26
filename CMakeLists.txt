@@ -40,6 +40,7 @@ include_directories(${xtl_INCLUDE_DIRS})
 set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xdimension.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_assign.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_config.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_math.hpp
