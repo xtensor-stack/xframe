@@ -60,6 +60,8 @@ namespace xf
         using coordinate_map = typename coordinate_type::map_type;
         using coordinate_initializer = std::initializer_list<typename coordinate_type::value_type>;
 
+        static value_type missing();
+
         size_type size() const noexcept;
         constexpr size_type dimension() const noexcept;
         const dimension_list& dimension_labels() const noexcept;        
@@ -75,7 +77,7 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const;
 
-        template <class Policy = DEFAULT_BROADCAST_POLICY>
+        template <class Join = DEFAULT_JOIN>
         std::pair<bool, bool> broadcast_coordinates(coordinate_type& coords) const;
 
         data_type& data() noexcept;
@@ -97,13 +99,13 @@ namespace xf
         template <std::size_t N = dynamic()>
         reference select(const selector_map_type<N>& selector);
 
-        template <std::size_t N = std::numeric_limits<size_type>::max()>
+        template <class Join = DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
         const_reference select(const selector_map_type<N>& selector) const;
 
         template <std::size_t N = dynamic()>
         reference select(selector_map_type<N>&& selector);
 
-        template <std::size_t N = dynamic()>
+        template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
         const_reference select(selector_map_type<N>&& selector) const;
 
         template <std::size_t N = dynamic()>
@@ -165,6 +167,12 @@ namespace xf
         template <class S>
         const_reference select_impl(const S& selector) const;
 
+        template <class S>
+        const_reference select_outer(const S& selector) const;
+
+        template <class Join, class S>
+        const_reference select_join(const S& selector) const;
+
         derived_type& derived_cast() noexcept;
         const derived_type& derived_cast() const noexcept;
 
@@ -210,6 +218,12 @@ namespace xf
     inline xvariable_base<D>::xvariable_base(coordinate_map&& coords, DM&& dims)
         : xvariable_base(coordinate_type(std::move(coords)), std::forward<DM>(dims))
     {
+    }
+
+    template <class D>
+    inline auto xvariable_base<D>::missing() -> value_type
+    {
+        return value_type(typename value_type::value_type(), false);
     }
 
     template <class D>
@@ -269,10 +283,10 @@ namespace xf
     }
 
     template <class D>
-    template <class Policy>
+    template <class Join>
     inline std::pair<bool, bool> xvariable_base<D>::broadcast_coordinates(coordinate_type& coords) const
     {
-        return xf::broadcast_coordinates<Policy>(coords, this->coordinates());
+        return xf::broadcast_coordinates<Join>(coords, this->coordinates());
     }
 
     template <class D>
@@ -310,10 +324,10 @@ namespace xf
     }
 
     template <class D>
-    template <std::size_t N>
+    template <class Join, std::size_t N>
     inline auto xvariable_base<D>::select(const selector_map_type<N>& selector) const -> const_reference
     {
-        return select_impl(selector_type<N>(selector));
+        return select_join<Join>(selector_type<N>(selector));
     }
 
     template <class D>
@@ -324,10 +338,10 @@ namespace xf
     }
 
     template <class D>
-    template <std::size_t N>
+    template <class Join, std::size_t N>
     inline auto xvariable_base<D>::select(selector_map_type<N>&& selector) const -> const_reference
     {
-        return select_impl(selector_type<N>(std::move(selector)));
+        return select_join<Join>(selector_type<N>(std::move(selector)));
     }
 
     template <class D>
@@ -410,6 +424,26 @@ namespace xf
         return data().element(idx.cbegin(), idx.cend());
     }
     
+    template <class D>
+    template <class S>
+    inline auto xvariable_base<D>::select_outer(const S& selector) const -> const_reference
+    {
+        return selector.get_outer_value(*this, coordinates(), dimension_mapping());
+    }
+    
+    template <class D>
+    template <class Join, class S>
+    inline auto xvariable_base<D>::select_join(const S& selector) const -> const_reference
+    {
+        return xtl::mpl::static_if<Join::id() == join::inner::id()>([&](auto self)
+        {
+            return self(*this).select_impl(selector);
+        }, /*else*/ [&](auto self)
+        {
+            return self(*this).select_outer(selector);
+        });
+    }
+
     template <class D>
     inline bool operator==(const xvariable_base<D>& lhs, const xvariable_base<D>& rhs) noexcept
     {

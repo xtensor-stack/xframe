@@ -32,9 +32,9 @@ namespace xf
         EXPECT_EQ(s1, 9u);
         std::size_t s2 = (f.m_a + f.m_b).size();
         EXPECT_EQ(s2, 12u);
-        std::size_t s3 = (f.m_a + f.m_a).template size<broadcast_policy::merge_axes>();
+        std::size_t s3 = (f.m_a + f.m_a).template size<join::outer>();
         EXPECT_EQ(s3, 9u);
-        std::size_t s4 = (f.m_a + f.m_b).template size<broadcast_policy::merge_axes>();
+        std::size_t s4 = (f.m_a + f.m_b).template size<join::outer>();
         EXPECT_EQ(s4, 48u);
     }
 
@@ -45,9 +45,9 @@ namespace xf
         EXPECT_EQ(s1, 2u);
         std::size_t s2 = (f.m_a + f.m_b).dimension();
         EXPECT_EQ(s2, 3u);
-        std::size_t s3 = (f.m_a + f.m_a).template dimension<broadcast_policy::merge_axes>();
+        std::size_t s3 = (f.m_a + f.m_a).template dimension<join::outer>();
         EXPECT_EQ(s3, 2u);
-        std::size_t s4 = (f.m_a + f.m_b).template dimension<broadcast_policy::merge_axes>();
+        std::size_t s4 = (f.m_a + f.m_b).template dimension<join::outer>();
         EXPECT_EQ(s4, 3u);
     }
 
@@ -56,11 +56,11 @@ namespace xf
         xfunction_features f;
         auto l1 = (f.m_a + f.m_a).dimension_labels();
         EXPECT_EQ(l1, f.m_a.dimension_labels());
-        auto l2 = (f.m_a + f.m_a).dimension_labels<broadcast_policy::merge_axes>();
+        auto l2 = (f.m_a + f.m_a).dimension_labels<join::outer>();
         EXPECT_EQ(l2, f.m_a.dimension_labels());
         auto l3 = (f.m_a + f.m_b).dimension_labels();
         EXPECT_EQ(l3, f.m_b.dimension_labels());
-        auto l4 = (f.m_a + f.m_b).dimension_labels<broadcast_policy::merge_axes>();
+        auto l4 = (f.m_a + f.m_b).dimension_labels<join::outer>();
         EXPECT_EQ(l4, f.m_b.dimension_labels());
     }
 
@@ -69,11 +69,11 @@ namespace xf
         xfunction_features f;
         auto c1 = (f.m_a + f.m_a).coordinates();
         EXPECT_EQ(c1, f.m_a.coordinates());
-        auto c2 = (f.m_a + f.m_a).coordinates<broadcast_policy::merge_axes>();
+        auto c2 = (f.m_a + f.m_a).coordinates<join::outer>();
         EXPECT_EQ(c2, f.m_a.coordinates());
         auto c3 = (f.m_a + f.m_b).coordinates();
         EXPECT_EQ(c3, make_intersect_coordinate());
-        auto c4 = (f.m_a + f.m_b).coordinates<broadcast_policy::merge_axes>();
+        auto c4 = (f.m_a + f.m_b).coordinates<join::outer>();
         EXPECT_EQ(c4, make_merge_coordinate());
     }
 
@@ -82,11 +82,11 @@ namespace xf
         xfunction_features f;
         auto d1 = (f.m_a + f.m_a).dimension_mapping();
         EXPECT_EQ(d1, f.m_a.dimension_mapping());
-        auto d2 = (f.m_a + f.m_a).dimension_mapping<broadcast_policy::merge_axes>();
+        auto d2 = (f.m_a + f.m_a).dimension_mapping<join::outer>();
         EXPECT_EQ(d2, f.m_a.dimension_mapping());
         auto d3 = (f.m_a + f.m_b).dimension_mapping();
         EXPECT_EQ(d3, f.m_b.dimension_mapping());
-        auto d4 = (f.m_a + f.m_b).dimension_mapping<broadcast_policy::merge_axes>();
+        auto d4 = (f.m_a + f.m_b).dimension_mapping<join::outer>();
         EXPECT_EQ(d4, f.m_b.dimension_mapping());
     }
 
@@ -122,7 +122,7 @@ namespace xf
         EXPECT_TRUE(res1.second);
 
         coordinate_type c2;
-        std::pair<bool, bool> res2 = (f.m_a + f.m_a).broadcast_coordinates<broadcast_policy::merge_axes>(c2);
+        std::pair<bool, bool> res2 = (f.m_a + f.m_a).broadcast_coordinates<join::outer>(c2);
         EXPECT_EQ(c2, f.m_a.coordinates());
         EXPECT_TRUE(res2.first);
         EXPECT_TRUE(res2.second);
@@ -134,13 +134,13 @@ namespace xf
         EXPECT_FALSE(res3.second);
 
         coordinate_type c4;
-        std::pair<bool, bool> res4 = (f.m_a + f.m_b).broadcast_coordinates<broadcast_policy::merge_axes>(c4);
+        std::pair<bool, bool> res4 = (f.m_a + f.m_b).broadcast_coordinates<join::outer>(c4);
         EXPECT_EQ(c4, make_merge_coordinate());
         EXPECT_FALSE(res4.first);
         EXPECT_FALSE(res4.second);
     }
 
-    TEST(xvariable_function, select)
+    TEST(xvariable_function, select_inner)
     {
         xfunction_features f;
 
@@ -149,6 +149,7 @@ namespace xf
             xtl::xoptional<double> a = (f.m_a + f.m_a).select({{"abscissa", "d"}, {"ordinate", 4}});
             xtl::xoptional<double> b = 2 * f.m_a.select({{"abscissa", "d"}, {"ordinate", 4}});
             EXPECT_EQ(a, b);
+            EXPECT_ANY_THROW((f.m_a + f.m_a).select({{"abscissa", "e"}, {"ordinate", 4}}));
         }
 
         {
@@ -158,6 +159,30 @@ namespace xf
             xtl::xoptional<double> b = f.m_a.select({{"abscissa", "d"}, {"ordinate", 4}, {"altitude", 2}}) +
                                        f.m_b.select({{"abscissa", "d"}, {"ordinate", 4}, {"altitude", 2}});
             EXPECT_EQ(a, b);
+            EXPECT_ANY_THROW((f.m_a + f.m_b).select({{"abscissa", "e"}, {"ordinate", 4}, {"altitude", 2}}));
+        }
+    }
+
+    TEST(xvariable_function, select_outer)
+    {
+        xfunction_features f;
+
+        {
+            SCOPED_TRACE("same shape");
+            xtl::xoptional<double> a = (f.m_a + f.m_a).select<join::outer>({{"abscissa", "d"}, {"ordinate", 4}});
+            xtl::xoptional<double> b = 2 * f.m_a.select<join::outer>({{"abscissa", "d"}, {"ordinate", 4}});
+            EXPECT_EQ(a, b);
+            EXPECT_EQ((f.m_a + f.m_a).select<join::outer>({{"abscissa", "e"}, {"ordinate", 4}}), f.m_a.missing());
+        }
+
+        {
+            SCOPED_TRACE("different shape");
+            
+            xtl::xoptional<double> a = (f.m_a + f.m_b).select<join::outer>({{"abscissa", "d"}, {"ordinate", 4}, {"altitude", 2}});
+            xtl::xoptional<double> b = f.m_a.select<join::outer>({{"abscissa", "d"}, {"ordinate", 4}, {"altitude", 2}}) +
+                                       f.m_b.select<join::outer>({{"abscissa", "d"}, {"ordinate", 4}, {"altitude", 2}});
+            EXPECT_EQ(a, b);
+            EXPECT_EQ((f.m_a + f.m_b).select<join::outer>({{"abscissa", "e"}, {"ordinate", 4}, {"altitude", 2}}), f.m_a.missing());
         }
     }
 }
