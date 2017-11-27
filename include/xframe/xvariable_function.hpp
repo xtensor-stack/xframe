@@ -208,7 +208,7 @@ namespace xf
             }
             else
             {
-                merge_dimension_mapping(std::make_index_sequence<sizeof...(CT)>(), m_dimension_mapping);
+                res.first = merge_dimension_mapping(std::make_index_sequence<sizeof...(CT)>(), m_dimension_mapping);
             }
             m_coordinate_computed = true;
             m_policy_id = Policy::id();
@@ -241,7 +241,7 @@ namespace xf
     template <std::size_t...I>
     bool xvariable_function<F, R, CT...>::merge_dimension_mapping(std::index_sequence<I...>, dimension_type& dims) const
     {
-        return xf::merge_axes(dims, std::get<I>(m_e).dimension_mapping()...);
+        return xf::broadcast_dimensions(dims, std::get<I>(m_e).dimension_mapping()...);
     }
 }
 

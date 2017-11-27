@@ -39,7 +39,7 @@ namespace xf
     public:
 
         static_assert(is_coordinate<C>::value, "first parameter of xselector must be xcoordinate");
-        static_assert(is_axis<D>::value, "second parameter of xselector must be xaxis");
+        static_assert(is_dimension<D>::value, "second parameter of xselector must be xaxis");
 
         using coordinate_type = C;
         using key_type = typename coordinate_type::key_type;
@@ -71,7 +71,7 @@ namespace xf
     public:
 
         static_assert(is_coordinate<C>::value, "first parameter of xiselector must be xcoordinate");
-        static_assert(is_axis<D>::value, "second parameter of xselector must be xaxis");
+        static_assert(is_dimension<D>::value, "second parameter of xselector must be xaxis");
 
         using coordinate_type = C;
         using key_type = typename coordinate_type::key_type;
@@ -97,7 +97,7 @@ namespace xf
     public:
 
         static_assert(is_coordinate<C>::value, "Frt parameter of xlocator musy be xcoordinate");
-        static_assert(is_axis<D>::value, "second parameter of xselector must be xaxis");
+        static_assert(is_dimension<D>::value, "second parameter of xselector must be xaxis");
 
         using coordinate_type = C;
         using key_type = typename coordinate_type::key_type;

@@ -491,9 +491,16 @@ namespace xf
         {
             while(input_iter != input_end)
             {
-                if(m_index.find(*input_iter) == m_index.end())
+                if(!contains(*input_iter))
                 {
-                    m_labels.insert(m_labels.begin(), *input_iter);
+                    if(output_iter != m_labels.rbegin())
+                    {
+                        m_labels.insert(m_labels.begin(), *input_iter);
+                    }
+                    else
+                    {
+                        m_labels.push_back(*input_iter);
+                    }
                 }
                 ++input_iter;
             }
