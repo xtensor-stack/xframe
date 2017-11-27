@@ -101,14 +101,14 @@ namespace xf
         auto coord_res = make_merge_coordinate();
         auto c1 = make_test_coordinate();
         decltype(c1) cres1;
-        auto res1 = broadcast_coordinates<broadcast_policy::merge_axes>(cres1, c1, c1);
+        auto res1 = broadcast_coordinates<join::outer>(cres1, c1, c1);
         EXPECT_TRUE(res1.first);
         EXPECT_TRUE(res1.second);
         EXPECT_EQ(c1, cres1);
 
         auto c2 = make_test_coordinate3();
         decltype(c2) cres2;
-        auto res2 = broadcast_coordinates<broadcast_policy::merge_axes>(cres2, c1, c2);
+        auto res2 = broadcast_coordinates<join::outer>(cres2, c1, c2);
         EXPECT_FALSE(res2.first);
         EXPECT_FALSE(res2.second);
         EXPECT_EQ(cres2, coord_res);
@@ -122,7 +122,7 @@ namespace xf
         auto coord_res = make_intersect_coordinate();
 
         auto cres = c1;
-        auto res = broadcast_coordinates<broadcast_policy::intersect_axes>(cres, c2);
+        auto res = broadcast_coordinates<join::inner>(cres, c2);
         EXPECT_FALSE(res.first);
         EXPECT_FALSE(res.second);
         EXPECT_EQ(cres, coord_res);

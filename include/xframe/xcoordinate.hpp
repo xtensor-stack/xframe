@@ -18,8 +18,8 @@
 #define DEFAULT_LABEL_LIST xtl::mpl::vector<int,std::size_t, xtl::xfixed_string<55>>
 #endif
 
-#ifndef DEFAULT_BROADCAST_POLICY
-#define DEFAULT_BROADCAST_POLICY broadcast_policy::intersect_axes
+#ifndef DEFAULT_JOIN
+#define DEFAULT_JOIN join::inner
 #endif
 
 #include "xtl/xiterator_base.hpp"
@@ -27,22 +27,22 @@
 
 namespace xf
 {
-    namespace broadcast_policy
+    namespace join
     {
-        enum class policy_id
+        enum class join_id
         {
-            merge_axis_id,
-            intersect_axis_id
+            outer_id,
+            inner_id
         };
 
-        struct merge_axes
+        struct outer
         {
-            static constexpr policy_id id() { return policy_id::merge_axis_id; }
+            static constexpr join_id id() { return join_id::outer_id; }
         };
         
-        struct intersect_axes
+        struct inner
         {
-            static constexpr policy_id id() { return policy_id::intersect_axis_id; }
+            static constexpr join_id id() { return join_id::inner_id; }
         };
     }
 
@@ -96,7 +96,7 @@ namespace xf
         key_iterator key_begin() const noexcept;
         key_iterator key_end() const noexcept;
 
-        template <class Policy, class... Args>
+        template <class Join, class... Args>
         std::pair<bool, bool> broadcast(const Args&... coordinates);
 
         bool operator==(const self_type& rhs) const noexcept;
@@ -108,14 +108,14 @@ namespace xf
         void insert_impl(std::pair<K, xaxis<LB1, S, MT>> axis, std::pair<K, xaxis<LB, S, MT>>... axes);
         void insert_impl();
 
-        template <class Policy, class... Args>
+        template <class Join, class... Args>
         std::pair<bool, bool> broadcast_impl(const self_type& c, const Args&... coordinates);
-        template <class Policy>
+        template <class Join>
         std::pair<bool, bool> broadcast_impl();
 
-        template <class Policy, class... Args>
+        template <class Join, class... Args>
         std::pair<bool, bool> broadcast_empty(const self_type& c, const Args&... coordinates);
-        template <class Policy>
+        template <class Join>
         std::pair<bool, bool> broadcast_empty();
 
         map_type m_coordinate;
@@ -133,7 +133,7 @@ namespace xf
     template <class K, class S, class MT, class... L>
     xcoordinate<K, S, MT> coordinate(std::pair<K, xaxis<L, S, MT>>... axes);
 
-    template <class Policy, class K, class S, class MT, class L, class... Args>
+    template <class Join, class K, class S, class MT, class L, class... Args>
     std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates);
 
     /******************************
@@ -267,10 +267,10 @@ namespace xf
     }
 
     template <class K, class S, class MT, class L>
-    template <class Policy, class... Args>
+    template <class Join, class... Args>
     inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast(const Args&... coordinates)
     {
-        return empty() ? broadcast_empty<Policy>(coordinates...) : broadcast_impl<Policy>(coordinates...);
+        return empty() ? broadcast_empty<Join>(coordinates...) : broadcast_impl<Join>(coordinates...);
     }
 
     template <class K, class S, class MT, class L>
@@ -300,11 +300,11 @@ namespace xf
 
     namespace detail
     {
-        template <class Policy>
+        template <class Join>
         struct axis_broadcast;
 
         template <>
-        struct axis_broadcast<broadcast_policy::merge_axes>
+        struct axis_broadcast<join::outer>
         {
             template <class A>
             static bool apply(A& output, const A& input)
@@ -314,7 +314,7 @@ namespace xf
         };
 
         template <>
-        struct axis_broadcast<broadcast_policy::intersect_axes>
+        struct axis_broadcast<join::inner>
         {
             template <class A>
             static bool apply(A& output, const A& input)
@@ -325,10 +325,10 @@ namespace xf
     }
 
     template <class K, class S, class MT, class L>
-    template <class Policy, class... Args>
+    template <class Join, class... Args>
     inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_impl(const self_type& c, const Args&... coordinates)
     {
-        auto res = broadcast_impl<Policy>(coordinates...);
+        auto res = broadcast_impl<Join>(coordinates...);
         for(auto iter = c.begin(); iter != c.end(); ++iter)
         {
             auto inserted = m_coordinate.insert(*iter);
@@ -340,32 +340,32 @@ namespace xf
             {
                 const auto& key = inserted.first->first;
                 auto& axis = inserted.first->second;
-                res.second &= detail::axis_broadcast<Policy>::apply(axis, c[key]);
+                res.second &= detail::axis_broadcast<Join>::apply(axis, c[key]);
             } 
         }
         return res;
     }
 
     template <class K, class S, class MT, class L>
-    template <class Policy>
+    template <class Join>
     inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_impl()
     {
         return { true, true };
     }
 
     template <class K, class S, class MT, class L>
-    template <class Policy, class... Args>
+    template <class Join, class... Args>
     inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_empty(const self_type& c, const Args&... coordinates)
     {
         m_coordinate = c.m_coordinate;
-        return broadcast_impl<Policy>(coordinates...);
+        return broadcast_impl<Join>(coordinates...);
     }
 
     template <class K, class S, class MT, class L>
-    template <class Policy>
+    template <class Join>
     inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_empty()
     {
-        return broadcast_impl<Policy>();
+        return broadcast_impl<Join>();
     }
 
     template <class OS, class K, class S, class MT, class L>
@@ -396,10 +396,10 @@ namespace xf
         return xcoordinate<K, S, MT>(std::move(axes)...);
     }
 
-    template <class Policy, class K, class S, class MT, class L, class... Args>
+    template <class Join, class K, class S, class MT, class L, class... Args>
     std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates)
     {
-        return output.template broadcast<Policy>(coordinates...);
+        return output.template broadcast<Join>(coordinates...);
     }
 }
 

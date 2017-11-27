@@ -11,6 +11,7 @@
 
 #include <limits>
 #include "xtl/xsequence.hpp"
+#include "xtl/xoptional.hpp"
 #include "xcoordinate.hpp"
 
 namespace xf
@@ -27,6 +28,15 @@ namespace xf
 
         template <class S, std::size_t N>
         using xselector_index_t = typename xselector_index<S, N>::type;
+
+        template <class T>
+        const T& static_missing() noexcept
+        {
+            using value_type = typename T::value_type;
+            using flag_type = typename T::flag_type;
+            static T res = xtl::missing<value_type>();
+            return res;
+        }
     }
 
     /*************
@@ -39,7 +49,7 @@ namespace xf
     public:
 
         static_assert(is_coordinate<C>::value, "first parameter of xselector must be xcoordinate");
-        static_assert(is_dimension<D>::value, "second parameter of xselector must be xaxis");
+        static_assert(is_dimension<D>::value, "second parameter of xselector must be xdimension");
 
         using coordinate_type = C;
         using key_type = typename coordinate_type::key_type;
@@ -56,6 +66,9 @@ namespace xf
 
         index_type get_index(const coordinate_type& coord, const dimension_type& dim) const;
 
+        template <class V>
+        typename V::const_reference get_outer_value(const V& v, const coordinate_type& coord, const dimension_type& dim) const;
+
     private:
 
         map_type m_coord;
@@ -71,7 +84,7 @@ namespace xf
     public:
 
         static_assert(is_coordinate<C>::value, "first parameter of xiselector must be xcoordinate");
-        static_assert(is_dimension<D>::value, "second parameter of xselector must be xaxis");
+        static_assert(is_dimension<D>::value, "second parameter of xiselector must be xdimension");
 
         using coordinate_type = C;
         using key_type = typename coordinate_type::key_type;
@@ -96,8 +109,8 @@ namespace xf
     {
     public:
 
-        static_assert(is_coordinate<C>::value, "Frt parameter of xlocator musy be xcoordinate");
-        static_assert(is_dimension<D>::value, "second parameter of xselector must be xaxis");
+        static_assert(is_coordinate<C>::value, "first parameter of xlocator must be xcoordinate");
+        static_assert(is_dimension<D>::value, "second parameter of xiselector must be xdimension");
 
         using coordinate_type = C;
         using key_type = typename coordinate_type::key_type;
@@ -149,6 +162,31 @@ namespace xf
             }
         }
         return res;
+    }
+
+    template <class C, class D, std::size_t N>
+    template <class V>
+    inline auto xselector<C, D, N>::get_outer_value(const V& v, const coordinate_type& coord, const dimension_type& dim) const
+        -> typename V::const_reference
+    {
+        index_type idx = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
+        for(const auto& c : m_coord)
+        {
+            auto iter = dim.find(c.first);
+            if(iter != dim.end())
+            {
+                const auto& axis = coord[c.first];
+                if(axis.contains(c.second))
+                {
+                    idx[iter->second]= axis[c.second];
+                }
+                else
+                {
+                    return detail::static_missing<typename V::value_type>();
+                }
+            }
+        }
+        return v.data().element(idx.cbegin(), idx.cend());
     }
 
     /*****************************

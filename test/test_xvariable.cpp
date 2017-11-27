@@ -89,7 +89,7 @@ namespace xf
         EXPECT_EQ(v(2, 2), 9.0);
     }
 
-    TEST(xvariable, select)
+    TEST(xvariable, select_inner)
     {
         auto v = make_test_variable();
         auto t00 = v.select({{"abscissa", "a"}, {"ordinate", 1}});
@@ -111,6 +111,41 @@ namespace xf
         EXPECT_EQ(t20, v(2, 0));
         EXPECT_EQ(t21, v(2, 1));
         EXPECT_EQ(t22, v(2, 2));
+
+        auto t100 = v.select({{"abscissa", "a"}, {"ordinate", 1}, {"altitude", 1}});
+        EXPECT_EQ(t100, t00);
+
+        EXPECT_ANY_THROW(v.select({{"abscissa", "e"}, {"ordinate", 1}}));
+    }
+
+    TEST(xvariable, select_outer)
+    {
+        const auto v = make_test_variable();
+        auto t00 = v.select<join::outer>({{"abscissa", "a"}, {"ordinate", 1}});
+        auto t01 = v.select<join::outer>({{"abscissa", "a"}, {"ordinate", 2}});
+        auto t02 = v.select<join::outer>({{"abscissa", "a"}, {"ordinate", 4}});
+        auto t10 = v.select<join::outer>({{"abscissa", "c"}, {"ordinate", 1}});
+        auto t11 = v.select<join::outer>({{"abscissa", "c"}, {"ordinate", 2}});
+        auto t12 = v.select<join::outer>({{"abscissa", "c"}, {"ordinate", 4}});
+        auto t20 = v.select<join::outer>({{"abscissa", "d"}, {"ordinate", 1}});
+        auto t21 = v.select<join::outer>({{"abscissa", "d"}, {"ordinate", 2}});
+        auto t22 = v.select<join::outer>({{"abscissa", "d"}, {"ordinate", 4}});
+
+        EXPECT_EQ(t00, v(0, 0));
+        EXPECT_EQ(t01, v(0, 1));
+        EXPECT_EQ(t02, v(0, 2));
+        EXPECT_EQ(t10, v(1, 0));
+        EXPECT_EQ(t11, v(1, 1));
+        EXPECT_EQ(t12, v(1, 2));
+        EXPECT_EQ(t20, v(2, 0));
+        EXPECT_EQ(t21, v(2, 1));
+        EXPECT_EQ(t22, v(2, 2));
+
+        auto t100 = v.select<join::outer>({{"abscissa", "a"}, {"ordinate", 1}, {"altitude", 1}});
+        EXPECT_EQ(t100, t00);
+
+        auto mis = v.select<join::outer>({{"abscissa", "e"}, {"ordinate", 1}});
+        EXPECT_EQ(mis, v.missing());
     }
 
     TEST(xvariable, iselect)
