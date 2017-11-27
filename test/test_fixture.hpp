@@ -15,7 +15,7 @@ namespace xf
     using fstring = xtl::xfixed_string<55>;
     using saxis_type = xaxis<fstring, std::size_t>; 
     using iaxis_type = xaxis<int, std::size_t>;
-    using dimension_type = xaxis<fstring, std::size_t, map_tag>;
+    using dimension_type = xdimension<fstring, std::size_t>;
     using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
     using coordinate_type = xcoordinate<fstring, data_type::size_type>;
     using variable_type = xvariable<fstring, data_type::value_expression, data_type::flag_expression>;

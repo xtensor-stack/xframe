@@ -10,6 +10,7 @@
 #define XFRAME_XVARIABLE_BASE_HPP
 
 #include "xcoordinate.hpp"
+#include "xdimension.hpp"
 #include "xselecting.hpp"
 
 namespace xf
@@ -17,7 +18,7 @@ namespace xf
 
     template <class C , class DM>
     struct enable_xvariable
-        : std::enable_if<is_coordinate<C>::value && is_axis<DM>::value,
+        : std::enable_if<is_coordinate<C>::value && is_dimension<DM>::value,
                          xt::void_t<>
           >
     {

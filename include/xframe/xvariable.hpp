@@ -29,7 +29,7 @@ namespace xf
         using data_type = xt::xoptional_assembly<VE, FE>;
         using size_type = typename data_type::size_type;
         using coordinate_type = xcoordinate<K, size_type, hash_map_tag, L>;
-        using dimension_type = xaxis<K, size_type, map_tag>;
+        using dimension_type = xdimension<K, size_type>;
     };
 
     template <class K, class VE, class FE, class L>

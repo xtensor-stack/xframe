@@ -89,6 +89,28 @@ namespace xf
     bool broadcast_dimensions(xdimension<L, T>& output, const Args&... dims);
 
     /*****************************
+     * is_dimension metafunction *
+     *****************************/
+
+    namespace detail
+    {
+        template <class T>
+        struct is_dimension_impl : std::false_type
+        {
+        };
+
+        template <class L, class T>
+        struct is_dimension_impl<xdimension<L, T>> : std::true_type
+        {
+        };
+    }
+
+    template <class T>
+    struct is_dimension : detail::is_dimension_impl<std::decay_t<T>>
+    {
+    };
+
+    /*****************************
      * xdimension implementation *
      *****************************/
 
