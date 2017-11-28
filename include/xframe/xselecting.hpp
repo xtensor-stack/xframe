@@ -152,7 +152,7 @@ namespace xf
     inline auto xselector<C, D, N>::get_index(const coordinate_type& coord, const dimension_type& dim) const
         -> index_type
     {
-        index_type res = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
+        index_type res = xtl::make_sequence<index_type>(coord.size(), size_type(0));
         for(const auto& c : m_coord)
         {
             auto iter = dim.find(c.first);

@@ -160,5 +160,26 @@ namespace xf
     {
         return variable_type(make_test_data2(), make_test_coordinate3(), dimension_type({"abscissa", "ordinate", "altitude"}));
     }
+
+    // abscissa: { "a", "d", "e" }
+    // ordinate: { 1, 4, 5 }
+    // dims: {{ "abscissa", 0 }, { "ordinate", 1 }}
+    // data = {{ 1. ,  2., N/A },
+    //         { N/A,  5.,  6. },
+    //         { 7. ,  8.,  9. }}
+    inline variable_type make_test_variable3()
+    {
+        return variable_type(make_test_data(), make_test_coordinate2(), dimension_type({"abscissa", "ordinate"}));
+    }
+
+    // altitude: { 1, 2, 4 }
+    // abscissa: { "a", "d", "e" }
+    // ordinate: { 1, 4, 5 }
+    // dims: {{"altitude", 0}, { "abscissa", 1 }, { "ordinate", 2 }} 
+    // data = make_test_data2
+    inline variable_type make_test_variable4()
+    {
+        return variable_type(make_test_data2(), make_test_coordinate3(), dimension_type({"altitude", "abscissa", "ordinate"}));
+    }
 }
 

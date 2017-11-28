@@ -28,6 +28,8 @@ namespace xf
 
         using self_type = xvariable_function<F, R, CT...>;
         using functor_type = std::remove_reference_t<F>;
+        using data_type = xt::xoptional_function<F, R, decltype(std::declval<CT>().data())...>;
+        //using data_type = xt::xoptional_function<F, R, typename std::decay_t<CT>::data_type...>;
         using value_type = R;
         using reference = value_type;
         using const_reference = value_type;
@@ -65,19 +67,14 @@ namespace xf
         
         template <class Join = DEFAULT_JOIN>
         std::pair<bool, bool> broadcast_coordinates(coordinate_type& coords) const;
+        bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
+
+        data_type data() const noexcept;
 
         template <std::size_t N = dynamic()>
         using selector_type = xselector<coordinate_type, dimension_type, N>;
         template <std::size_t N = dynamic()>
         using selector_map_type = typename selector_type<N>::map_type;
-        template <std::size_t N = dynamic()>
-        using iselector_type = xiselector<coordinate_type, dimension_type, N>;
-        template <std::size_t N = dynamic()>
-        using iselector_map_type = typename iselector_type<N>::map_type;
-        template <std::size_t N = dynamic()>
-        using locator_type = xlocator<coordinate_type, dimension_type, N>;
-        template <std::size_t N = dynamic()>
-        using locator_map_type = typename locator_type<N>::map_type;
 
         template <class Join = DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
         const_reference select(const selector_map_type<N>& selector) const;
@@ -96,6 +93,9 @@ namespace xf
         template <class Join, std::size_t... I>
         std::pair<bool, bool> broadcast_coordinates_impl(std::index_sequence<I...>, coordinate_type& coords) const;
 
+        template <std::size_t... I>
+        data_type data_impl(std::index_sequence<I...>) const noexcept;
+
         template <class Join, std::size_t... I, class S>
         const_reference select_impl(std::index_sequence<I...>, S&& selector) const;
 
@@ -106,6 +106,7 @@ namespace xf
         functor_type m_f;
         mutable coordinate_type m_coordinate;
         mutable dimension_type m_dimension_mapping;
+        //mutable data_type m_data;
         mutable join::join_id m_join_id;
         mutable bool m_coordinate_computed;
     };
@@ -181,6 +182,27 @@ namespace xf
     }
 
     template <class F, class R, class... CT>
+    inline bool xvariable_function<F, R, CT...>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
+    {
+        bool ret = true;
+        if(trivial_bc)
+        {
+            dims = std::get<0>(m_e).dimension_mapping();
+        }
+        else
+        {
+            ret = merge_dimension_mapping(std::make_index_sequence<sizeof...(CT)>(), dims);
+        }
+        return ret;
+    }
+
+    template <class F, class R, class... CT>
+    inline auto xvariable_function<F, R, CT...>::data() const noexcept -> data_type
+    {
+        return data_impl(std::make_index_sequence<sizeof...(CT)>());
+    }
+
+    template <class F, class R, class... CT>
     template <class Join, std::size_t N>
     inline auto xvariable_function<F, R, CT...>::select(const selector_map_type<N>& selector) const -> const_reference
     {
@@ -202,14 +224,7 @@ namespace xf
         {
             m_coordinate.clear();
             auto res = broadcast_coordinates<Join>(m_coordinate);
-            if(res.first)
-            {
-                m_dimension_mapping = std::get<0>(m_e).dimension_mapping();
-            }
-            else
-            {
-                res.first = merge_dimension_mapping(std::make_index_sequence<sizeof...(CT)>(), m_dimension_mapping);
-            }
+            res.first = broadcast_dimensions(m_dimension_mapping, res.first);
             m_coordinate_computed = true;
             m_join_id = Join::id();
         }
@@ -230,6 +245,13 @@ namespace xf
         return xf::broadcast_coordinates<Join>(coords, std::get<I>(m_e).coordinates()...);
     }
 
+    template <class F, class R, class... CT>
+    template <std::size_t... I>
+    inline auto xvariable_function<F, R, CT...>::data_impl(std::index_sequence<I...>) const noexcept -> data_type
+    {
+        return data_type(m_f, std::get<I>(m_e).data()...);
+    }
+    
     template <class F, class R, class... CT>
     template <class Join, std::size_t... I, class S>
     inline auto xvariable_function<F, R, CT...>::select_impl(std::index_sequence<I...>, S&& selector) const -> const_reference

@@ -79,6 +79,7 @@ namespace xf
 
         template <class Join = DEFAULT_JOIN>
         std::pair<bool, bool> broadcast_coordinates(coordinate_type& coords) const;
+        bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
         data_type& data() noexcept;
         const data_type& data() const noexcept;
@@ -287,6 +288,21 @@ namespace xf
     inline std::pair<bool, bool> xvariable_base<D>::broadcast_coordinates(coordinate_type& coords) const
     {
         return xf::broadcast_coordinates<Join>(coords, this->coordinates());
+    }
+
+    template <class D>
+    inline bool  xvariable_base<D>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
+    {
+        bool ret = true;
+        if(trivial_bc)
+        {
+            dims = this->dimension_mapping();
+        }
+        else
+        {
+            ret = xf::broadcast_dimensions(dims, this->dimension_mapping());
+        }
+        return ret;
     }
 
     template <class D>

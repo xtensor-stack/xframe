@@ -84,6 +84,7 @@ namespace xf
         
         template <class LB>
         const label_list<LB>& labels() const;
+        key_type label(size_type i) const;
 
         bool empty() const;
         size_type size() const;
@@ -203,6 +204,12 @@ namespace xf
     inline auto xaxis_variant<L, T, MT>::labels() const -> const label_list<LB>&
     {
         return xtl::get<xaxis<LB, T>>(m_data).labels();
+    }
+
+    template <class L, class T, class MT>
+    inline auto xaxis_variant<L, T, MT>::label(size_type i) const -> key_type
+    {
+        return xtl::visit([i](auto&& arg) -> key_type { return arg.labels()[i]; }, m_data);
     }
 
     template <class L, class T, class MT>

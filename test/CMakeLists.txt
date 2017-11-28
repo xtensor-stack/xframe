@@ -84,6 +84,7 @@ set(XFRAME_TESTS
     test_xdimension.cpp
     test_xframe_utils.cpp
     test_xvariable.cpp
+    test_xvariable_assign.cpp
     test_xvariable_function.cpp
 )
 
