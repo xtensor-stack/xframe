@@ -9,12 +9,15 @@
 #ifndef XFRAME_XVARIABLE_BASE_HPP
 #define XFRAME_XVARIABLE_BASE_HPP
 
+#include "xtensor/xnoalias.hpp"
+
 #include "xcoordinate.hpp"
 #include "xdimension.hpp"
 #include "xselecting.hpp"
 
 namespace xf
 {
+    using xt::noalias;
 
     template <class C , class DM>
     struct enable_xvariable
@@ -327,7 +330,7 @@ namespace xf
         {
             shape[dims[c.first]] = c.second.size();
         }
-        data().reshape(shape);
+        data().reshape(std::move(shape));
         m_coordinate = std::forward<C>(coords);
         m_dimension_mapping = std::forward<DM>(dims);
     }

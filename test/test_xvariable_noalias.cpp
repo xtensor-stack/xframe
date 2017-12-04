@@ -11,114 +11,125 @@
 
 namespace xf
 {
-
-    TEST(xvariable_assign, a_plus_b)
+    TEST(xvariable_noalias, a_plus_b)
     {
         DEFINE_TEST_VARIABLES();
         {
             SCOPED_TRACE("same coordinate");
-            variable_type res = a + a;
+            variable_type res = a;
+            noalias(res) = a + a;
             selector_list sl = make_selector_list_aa();
             CHECK_EQUALITY(res, a, a, sl, +)
         }
 
         {
             SCOPED_TRACE("different coordinates");
-            variable_type res = a + b;
+            variable_type res = a;
+            noalias(res) = a + b;
             selector_list sl = make_selector_list_ab();
             CHECK_EQUALITY(res, a, b, sl, +)
         }
 
         {
             SCOPED_TRACE("broadcasting coordinates");
-            variable_type res = c + d;
+            variable_type res = c;
+            noalias(res) = c + d;
             selector_list sl = make_selector_list_cd();
             CHECK_EQUALITY(res, c, d, sl, +)
         }
     }
 
-    TEST(xvariable_assign, a_minus_b)
+    TEST(xvariable_noalias, a_minus_b)
     {
         DEFINE_TEST_VARIABLES();
         {
             SCOPED_TRACE("same coordinate");
-            variable_type res = a - a;
+            variable_type res = a;
+            noalias(res) = a - a;
             selector_list sl = make_selector_list_aa();
             CHECK_EQUALITY(res, a, a, sl, -)
         }
 
         {
             SCOPED_TRACE("different coordinates");
-            variable_type res = a - b;
+            variable_type res = a;
+            noalias(res) = a - b;
             selector_list sl = make_selector_list_ab();
             CHECK_EQUALITY(res, a, b, sl, -)
         }
 
         {
             SCOPED_TRACE("broadcasting coordinates");
-            variable_type res = c - d;
+            variable_type res = c;
+            noalias(res) = c - d;
             selector_list sl = make_selector_list_cd();
             CHECK_EQUALITY(res, c, d, sl, -)
         }
     }
 
-    TEST(xvariable_assign, a_times_b)
+    TEST(xvariable_noalias, a_times_b)
     {
         DEFINE_TEST_VARIABLES();
         {
             SCOPED_TRACE("same coordinate");
-            variable_type res = a * a;
+            variable_type res = a;
+            noalias(res) = a * a;
             selector_list sl = make_selector_list_aa();
             CHECK_EQUALITY(res, a, a, sl, *)
         }
 
         {
             SCOPED_TRACE("different coordinates");
-            variable_type res = a * b;
+            variable_type res = a;
+            noalias(res) = a * b;
             selector_list sl = make_selector_list_ab();
             CHECK_EQUALITY(res, a, b, sl, *)
         }
 
         {
             SCOPED_TRACE("broadcasting coordinates");
-            variable_type res = c * d;
+            variable_type res = c;
+            noalias(res) = c * d;
             selector_list sl = make_selector_list_cd();
             CHECK_EQUALITY(res, c, d, sl, *)
         }
     }
 
-    TEST(xvariable_assign, a_divided_by_b)
+    TEST(xvariable_noalias, a_divided_by__b)
     {
         DEFINE_TEST_VARIABLES();
         {
             SCOPED_TRACE("same coordinate");
-            variable_type res = a / a;
+            variable_type res = a;
+            noalias(res) = a / a;
             selector_list sl = make_selector_list_aa();
             CHECK_EQUALITY(res, a, a, sl, /)
         }
 
         {
             SCOPED_TRACE("different coordinates");
-            variable_type res = a / b;
+            variable_type res = a;
+            noalias(res) = a / b;
             selector_list sl = make_selector_list_ab();
             CHECK_EQUALITY(res, a, b, sl, /)
         }
 
         {
             SCOPED_TRACE("broadcasting coordinates");
-            variable_type res = c / d;
+            variable_type res = c;
+            noalias(res) = c / d;
             selector_list sl = make_selector_list_cd();
             CHECK_EQUALITY(res, c, d, sl, /)
         }
     }
 
-    TEST(xvariable_assign, a_plus_equal_b)
+    TEST(xvariable_noalias, a_plus_equal_b)
     {
         DEFINE_TEST_VARIABLES();
         {
             SCOPED_TRACE("same coordinate");
             variable_type res = a;
-            res += a;
+            noalias(res) += a;
             selector_list sl = make_selector_list_aa();
             CHECK_EQUALITY(res, a, a, sl, +)
         }
@@ -126,7 +137,7 @@ namespace xf
         {
             SCOPED_TRACE("different coordinates");
             variable_type res = a;
-            res += b;
+            noalias(res) += b;
             selector_list sl = make_selector_list_ab();
             CHECK_EQUALITY(res, a, b, sl, +)
         }
@@ -134,19 +145,19 @@ namespace xf
         {
             SCOPED_TRACE("broadcasting coordinates");
             variable_type res = c;
-            res += d;
+            noalias(res) += d;
             selector_list sl = make_selector_list_cd();
             CHECK_EQUALITY(res, c, d, sl, +)
         }
     }
 
-    TEST(xvariable_assign, a_minus_equal_b)
+    TEST(xvariable_noalias, a_minus_equal_b)
     {
         DEFINE_TEST_VARIABLES();
         {
             SCOPED_TRACE("same coordinate");
             variable_type res = a;
-            res -= a;
+            noalias(res) -= a;
             selector_list sl = make_selector_list_aa();
             CHECK_EQUALITY(res, a, a, sl, -)
         }
@@ -154,7 +165,7 @@ namespace xf
         {
             SCOPED_TRACE("different coordinates");
             variable_type res = a;
-            res -= b;
+            noalias(res) -= b;
             selector_list sl = make_selector_list_ab();
             CHECK_EQUALITY(res, a, b, sl, -)
         }
@@ -162,19 +173,19 @@ namespace xf
         {
             SCOPED_TRACE("broadcasting coordinates");
             variable_type res = c;
-            res -= d;
+            noalias(res) -= d;
             selector_list sl = make_selector_list_cd();
             CHECK_EQUALITY(res, c, d, sl, -)
         }
     }
 
-    TEST(xvariable_assign, a_times_equal_b)
+    TEST(xvariable_noalias, a_times_equal_b)
     {
         DEFINE_TEST_VARIABLES();
         {
             SCOPED_TRACE("same coordinate");
             variable_type res = a;
-            res *= a;
+            noalias(res) *= a;
             selector_list sl = make_selector_list_aa();
             CHECK_EQUALITY(res, a, a, sl, *)
         }
@@ -182,7 +193,7 @@ namespace xf
         {
             SCOPED_TRACE("different coordinates");
             variable_type res = a;
-            res *= b;
+            noalias(res) *= b;
             selector_list sl = make_selector_list_ab();
             CHECK_EQUALITY(res, a, b, sl, *)
         }
@@ -190,19 +201,19 @@ namespace xf
         {
             SCOPED_TRACE("broadcasting coordinates");
             variable_type res = c;
-            res *= d;
+            noalias(res) *= d;
             selector_list sl = make_selector_list_cd();
             CHECK_EQUALITY(res, c, d, sl, *)
         }
     }
 
-    TEST(xvariable_assign, a_divided_by_equal_b)
+    TEST(xvariable_noalias, a_divided_by_equal_b)
     {
         DEFINE_TEST_VARIABLES();
         {
             SCOPED_TRACE("same coordinate");
             variable_type res = a;
-            res /= a;
+            noalias(res) /= a;
             selector_list sl = make_selector_list_aa();
             CHECK_EQUALITY(res, a, a, sl, /)
         }
@@ -210,7 +221,7 @@ namespace xf
         {
             SCOPED_TRACE("different coordinates");
             variable_type res = a;
-            res /= b;
+            noalias(res) /= b;
             selector_list sl = make_selector_list_ab();
             CHECK_EQUALITY(res, a, b, sl, /)
         }
@@ -218,134 +229,9 @@ namespace xf
         {
             SCOPED_TRACE("broadcasting coordinates");
             variable_type res = c;
-            res /= d;
-            selector_list sl = make_selector_list_cd();
-            CHECK_EQUALITY(res, c, d, sl, /)
-        }
-    }
-
-    TEST(xvariable_assign, assign_a_plus_b)
-    {
-        DEFINE_TEST_VARIABLES();
-        {
-            SCOPED_TRACE("same coordinate");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = a + a;
-            selector_list sl = make_selector_list_aa();
-            CHECK_EQUALITY(res, a, a, sl, +)
-        }
-
-        {
-            SCOPED_TRACE("different coordinates");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = a + b;
-            selector_list sl = make_selector_list_ab();
-            CHECK_EQUALITY(res, a, b, sl, +)
-        }
-
-        {
-            SCOPED_TRACE("broadcasting coordinates");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = c + d;
-            selector_list sl = make_selector_list_cd();
-            CHECK_EQUALITY(res, c, d, sl, +)
-        }
-    }
-
-    TEST(xvariable_assign, assign_a_minus_b)
-    {
-        DEFINE_TEST_VARIABLES();
-        {
-            SCOPED_TRACE("same coordinate");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = a - a;
-            selector_list sl = make_selector_list_aa();
-            CHECK_EQUALITY(res, a, a, sl, -)
-        }
-
-        {
-            SCOPED_TRACE("different coordinates");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = a - b;
-            selector_list sl = make_selector_list_ab();
-            CHECK_EQUALITY(res, a, b, sl, -)
-        }
-
-        {
-            SCOPED_TRACE("broadcasting coordinates");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = c - d;
-            selector_list sl = make_selector_list_cd();
-            CHECK_EQUALITY(res, c, d, sl, -)
-        }
-    }
-
-    TEST(xvariable_assign, assign_a_times_b)
-    {
-        DEFINE_TEST_VARIABLES();
-        {
-            SCOPED_TRACE("same coordinate");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = a * a;
-            selector_list sl = make_selector_list_aa();
-            CHECK_EQUALITY(res, a, a, sl, *)
-        }
-
-        {
-            SCOPED_TRACE("different coordinates");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = a * b;
-            selector_list sl = make_selector_list_ab();
-            CHECK_EQUALITY(res, a, b, sl, *)
-        }
-
-        {
-            SCOPED_TRACE("broadcasting coordinates");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = c * d;
-            selector_list sl = make_selector_list_cd();
-            CHECK_EQUALITY(res, c, d, sl, *)
-        }
-    }
-
-    TEST(xvariable_assign, assign_a_divided_by_b)
-    {
-        DEFINE_TEST_VARIABLES();
-        {
-            SCOPED_TRACE("same coordinate");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = a / a;
-            selector_list sl = make_selector_list_aa();
-            CHECK_EQUALITY(res, a, a, sl, /)
-        }
-
-        {
-            SCOPED_TRACE("different coordinates");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = a / b;
-            selector_list sl = make_selector_list_ab();
-            CHECK_EQUALITY(res, a, b, sl, /)
-        }
-
-        {
-            SCOPED_TRACE("broadcasting coordinates");
-            variable_type res = a;
-            EXPECT_EQ(res(0, 0), a(0, 0));
-            res = c / d;
+            noalias(res) /= d;
             selector_list sl = make_selector_list_cd();
             CHECK_EQUALITY(res, c, d, sl, /)
         }
     }
 }
-

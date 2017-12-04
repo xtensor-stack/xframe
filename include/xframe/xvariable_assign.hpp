@@ -45,6 +45,10 @@ namespace xt
 
         template <class E1, class E2>
         static void assign_optional_tensor(xexpression<E1>& e1, const xexpression<E2>& e2, bool trivial);
+
+        template <class E1, class E2>
+        static void assign_reshaped_xexpression(xexpression<E1>& e1, const xexpression<E2>& e2,
+                                                std::pair<bool, bool> trivial);
     };
 
     /***************************************
@@ -105,21 +109,31 @@ namespace xt
                                                                                    const xexpression<E2>& e2)
     {
         std::pair<bool, bool> trivial = reshape(e1, e2);
-        if(trivial.second)
-        {
-            assign_optional_tensor(e1, e2, trivial.first);
-        }
-        else
-        {
-            assign_data(e1, e2, false);
-        }
+        assign_reshaped_xexpression(e1, e2, trivial);
     }
 
     template <class E1, class E2>
     inline void xexpression_assigner<xvariable_expression_tag>::computed_assign(xexpression<E1>& e1,
                                                                                 const xexpression<E2>& e2)
     {
-        throw std::runtime_error("computed_assign not implemented");
+        using coordinate_type = typename E1::coordinate_type;
+        using dimension_type = typename E1::dimension_type;
+        coordinate_type c;
+        dimension_type d;
+        std::pair<bool, bool> trivial = e2.derived_cast().broadcast_coordinates(c);
+        trivial.first = e2.derived_cast().broadcast_dimensions(d, trivial.first);
+        if (d.size() > e1.derived_cast().dimension_mapping().size() || !trivial.second)
+        {
+            // TODO: add constructor overloads in xvariable to avoid reshape
+            typename E1::temporary_type tmp;
+            tmp.reshape(std::move(c), std::move(d));
+            assign_reshaped_xexpression(tmp, e2, trivial);
+            e1.derived_cast().assign_temporary(std::move(tmp));
+        }
+        else
+        {
+            assign_reshaped_xexpression(e1, e2, trivial);
+        }
     }
 
     template <class E1, class E2, class F>
@@ -159,6 +173,21 @@ namespace xt
         xexpression_assigner<xoptional_expression_tag>::assign_data(e1.derived_cast().data(),
                                                                     e2.derived_cast().data(),
                                                                     trivial);
+    }
+
+    template <class E1, class E2>
+    inline void xexpression_assigner<xvariable_expression_tag>::assign_reshaped_xexpression(xexpression<E1>& e1,
+                                                                                            const xexpression<E2>& e2,
+                                                                                            std::pair<bool, bool> trivial)
+    {
+        if (trivial.second)
+        {
+            assign_optional_tensor(e1, e2, trivial.first);
+        }
+        else
+        {
+            assign_data(e1, e2, false);
+        }
     }
 }
 

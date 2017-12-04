@@ -86,6 +86,7 @@ set(XFRAME_TESTS
     test_xvariable.cpp
     test_xvariable_assign.cpp
     test_xvariable_function.cpp
+    test_xvariable_noalias.cpp
 )
 
 set(XFRAME_TARGET test_xframe)
