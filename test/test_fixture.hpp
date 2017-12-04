@@ -160,5 +160,111 @@ namespace xf
     {
         return variable_type(make_test_data2(), make_test_coordinate3(), dimension_type({"abscissa", "ordinate", "altitude"}));
     }
+
+    // abscissa: { "a", "d", "e" }
+    // ordinate: { 1, 4, 5 }
+    // dims: {{ "abscissa", 0 }, { "ordinate", 1 }}
+    // data = {{ 1. ,  2., N/A },
+    //         { N/A,  5.,  6. },
+    //         { 7. ,  8.,  9. }}
+    inline variable_type make_test_variable3()
+    {
+        return variable_type(make_test_data(), make_test_coordinate2(), dimension_type({"abscissa", "ordinate"}));
+    }
+
+    // altitude: { 1, 2, 4 }
+    // abscissa: { "a", "d", "e" }
+    // ordinate: { 1, 4, 5 }
+    // dims: {{"altitude", 0}, { "abscissa", 1 }, { "ordinate", 2 }} 
+    // data = make_test_data2
+    inline variable_type make_test_variable4()
+    {
+        return variable_type(make_test_data2(), make_test_coordinate3(), dimension_type({"altitude", "abscissa", "ordinate"}));
+    }
+
+    /*************
+     * selectors *
+     *************/
+
+    using dict_type = typename variable_type::selector_map_type<>;
+    using selector_list = std::vector<dict_type>;
+
+    inline selector_list make_selector_list_aa()
+    {
+        selector_list sl(9);
+        sl[0] = { { "abscissa", "a" },{ "ordinate", 1 } };
+        sl[1] = { { "abscissa", "a" },{ "ordinate", 2 } };
+        sl[2] = { { "abscissa", "a" },{ "ordinate", 4 } };
+        sl[3] = { { "abscissa", "c" },{ "ordinate", 1 } };
+        sl[4] = { { "abscissa", "c" },{ "ordinate", 2 } };
+        sl[5] = { { "abscissa", "c" },{ "ordinate", 4 } };
+        sl[6] = { { "abscissa", "d" },{ "ordinate", 1 } };
+        sl[7] = { { "abscissa", "d" },{ "ordinate", 2 } };
+        sl[8] = { { "abscissa", "d" },{ "ordinate", 4 } };
+        return sl;
+    }
+
+    inline selector_list make_selector_list_ab()
+    {
+        selector_list sl(12);
+        sl[0] = { { "abscissa", "a" },{ "ordinate", 1 },{ "altitude", 1 } };
+        sl[1] = { { "abscissa", "a" },{ "ordinate", 1 },{ "altitude", 2 } };
+        sl[2] = { { "abscissa", "a" },{ "ordinate", 1 },{ "altitude", 4 } };
+        sl[3] = { { "abscissa", "a" },{ "ordinate", 4 },{ "altitude", 1 } };
+        sl[4] = { { "abscissa", "a" },{ "ordinate", 4 },{ "altitude", 2 } };
+        sl[5] = { { "abscissa", "a" },{ "ordinate", 4 },{ "altitude", 4 } };
+        sl[6] = { { "abscissa", "d" },{ "ordinate", 1 },{ "altitude", 1 } };
+        sl[7] = { { "abscissa", "d" },{ "ordinate", 1 },{ "altitude", 2 } };
+        sl[8] = { { "abscissa", "d" },{ "ordinate", 1 },{ "altitude", 4 } };
+        sl[9] = { { "abscissa", "d" },{ "ordinate", 4 },{ "altitude", 1 } };
+        sl[10] = { { "abscissa", "d" },{ "ordinate", 4 },{ "altitude", 2 } };
+        sl[11] = { { "abscissa", "d" },{ "ordinate", 4 },{ "altitude", 4 } };
+        return sl;
+    }
+
+    inline selector_list make_selector_list_cd()
+    {
+        selector_list sl(27);
+        sl[0] = { { "altitude", 1 },{ "abscissa", "a" },{ "ordinate", 1 } };
+        sl[1] = { { "altitude", 1 },{ "abscissa", "a" },{ "ordinate", 4 } };
+        sl[2] = { { "altitude", 1 },{ "abscissa", "a" },{ "ordinate", 5 } };
+        sl[3] = { { "altitude", 1 },{ "abscissa", "d" },{ "ordinate", 1 } };
+        sl[4] = { { "altitude", 1 },{ "abscissa", "d" },{ "ordinate", 4 } };
+        sl[5] = { { "altitude", 1 },{ "abscissa", "d" },{ "ordinate", 5 } };
+        sl[6] = { { "altitude", 1 },{ "abscissa", "e" },{ "ordinate", 1 } };
+        sl[7] = { { "altitude", 1 },{ "abscissa", "e" },{ "ordinate", 4 } };
+        sl[8] = { { "altitude", 1 },{ "abscissa", "e" },{ "ordinate", 5 } };
+        sl[9] = { { "altitude", 2 },{ "abscissa", "a" },{ "ordinate", 1 } };
+        sl[10] = { { "altitude", 2 },{ "abscissa", "a" },{ "ordinate", 4 } };
+        sl[11] = { { "altitude", 2 },{ "abscissa", "a" },{ "ordinate", 5 } };
+        sl[12] = { { "altitude", 2 },{ "abscissa", "d" },{ "ordinate", 1 } };
+        sl[13] = { { "altitude", 2 },{ "abscissa", "d" },{ "ordinate", 4 } };
+        sl[14] = { { "altitude", 2 },{ "abscissa", "d" },{ "ordinate", 5 } };
+        sl[15] = { { "altitude", 2 },{ "abscissa", "e" },{ "ordinate", 1 } };
+        sl[16] = { { "altitude", 2 },{ "abscissa", "e" },{ "ordinate", 4 } };
+        sl[17] = { { "altitude", 2 },{ "abscissa", "e" },{ "ordinate", 5 } };
+        sl[18] = { { "altitude", 4 },{ "abscissa", "a" },{ "ordinate", 1 } };
+        sl[19] = { { "altitude", 4 },{ "abscissa", "a" },{ "ordinate", 4 } };
+        sl[20] = { { "altitude", 4 },{ "abscissa", "a" },{ "ordinate", 5 } };
+        sl[21] = { { "altitude", 4 },{ "abscissa", "d" },{ "ordinate", 1 } };
+        sl[22] = { { "altitude", 4 },{ "abscissa", "d" },{ "ordinate", 4 } };
+        sl[23] = { { "altitude", 4 },{ "abscissa", "d" },{ "ordinate", 5 } };
+        sl[24] = { { "altitude", 4 },{ "abscissa", "e" },{ "ordinate", 1 } };
+        sl[25] = { { "altitude", 4 },{ "abscissa", "e" },{ "ordinate", 4 } };
+        sl[26] = { { "altitude", 4 },{ "abscissa", "e" },{ "ordinate", 5 } };
+        return sl;
+    }
+
+#define DEFINE_TEST_VARIABLES()                                           \
+        variable_type a = make_test_variable();                           \
+        variable_type b = make_test_variable2();                          \
+        variable_type c = make_test_variable3();                          \
+        variable_type d = make_test_variable4()
+
+#define CHECK_EQUALITY(RES, A, B, SL, OP)                                 \
+    for(std::size_t i = 0; i < sl.size(); ++i)                            \
+    {                                                                     \
+        EXPECT_EQ(RES.select(SL[i]), A.select(SL[i]) OP B.select(SL[i])); \
+    }
 }
 

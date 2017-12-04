@@ -511,7 +511,7 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline bool xaxis<L, T, MT>::merge_unsorted(bool broadcasting)
+    inline bool xaxis<L, T, MT>::merge_unsorted(bool /*broadcasting*/)
     {
         return true;
     }

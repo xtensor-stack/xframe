@@ -12,6 +12,7 @@
 #include "xtensor/xoptional_assembly.hpp"
 
 #include "xvariable_base.hpp"
+#include "xvariable_assign.hpp"
 #include "xvariable_math.hpp"
 
 namespace xf
@@ -31,19 +32,34 @@ namespace xf
         using coordinate_type = xcoordinate<K, size_type, hash_map_tag, L>;
         using dimension_type = xdimension<K, size_type>;
     };
+}
 
+namespace xt
+{
+    template <class K, class VE, class FE, class L>
+    struct xcontainer_inner_types<xf::xvariable<K, VE, FE, L>>
+        : xf::xvariable_inner_types<xf::xvariable<K, VE, FE, L>>
+    {
+        using temporary_type = xf::xvariable<K, VE, FE, L>;
+    };
+}
+
+namespace xf
+{
     template <class K, class VE, class FE, class L>
     class xvariable : public xvariable_base<xvariable<K, VE, FE, L>>,
-                      public xt::xexpression<xvariable<K, VE, FE, L>>
+                      public xt::xcontainer_semantic<xvariable<K, VE, FE, L>>
     {
     public:
 
         using self_type = xvariable<K, VE, FE, L>;
         using base_type = xvariable_base<self_type>;
+        using semantic_base = xt::xcontainer_semantic<self_type>;
 
         using data_type = typename base_type::data_type;
         using coordinate_map = typename base_type::coordinate_map;
         using coordinate_initializer = typename base_type::coordinate_initializer;
+        using temporary_type = typename semantic_base::temporary_type;
 
         using expression_tag = xvariable_expression_tag;
 
@@ -66,6 +82,12 @@ namespace xf
 
         xvariable(xvariable&&) = default;
         xvariable& operator=(xvariable&&) = default;
+
+        template <class E>
+        xvariable(const xt::xexpression<E>& e);
+
+        template <class E>
+        xvariable& operator=(const xt::xexpression<E>& e);
 
     private:
 
@@ -128,6 +150,21 @@ namespace xf
     {
     }
 
+    template <class K, class VE, class FE, class L>
+    template <class E>
+    inline xvariable<K, VE, FE, L>::xvariable(const xt::xexpression<E>& e)
+        : base_type()
+    {
+        semantic_base::assign(e);
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <class E>
+    inline auto xvariable<K, VE, FE, L>::operator=(const xt::xexpression<E>& e) -> self_type&
+    {
+        return semantic_base::assign(e);
+    }
+    
     template <class K, class VE, class FE, class L>
     inline auto xvariable<K, VE, FE, L>::data_impl() noexcept -> data_type&
     {

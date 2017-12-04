@@ -9,12 +9,15 @@
 #ifndef XFRAME_XVARIABLE_BASE_HPP
 #define XFRAME_XVARIABLE_BASE_HPP
 
+#include "xtensor/xnoalias.hpp"
+
 #include "xcoordinate.hpp"
 #include "xdimension.hpp"
 #include "xselecting.hpp"
 
 namespace xf
 {
+    using xt::noalias;
 
     template <class C , class DM>
     struct enable_xvariable
@@ -79,6 +82,7 @@ namespace xf
 
         template <class Join = DEFAULT_JOIN>
         std::pair<bool, bool> broadcast_coordinates(coordinate_type& coords) const;
+        bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
         data_type& data() noexcept;
         const data_type& data() const noexcept;
@@ -290,6 +294,21 @@ namespace xf
     }
 
     template <class D>
+    inline bool  xvariable_base<D>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
+    {
+        bool ret = true;
+        if(trivial_bc)
+        {
+            dims = this->dimension_mapping();
+        }
+        else
+        {
+            ret = xf::broadcast_dimensions(dims, this->dimension_mapping());
+        }
+        return ret;
+    }
+
+    template <class D>
     inline auto xvariable_base<D>::data() noexcept -> data_type&
     {
         return derived_cast().data_impl();
@@ -311,7 +330,7 @@ namespace xf
         {
             shape[dims[c.first]] = c.second.size();
         }
-        data().reshape(shape);
+        data().reshape(std::move(shape));
         m_coordinate = std::forward<C>(coords);
         m_dimension_mapping = std::forward<DM>(dims);
     }
