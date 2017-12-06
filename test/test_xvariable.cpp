@@ -19,9 +19,11 @@ namespace xf
         variable_type::coordinate_map m;
         m["abscissa"] = make_test_saxis();
         m["ordinate"] = make_test_iaxis();
+        variable_type::coordinate_map m2(m);
 
         data_type d = make_test_data();
         dimension_type dim_map = {"abscissa", "ordinate"};
+        dimension_type dim_map2(dim_map);
         auto v2 = variable_type(d, m, dim_map);
         auto v3 = variable_type(d, std::move(m), std::move(dim_map));
 
@@ -31,6 +33,18 @@ namespace xf
 
         auto v4 = variable_type(std::move(d), {{"abscissa", make_test_saxis()}, {"ordinate", make_test_iaxis()}});
         EXPECT_EQ(v1, v4);
+
+        auto v5 = variable_type(make_test_coordinate(), dimension_type({ "abscissa", "ordinate" }));
+        EXPECT_EQ(v5.data().shape(), data_type::shape_type({ 3, 3 }));
+
+        auto v6 = variable_type(m2, dim_map2);
+        EXPECT_EQ(v6.data().shape(), data_type::shape_type({ 3, 3 }));
+
+        auto v7 = variable_type(std::move(m2), std::move(dim_map2));
+        EXPECT_EQ(v7.data().shape(), data_type::shape_type({ 3, 3 }));
+
+        auto v8 = variable_type({ { "abscissa", make_test_saxis() },{ "ordinate", make_test_iaxis() } });
+        EXPECT_EQ(v8.data().shape(), data_type::shape_type({ 3, 3 }));
     }
 
     TEST(xvariable, size)

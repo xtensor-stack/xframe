@@ -158,6 +158,8 @@ namespace xf
         xvariable_base(xvariable_base&&) = default;
         xvariable_base& operator=(xvariable_base&&) = default;
 
+        typename data_type::shape_type compute_shape() const;
+
     private:
 
         static dimension_type make_dimension_mapping(coordinate_initializer coord);
@@ -321,18 +323,24 @@ namespace xf
     }
 
     template <class D>
+    inline auto xvariable_base<D>::compute_shape() const -> typename data_type::shape_type
+    {
+        using shape_type = typename data_type::shape_type;
+        shape_type shape(m_dimension_mapping.size());
+        for (auto& c : m_coordinate)
+        {
+            shape[m_dimension_mapping[c.first]] = c.second.size();
+        }
+        return shape;
+    }
+
+    template <class D>
     template <class C, class DM>
     inline void xvariable_base<D>::reshape_impl(C&& coords, DM&& dims)
     {
-        using shape_type = typename data_type::shape_type;
-        shape_type shape(dims.size());
-        for(auto& c : coords)
-        {
-            shape[dims[c.first]] = c.second.size();
-        }
-        data().reshape(std::move(shape));
         m_coordinate = std::forward<C>(coords);
         m_dimension_mapping = std::forward<DM>(dims);
+        data().reshape(compute_shape());
     }
 
     template <class D>
