@@ -65,6 +65,17 @@ namespace xf
 
         xvariable() = default;
 
+        template <class C, class DM, class = enable_xvariable<C, DM>>
+        explicit xvariable(C&& coords, DM&& dims);
+
+        template <class DM>
+        explicit xvariable(const coordinate_map& coords, DM&& dims);
+
+        template <class DM>
+        explicit xvariable(coordinate_map&& coords, DM&& dims);
+
+        explicit xvariable(coordinate_initializer coords);
+
         template <class D, class C, class DM, class = enable_xvariable_t<C, DM>>
         explicit xvariable(D&& data, C&& coords, DM&& dims);
 
@@ -117,6 +128,37 @@ namespace xf
     /****************************
      * xvariable implementation *
      ****************************/
+
+    template <class K, class VE, class FE, class L>
+    template <class C, class DM, class>
+    inline xvariable<K, VE, FE, L>::xvariable(C&& coords, DM&& dims)
+        : base_type(std::forward<C>(coords), std::forward<DM>(dims)),
+          m_data(base_type::compute_shape())
+    {
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <class DM>
+    inline xvariable<K, VE, FE, L>::xvariable(const coordinate_map& coords, DM&& dims)
+        : base_type(coords, std::forward<DM>(dims)),
+          m_data(base_type::compute_shape())
+    {
+    }
+
+    template <class K, class VE, class FE, class L>
+    template <class DM>
+    inline xvariable<K, VE, FE, L>::xvariable(coordinate_map&& coords, DM&& dims)
+        : base_type(std::move(coords), std::forward<DM>(dims)),
+          m_data(base_type::compute_shape())
+    {
+    }
+
+    template <class K, class VE, class FE, class L>
+    inline xvariable<K, VE, FE, L>::xvariable(coordinate_initializer coords)
+        : base_type(coords),
+          m_data(base_type::compute_shape())
+    {
+    }
 
     template <class K, class VE, class FE, class L>
     template <class D, class C, class DM, class>
