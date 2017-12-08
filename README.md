@@ -1,4 +1,4 @@
-# xframe
+# ![xframe](http://quantstack.net/assets/images/xframe.svg)
 
 [![Travis](https://travis-ci.org/QuantStack/xframe.svg?branch=master)](https://travis-ci.org/QuantStack/xframe)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/ob700oy60ee23r3q/branch/master?svg=true)](https://ci.appveyor.com/project/QuantStack/xframe/branch/master)
