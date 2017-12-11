@@ -186,12 +186,6 @@ namespace xf
         dimension_type m_dimension_mapping;
     };
 
-    template <class D>
-    bool operator==(const xvariable_base<D>& lhs, const xvariable_base<D>& rhs) noexcept;
-
-    template <class D>
-    bool operator!=(const xvariable_base<D>& lhs, const xvariable_base<D>& rhs) noexcept;
-
     /****************************
      * xvariable_base implementation *
      ****************************/
@@ -469,20 +463,6 @@ namespace xf
         {
             return self(*this).select_outer(selector);
         });
-    }
-
-    template <class D>
-    inline bool operator==(const xvariable_base<D>& lhs, const xvariable_base<D>& rhs) noexcept
-    {
-        return lhs.data() == rhs.data() &&
-               lhs.coordinates() == rhs.coordinates() &&
-               lhs.dimension_mapping() == rhs.dimension_mapping();
-    }
-
-    template <class D>
-    inline bool operator!=(const xvariable_base<D>& lhs, const xvariable_base<D>& rhs) noexcept
-    {
-        return !(lhs == rhs);
     }
 
     template <class D>

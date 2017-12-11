@@ -6,16 +6,13 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XFRAME_UTILS_HPP
-#define XFRAME_UTILS_HPP
+#ifndef XFRAME_XFRAME_UTILS_HPP
+#define XFRAME_XFRAME_UTILS_HPP
 
 #include <iterator>
 
 namespace xf
 {
-    struct xvariable_expression_tag {};
-    struct xframe_expression_tag {};
-
     template <class CO, class... CI>
     bool merge_to(CO& output, const CI&... input);
 
