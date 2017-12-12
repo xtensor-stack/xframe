@@ -11,8 +11,8 @@
 
 #include "xtensor/xoptional_assembly.hpp"
 
-#include "xvariable_base.hpp"
 #include "xvariable_assign.hpp"
+#include "xvariable_base.hpp"
 #include "xvariable_math.hpp"
 
 namespace xf
@@ -109,21 +109,6 @@ namespace xf
 
         friend class xvariable_base<xvariable<K, VE, FE, L>>;
     };
-
-    // Temporary: xtensor operator== and operator!= should be enabled for xtensor_expression_tag
-    // and xoptional_expression_tag only
-    template <class K, class VE, class FE, class L>
-    inline bool operator==(const xvariable<K, VE, FE, L>& lhs, const xvariable<K, VE, FE, L>& rhs)
-    {
-        using base_type = typename xvariable<K, VE, FE, L>::base_type;
-        return operator==((const base_type&)lhs, (const base_type&)rhs);
-    }
-
-    template <class K, class VE, class FE, class L>
-    inline bool operator!=(const xvariable<K, VE, FE, L>& lhs, const xvariable<K, VE, FE, L>& rhs)
-    {
-        return !(lhs == rhs);
-    }
 
     /****************************
      * xvariable implementation *

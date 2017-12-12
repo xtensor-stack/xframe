@@ -10,9 +10,8 @@
 #define XFRAME_XVARIABLE_ASSIGN_HPP
 
 #include "xtensor/xassign.hpp"
-//#include "xtensor/xoptional.hpp"
 #include "xcoordinate.hpp"
-#include "xframe_utils.hpp"
+#include "xframe_expression.hpp"
 
 namespace xt
 {

@@ -9,7 +9,9 @@
 #ifndef XFRAME_XVARIABLE_MATH_HPP
 #define XFRAME_XVARIABLE_MATH_HPP
 
+#include "xtensor/xconcepts.hpp"
 #include "xtensor/xmath.hpp"
+#include "xframe_expression.hpp"
 #include "xvariable_function.hpp"
 
 namespace xt
@@ -28,6 +30,18 @@ namespace xt
             using type = xf::xvariable_function<F, typename F::result_type, E...>;
         };
     }
+
+    template <class E1, class E2>
+    inline std::enable_if_t<xf::xvariable_comparable<E1, E2>::value, bool>
+    operator==(const xexpression<E1>& e1, const xexpression<E2>& e2)
+    {
+        const E1& de1 = e1.derived_cast();
+        const E2& de2 = e2.derived_cast();
+
+        return de1.data() == de2.data() &&
+            de1.coordinates() == de2.coordinates() &&
+            de1.dimension_mapping() == de2.dimension_mapping();
+    }
 }
 
 namespace xf
@@ -36,6 +50,9 @@ namespace xf
     using xt::operator-;
     using xt::operator*;
     using xt::operator/;
+
+    using xt::operator==;
+    using xt::operator!=;
 }
 
 #endif
