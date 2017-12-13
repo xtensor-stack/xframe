@@ -266,5 +266,17 @@ namespace xf
     {                                                                     \
         EXPECT_EQ(RES.select(SL[i]), A.select(SL[i]) OP B.select(SL[i])); \
     }
+
+#define CHECK_SCALAR2_EQUALITY(RES, A, B, SL, OP)                         \
+    for(std::size_t i = 0; i < sl.size(); ++i)                            \
+    {                                                                     \
+        EXPECT_EQ(RES.select(SL[i]), A.select(SL[i]) OP B); \
+    }
+
+#define CHECK_SCALAR1_EQUALITY(RES, A, B, SL, OP)                         \
+    for(std::size_t i = 0; i < sl.size(); ++i)                            \
+    {                                                                     \
+        EXPECT_EQ(RES.select(SL[i]), A OP B.select(SL[i])); \
+    }
 }
 

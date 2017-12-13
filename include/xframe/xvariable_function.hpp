@@ -13,9 +13,42 @@
 
 #include "xcoordinate.hpp"
 #include "xselecting.hpp"
+#include "xvariable_scalar.hpp"
+
+namespace std
+{
+    template <class T>
+    struct common_type<T, xf::xfull_coordinate>
+    {
+        using type = T;
+    };
+
+    template <class T>
+    struct common_type<xf::xfull_coordinate, T>
+        : common_type<T, xf::xfull_coordinate>
+    {
+    };
+}
 
 namespace xf
 {
+    namespace detail
+    {
+        template <class CT>
+        struct xvariable_closure
+        {
+            using type = CT;
+        };
+
+        template <class CT>
+        struct xvariable_closure<xt::xscalar<CT>>
+        {
+            using type = xvariable_scalar<CT>;
+        };
+    }
+
+    template <class CT>
+    using xvariable_closure_t = typename detail::xvariable_closure<CT>::type;
 
     /**********************
      * xvariable_function *
@@ -28,8 +61,7 @@ namespace xf
 
         using self_type = xvariable_function<F, R, CT...>;
         using functor_type = std::remove_reference_t<F>;
-        using data_type = xt::xoptional_function<F, R, decltype(std::declval<CT>().data())...>;
-        //using data_type = xt::xoptional_function<F, R, typename std::decay_t<CT>::data_type...>;
+        using data_type = xt::xoptional_function<F, R, decltype(std::declval<xvariable_closure_t<CT>>().data())...>;
         using value_type = R;
         using reference = value_type;
         using const_reference = value_type;
@@ -38,8 +70,8 @@ namespace xf
         using size_type = xt::detail::common_size_type_t<std::decay_t<CT>...>;
         using difference_type = xt::detail::common_difference_type_t<std::decay_t<CT>...>;     
 
-        using coordinate_type = std::common_type_t<typename std::decay_t<CT>::coordinate_type...>;
-        using dimension_type = std::common_type_t<typename std::decay_t<CT>::dimension_type...>;
+        using coordinate_type = std::common_type_t<typename std::decay_t<xvariable_closure_t<CT>>::coordinate_type...>;
+        using dimension_type = std::common_type_t<typename std::decay_t<xvariable_closure_t<CT>>::dimension_type...>;
         using dimension_list = typename dimension_type::label_list;
 
         using expression_tag = xvariable_expression_tag;
@@ -82,6 +114,7 @@ namespace xf
         template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
         const_reference select(selector_map_type<N>&& selector) const;
 
+        const std::tuple<xvariable_closure_t<CT>...>& arguments() const { return m_e; }
     private:
 
         template <class Join>
@@ -102,11 +135,10 @@ namespace xf
         template <std::size_t...I>
         bool merge_dimension_mapping(std::index_sequence<I...>, dimension_type& dims) const;
 
-        std::tuple<CT...> m_e;
+        std::tuple<xvariable_closure_t<CT>...> m_e;
         functor_type m_f;
         mutable coordinate_type m_coordinate;
         mutable dimension_type m_dimension_mapping;
-        //mutable data_type m_data;
         mutable join::join_id m_join_id;
         mutable bool m_coordinate_computed;
     };
@@ -181,13 +213,46 @@ namespace xf
         return broadcast_coordinates_impl<Join>(std::make_index_sequence<sizeof...(CT)>(), coords);
     }
 
+    namespace detail
+    {
+        template <class T, std::size_t I, bool C>
+        struct first_non_scalar_impl
+        {
+            using elem_type = std::tuple_element_t<I, T>;
+
+            static elem_type& get(const T& t) noexcept
+            {
+                return std::get<I>(t);
+            }
+        };
+
+        template <class T, std::size_t I>
+        struct first_non_scalar_impl<T, I, false>
+            : first_non_scalar_impl<T, I + 1, !is_xvariable_scalar<std::tuple_element_t<I+1, T>>::value>
+        {
+        };
+
+        template <class T>
+        struct first_non_scalar
+            : first_non_scalar_impl<T, 0, !is_xvariable_scalar<std::tuple_element_t<0, T>>::value>
+        {
+        };
+
+        template <class T>
+        inline auto get_first_non_scalar(const T& t) noexcept
+        {
+            return first_non_scalar<T>::get(t);
+        }
+    }
+
     template <class F, class R, class... CT>
     inline bool xvariable_function<F, R, CT...>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
     {
         bool ret = true;
         if(trivial_bc)
         {
-            dims = std::get<0>(m_e).dimension_mapping();
+            //dims = std::get<0>(m_e).dimension_mapping();
+            dims = detail::get_first_non_scalar(m_e).dimension_mapping();
         }
         else
         {

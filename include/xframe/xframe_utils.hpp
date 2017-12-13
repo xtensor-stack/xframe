@@ -13,6 +13,11 @@
 
 namespace xf
 {
+    constexpr std::size_t dynamic()
+    {
+        return std::numeric_limits<std::size_t>::max();
+    }
+
     template <class CO, class... CI>
     bool merge_to(CO& output, const CI&... input);
 

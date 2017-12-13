@@ -13,6 +13,8 @@
 
 namespace xf
 {
+    class xfull_coordinate;
+
     /**************
      * xdimension *
      **************/
@@ -69,10 +71,19 @@ namespace xf
     private:
 
         template <class... Args>
-        bool broadcast_impl(const Args&... dims);
+        bool broadcast_impl(const self_type& a, const Args&... dims);
+
+        template <class... Args>
+        bool broadcast_impl(const xfull_coordinate& a, const Args&... dims);
+
+        bool broadcast_impl();
 
         template <class... Args>
         bool broadcast_empty(const self_type& a, const Args&... dims);
+
+        template <class... Args>
+        bool broadcast_empty(const xfull_coordinate& a, const Args&... dims);
+
         bool broadcast_empty();
     };
 
@@ -155,9 +166,24 @@ namespace xf
 
     template <class L, class T>
     template <class... Args>
-    inline bool xdimension<L, T>::broadcast_impl(const Args&... dims)
+    inline bool xdimension<L, T>::broadcast_impl(const self_type& a, const Args&... dims)
     {
-        return base_type::merge_unsorted(true, dims.labels()...);
+        bool res = base_type::merge_unsorted(true, a.labels());
+        res &= broadcast_impl(dims...);
+        return res;
+    }
+
+    template <class L, class T>
+    template <class... Args>
+    inline bool xdimension<L, T>::broadcast_impl(const xfull_coordinate& /*a*/, const Args&... dims)
+    {
+        return broadcast_impl(dims...);
+    }
+
+    template <class L, class T>
+    inline bool xdimension<L, T>::broadcast_impl()
+    {
+        return true;
     }
 
     template <class L, class T>
@@ -168,6 +194,13 @@ namespace xf
         return broadcast_impl(dims...);
     }
     
+    template <class L, class T>
+    template <class... Args>
+    bool xdimension<L, T>::broadcast_empty(const xfull_coordinate& /*a*/, const Args&... dims)
+    {
+        return broadcast_empty(dims...);
+    }
+
     template <class L, class T>
     bool xdimension<L, T>::broadcast_empty()
     {

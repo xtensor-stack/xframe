@@ -89,7 +89,6 @@ namespace xt
         std::vector<size_type> index(dim_label.size(), size_type(0));
         using selector_map_type = typename E1::template selector_map_type<>;
         selector_map_type selector;
-        size_type i = index.size();
         bool end = false;
         do
         {
@@ -123,9 +122,7 @@ namespace xt
         trivial.first = e2.derived_cast().broadcast_dimensions(d, trivial.first);
         if (d.size() > e1.derived_cast().dimension_mapping().size() || !trivial.second)
         {
-            // TODO: add constructor overloads in xvariable to avoid reshape
-            typename E1::temporary_type tmp;
-            tmp.reshape(std::move(c), std::move(d));
+            typename E1::temporary_type tmp(std::move(c), std::move(d));
             assign_reshaped_xexpression(tmp, e2, trivial);
             e1.derived_cast().assign_temporary(std::move(tmp));
         }
