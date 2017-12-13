@@ -30,11 +30,6 @@ namespace xf
     template <class C, class DM>
     using enable_xvariable_t = typename enable_xvariable<C, DM>::type;
 
-    constexpr std::size_t dynamic()
-    {
-        return std::numeric_limits<std::size_t>::max();
-    }
-
     template <class D>
     struct xvariable_inner_types;
 

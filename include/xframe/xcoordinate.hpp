@@ -46,6 +46,8 @@ namespace xf
         };
     }
 
+    class xfull_coordinate {};
+
     template <class K, class S, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
     class xcoordinate
     {
@@ -110,11 +112,15 @@ namespace xf
 
         template <class Join, class... Args>
         std::pair<bool, bool> broadcast_impl(const self_type& c, const Args&... coordinates);
+        template <class Join, class... Args>
+        std::pair<bool, bool> broadcast_impl(const xfull_coordinate& c, const Args&... coordinates);
         template <class Join>
         std::pair<bool, bool> broadcast_impl();
 
         template <class Join, class... Args>
         std::pair<bool, bool> broadcast_empty(const self_type& c, const Args&... coordinates);
+        template <class Join, class... Args>
+        std::pair<bool, bool> broadcast_empty(const xfull_coordinate& c, const Args&... coordinates);
         template <class Join>
         std::pair<bool, bool> broadcast_empty();
 
@@ -347,6 +353,13 @@ namespace xf
     }
 
     template <class K, class S, class MT, class L>
+    template <class Join, class... Args>
+    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_impl(const xfull_coordinate& /*c*/, const Args&... coordinates)
+    {
+        return broadcast_impl<Join>(coordinates...);
+    }
+
+    template <class K, class S, class MT, class L>
     template <class Join>
     inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_impl()
     {
@@ -359,6 +372,13 @@ namespace xf
     {
         m_coordinate = c.m_coordinate;
         return broadcast_impl<Join>(coordinates...);
+    }
+
+    template <class K, class S, class MT, class L>
+    template <class Join, class... Args>
+    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_empty(const xfull_coordinate& /*c*/, const Args&... coordinates)
+    {
+        return broadcast_empty<Join>(coordinates...);
     }
 
     template <class K, class S, class MT, class L>

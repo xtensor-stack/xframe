@@ -206,7 +206,7 @@ namespace xf
     }
 
     template <class C, class D, std::size_t N>
-    inline auto xiselector<C, D, N>::get_index(const coordinate_type& coord, const dimension_type& dim) const
+    inline auto xiselector<C, D, N>::get_index(const coordinate_type& /*coord*/, const dimension_type& dim) const
         -> index_type
     {
         index_type res = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
