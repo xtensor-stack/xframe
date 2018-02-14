@@ -22,7 +22,8 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - conda install gtest cmake xtl xtensor -c conda-forge
+  - conda install gtest cmake -c conda-forge
+  - conda install xtl xtensor -c QuantStack
   - cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -DBUILD_TESTS=ON .
   - nmake test_xframe
   - cd test

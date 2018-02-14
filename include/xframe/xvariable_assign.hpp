@@ -40,14 +40,14 @@ namespace xt
     private:
 
         template <class E1, class E2>
-        static std::pair<bool, bool> reshape(xexpression<E1>& e1, const xexpression<E2>& e2);
+        static std::pair<bool, bool> resize(xexpression<E1>& e1, const xexpression<E2>& e2);
 
         template <class E1, class E2>
         static void assign_optional_tensor(xexpression<E1>& e1, const xexpression<E2>& e2, bool trivial);
 
         template <class E1, class E2>
-        static void assign_reshaped_xexpression(xexpression<E1>& e1, const xexpression<E2>& e2,
-                                                std::pair<bool, bool> trivial);
+        static void assign_resized_xexpression(xexpression<E1>& e1, const xexpression<E2>& e2,
+                                               std::pair<bool, bool> trivial);
     };
 
     /***************************************
@@ -106,8 +106,8 @@ namespace xt
     inline void xexpression_assigner<xvariable_expression_tag>::assign_xexpression(xexpression<E1>& e1,
                                                                                    const xexpression<E2>& e2)
     {
-        std::pair<bool, bool> trivial = reshape(e1, e2);
-        assign_reshaped_xexpression(e1, e2, trivial);
+        std::pair<bool, bool> trivial = resize(e1, e2);
+        assign_resized_xexpression(e1, e2, trivial);
     }
 
     template <class E1, class E2>
@@ -123,12 +123,12 @@ namespace xt
         if (d.size() > e1.derived_cast().dimension_mapping().size() || !trivial.second)
         {
             typename E1::temporary_type tmp(std::move(c), std::move(d));
-            assign_reshaped_xexpression(tmp, e2, trivial);
+            assign_resized_xexpression(tmp, e2, trivial);
             e1.derived_cast().assign_temporary(std::move(tmp));
         }
         else
         {
-            assign_reshaped_xexpression(e1, e2, trivial);
+            assign_resized_xexpression(e1, e2, trivial);
         }
     }
 
@@ -148,8 +148,8 @@ namespace xt
     }
 
     template <class E1, class E2>
-    inline std::pair<bool, bool> xexpression_assigner<xvariable_expression_tag>::reshape(xexpression<E1>& e1,
-                                                                                         const xexpression<E2>& e2)
+    inline std::pair<bool, bool> xexpression_assigner<xvariable_expression_tag>::resize(xexpression<E1>& e1,
+                                                                                        const xexpression<E2>& e2)
     {
         using coordinate_type = typename E1::coordinate_type;
         using dimension_type = typename E1::dimension_type;
@@ -157,7 +157,7 @@ namespace xt
         dimension_type d;
         std::pair<bool, bool> res = e2.derived_cast().broadcast_coordinates(c);
         res.first = e2.derived_cast().broadcast_dimensions(d, res.first);
-        e1.derived_cast().reshape(c, d);
+        e1.derived_cast().resize(c, d);
         return res;
     }
 
@@ -172,9 +172,9 @@ namespace xt
     }
 
     template <class E1, class E2>
-    inline void xexpression_assigner<xvariable_expression_tag>::assign_reshaped_xexpression(xexpression<E1>& e1,
-                                                                                            const xexpression<E2>& e2,
-                                                                                            std::pair<bool, bool> trivial)
+    inline void xexpression_assigner<xvariable_expression_tag>::assign_resized_xexpression(xexpression<E1>& e1,
+                                                                                           const xexpression<E2>& e2,
+                                                                                           std::pair<bool, bool> trivial)
     {
         if (trivial.second)
         {
