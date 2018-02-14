@@ -66,6 +66,9 @@ namespace xf
         const coordinate_type& coordinates() const noexcept;
         const dimension_type& dimension_mapping() const noexcept;
 
+        void resize(const coordinate_type& coords, const dimension_type& dims);
+        void resize(coordinate_type&& coords, dimension_type&& dims);
+
         void reshape(const coordinate_type& coords, const dimension_type& dims);
         void reshape(coordinate_type&& coords, dimension_type&& dims);
 
@@ -160,6 +163,9 @@ namespace xf
         static dimension_type make_dimension_mapping(coordinate_initializer coord);
 
         template <class C, class DM>
+        void resize_impl(C&& coords, DM&& dims);
+
+        template <class C, class DM>
         void reshape_impl(C&& coords, DM&& dims);
 
         template <class S>
@@ -250,15 +256,27 @@ namespace xf
     {
         return m_dimension_mapping;
     }
+    
+    template <class D>
+    inline void xvariable_base<D>::resize(const coordinate_type& coords, const dimension_type& dims)
+    {
+        resize_impl(coords, dims);
+    }
 
     template <class D>
-    void xvariable_base<D>::reshape(const coordinate_type& coords, const dimension_type& dims)
+    inline void xvariable_base<D>::resize(coordinate_type&& coords, dimension_type&& dims)
+    {
+        resize_impl(std::move(coords), std::move(dims));
+    }
+    
+    template <class D>
+    inline void xvariable_base<D>::reshape(const coordinate_type& coords, const dimension_type& dims)
     {
         reshape_impl(coords, dims);
     }
 
     template <class D>
-    void xvariable_base<D>::reshape(coordinate_type&& coords, dimension_type&& dims)
+    inline void xvariable_base<D>::reshape(coordinate_type&& coords, dimension_type&& dims)
     {
         reshape_impl(std::move(coords), std::move(dims));
     }
@@ -321,6 +339,15 @@ namespace xf
             shape[m_dimension_mapping[c.first]] = c.second.size();
         }
         return shape;
+    }
+
+    template <class D>
+    template <class C, class DM>
+    inline void xvariable_base<D>::resize_impl(C&& coords, DM&& dims)
+    {
+        m_coordinate = std::forward<C>(coords);
+        m_dimension_mapping = std::forward<DM>(dims);
+        data().resize(compute_shape());
     }
 
     template <class D>

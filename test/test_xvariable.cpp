@@ -73,7 +73,7 @@ namespace xf
         EXPECT_EQ(v.dimension_labels(), s.labels());
     }
 
-    TEST(xvariable, reshape)
+    TEST(xvariable, resize)
     {
         auto v1 = make_test_variable();
         auto shape1 = v1.data().shape();
@@ -83,7 +83,7 @@ namespace xf
         saxis_type a = { "a", "c" };
         dimension_type dim = { "abscissa" };
         auto c = coordinate(std::make_pair(fstring("abscissa"), a));
-        v1.reshape(c, dim);
+        v1.resize(c, dim);
         auto shape2 = v1.data().shape();
         decltype(shape2) res2 = { 2 };
         EXPECT_EQ(shape2, res2);
