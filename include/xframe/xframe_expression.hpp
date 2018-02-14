@@ -28,23 +28,4 @@ namespace xf
     };
 }
 
-// TODO: remove that when xtensor is fixed
-namespace xt
-{
-    namespace detail
-    {
-        template <>
-        struct expression_tag_and<xtensor_expression_tag, xf::xvariable_expression_tag>
-        {
-            using type = xf::xvariable_expression_tag;
-        };
-
-        template <>
-        struct expression_tag_and<xf::xvariable_expression_tag, xtensor_expression_tag>
-            : expression_tag_and<xtensor_expression_tag, xf::xvariable_expression_tag>
-        {
-        };
-    }
-}
-
 #endif
