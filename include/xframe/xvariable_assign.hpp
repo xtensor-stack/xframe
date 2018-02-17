@@ -137,7 +137,9 @@ namespace xt
                                                                                        const E2& e2,
                                                                                        F&& f)
     {
-        throw std::runtime_error("scalar_computed_assign not implemented");
+        E1& d = e1.derived_cast();
+        std::transform(d.data().cbegin(), d.data().cend(), d.data().begin(),
+            [e2, &f](const auto& v) { return f(v, e2); });
     }
 
     template <class E1, class E2>

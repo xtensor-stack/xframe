@@ -53,4 +53,40 @@ namespace xf
         variable_type res2 = a / 2.;
         CHECK_SCALAR2_EQUALITY(res2, a, 2, sl, /)
     }
+
+    TEST(xvariable_scalar, a_plus_equal_b)
+    {
+        variable_type a = make_test_variable();
+        variable_type b = a;
+        selector_list sl = make_selector_list_aa();
+        a += 2.;
+        CHECK_SCALAR2_EQUALITY(a, b, 2, sl, +)
+    }
+
+    TEST(xvariable_scalar, a_minus_equal_b)
+    {
+        variable_type a = make_test_variable();
+        variable_type b = a;
+        selector_list sl = make_selector_list_aa();
+        a -= 2.;
+        CHECK_SCALAR2_EQUALITY(a, b, 2, sl, -)
+    }
+
+    TEST(xvariable_scalar, a_times_equal_b)
+    {
+        variable_type a = make_test_variable();
+        variable_type b = a;
+        selector_list sl = make_selector_list_aa();
+        a *= 2.;
+        CHECK_SCALAR2_EQUALITY(a, b, 2, sl, *)
+    }
+
+    TEST(xvariable_scalar, a_divided_by_equal_b)
+    {
+        variable_type a = make_test_variable();
+        variable_type b = a;
+        selector_list sl = make_selector_list_aa();
+        a /= 2.;
+        CHECK_SCALAR2_EQUALITY(a, b, 2, sl, /)
+    }
 }
