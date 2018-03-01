@@ -50,9 +50,25 @@ namespace xf
     using xt::operator-;
     using xt::operator*;
     using xt::operator/;
+    using xt::operator%;
+    
+    using xt::operator||;
+    using xt::operator&&;
+    using xt::operator!;
 
-    using xt::operator==;
+    using xt::operator&;
+    using xt::operator|;
+    using xt::operator^;
+    using xt::operator~;
+
     using xt::operator!=;
+    using xt::operator<;
+    using xt::operator<=;
+    using xt::operator>;
+    using xt::operator>=;
+
+    using xt::equal;
+    using xt::not_equal;
 }
 
 #endif
