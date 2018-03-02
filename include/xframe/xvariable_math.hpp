@@ -85,6 +85,15 @@ namespace xf
     // Needs a bug fix in xtensor
     //using xt::clip;
     using xt::sign;
+
+    using xt::exp;
+    using xt::exp2;
+    using xt::expm1;
+    using xt::log;
+    using xt::log10;
+    using xt::log2;
+    using xt::log1p;
+
 }
 
 #endif

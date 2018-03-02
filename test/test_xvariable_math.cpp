@@ -356,4 +356,53 @@ namespace xf
         xtl::xoptional<double> ceil = 2.4;
         EXPECT_EQ(clip(a.select(sel), floor, ceil), clip(a, floor, ceil).select(sel));
     }*/
+
+    TEST(xvariable_math, exp)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(exp(a.select(sel)), exp(a).select(sel));
+    }
+
+    TEST(xvariable_math, exp2)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(exp2(a.select(sel)), exp2(a).select(sel));
+    }
+
+    TEST(xvariable_math, expm1)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(expm1(a.select(sel)), expm1(a).select(sel));
+    }
+
+    TEST(xvariable_math, log)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(log(a.select(sel)), log(a).select(sel));
+    }
+
+    TEST(xvariable_math, log10)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(log10(a.select(sel)), log10(a).select(sel));
+    }
+
+    TEST(xvariable_math, log2)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(log2(a.select(sel)), log2(a).select(sel));
+    }
+
+    TEST(xvariable_math, log1p)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(log1p(a.select(sel)), log1p(a).select(sel));
+    }
 }
