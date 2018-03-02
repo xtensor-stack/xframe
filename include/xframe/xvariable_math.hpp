@@ -106,6 +106,13 @@ namespace xf
     using xt::acos;
     using xt::atan;
     using xt::atan2;
+
+    using xt::sinh;
+    using xt::cosh;
+    using xt::tanh;
+    using xt::asinh;
+    using xt::acosh;
+    using xt::atanh;
 }
 
 #endif

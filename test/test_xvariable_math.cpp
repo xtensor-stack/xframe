@@ -494,4 +494,46 @@ namespace xf
         dict_type sel = make_selector_aa();
         EXPECT_EQ(atan2(a.select(sel), 2. * a.select(sel)), atan2(a, 2. * a).select(sel));
     }
+
+    TEST(xvariable_math, sinh)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(sinh(a.select(sel)), sinh(a).select(sel));
+    }
+
+    TEST(xvariable_math, cosh)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(cosh(a.select(sel)), cosh(a).select(sel));
+    }
+
+    TEST(xvariable_math, tanh)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(tanh(a.select(sel)), tanh(a).select(sel));
+    }
+
+    TEST(xvariable_math, asinh)
+    {
+        variable_type a = make_test_variable() / 10.;
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(asinh(a.select(sel)), asinh(a).select(sel));
+    }
+
+    TEST(xvariable_math, acosh)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(acosh(a.select(sel)), acosh(a).select(sel));
+    }
+
+    TEST(xvariable_math, atanh)
+    {
+        variable_type a = make_test_variable() / 10.;
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(atanh(a.select(sel)), atanh(a).select(sel));
+    }
 }
