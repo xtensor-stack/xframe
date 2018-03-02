@@ -264,8 +264,7 @@ namespace xf
         EXPECT_EQ(remainder(sa, a.select(sel)), remainder(sa, a).select(sel));
     }
 
-    // TODO: enable this once xtl is fixed
-    /*TEST(xvariable_math, fma)
+    TEST(xvariable_math, fma)
     {
         variable_type a = make_test_variable();
         dict_type sel = make_selector_aa();
@@ -278,8 +277,7 @@ namespace xf
         EXPECT_EQ(fma(sa, a.select(sel), a.select(sel)), xf::fma(sa, a, a).select(sel));
 
         EXPECT_EQ(fma(sa, sb, a.select(sel)), xf::fma(sa, sb, a).select(sel));
-    }*/
-
+    }
     
     TEST(xvariable_math, fmax)
     {
@@ -564,4 +562,75 @@ namespace xf
         dict_type sel = make_selector_aa();
         EXPECT_EQ(lgamma(a.select(sel)), lgamma(a).select(sel));
     }
+
+    TEST(xvariable_math, ceil)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(ceil(a.select(sel)), ceil(a).select(sel));
+    }
+
+    TEST(xvariable_math, floor)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(floor(a.select(sel)), floor(a).select(sel));
+    }
+
+    TEST(xvariable_math, trunc)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(trunc(a.select(sel)), trunc(a).select(sel));
+    }
+
+    TEST(xvariable_math, round)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(round(a.select(sel)), round(a).select(sel));
+    }
+
+    TEST(xvariable_math, nearbyint)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(nearbyint(a.select(sel)), nearbyint(a).select(sel));
+    }
+
+    TEST(xvariable_math, rint)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(rint(a.select(sel)), rint(a).select(sel));
+    }
+
+    TEST(xvariable_math, isfinite)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(isfinite(a.select(sel)), xf::isfinite(a).select(sel));
+    }
+
+    TEST(xvariable_math, isinf)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(isinf(a.select(sel)), xf::isinf(a).select(sel));
+    }
+
+    TEST(xvariable_math, isnan)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(isnan(a.select(sel)), xf::isnan(a).select(sel));
+    }
+
+    // Needs a fix in xtensor
+    /*TEST(xvariable_math, isclose)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_TRUE(isclose(a, a).select(sel));
+    }*/
 }

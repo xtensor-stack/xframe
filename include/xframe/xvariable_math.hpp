@@ -74,15 +74,13 @@ namespace xf
     using xt::fabs;
     using xt::fmod;
     using xt::remainder;
-    // Needs a bug fix in xtl
-    //using xt::fma;
+    using xt::fma;
     using xt::fmax;
     using xt::fmin;
     using xt::fdim;
-    // Needs a bug fix in xtl
+    // Needs a fix in xtensor
     //using xt::maximum;
     //using xt::minimum;
-    // Needs a bug fix in xtensor
     //using xt::clip;
     using xt::sign;
 
@@ -118,6 +116,20 @@ namespace xf
     using xt::erfc;
     using xt::tgamma;
     using xt::lgamma;
+
+    using xt::ceil;
+    using xt::floor;
+    using xt::trunc;
+    using xt::round;
+    using xt::nearbyint;
+    using xt::rint;
+
+    using xt::isfinite;
+    using xt::isinf;
+    using xt::isnan;
+    // Needs a fix in xtensor
+    /*using xt::isclose;
+    using xt::allclose;*/
 }
 
 #endif
