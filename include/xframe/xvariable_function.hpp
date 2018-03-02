@@ -28,6 +28,12 @@ namespace std
         : common_type<T, xf::xfull_coordinate>
     {
     };
+
+    template <>
+    struct common_type<xf::xfull_coordinate, xf::xfull_coordinate>
+    {
+        using type = xf::xfull_coordinate;
+    };
 }
 
 namespace xf

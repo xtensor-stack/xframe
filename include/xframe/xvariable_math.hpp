@@ -69,6 +69,22 @@ namespace xf
 
     using xt::equal;
     using xt::not_equal;
+
+    using xt::abs;
+    using xt::fabs;
+    using xt::fmod;
+    using xt::remainder;
+    // Needs a bug fix in xtl
+    //using xt::fma;
+    using xt::fmax;
+    using xt::fmin;
+    using xt::fdim;
+    // Needs a bug fix in xtl
+    //using xt::maximum;
+    //using xt::minimum;
+    // Needs a bug fix in xtensor
+    //using xt::clip;
+    using xt::sign;
 }
 
 #endif
