@@ -536,4 +536,32 @@ namespace xf
         dict_type sel = make_selector_aa();
         EXPECT_EQ(atanh(a.select(sel)), atanh(a).select(sel));
     }
+
+    TEST(xvariable_math, erf)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(erf(a.select(sel)), erf(a).select(sel));
+    }
+
+    TEST(xvariable_math, erfc)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(erfc(a.select(sel)), erfc(a).select(sel));
+    }
+
+    TEST(xvariable_math, tgamma)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(tgamma(a.select(sel)), tgamma(a).select(sel));
+    }
+
+    TEST(xvariable_math, lgamma)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(lgamma(a.select(sel)), lgamma(a).select(sel));
+    }
 }

@@ -113,6 +113,11 @@ namespace xf
     using xt::asinh;
     using xt::acosh;
     using xt::atanh;
+
+    using xt::erf;
+    using xt::erfc;
+    using xt::tgamma;
+    using xt::lgamma;
 }
 
 #endif
