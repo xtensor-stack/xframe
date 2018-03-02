@@ -445,4 +445,53 @@ namespace xf
         double sa = 1.2;
         EXPECT_EQ(hypot(sa, a.select(sel)), hypot(sa, a).select(sel));
     }
+
+    TEST(xvariable_math, sin)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(sin(a.select(sel)), sin(a).select(sel));
+    }
+
+    TEST(xvariable_math, cos)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(cos(a.select(sel)), cos(a).select(sel));
+    }
+
+    TEST(xvariable_math, tan)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(tan(a.select(sel)), tan(a).select(sel));
+    }
+
+    TEST(xvariable_math, asin)
+    {
+        variable_type a = make_test_variable() / 10.;
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(asin(a.select(sel)), asin(a).select(sel));
+    }
+
+    TEST(xvariable_math, acos)
+    {
+        variable_type a = make_test_variable() / 10.;
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(acos(a.select(sel)), acos(a).select(sel));
+    }
+
+    TEST(xvariable_math, atan)
+    {
+        variable_type a = make_test_variable() / 10.;
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(atan(a.select(sel)), atan(a).select(sel));
+    }
+
+    TEST(xvariable_math, atan2)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(atan2(a.select(sel), 2. * a.select(sel)), atan2(a, 2. * a).select(sel));
+    }
 }

@@ -98,6 +98,14 @@ namespace xf
     using xt::sqrt;
     using xt::cbrt;
     using xt::hypot;
+
+    using xt::sin;
+    using xt::cos;
+    using xt::tan;
+    using xt::asin;
+    using xt::acos;
+    using xt::atan;
+    using xt::atan2;
 }
 
 #endif
