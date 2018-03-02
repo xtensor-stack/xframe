@@ -94,6 +94,10 @@ namespace xf
     using xt::log2;
     using xt::log1p;
 
+    using xt::pow;
+    using xt::sqrt;
+    using xt::cbrt;
+    using xt::hypot;
 }
 
 #endif

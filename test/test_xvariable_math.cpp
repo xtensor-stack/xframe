@@ -405,4 +405,44 @@ namespace xf
         dict_type sel = make_selector_aa();
         EXPECT_EQ(log1p(a.select(sel)), log1p(a).select(sel));
     }
+
+    TEST(xvariable_math, pow)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(pow(a.select(sel), a.select(sel)), pow(a, a).select(sel));
+
+        double sb = 1.2;
+        EXPECT_EQ(pow(a.select(sel), sb), pow(a, sb).select(sel));
+
+        double sa = 1.2;
+        EXPECT_EQ(pow(sa, a.select(sel)), pow(sa, a).select(sel));
+    }
+
+    TEST(xvariable_math, sqrt)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(sqrt(a.select(sel)), sqrt(a).select(sel));
+    }
+
+    TEST(xvariable_math, cbrt)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(cbrt(a.select(sel)), cbrt(a).select(sel));
+    }
+
+    TEST(xvariable_math, hypot)
+    {
+        variable_type a = make_test_variable();
+        dict_type sel = make_selector_aa();
+        EXPECT_EQ(hypot(a.select(sel), a.select(sel)), hypot(a, a).select(sel));
+
+        double sb = 1.2;
+        EXPECT_EQ(hypot(a.select(sel), sb), hypot(a, sb).select(sel));
+
+        double sa = 1.2;
+        EXPECT_EQ(hypot(sa, a.select(sel)), hypot(sa, a).select(sel));
+    }
 }
