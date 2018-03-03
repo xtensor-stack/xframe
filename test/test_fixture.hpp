@@ -17,8 +17,12 @@ namespace xf
     using iaxis_type = xaxis<int, std::size_t>;
     using dimension_type = xdimension<fstring, std::size_t>;
     using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
+    using int_data_type = xt::xoptional_assembly<xt::xarray<int>, xt::xarray<bool>>;
+    using bool_data_type = xt::xoptional_assembly<xt::xarray<bool>, xt::xarray<bool>>;
     using coordinate_type = xcoordinate<fstring, data_type::size_type>;
     using variable_type = xvariable<fstring, data_type::value_expression, data_type::flag_expression>;
+    using int_variable_type = xvariable<fstring, int_data_type::value_expression, int_data_type::flag_expression>;
+    using bool_variable_type = xvariable<fstring, bool_data_type::value_expression, bool_data_type::flag_expression>;
 
     /********
      * axes *
@@ -140,6 +144,32 @@ namespace xf
         return d2;
     }
 
+    // data = {{ 1 ,  2, N/A },
+    //         { N/A, 5,  6 },
+    //         { 7 ,  8,  9 }}
+    inline int_data_type make_test_int_data()
+    {
+        int_data_type d = {{ 1, 2, 3 },
+                           { 4, 5, 6 },
+                           { 7, 8, 9 }};
+        d(0, 2).has_value() = false;
+        d(1, 0).has_value() = false;
+        return d;
+    }
+
+    // data = {{ true ,  true, N/A },
+    //         { N/A, true,  true },
+    //         { true ,  true,  true }}
+    inline bool_data_type make_test_bool_data()
+    {
+        bool_data_type d = {{ true, true, true },
+                            { true, true, true },
+                            { true, true, true }};
+        d(0, 2).has_value() = false;
+        d(1, 0).has_value() = false;
+        return d;
+    }
+
     // abscissa: { "a", "c", "d" }
     // ordinate: { 1, 2, 4 }
     // dims: {{ "abscissa", 0 }, { "ordinate", 1 }}
@@ -182,12 +212,33 @@ namespace xf
         return variable_type(make_test_data2(), make_test_coordinate3(), dimension_type({"altitude", "abscissa", "ordinate"}));
     }
 
+    // abscissa: { "a", "c", "d" }
+    // ordinate: { 1, 2, 4 }
+    // dims: {{ "abscissa", 0 }, { "ordinate", 1 }}
+    // data = {{ 1 ,  2, N/A },
+    //         { N/A, 5,  6 },
+    //         { 7 ,  8,  9 }}
+    inline int_variable_type make_test_int_variable()
+    {
+        return int_variable_type(make_test_int_data(), make_test_coordinate(), dimension_type({ "abscissa", "ordinate" }));
+    }
+
+    inline bool_variable_type make_test_bool_variable()
+    {
+        return bool_variable_type(make_test_bool_data(), make_test_coordinate(), dimension_type({ "abscissa", "ordinate" }));
+    }
+
     /*************
      * selectors *
      *************/
 
     using dict_type = typename variable_type::selector_map_type<>;
     using selector_list = std::vector<dict_type>;
+
+    inline dict_type make_selector_aa()
+    {
+        return { {"abscissa", "a"}, {"ordinate", 1} };
+    }
 
     inline selector_list make_selector_list_aa()
     {
