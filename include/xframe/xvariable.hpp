@@ -21,42 +21,46 @@ namespace xf
      * xvariable *
      *************/
 
-    template <class K, class VE, class FE, class L = DEFAULT_LABEL_LIST>
+    template <class CCT, class ECT>
     class xvariable;
 
-    template <class K, class VE, class FE, class L>
-    struct xvariable_inner_types<xvariable<K, VE, FE, L>>
+    template <class CCT, class ECT>
+    struct xvariable_inner_types<xvariable<CCT, ECT>>
     {
-        using data_type = xt::xoptional_assembly<VE, FE>;
-        using size_type = typename data_type::size_type;
-        using coordinate_type = xcoordinate<K, size_type, hash_map_tag, L>;
-        using dimension_type = xdimension<K, size_type>;
+        using data_closure_type = ECT;
+        using coordinate_closure_type = CCT;
+        using data_type = std::decay_t<ECT>;
+        using coordinate_type = std::decay_t<CCT>;
+        using key_type = typename coordinate_type::key_type;
+        using size_type = typename coordinate_type::size_type;
+        using dimension_type = xdimension<key_type, size_type>;
     };
 }
 
 namespace xt
 {
-    template <class K, class VE, class FE, class L>
-    struct xcontainer_inner_types<xf::xvariable<K, VE, FE, L>>
-        : xf::xvariable_inner_types<xf::xvariable<K, VE, FE, L>>
+    template <class CCT, class ECT>
+    struct xcontainer_inner_types<xf::xvariable<CCT, ECT>>
+        : xf::xvariable_inner_types<xf::xvariable<CCT, ECT>>
     {
-        using temporary_type = xf::xvariable<K, VE, FE, L>;
+        using temporary_type = xf::xvariable<std::decay_t<CCT>, std::decay_t<ECT>>;
     };
 }
 
 namespace xf
 {
-    template <class K, class VE, class FE, class L>
-    class xvariable : public xvariable_base<xvariable<K, VE, FE, L>>,
-                      public xt::xcontainer_semantic<xvariable<K, VE, FE, L>>
+    template <class CCT, class ECT>
+    class xvariable : public xvariable_base<xvariable<CCT, ECT>>,
+                      public xt::xcontainer_semantic<xvariable<CCT, ECT>>
     {
     public:
 
-        using self_type = xvariable<K, VE, FE, L>;
+        using self_type = xvariable<CCT, ECT>;
         using base_type = xvariable_base<self_type>;
         using semantic_base = xt::xcontainer_semantic<self_type>;
 
         using data_type = typename base_type::data_type;
+        using data_closure_type = typename base_type::data_closure_type;
         using coordinate_map = typename base_type::coordinate_map;
         using coordinate_initializer = typename base_type::coordinate_initializer;
         using temporary_type = typename semantic_base::temporary_type;
@@ -102,104 +106,104 @@ namespace xf
 
     private:
 
-        data_type m_data;
+        data_closure_type m_data;
 
         data_type& data_impl() noexcept;
         const data_type& data_impl() const noexcept;
 
-        friend class xvariable_base<xvariable<K, VE, FE, L>>;
+        friend class xvariable_base<xvariable<CCT, ECT>>;
     };
 
     /****************************
      * xvariable implementation *
      ****************************/
 
-    template <class K, class VE, class FE, class L>
+    template <class CCT, class ECT>
     template <class C, class DM, class>
-    inline xvariable<K, VE, FE, L>::xvariable(C&& coords, DM&& dims)
+    inline xvariable<CCT, ECT>::xvariable(C&& coords, DM&& dims)
         : base_type(std::forward<C>(coords), std::forward<DM>(dims)),
           m_data(base_type::compute_shape())
     {
     }
 
-    template <class K, class VE, class FE, class L>
+    template <class CCT, class ECT>
     template <class DM>
-    inline xvariable<K, VE, FE, L>::xvariable(const coordinate_map& coords, DM&& dims)
+    inline xvariable<CCT, ECT>::xvariable(const coordinate_map& coords, DM&& dims)
         : base_type(coords, std::forward<DM>(dims)),
           m_data(base_type::compute_shape())
     {
     }
 
-    template <class K, class VE, class FE, class L>
+    template <class CCT, class ECT>
     template <class DM>
-    inline xvariable<K, VE, FE, L>::xvariable(coordinate_map&& coords, DM&& dims)
+    inline xvariable<CCT, ECT>::xvariable(coordinate_map&& coords, DM&& dims)
         : base_type(std::move(coords), std::forward<DM>(dims)),
           m_data(base_type::compute_shape())
     {
     }
 
-    template <class K, class VE, class FE, class L>
-    inline xvariable<K, VE, FE, L>::xvariable(coordinate_initializer coords)
+    template <class CCT, class ECT>
+    inline xvariable<CCT, ECT>::xvariable(coordinate_initializer coords)
         : base_type(coords),
           m_data(base_type::compute_shape())
     {
     }
 
-    template <class K, class VE, class FE, class L>
+    template <class CCT, class ECT>
     template <class D, class C, class DM, class>
-    inline xvariable<K, VE, FE, L>::xvariable(D&& data, C&& coords, DM&& dims)
+    inline xvariable<CCT, ECT>::xvariable(D&& data, C&& coords, DM&& dims)
         : base_type(std::forward<C>(coords), std::forward<DM>(dims)),
           m_data(std::forward<D>(data))
     {
     }
 
-    template <class K, class VE, class FE, class L>
+    template <class CCT, class ECT>
     template <class D, class DM>
-    inline xvariable<K, VE, FE, L>::xvariable(D&& data, const coordinate_map& coords, DM&& dims)
+    inline xvariable<CCT, ECT>::xvariable(D&& data, const coordinate_map& coords, DM&& dims)
         : base_type(coords, std::forward<DM>(dims)),
           m_data(std::forward<D>(data))
     {
     }
 
-    template <class K, class VE, class FE, class L>
+    template <class CCT, class ECT>
     template <class D, class DM>
-    inline xvariable<K, VE, FE, L>::xvariable(D&& data, coordinate_map&& coords, DM&& dims)
+    inline xvariable<CCT, ECT>::xvariable(D&& data, coordinate_map&& coords, DM&& dims)
         : base_type(std::move(coords), std::forward<DM>(dims)),
           m_data(std::forward<D>(data))
     {
     }
 
-    template <class K, class VE, class FE, class L>
+    template <class CCT, class ECT>
     template <class D>
-    inline xvariable<K, VE, FE, L>::xvariable(D&& data, coordinate_initializer coords)
+    inline xvariable<CCT, ECT>::xvariable(D&& data, coordinate_initializer coords)
         : base_type(coords),
           m_data(std::forward<D>(data))
     {
     }
 
-    template <class K, class VE, class FE, class L>
+    template <class CCT, class ECT>
     template <class E>
-    inline xvariable<K, VE, FE, L>::xvariable(const xt::xexpression<E>& e)
+    inline xvariable<CCT, ECT>::xvariable(const xt::xexpression<E>& e)
         : base_type()
     {
         semantic_base::assign(e);
     }
 
-    template <class K, class VE, class FE, class L>
+    template <class CCT, class ECT>
     template <class E>
-    inline auto xvariable<K, VE, FE, L>::operator=(const xt::xexpression<E>& e) -> self_type&
+    inline auto xvariable<CCT, ECT>::operator=(const xt::xexpression<E>& e) -> self_type&
     {
         return semantic_base::assign(e);
     }
     
-    template <class K, class VE, class FE, class L>
-    inline auto xvariable<K, VE, FE, L>::data_impl() noexcept -> data_type&
+    template <class CCT, class ECT>
+    inline auto xvariable<CCT, ECT>::data_impl() noexcept -> data_type&
     {
         return m_data;
     }
 
-    template <class K, class VE, class FE, class L>
-    inline auto xvariable<K, VE, FE, L>::data_impl() const noexcept -> const data_type&
+    template <class CCT, class ECT>
+    inline auto xvariable<CCT, ECT>::data_impl() const noexcept -> const data_type&
     {
         return m_data;
     }

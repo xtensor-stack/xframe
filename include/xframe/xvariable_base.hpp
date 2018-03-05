@@ -55,6 +55,9 @@ namespace xf
         using dimension_type = typename inner_types::dimension_type;
         using dimension_list = typename dimension_type::label_list;
 
+        using data_closure_type = typename inner_types::data_closure_type;
+        using coordinate_closure_type = typename inner_types::coordinate_closure_type;
+
         using coordinate_map = typename coordinate_type::map_type;
         using coordinate_initializer = std::initializer_list<typename coordinate_type::value_type>;
 
@@ -183,7 +186,7 @@ namespace xf
         derived_type& derived_cast() noexcept;
         const derived_type& derived_cast() const noexcept;
 
-        coordinate_type m_coordinate;
+        coordinate_closure_type m_coordinate;
         dimension_type m_dimension_mapping;
     };
 

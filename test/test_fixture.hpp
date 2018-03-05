@@ -20,9 +20,9 @@ namespace xf
     using int_data_type = xt::xoptional_assembly<xt::xarray<int>, xt::xarray<bool>>;
     using bool_data_type = xt::xoptional_assembly<xt::xarray<bool>, xt::xarray<bool>>;
     using coordinate_type = xcoordinate<fstring, data_type::size_type>;
-    using variable_type = xvariable<fstring, data_type::value_expression, data_type::flag_expression>;
-    using int_variable_type = xvariable<fstring, int_data_type::value_expression, int_data_type::flag_expression>;
-    using bool_variable_type = xvariable<fstring, bool_data_type::value_expression, bool_data_type::flag_expression>;
+    using variable_type = xvariable<coordinate_type, data_type>;
+    using int_variable_type = xvariable<coordinate_type, int_data_type>;
+    using bool_variable_type = xvariable<coordinate_type, bool_data_type>;
 
     /********
      * axes *
