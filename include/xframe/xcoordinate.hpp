@@ -142,9 +142,9 @@ namespace xf
     template <class Join, class K, class S, class MT, class L, class... Args>
     std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates);
 
-    /******************************
-     * is_coordinate_metafunction *
-     ******************************/
+    /****************************
+     * coordinate metafunctions *
+     ****************************/
 
     namespace detail
     {
@@ -157,12 +157,54 @@ namespace xf
         struct is_coordinate_impl<xcoordinate<K, S, MT, L>> : std::true_type
         {
         };
+
+        template <class T>
+        struct is_coordinate_map_impl : std::false_type
+        {
+        };
+
+        template <class K, class L, class S, class MT>
+        struct is_coordinate_map_impl<std::map<K, xaxis_variant<L, S, MT>>>
+            : std::true_type
+        {
+        };
+
+        template <class T>
+        struct get_coordinate_type_impl;
+
+        template <class K, class L, class S, class MT>
+        struct get_coordinate_type_impl<std::map<K, xaxis_variant<L, S, MT>>>
+        {
+            using type = xcoordinate<K, S, MT, L>;
+        };
     }
 
     template <class T>
     struct is_coordinate : detail::is_coordinate_impl<std::decay_t<T>>
     {
     };
+
+    template <class T>
+    struct is_coordinate_map : detail::is_coordinate_map_impl<std::decay_t<T>>
+    {
+    };
+
+    template <class T>
+    struct enable_coordinate_map
+        : std::enable_if<is_coordinate_map<T>::value, xt::void_t<>>
+    {
+    };
+
+    template <class T>
+    using enable_coordinate_map_t = typename enable_coordinate_map<T>::type;
+
+    template <class T>
+    struct get_coordinate_type : detail::get_coordinate_type_impl<std::decay_t<T>>
+    {
+    };
+
+    template <class T>
+    using get_coordinate_type_t = typename get_coordinate_type<T>::type;
 
     /******************************
      * xcoordinate implementation *

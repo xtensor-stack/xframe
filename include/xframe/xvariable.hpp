@@ -29,7 +29,7 @@ namespace xf
     {
         using data_closure_type = ECT;
         using coordinate_closure_type = CCT;
-        using data_type = std::decay_t<ECT>;
+        using data_type = std::remove_reference_t<ECT>;
         using coordinate_type = std::decay_t<CCT>;
         using key_type = typename coordinate_type::key_type;
         using size_type = typename coordinate_type::size_type;
@@ -113,6 +113,16 @@ namespace xf
 
         friend class xvariable_base<xvariable<CCT, ECT>>;
     };
+
+    /********************************
+     * variable generator functions *
+     ********************************/
+
+    template <class D, class C, class DM, class = enable_xvariable_t<C, DM>>
+    auto variable(D&& data, C&& coord, DM&& dims) -> xvariable<xtl::closure_type_t<C>, xtl::closure_type_t<D>>;
+
+    template <class D, class C, class DM, class = enable_coordinate_map_t<C>>
+    auto variable(D&& data, C&& coord, DM&& dims) -> xvariable<get_coordinate_type_t<C>, xtl::closure_type_t<D>>;
 
     /****************************
      * xvariable implementation *
@@ -206,6 +216,24 @@ namespace xf
     inline auto xvariable<CCT, ECT>::data_impl() const noexcept -> const data_type&
     {
         return m_data;
+    }
+
+   /**************************************
+    * generator functions implementation *
+    **************************************/
+
+    template <class D, class C, class DM, class>
+    inline auto variable(D&& data, C&& coord, DM&& dims) -> xvariable<xtl::closure_type_t<C>, xtl::closure_type_t<D>>
+    {
+        using type = xvariable<xtl::closure_type_t<C>, xtl::closure_type_t<D>>;
+        return type(std::forward<D>(data), std::forward<C>(coord), std::forward<DM>(dims));
+    }
+
+    template <class D, class C, class DM, class>
+    inline auto variable(D&& data, C&& coord, DM&& dims) -> xvariable<get_coordinate_type_t<C>, xtl::closure_type_t<D>>
+    {
+        using type = xvariable<decltype(coordinate(std::forward<C>(coord))), xtl::closure_type_t<D>>;
+        return type(std::forward<D>(data), coordinate(std::forward<C>(coord)), std::forward<DM>(dims));
     }
 }
 

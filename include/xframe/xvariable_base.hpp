@@ -42,11 +42,19 @@ namespace xf
         using derived_type = D;
         using inner_types = xvariable_inner_types<D>;
 
+        using data_closure_type = typename inner_types::data_closure_type;
+        using coordinate_closure_type = typename inner_types::coordinate_closure_type;
+        static constexpr bool is_data_const = std::is_const<std::remove_reference_t<data_closure_type>>::value;
+
         using data_type = typename inner_types::data_type;
         using value_type = typename data_type::value_type;
-        using reference = typename data_type::reference;
+        using reference = std::conditional_t<is_data_const,
+                                             typename data_type::const_reference,
+                                             typename data_type::reference>;
         using const_reference = typename data_type::const_reference;
-        using pointer = typename data_type::pointer;
+        using pointer = std::conditional_t<is_data_const,
+                                           typename data_type::const_pointer,
+                                           typename data_type::pointer>;
         using const_pointer = typename data_type::const_pointer;
         using size_type = typename data_type::size_type;
         using difference_type = typename data_type::difference_type;
@@ -54,9 +62,6 @@ namespace xf
         using coordinate_type = typename inner_types::coordinate_type;
         using dimension_type = typename inner_types::dimension_type;
         using dimension_list = typename dimension_type::label_list;
-
-        using data_closure_type = typename inner_types::data_closure_type;
-        using coordinate_closure_type = typename inner_types::coordinate_closure_type;
 
         using coordinate_map = typename coordinate_type::map_type;
         using coordinate_initializer = std::initializer_list<typename coordinate_type::value_type>;
