@@ -11,7 +11,6 @@
 
 namespace xf
 {
-
     TEST(xvariable, constructor)
     {
         auto v1 = variable_type(make_test_data(), make_test_coordinate(), dimension_type({"abscissa", "ordinate"}));
@@ -208,5 +207,48 @@ namespace xf
         EXPECT_EQ(t20, v(2, 0));
         EXPECT_EQ(t21, v(2, 1));
         EXPECT_EQ(t22, v(2, 2));
+    }
+
+    TEST(xvariable, generator)
+    {
+        dimension_type dim({ "abscissa", "ordinate" });
+        coordinate_type coord1 = make_test_coordinate();
+        data_type data1 = make_test_data();
+
+        auto var1 = variable(data1, coord1, dim);
+        using var1_type = decltype(var1);
+        bool coord1_res = std::is_same<var1_type::coordinate_closure_type, var1_type::coordinate_type&>::value;
+        bool data1_res = std::is_same<var1_type::data_closure_type, var1_type::data_type&>::value;
+        EXPECT_TRUE(coord1_res);
+        EXPECT_TRUE(data1_res);
+        EXPECT_EQ(var1(0, 0), 1.0);
+
+        const coordinate_type coord2 = make_test_coordinate();
+        const data_type data2 = make_test_data();
+        auto var2 = variable(data2, coord2, dim);
+        using var2_type = decltype(var2);
+        bool coord2_res = std::is_same<var2_type::coordinate_closure_type, const var2_type::coordinate_type&>::value;
+        bool data2_res = std::is_same<var2_type::data_closure_type, const var2_type::data_type&>::value;
+        EXPECT_TRUE(coord2_res);
+        EXPECT_TRUE(data2_res);
+        EXPECT_EQ(var2(0, 0), 1.0);
+
+        auto var3 = variable(make_test_data(), make_test_coordinate(), dim);
+        using var3_type = decltype(var3);
+        bool coord3_res = std::is_same<var3_type::coordinate_closure_type, var3_type::coordinate_type>::value;
+        bool data3_res = std::is_same<var3_type::data_closure_type, var3_type::data_type>::value;
+        EXPECT_TRUE(coord3_res);
+        EXPECT_TRUE(data3_res);
+        EXPECT_EQ(var3(0, 0), 1.0);
+    }
+
+    TEST(xvariable, map_generator)
+    {
+        dimension_type dim({ "abscissa", "ordinate" });
+        coordinate_type coord1 = make_test_coordinate();
+        data_type data1 = make_test_data();
+        coordinate_type::map_type coord_map = coord1.data();
+
+        auto var1 = variable(data1, coord_map, dim);
     }
 }

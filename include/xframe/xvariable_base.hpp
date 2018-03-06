@@ -42,11 +42,19 @@ namespace xf
         using derived_type = D;
         using inner_types = xvariable_inner_types<D>;
 
+        using data_closure_type = typename inner_types::data_closure_type;
+        using coordinate_closure_type = typename inner_types::coordinate_closure_type;
+        static constexpr bool is_data_const = std::is_const<std::remove_reference_t<data_closure_type>>::value;
+
         using data_type = typename inner_types::data_type;
         using value_type = typename data_type::value_type;
-        using reference = typename data_type::reference;
+        using reference = std::conditional_t<is_data_const,
+                                             typename data_type::const_reference,
+                                             typename data_type::reference>;
         using const_reference = typename data_type::const_reference;
-        using pointer = typename data_type::pointer;
+        using pointer = std::conditional_t<is_data_const,
+                                           typename data_type::const_pointer,
+                                           typename data_type::pointer>;
         using const_pointer = typename data_type::const_pointer;
         using size_type = typename data_type::size_type;
         using difference_type = typename data_type::difference_type;
@@ -183,7 +191,7 @@ namespace xf
         derived_type& derived_cast() noexcept;
         const derived_type& derived_cast() const noexcept;
 
-        coordinate_type m_coordinate;
+        coordinate_closure_type m_coordinate;
         dimension_type m_dimension_mapping;
     };
 
