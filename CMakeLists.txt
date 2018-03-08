@@ -42,6 +42,7 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_variant.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xdimension.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xdynamic_variable.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_config.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_utils.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xselecting.hpp
