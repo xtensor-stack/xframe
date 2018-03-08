@@ -132,6 +132,24 @@ namespace xf
         map_type m_coord;
     };
 
+    /********************
+     * xselector_traits *
+     ********************/
+
+    template <class C, class DM, std::size_t N>
+    struct xselector_traits
+    {
+        using coordinate_type = C;
+        using dimension_type = DM;
+
+        using selector_type = xselector<coordinate_type, dimension_type, N>;
+        using selector_map_type = typename selector_type::map_type;
+        using iselector_type = xiselector<coordinate_type, dimension_type, N>;
+        using iselector_map_type = typename iselector_type::map_type;
+        using locator_type = xlocator<coordinate_type, dimension_type, N>;
+        using locator_map_type = typename locator_type::map_type;
+    };
+
     /****************************
      * xselector implementation *
      ****************************/
