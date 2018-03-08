@@ -94,17 +94,19 @@ namespace xf
         const data_type& data() const noexcept;
 
         template <std::size_t N = dynamic()>
-        using selector_type = xselector<coordinate_type, dimension_type, N>;
+        using selector_traits = xselector_traits<coordinate_type, dimension_type, N>;
         template <std::size_t N = dynamic()>
-        using selector_map_type = typename selector_type<N>::map_type;
+        using selector_type = typename selector_traits<N>::selector_type;
         template <std::size_t N = dynamic()>
-        using iselector_type = xiselector<coordinate_type, dimension_type, N>;
+        using selector_map_type = typename selector_traits<N>::selector_map_type;
         template <std::size_t N = dynamic()>
-        using iselector_map_type = typename iselector_type<N>::map_type;
+        using iselector_type = typename selector_traits<N>::iselector_type;
         template <std::size_t N = dynamic()>
-        using locator_type = xlocator<coordinate_type, dimension_type, N>;
+        using iselector_map_type = typename selector_traits<N>::iselector_map_type;
         template <std::size_t N = dynamic()>
-        using locator_map_type = typename locator_type<N>::map_type;
+        using locator_type = typename selector_traits<N>::locator_type;
+        template <std::size_t N = dynamic()>
+        using locator_map_type = typename selector_traits<N>::locator_map_type;
 
         template <std::size_t N = dynamic()>
         reference select(const selector_map_type<N>& selector);

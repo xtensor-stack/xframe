@@ -250,5 +250,11 @@ namespace xf
         coordinate_type::map_type coord_map = coord1.data();
 
         auto var1 = variable(data1, coord_map, dim);
+        using var1_type = decltype(var1);
+        bool coord1_res = std::is_same<var1_type::coordinate_closure_type, var1_type::coordinate_type>::value;
+        bool data1_res = std::is_same<var1_type::data_closure_type, var1_type::data_type&>::value;
+        EXPECT_TRUE(coord1_res);
+        EXPECT_TRUE(data1_res);
+        EXPECT_EQ(var1(0, 0), 1.0);
     }
 }
