@@ -10,6 +10,10 @@
 #define XFRAME_XFRAME_UTILS_HPP
 
 #include <iterator>
+#include <string>
+
+#include "xframe_config.hpp"
+#include "xframe_trace.hpp"
 
 namespace xf
 {

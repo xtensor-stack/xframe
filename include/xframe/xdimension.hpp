@@ -168,7 +168,9 @@ namespace xf
     template <class... Args>
     inline bool xdimension<L, T>::broadcast_impl(const self_type& a, const Args&... dims)
     {
+        XFRAME_TRACE_BROADCAST_DIMENSIONS(*this, a);
         bool res = base_type::merge_unsorted(true, a.labels());
+        XFRAME_TRACE_DIMENSIONS_RESULT(*this, res);
         res &= broadcast_impl(dims...);
         return res;
     }

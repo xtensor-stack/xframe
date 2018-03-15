@@ -367,6 +367,7 @@ namespace xf
     inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_impl(const self_type& c, const Args&... coordinates)
     {
         auto res = broadcast_impl<Join>(coordinates...);
+        XFRAME_TRACE_BROADCAST_COORDINATES(*this, c);
         for(auto iter = c.begin(); iter != c.end(); ++iter)
         {
             auto inserted = m_coordinate.insert(*iter);
@@ -381,6 +382,7 @@ namespace xf
                 res.second &= detail::axis_broadcast<Join>::apply(axis, c[key]);
             } 
         }
+        XFRAME_TRACE_COORDINATES_RESULT(*this, res);
         return res;
     }
 

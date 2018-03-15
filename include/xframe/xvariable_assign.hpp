@@ -106,8 +106,10 @@ namespace xt
     inline void xexpression_assigner<xvariable_expression_tag>::assign_xexpression(xexpression<E1>& e1,
                                                                                    const xexpression<E2>& e2)
     {
+        XFRAME_TRACE("ASSIGN EXPRESSION - BEGIN");
         std::pair<bool, bool> trivial = resize(e1, e2);
         assign_resized_xexpression(e1, e2, trivial);
+        XFRAME_TRACE("ASSIGN EXPRESSION - END" << std::endl);
     }
 
     template <class E1, class E2>

@@ -119,8 +119,8 @@ namespace xf
 
         storage_type m_data;
 
-        template <class OS, class L1, class T1>
-        friend OS& operator<<(OS&, const xaxis_variant<L1, T1>&);
+        template <class OS, class L1, class T1, class MT1>
+        friend OS& operator<<(OS&, const xaxis_variant<L1, T1, MT1>&);
 
     };
 
