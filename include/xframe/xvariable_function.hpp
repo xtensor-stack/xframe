@@ -104,7 +104,7 @@ namespace xf
         const_reference operator()(Args... args) const;
         
         template <class Join = DEFAULT_JOIN>
-        std::pair<bool, bool> broadcast_coordinates(coordinate_type& coords) const;
+        xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
         data_type data() const noexcept;
@@ -130,7 +130,7 @@ namespace xf
         const_reference access_impl(std::index_sequence<I...>, Args... args) const;
 
         template <class Join, std::size_t... I>
-        std::pair<bool, bool> broadcast_coordinates_impl(std::index_sequence<I...>, coordinate_type& coords) const;
+        xtrivial_broadcast broadcast_coordinates_impl(std::index_sequence<I...>, coordinate_type& coords) const;
 
         template <std::size_t... I>
         data_type data_impl(std::index_sequence<I...>) const noexcept;
@@ -214,7 +214,7 @@ namespace xf
 
     template <class F, class R, class... CT>
     template <class Join>
-    inline std::pair<bool, bool> xvariable_function<F, R, CT...>::broadcast_coordinates(coordinate_type& coords) const
+    inline xtrivial_broadcast xvariable_function<F, R, CT...>::broadcast_coordinates(coordinate_type& coords) const
     {
         return broadcast_coordinates_impl<Join>(std::make_index_sequence<sizeof...(CT)>(), coords);
     }
@@ -295,7 +295,7 @@ namespace xf
         {
             m_coordinate.clear();
             auto res = broadcast_coordinates<Join>(m_coordinate);
-            res.first = broadcast_dimensions(m_dimension_mapping, res.first);
+            broadcast_dimensions(m_dimension_mapping, res.m_xtensor_trivial);
             m_coordinate_computed = true;
             m_join_id = Join::id();
         }
@@ -310,7 +310,7 @@ namespace xf
     
     template <class F, class R, class... CT>
     template <class Join, std::size_t... I>
-    inline std::pair<bool, bool>
+    inline xtrivial_broadcast
     xvariable_function<F, R, CT...>::broadcast_coordinates_impl(std::index_sequence<I...>, coordinate_type& coords) const
     {
         return xf::broadcast_coordinates<Join>(coords, std::get<I>(m_e).coordinates()...);

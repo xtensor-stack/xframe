@@ -38,6 +38,14 @@ namespace xf
 
     class xfull_coordinate {};
 
+    struct xtrivial_broadcast
+    {
+        xtrivial_broadcast() = default;
+        xtrivial_broadcast(bool xtensor_trivial, bool xframe_trivial);
+        bool m_xtensor_trivial;
+        bool m_xframe_trivial;
+    };
+
     template <class K, class S, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
     class xcoordinate
     {
@@ -89,7 +97,7 @@ namespace xf
         key_iterator key_end() const noexcept;
 
         template <class Join, class... Args>
-        std::pair<bool, bool> broadcast(const Args&... coordinates);
+        xtrivial_broadcast broadcast(const Args&... coordinates);
 
         bool operator==(const self_type& rhs) const noexcept;
         bool operator!=(const self_type& rhs) const noexcept;
@@ -101,18 +109,18 @@ namespace xf
         void insert_impl();
 
         template <class Join, class... Args>
-        std::pair<bool, bool> broadcast_impl(const self_type& c, const Args&... coordinates);
+        xtrivial_broadcast broadcast_impl(const self_type& c, const Args&... coordinates);
         template <class Join, class... Args>
-        std::pair<bool, bool> broadcast_impl(const xfull_coordinate& c, const Args&... coordinates);
+        xtrivial_broadcast broadcast_impl(const xfull_coordinate& c, const Args&... coordinates);
         template <class Join>
-        std::pair<bool, bool> broadcast_impl();
+        xtrivial_broadcast broadcast_impl();
 
         template <class Join, class... Args>
-        std::pair<bool, bool> broadcast_empty(const self_type& c, const Args&... coordinates);
+        xtrivial_broadcast broadcast_empty(const self_type& c, const Args&... coordinates);
         template <class Join, class... Args>
-        std::pair<bool, bool> broadcast_empty(const xfull_coordinate& c, const Args&... coordinates);
+        xtrivial_broadcast broadcast_empty(const xfull_coordinate& c, const Args&... coordinates);
         template <class Join>
-        std::pair<bool, bool> broadcast_empty();
+        xtrivial_broadcast broadcast_empty();
 
         map_type m_coordinate;
     };
@@ -130,7 +138,7 @@ namespace xf
     xcoordinate<K, S, MT> coordinate(std::pair<K, xaxis<L, S, MT>>... axes);
 
     template <class Join, class K, class S, class MT, class L, class... Args>
-    std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates);
+    xtrivial_broadcast broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates);
 
     /****************************
      * coordinate metafunctions *
@@ -199,6 +207,11 @@ namespace xf
     /******************************
      * xcoordinate implementation *
      ******************************/
+
+    inline xtrivial_broadcast::xtrivial_broadcast(bool xtensor_trivial, bool xframe_trivial)
+        : m_xtensor_trivial(xtensor_trivial), m_xframe_trivial(xframe_trivial)
+    {
+    }
 
     template <class K, class S, class MT, class L>
     xcoordinate<K, S, MT, L>::xcoordinate(const map_type& axes)
@@ -306,7 +319,7 @@ namespace xf
 
     template <class K, class S, class MT, class L>
     template <class Join, class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast(const Args&... coordinates)
+    inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast(const Args&... coordinates)
     {
         return empty() ? broadcast_empty<Join>(coordinates...) : broadcast_impl<Join>(coordinates...);
     }
@@ -364,7 +377,7 @@ namespace xf
 
     template <class K, class S, class MT, class L>
     template <class Join, class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_impl(const self_type& c, const Args&... coordinates)
+    inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast_impl(const self_type& c, const Args&... coordinates)
     {
         auto res = broadcast_impl<Join>(coordinates...);
         XFRAME_TRACE_BROADCAST_COORDINATES(*this, c);
@@ -373,13 +386,13 @@ namespace xf
             auto inserted = m_coordinate.insert(*iter);
             if(inserted.second)
             {
-                res.first = false;
+                res.m_xtensor_trivial = false;
             }
             else
             {
                 const auto& key = inserted.first->first;
                 auto& axis = inserted.first->second;
-                res.second &= detail::axis_broadcast<Join>::apply(axis, c[key]);
+                res.m_xframe_trivial &= detail::axis_broadcast<Join>::apply(axis, c[key]);
             } 
         }
         XFRAME_TRACE_COORDINATES_RESULT(*this, res);
@@ -388,21 +401,21 @@ namespace xf
 
     template <class K, class S, class MT, class L>
     template <class Join, class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_impl(const xfull_coordinate& /*c*/, const Args&... coordinates)
+    inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast_impl(const xfull_coordinate& /*c*/, const Args&... coordinates)
     {
         return broadcast_impl<Join>(coordinates...);
     }
 
     template <class K, class S, class MT, class L>
     template <class Join>
-    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_impl()
+    inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast_impl()
     {
-        return { true, true };
+        return xtrivial_broadcast(true, true);
     }
 
     template <class K, class S, class MT, class L>
     template <class Join, class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_empty(const self_type& c, const Args&... coordinates)
+    inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast_empty(const self_type& c, const Args&... coordinates)
     {
         m_coordinate = c.m_coordinate;
         return broadcast_impl<Join>(coordinates...);
@@ -410,14 +423,14 @@ namespace xf
 
     template <class K, class S, class MT, class L>
     template <class Join, class... Args>
-    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_empty(const xfull_coordinate& /*c*/, const Args&... coordinates)
+    inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast_empty(const xfull_coordinate& /*c*/, const Args&... coordinates)
     {
         return broadcast_empty<Join>(coordinates...);
     }
 
     template <class K, class S, class MT, class L>
     template <class Join>
-    inline std::pair<bool, bool> xcoordinate<K, S, MT, L>::broadcast_empty()
+    inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast_empty()
     {
         return broadcast_impl<Join>();
     }
@@ -451,7 +464,7 @@ namespace xf
     }
 
     template <class Join, class K, class S, class MT, class L, class... Args>
-    std::pair<bool, bool> broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates)
+    inline xtrivial_broadcast broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates)
     {
         return output.template broadcast<Join>(coordinates...);
     }

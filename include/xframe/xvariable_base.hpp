@@ -87,7 +87,7 @@ namespace xf
         const_reference operator()(Args... args) const;
 
         template <class Join = DEFAULT_JOIN>
-        std::pair<bool, bool> broadcast_coordinates(coordinate_type& coords) const;
+        xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
         data_type& data() noexcept;
@@ -307,13 +307,13 @@ namespace xf
 
     template <class D>
     template <class Join>
-    inline std::pair<bool, bool> xvariable_base<D>::broadcast_coordinates(coordinate_type& coords) const
+    inline xtrivial_broadcast xvariable_base<D>::broadcast_coordinates(coordinate_type& coords) const
     {
         return xf::broadcast_coordinates<Join>(coords, this->coordinates());
     }
 
     template <class D>
-    inline bool  xvariable_base<D>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
+    inline bool xvariable_base<D>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
     {
         bool ret = true;
         if(trivial_bc)

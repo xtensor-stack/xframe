@@ -40,14 +40,14 @@ namespace xt
     private:
 
         template <class E1, class E2>
-        static std::pair<bool, bool> resize(xexpression<E1>& e1, const xexpression<E2>& e2);
+        static xf::xtrivial_broadcast resize(xexpression<E1>& e1, const xexpression<E2>& e2);
 
         template <class E1, class E2>
         static void assign_optional_tensor(xexpression<E1>& e1, const xexpression<E2>& e2, bool trivial);
 
         template <class E1, class E2>
         static void assign_resized_xexpression(xexpression<E1>& e1, const xexpression<E2>& e2,
-                                               std::pair<bool, bool> trivial);
+                                               xf::xtrivial_broadcast trivial);
     };
 
     /***************************************
@@ -107,7 +107,7 @@ namespace xt
                                                                                    const xexpression<E2>& e2)
     {
         XFRAME_TRACE("ASSIGN EXPRESSION - BEGIN");
-        std::pair<bool, bool> trivial = resize(e1, e2);
+        xf::xtrivial_broadcast trivial = resize(e1, e2);
         assign_resized_xexpression(e1, e2, trivial);
         XFRAME_TRACE("ASSIGN EXPRESSION - END" << std::endl);
     }
@@ -120,9 +120,10 @@ namespace xt
         using dimension_type = typename E1::dimension_type;
         coordinate_type c;
         dimension_type d;
-        std::pair<bool, bool> trivial = e2.derived_cast().broadcast_coordinates(c);
-        trivial.first = e2.derived_cast().broadcast_dimensions(d, trivial.first);
-        if (d.size() > e1.derived_cast().dimension_mapping().size() || !trivial.second)
+        xf::xtrivial_broadcast trivial = e2.derived_cast().broadcast_coordinates(c);
+        bool dim_trivial = e2.derived_cast().broadcast_dimensions(d, trivial.m_xtensor_trivial);
+        trivial.m_xframe_trivial &= dim_trivial;
+        if (d.size() > e1.derived_cast().dimension_mapping().size() || !trivial.m_xframe_trivial)
         {
             typename E1::temporary_type tmp(std::move(c), std::move(d));
             assign_resized_xexpression(tmp, e2, trivial);
@@ -152,15 +153,16 @@ namespace xt
     }
 
     template <class E1, class E2>
-    inline std::pair<bool, bool> xexpression_assigner<xvariable_expression_tag>::resize(xexpression<E1>& e1,
-                                                                                        const xexpression<E2>& e2)
+    inline xf::xtrivial_broadcast xexpression_assigner<xvariable_expression_tag>::resize(xexpression<E1>& e1,
+                                                                                         const xexpression<E2>& e2)
     {
         using coordinate_type = typename E1::coordinate_type;
         using dimension_type = typename E1::dimension_type;
         coordinate_type c;
         dimension_type d;
-        std::pair<bool, bool> res = e2.derived_cast().broadcast_coordinates(c);
-        res.first = e2.derived_cast().broadcast_dimensions(d, res.first);
+        xf::xtrivial_broadcast res = e2.derived_cast().broadcast_coordinates(c);
+        bool dim_trivial = e2.derived_cast().broadcast_dimensions(d, res.m_xtensor_trivial);
+        res.m_xframe_trivial &= dim_trivial;
         e1.derived_cast().resize(c, d);
         return res;
     }
@@ -178,11 +180,11 @@ namespace xt
     template <class E1, class E2>
     inline void xexpression_assigner<xvariable_expression_tag>::assign_resized_xexpression(xexpression<E1>& e1,
                                                                                            const xexpression<E2>& e2,
-                                                                                           std::pair<bool, bool> trivial)
+                                                                                           xf::xtrivial_broadcast trivial)
     {
-        if (trivial.second)
+        if (trivial.m_xframe_trivial)
         {
-            assign_optional_tensor(e1, e2, trivial.first);
+            assign_optional_tensor(e1, e2, trivial.m_xtensor_trivial);
         }
         else
         {

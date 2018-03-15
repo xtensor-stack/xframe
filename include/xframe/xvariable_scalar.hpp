@@ -44,7 +44,7 @@ namespace xf
         const_reference operator()(Args... args) const noexcept;
 
         template <class C, class Join = DEFAULT_JOIN>
-        std::pair<bool, bool> broadcast_coordinates(C& coords) const noexcept;
+        xtrivial_broadcast broadcast_coordinates(C& coords) const noexcept;
 
         template <class D>
         bool broadcast_dimensions(D& dims, bool trivial_bc = false) const noexcept;
@@ -112,9 +112,9 @@ namespace xf
 
     template <class CT>
     template <class C, class Join>
-    inline std::pair<bool, bool> xvariable_scalar<CT>::broadcast_coordinates(C& /*coords*/) const noexcept
+    inline xtrivial_broadcast xvariable_scalar<CT>::broadcast_coordinates(C& /*coords*/) const noexcept
     {
-        return std::make_pair(true, true);
+        return xtrivial_broadcast(true, true);
     }
 
     template <class CT>
