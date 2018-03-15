@@ -106,15 +106,15 @@ namespace xf
         auto v = make_test_variable();
         auto dv = make_dynamic(v);
 
-        auto t00 = dv.locate({ { 0, "a" },{ 1, 1 } });
-        auto t01 = dv.locate({ { 0, "a" },{ 1, 2 } });
-        auto t02 = dv.locate({ { 0, "a" },{ 1, 4 } });
-        auto t10 = dv.locate({ { 0, "c" },{ 1, 1 } });
-        auto t11 = dv.locate({ { 0, "c" },{ 1, 2 } });
-        auto t12 = dv.locate({ { 0, "c" },{ 1, 4 } });
-        auto t20 = dv.locate({ { 0, "d" },{ 1, 1 } });
-        auto t21 = dv.locate({ { 0, "d" },{ 1, 2 } });
-        auto t22 = dv.locate({ { 0, "d" },{ 1, 4 } });
+        auto t00 = dv.mlocate({ { 0, "a" },{ 1, 1 } });
+        auto t01 = dv.mlocate({ { 0, "a" },{ 1, 2 } });
+        auto t02 = dv.mlocate({ { 0, "a" },{ 1, 4 } });
+        auto t10 = dv.mlocate({ { 0, "c" },{ 1, 1 } });
+        auto t11 = dv.mlocate({ { 0, "c" },{ 1, 2 } });
+        auto t12 = dv.mlocate({ { 0, "c" },{ 1, 4 } });
+        auto t20 = dv.mlocate({ { 0, "d" },{ 1, 1 } });
+        auto t21 = dv.mlocate({ { 0, "d" },{ 1, 2 } });
+        auto t22 = dv.mlocate({ { 0, "d" },{ 1, 4 } });
 
         EXPECT_EQ(opt_cast(t00), v(0, 0));
         EXPECT_EQ(opt_cast(t01), v(0, 1));

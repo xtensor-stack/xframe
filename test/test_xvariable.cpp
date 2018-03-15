@@ -188,7 +188,17 @@ namespace xf
     TEST(xvariable, locate)
     {
         auto v = make_test_variable();
-        auto t00 = v.locate({{0, "a"}, {1, 1}});
+        auto t00 = v.locate("a", 1);
+        auto t01 = v.locate("a", 2);
+        auto t02 = v.locate("a", 4);
+        auto t10 = v.locate("c", 1);
+        auto t11 = v.locate("c", 2);
+        auto t12 = v.locate("c", 4);
+        auto t20 = v.locate("d", 1);
+        auto t21 = v.locate("d", 2);
+        auto t22 = v.locate("d", 4);
+
+        /*auto t00 = v.locate({{0, "a"}, {1, 1}});
         auto t01 = v.locate({{0, "a"}, {1, 2}});
         auto t02 = v.locate({{0, "a"}, {1, 4}});
         auto t10 = v.locate({{0, "c"}, {1, 1}});
@@ -196,7 +206,7 @@ namespace xf
         auto t12 = v.locate({{0, "c"}, {1, 4}});
         auto t20 = v.locate({{0, "d"}, {1, 1}});
         auto t21 = v.locate({{0, "d"}, {1, 2}});
-        auto t22 = v.locate({{0, "d"}, {1, 4}});
+        auto t22 = v.locate({{0, "d"}, {1, 4}});*/
 
         EXPECT_EQ(t00, v(0, 0));
         EXPECT_EQ(t01, v(0, 1));
