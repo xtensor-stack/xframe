@@ -50,7 +50,7 @@ namespace xf
         virtual xtl::any do_select(const selector_map_type&, join::inner) const = 0;
 
         virtual xtl::any do_iselect(const iselector_map_type&) const = 0;
-        virtual xtl::any do_locate(const locator_map_type&) const = 0;
+        virtual xtl::any do_mlocate(const locator_map_type&) const = 0;
     };
 
     /*********************
@@ -88,7 +88,7 @@ namespace xf
         xtl::any iselect(const iselector_map_type<N>& sel) const;
 
         template <std::size_t N>
-        xtl::any locate(const locator_map_type<N>& sel) const;
+        xtl::any mlocate(const locator_map_type<N>& sel) const;
 
     protected:
 
@@ -132,7 +132,7 @@ namespace xf
         xtl::any iselect(const iselector_map_type<N>& sel) const;
 
         template <std::size_t N = std::numeric_limits<std::size_t>::max()>
-        xtl::any locate(const locator_map_type<N>& sel) const;
+        xtl::any mlocate(const locator_map_type<N>& sel) const;
 
     private:
 
@@ -195,7 +195,7 @@ namespace xf
         xtl::any do_select(const selector_map_type&, join::inner) const override;
 
         xtl::any do_iselect(const iselector_map_type&) const override;
-        xtl::any do_locate(const locator_map_type&) const override;
+        xtl::any do_mlocate(const locator_map_type&) const override;
 
     protected:
 
@@ -269,10 +269,10 @@ namespace xf
 
     template <class C, class DM>
     template <std::size_t N>
-    inline xtl::any xvariable_wrapper<C, DM>::locate(const locator_map_type<N>& sel) const
+    inline xtl::any xvariable_wrapper<C, DM>::mlocate(const locator_map_type<N>& sel) const
     {
         const xdynamic_interface<xselector_traits<C, DM, N>>& base = *this;
-        return base.do_locate(sel);
+        return base.do_mlocate(sel);
     }
 
     /************************************
@@ -340,9 +340,9 @@ namespace xf
 
     template <class C, class DM>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::locate(const locator_map_type<N>& sel) const
+    inline xtl::any xdynamic_variable<C, DM>::mlocate(const locator_map_type<N>& sel) const
     {
-        return p_wrapper->template locate<N>(sel);
+        return p_wrapper->template mlocate<N>(sel);
     }
 
     /*****************************************
@@ -401,9 +401,9 @@ namespace xf
 
     template <class T, class B>
     inline xtl::any
-    xdynamic_implementation<T, B>::do_locate(const locator_map_type& sel) const
+    xdynamic_implementation<T, B>::do_mlocate(const locator_map_type& sel) const
     {
-        return this->get_variable().locate(sel);
+        return this->get_variable().mlocate(sel);
     }
 
     /*****************************************

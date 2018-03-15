@@ -86,6 +86,12 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const;
 
+        template <class... Args>
+        reference locate(Args... args);
+
+        template <class... Args>
+        const_reference locate(Args... args) const;
+
         template <class Join = DEFAULT_JOIN>
         xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
@@ -133,16 +139,16 @@ namespace xf
         const_reference iselect(iselector_map_type<N>&& selector) const;
 
         template <std::size_t N = dynamic()>
-        reference locate(const locator_map_type<N>& locator);
+        reference mlocate(const locator_map_type<N>& locator);
 
         template <std::size_t N = dynamic()>
-        const_reference locate(const locator_map_type<N>& locator) const;
+        const_reference mlocate(const locator_map_type<N>& locator) const;
 
         template <std::size_t N = dynamic()>
-        reference locate(locator_map_type<N>&& locator);
+        reference mlocate(locator_map_type<N>&& locator);
 
         template <std::size_t N = dynamic()>
-        const_reference locate(locator_map_type<N>&& locator) const;
+        const_reference mlocate(locator_map_type<N>&& locator) const;
 
     protected:
 
@@ -177,6 +183,12 @@ namespace xf
 
         template <class C, class DM>
         void reshape_impl(C&& coords, DM&& dims);
+
+        template <std::size_t N, class T, class... Args>
+        void fill_locator(locator_map_type<N>& loc, std::size_t index, T idx, Args... args) const;
+
+        template <std::size_t N>
+        void fill_locator(locator_map_type<N>& loc, std::size_t index) const;
 
         template <class S>
         reference select_impl(const S& selector);
@@ -306,6 +318,26 @@ namespace xf
     }
 
     template <class D>
+    template <class... Args>
+    inline auto xvariable_base<D>::locate(Args... args) -> reference
+    {
+        constexpr std::size_t nb_args = sizeof...(Args);
+        locator_map_type<nb_args> loc;
+        fill_locator<nb_args>(loc, dimension() - nb_args, args...);
+        return mlocate<nb_args>(std::move(loc));
+    }
+
+    template <class D>
+    template <class... Args>
+    inline auto xvariable_base<D>::locate(Args... args) const -> const_reference
+    {
+        constexpr std::size_t nb_args = sizeof...(Args);
+        locator_map_type<nb_args> loc;
+        fill_locator<nb_args>(loc, dimension() - nb_args, args...);
+        return mlocate<nb_args>(std::move(loc));
+    }
+
+    template <class D>
     template <class Join>
     inline xtrivial_broadcast xvariable_base<D>::broadcast_coordinates(coordinate_type& coords) const
     {
@@ -427,28 +459,28 @@ namespace xf
 
     template <class D>
     template <std::size_t N>
-    inline auto xvariable_base<D>::locate(const locator_map_type<N>& locator) -> reference
+    inline auto xvariable_base<D>::mlocate(const locator_map_type<N>& locator) -> reference
     {
         return select_impl(locator_type<N>(locator));
     }
 
     template <class D>
     template <std::size_t N>
-    inline auto xvariable_base<D>::locate(const locator_map_type<N>& locator) const -> const_reference
+    inline auto xvariable_base<D>::mlocate(const locator_map_type<N>& locator) const -> const_reference
     {
         return select_impl(locator_type<N>(locator));
     }
 
     template <class D>
     template <std::size_t N>
-    inline auto xvariable_base<D>::locate(locator_map_type<N>&& locator) -> reference
+    inline auto xvariable_base<D>::mlocate(locator_map_type<N>&& locator) -> reference
     {
         return select_impl(locator_type<N>(std::move(locator)));
     }
 
     template <class D>
     template <std::size_t N>
-    inline auto xvariable_base<D>::locate(locator_map_type<N>&& locator) const -> const_reference
+    inline auto xvariable_base<D>::mlocate(locator_map_type<N>&& locator) const -> const_reference
     {
         return select_impl(locator_type<N>(std::move(locator)));
     }
@@ -459,6 +491,20 @@ namespace xf
         dimension_list tmp(coord.size());
         std::transform(coord.begin(), coord.end(), tmp.begin(), [](const auto& p) { return p.first; });
         return dimension_type(std::move(tmp));
+    }
+
+    template <class D>
+    template <std::size_t N, class T, class... Args>
+    inline void xvariable_base<D>::fill_locator(locator_map_type<N>& loc, std::size_t index, T idx, Args... args) const
+    {
+        loc[index] = idx;
+        fill_locator<N>(loc, index + 1, args...);
+    }
+
+    template <class D>
+    template <std::size_t N>
+    inline void xvariable_base<D>::fill_locator(locator_map_type<N>& loc, std::size_t index) const
+    {
     }
 
     template <class D>
