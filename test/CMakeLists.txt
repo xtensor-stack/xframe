@@ -80,10 +80,12 @@ set(XFRAME_TESTS
     main.cpp
     test_fixture.hpp
     test_xaxis.cpp
+    test_xaxis_view.cpp
     test_xcoordinate.cpp
     test_xdimension.cpp
     test_xdynamic_variable.cpp
     test_xframe_utils.cpp
+    test_xsequence_view.cpp
     test_xvariable.cpp
     test_xvariable_assign.cpp
     test_xvariable_function.cpp
