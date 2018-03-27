@@ -56,6 +56,7 @@ namespace xf
         static_assert(std::is_integral<T>::value, "index_type must be an integral type");
         
         using self_type = xaxis_variant<L, T, MT>;
+        using map_container_tag = MT;
         using traits_type = detail::xaxis_variant_traits<T, MT, L>;
         using storage_type = typename traits_type::storage_type;
         using key_type = typename traits_type::key_type;

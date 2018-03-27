@@ -39,7 +39,9 @@ include_directories(${xtl_INCLUDE_DIRS})
 
 set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xaxis_slice.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_variant.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xaxis_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xdimension.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xdynamic_variable.hpp
@@ -48,6 +50,7 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_trace.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_utils.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xselecting.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xsequence_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_assign.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_base.hpp
