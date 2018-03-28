@@ -30,11 +30,16 @@ namespace xf
         using container_type = C;
         using slice_type = S;
 
+        static constexpr bool is_const = std::is_const<std::remove_reference_t<C>>::value;
         using value_type = typename container_type::value_type;
-        using reference = typename container_type::reference;
+        using reference = std::conditional_t<is_const,
+                                             typename container_type::const_reference,
+                                             typename container_type::reference>;
         using const_reference = typename container_type::const_reference;
         using pointer = typename container_type::pointer;
-        using const_pointer = typename container_type::const_pointer;
+        using const_pointer = std::conditional_t<is_const,
+                                                 typename container_type::const_pointer,
+                                                 typename container_type::pointer>;
         using size_type = typename container_type::size_type;
         using difference_type = typename container_type::difference_type;
 
