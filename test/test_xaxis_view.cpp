@@ -33,12 +33,12 @@ namespace xf
         return slice_type(size_type(1), size_type(7), size_type(2));
     }
 
-    /*TEST(xaxis_view, label)
+    TEST(xaxis_view, label)
     {
         auto a = make_test_saxis();
         view_type v = view_type(a, make_slice());
-        EXPECT_EQ(v.label(0), v.labels<fstring>()[0]);
-    }*/
+        EXPECT_EQ(xtl::get<fstring>(v.label(0)), v.labels<fstring>()[0]);
+    }
 
     TEST(xaxis_view, size)
     {

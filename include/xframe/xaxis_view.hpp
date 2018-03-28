@@ -47,7 +47,7 @@ namespace xf
         using subiterator = typename axis_type::const_iterator;
 
         template <class LB>
-        using label_list = xsequence_view<typename axis_type::template label_list<LB>, slice_type>;
+        using label_list = xsequence_view<const typename axis_type::template label_list<LB>, slice_type>;
 
         template <class S>
         xaxis_view(const axis_type& axis, S&& slice);
