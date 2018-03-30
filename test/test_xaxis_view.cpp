@@ -22,7 +22,7 @@ namespace xf
     using slice_type = xaxis_istepped_range<size_type>;
 
     // { "a", "c", "d" }
-    inline axis_variant make_test_saxis()
+    inline axis_variant make_test_view_saxis()
     {
         return axis_variant(saxis_type({ "a", "c", "d", "f", "g", "h", "m", "n" }));
     }
@@ -35,14 +35,14 @@ namespace xf
 
     TEST(xaxis_view, label)
     {
-        auto a = make_test_saxis();
+        auto a = make_test_view_saxis();
         view_type v = view_type(a, make_slice());
         EXPECT_EQ(xtl::get<fstring>(v.label(0)), v.labels<fstring>()[0]);
     }
 
     TEST(xaxis_view, size)
     {
-        auto a = make_test_saxis();
+        auto a = make_test_view_saxis();
         view_type v = view_type(a, make_slice());
         EXPECT_EQ(v.size(), 3);
         EXPECT_FALSE(v.empty());
@@ -54,7 +54,7 @@ namespace xf
 
     TEST(xaxis_view, contains)
     {
-        auto a = make_test_saxis();
+        auto a = make_test_view_saxis();
         view_type v = view_type(a, make_slice());
 
         EXPECT_TRUE(v.contains("c"));
@@ -63,7 +63,7 @@ namespace xf
 
     TEST(xaxis_view, access)
     {
-        auto a = make_test_saxis();
+        auto a = make_test_view_saxis();
         view_type v = view_type(a, make_slice());
 
         auto vc = v["c"];
@@ -78,12 +78,13 @@ namespace xf
 
     TEST(xaxis_view, iterator)
     {
-        auto a = make_test_saxis();
+        auto a = make_test_view_saxis();
         view_type v = view_type(a, make_slice());
 
         auto it = v.begin();
 
         EXPECT_TRUE(it == v.cbegin());
+        bool res = (it != v.end());
         EXPECT_TRUE(it != v.end());
         EXPECT_TRUE(it < v.end());
         EXPECT_TRUE(it <= v.end());
@@ -92,21 +93,28 @@ namespace xf
         EXPECT_EQ(v.end(), v.cend());
 
         // TODO: fix xaxis_variant iterator
-        /*EXPECT_EQ(it->first, "c");
-        EXPECT_EQ(it->second, v["c"]);
+        EXPECT_EQ(xtl::xget<const fstring&>(it->first), "c");
+        auto val = *it;
+        EXPECT_EQ(xtl::xget<const fstring&>(val.first), "c");
+        EXPECT_EQ(val.second, v["c"]);
         ++it;
-        EXPECT_EQ(it->first, "f");
+        EXPECT_EQ(xtl::xget<const fstring&>(it->first), "f");
         EXPECT_EQ(it->second, v["f"]);
         auto tmp = it++;
-        EXPECT_EQ(tmp->first, "f");
+        EXPECT_EQ(xtl::xget<const fstring&>(tmp->first), "f");
         EXPECT_EQ(tmp->second, v["f"]);
-        EXPECT_EQ(it->first, "h");
+        EXPECT_EQ(xtl::xget<const fstring&>(it->first), "h");
         EXPECT_EQ(it->second, v["h"]);
         ++it;
-        EXPECT_EQ(it, a.end());
+        EXPECT_EQ(it, v.end());
 
-        EXPECT_EQ(v["h"], (v.begin() + 2)->first);
-        EXPECT_EQ(v["c"], (v.end() - 2)->first);
-        EXPECT_EQ(3, v.end() - v.begin());*/
+        EXPECT_EQ(v["h"], (v.begin() + 2)->second);
+        EXPECT_EQ(v["f"], (v.end() - 2)->second);
+        EXPECT_EQ(3, v.end() - v.begin());
+
+        auto f1 = v.find("c");
+        EXPECT_EQ(f1->second, v["c"]);
+        auto f2 = v.find("a");
+        EXPECT_EQ(f2, v.cend());
     }
 }
