@@ -37,6 +37,8 @@ namespace xf
         size_type operator()(size_type i) const noexcept;
         size_type step_size(size_type i, size_type n = 1) const noexcept;
 
+        size_type revert_index(size_type i) const noexcept;
+
     private:
 
         size_type m_min;
@@ -81,6 +83,8 @@ namespace xf
         size_type operator()(size_type i) const noexcept;
         size_type step_size(size_type i, size_type n = 1) const noexcept;
 
+        size_type revert_index(size_type i) const noexcept;
+
     private:
 
         size_type m_min;
@@ -108,6 +112,8 @@ namespace xf
         size_type operator()(size_type i) const noexcept;
         size_type step_size(size_type i, size_type n = 1) const noexcept;
 
+        size_type revert_index(size_type i) const noexcept;
+
     private:
 
         size_type m_size;
@@ -134,6 +140,8 @@ namespace xf
 
         size_type operator()(size_type i) const noexcept;
         size_type step_size(size_type i, size_type n = 1) const noexcept;
+
+        size_type revert_index(size_type i) const noexcept;
 
     private:
 
@@ -174,6 +182,12 @@ namespace xf
         return n;
     }
 
+    template <class T>
+    inline auto xaxis_irange<T>::revert_index(size_type i) const noexcept -> size_type
+    {
+        return i - m_min;
+    }
+
     /**************************************
      * xaxis_stepped_range implementation *
      **************************************/
@@ -205,7 +219,13 @@ namespace xf
     template <class T>
     inline auto xaxis_istepped_range<T>::step_size(size_type i, size_type n) const noexcept -> size_type
     {
-        return m_min + (i * m_step) * n;
+        return m_step * n;
+    }
+
+    template <class T>
+    inline auto xaxis_istepped_range<T>::revert_index(size_type i) const noexcept -> size_type
+    {
+        return (i - m_min) / m_step;
     }
 
     /****************************
@@ -242,6 +262,12 @@ namespace xf
         return n;
     }
 
+    template <class T>
+    inline auto xaxis_iall<T>::revert_index(size_type i) const noexcept -> size_type
+    {
+        return i;
+    }
+
     /*******************************
      * xaxis_islice implementation *
      *******************************/
@@ -275,6 +301,12 @@ namespace xf
     inline auto xaxis_islice<T>::step_size(size_type i, size_type n) const noexcept -> size_type
     {
         return xtl::visit([i, n](auto&& arg) { return arg.step_size(i, n); }, m_slice);
+    }
+
+    template <class T>
+    inline auto xaxis_islice<T>::revert_index(size_type i) const noexcept -> size_type
+    {
+        return xtl::visit([i](auto&& arg) { return arg.revert_index(i); }, m_slice);
     }
 }
 

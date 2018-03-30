@@ -205,18 +205,9 @@ namespace xf
     inline auto xaxis_view<L, T, MT>::find(const key_type& key) const -> const_iterator
     {
         auto iter = m_axis.find(key);
-        if (iter != m_axis.end() /*&& m_slice.contains(iter->second)*/)
+        if (iter != m_axis.end() && m_slice.contains(iter->second))
         {
-            // This should be replace with the commented condition above
-            // one xaxis_variant_iterator is fixed.
-            if (m_slice.contains(m_axis[key]))
-            {
-                return iter;
-            }
-            else
-            {
-                return cend;
-            }
+            return const_iterator(iter, &m_slice, m_slice.revert_index(iter->second));
         }
         else
         {
@@ -239,13 +230,14 @@ namespace xf
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::cbegin() const -> const_iterator
     {
-        return const_iterator(m_axis.cbegin(), &m_slice, size_type(0));
+        return const_iterator(m_axis.cbegin() + m_slice(0u), &m_slice, 0u);
     }
 
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::cend() const -> const_iterator
     {
-        return const_iterator(m_axis.cend(), &m_slice, size());
+        size_type inc = m_slice(size());
+        return const_iterator(m_axis.cbegin() + m_slice(size()), &m_slice, size());
     }
 
     template <class L, class T, class MT>
@@ -285,39 +277,43 @@ namespace xf
     template <class L, class T, class MT>
     inline auto xaxis_view_iterator<L, T, MT>::operator++() -> self_type&
     {
-        size_type step = xtl::visit([this](auto&& arg) { return arg.step_size(m_index); }, *p_slice);
+        size_type step = p_slice->step_size(m_index);
         m_it += static_cast<difference_type>(step);
         ++m_index;
+        return *this;
     }
 
     template <class L, class T, class MT>
     inline auto xaxis_view_iterator<L, T, MT>::operator--() -> self_type&
     {
         --m_index;
-        size_type step = xtl::visit([this](auto&& arg) { return arg.step_size(m_index); }, *p_slice);
+        size_type step = p_slice->step_size(m_index);
         m_it -= static_cast<difference_type>(step);
+        return *this;
     }
 
     template <class L, class T, class MT>
     inline auto xaxis_view_iterator<L, T, MT>::operator+=(difference_type n) -> self_type&
     {
-        size_type step = xtl::visit([this, n](auto&& arg) { return arg.step_size(m_index, n); }, *p_slice);
+        size_type step = p_slice->step_size(m_index, n);
         m_it += static_cast<difference_type>(step);
         m_index += n;
+        return *this;
     }
 
     template <class L, class T, class MT>
     inline auto xaxis_view_iterator<L, T, MT>::operator-=(difference_type n) -> self_type&
     {
         m_index -= n;
-        size_type step = xtl::visit([this, n](auto&& arg) { return arg.step_size(m_index, n); }, *p_slice);
+        size_type step = p_slice->step_size(m_index, n);
         m_it -= static_cast<difference_type>(step);
+        return *this;
     }
 
     template <class L, class T, class MT>
     inline auto xaxis_view_iterator<L, T, MT>::operator-(const self_type& rhs) const -> difference_type
     {
-        return static_cast<difference_type>(rhs.m_index) - static_cast<difference_type>(m_index);
+        return static_cast<difference_type>(m_index) - static_cast<difference_type>(rhs.m_index);
     }
 
     template <class L, class T, class MT>

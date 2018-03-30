@@ -29,12 +29,13 @@ namespace xf
             // Convenient for defining other types, but do not use it
             using label_list = std::vector<xtl::variant<L...>>;
             using key_type = xtl::variant<typename xaxis<L, S, MT>::key_type...>;
+            using key_reference = xtl::variant<xtl::xclosure_wrapper<const typename xaxis<L, S, MT>::key_type&>...>;
             using mapped_type = S;
-            using value_type = xtl::variant<typename xaxis<L, S, MT>::value_type...>;
-            using reference = xtl::variant<xtl::xclosure_wrapper<typename xaxis<L, S, MT>::reference>...>;
-            using const_reference = xtl::variant<xtl::xclosure_wrapper<const typename xaxis<L, S, MT>::const_reference>...>;
-            using pointer = xtl::variant<typename xaxis<L, S, MT>::pointer...>;
-            using const_pointer = xtl::variant<typename xaxis<L, S, MT>::const_pointer...>;
+            using value_type = std::pair<key_type, mapped_type>;
+            using reference = std::pair<key_reference, mapped_type&>;
+            using const_reference = std::pair<key_reference, const mapped_type&>;
+            using pointer = xtl::xclosure_pointer<reference>;
+            using const_pointer = xtl::xclosure_pointer<const_reference>;
             using size_type = typename label_list::size_type;
             using difference_type = typename label_list::difference_type;
             using subiterator = xtl::variant<typename xaxis<L, S, MT>::const_iterator...>;
@@ -60,6 +61,7 @@ namespace xf
         using traits_type = detail::xaxis_variant_traits<T, MT, L>;
         using storage_type = typename traits_type::storage_type;
         using key_type = typename traits_type::key_type;
+        using key_reference = typename traits_type::key_reference;
         using mapped_type = T;
         using value_type = typename traits_type::value_type;
         using reference = typename traits_type::reference;
@@ -143,6 +145,7 @@ namespace xf
         
         using self_type = xaxis_variant_iterator<L, T, MT>;
         using container_type = xaxis_variant<L, T, MT>;
+        using key_reference = typename container_type::key_reference;
         using value_type = typename container_type::value_type;
         using reference = typename container_type::const_reference;
         using pointer = typename container_type::const_pointer;
@@ -253,7 +256,7 @@ namespace xf
         auto lambda = [&key](auto&& arg) -> const_iterator
         {
             using type = typename std::decay_t<decltype(arg)>::key_type;
-            return arg.find(xtl::get<type>(key));
+            return subiterator(arg.find(xtl::get<type>(key)));
         };
         return xtl::visit(lambda, m_data);
     }
@@ -397,13 +400,22 @@ namespace xf
     template <class L, class T, class MT>
     inline auto xaxis_variant_iterator<L, T, MT>::operator*() const -> reference
     {
-        return xtl::visit([](auto&& arg) { return reference(xtl::closure(*arg)); }, m_it);
+        return xtl::visit([](auto&& arg)
+        {
+            return reference(key_reference(xtl::closure(arg->first)), arg->second);
+        }, m_it);
     }
+
+    template <class T>
+    struct DEBUG;
 
     template <class L, class T, class MT>
     inline auto xaxis_variant_iterator<L, T, MT>::operator->() const -> pointer
     {
-        return xtl::visit([](auto&& arg) { return arg.operator->(); }, m_it);
+        return xtl::visit([](auto&& arg)
+        {
+            return pointer(reference(key_reference(xtl::closure(arg->first)), arg->second));
+        }, m_it);
     }
 
     template <class L, class T, class MT>
