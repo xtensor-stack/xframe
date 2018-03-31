@@ -25,9 +25,14 @@
 #endif
 
 // A higher number leads to an ICE on VS 2015
+#ifndef STATIC_DIMENSION_LIMIT
 #define STATIC_DIMENSION_LIMIT 4
+#endif
 
+#ifndef XFRAME_ENABLE_TRACE
 #define XFRAME_ENABLE_TRACE 0
+#endif
+
 #ifndef XFRAME_OUT
 #define XFRAME_OUT std::cout
 #endif

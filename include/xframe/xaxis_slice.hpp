@@ -177,7 +177,7 @@ namespace xf
     }
 
     template <class T>
-    inline auto xaxis_irange<T>::step_size(size_type i, size_type n) const noexcept -> size_type
+    inline auto xaxis_irange<T>::step_size(size_type, size_type n) const noexcept -> size_type
     {
         return n;
     }
@@ -217,7 +217,7 @@ namespace xf
     }
     
     template <class T>
-    inline auto xaxis_istepped_range<T>::step_size(size_type i, size_type n) const noexcept -> size_type
+    inline auto xaxis_istepped_range<T>::step_size(size_type, size_type n) const noexcept -> size_type
     {
         return m_step * n;
     }
@@ -257,7 +257,7 @@ namespace xf
     }
 
     template <class T>
-    inline auto xaxis_iall<T>::step_size(size_type i, size_type n) const noexcept -> size_type
+    inline auto xaxis_iall<T>::step_size(size_type, size_type n) const noexcept -> size_type
     {
         return n;
     }

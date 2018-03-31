@@ -39,7 +39,7 @@ namespace xf
 #define XFRAME_TRACE_COORDINATES_RESULT(res, trivial)           \
     XFRAME_TRACE("res:")                                        \
     XFRAME_OUT << res;                                          \
-    XFRAME_TRACE("trivial broadcasting = (" << trivial.first << ", " << trivial.second << ")");
+    XFRAME_TRACE("trivial broadcasting = (" << trivial.m_xtensor_trivial << ", " << trivial.m_xframe_trivial << ")");
 #else
 #define XFRAME_TRACE(expr)
 #define XFRAME_TRACE_BROADCAST_DIMENSIONS(lhs, rhs)
