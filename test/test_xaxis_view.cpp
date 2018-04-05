@@ -21,7 +21,7 @@ namespace xf
     using view_type = xaxis_view<DEFAULT_LABEL_LIST, size_type, typename axis_variant::map_container_tag>;
     using slice_type = xaxis_istepped_range<size_type>;
 
-    // { "a", "c", "d" }
+    // { "a", "c", "d", "f", "g", "h", "m", "n" }
     inline axis_variant make_test_view_saxis()
     {
         return axis_variant(saxis_type({ "a", "c", "d", "f", "g", "h", "m", "n" }));
@@ -116,5 +116,33 @@ namespace xf
         EXPECT_EQ(f1->second, v["c"]);
         auto f2 = v.find("a");
         EXPECT_EQ(f2, v.cend());
+    }
+
+    TEST(xaxis_view, range)
+    {
+        // { "a", "c", "d", "f", "g", "h", "m", "n" }
+        auto a = make_test_view_saxis();
+
+        auto r = range("c", "g");
+        view_type vr = view_type(a, r.build_islice(a));
+        auto vrit = vr.cbegin();
+        EXPECT_EQ(xtl::xget<const fstring&>(vrit->first), "c");
+        ++vrit;
+        EXPECT_EQ(xtl::xget<const fstring&>(vrit->first), "d");
+        ++vrit;
+        EXPECT_EQ(xtl::xget<const fstring&>(vrit->first), "f");
+        ++vrit;
+        EXPECT_EQ(vrit, vr.cend());
+
+        auto sr = range("c", "m", 2);
+        view_type vsr = view_type(a, sr.build_islice(a));
+        auto vsrit = vsr.cbegin();
+        EXPECT_EQ(xtl::xget<const fstring&>(vsrit->first), "c");
+        ++vsrit;
+        EXPECT_EQ(xtl::xget<const fstring&>(vsrit->first), "f");
+        ++vsrit;
+        EXPECT_EQ(xtl::xget<const fstring&>(vsrit->first), "h");
+        ++vsrit;
+        EXPECT_EQ(vsrit, vsr.cend());
     }
 }
