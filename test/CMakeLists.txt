@@ -79,9 +79,11 @@ include_directories(${GTEST_INCLUDE_DIRS})
 set(XFRAME_TESTS
     main.cpp
     test_fixture.hpp
+    test_fixture_view.hpp
     test_xaxis.cpp
     test_xaxis_view.cpp
     test_xcoordinate.cpp
+    test_xcoordinate_view.cpp
     test_xdimension.cpp
     test_xdynamic_variable.cpp
     test_xframe_utils.cpp
