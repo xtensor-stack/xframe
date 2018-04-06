@@ -65,6 +65,7 @@ namespace xf
 
         using coordinate_map = typename coordinate_type::map_type;
         using coordinate_initializer = std::initializer_list<typename coordinate_type::value_type>;
+        using key_type = typename coordinate_map::key_type;
 
         static value_type missing();
 

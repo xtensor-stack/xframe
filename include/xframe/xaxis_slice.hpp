@@ -29,6 +29,7 @@ namespace xf
     public:
 
         using size_type = T;
+        using self_type = xaxis_irange<T>;
 
         xaxis_irange() = default;
         xaxis_irange(size_type min_val, size_type max_val) noexcept;
@@ -40,6 +41,9 @@ namespace xf
         size_type step_size(size_type i, size_type n = 1) const noexcept;
 
         size_type revert_index(size_type i) const noexcept;
+
+        bool operator==(const self_type& rhs) const noexcept;
+        bool operator!=(const self_type& rhs) const noexcept;
 
     private:
 
@@ -57,6 +61,7 @@ namespace xf
     public:
 
         using size_type = T;
+        using self_type = xaxis_istepped_range<T>;
 
         xaxis_istepped_range() = default;
         xaxis_istepped_range(size_type min_val, size_type max_val, size_type step) noexcept;
@@ -68,6 +73,9 @@ namespace xf
         size_type step_size(size_type i, size_type n = 1) const noexcept;
 
         size_type revert_index(size_type i) const noexcept;
+
+        bool operator==(const self_type& rhs) const noexcept;
+        bool operator!=(const self_type& rhs) const noexcept;
 
     private:
 
@@ -86,6 +94,7 @@ namespace xf
     public:
 
         using size_type = T;
+        using self_type = xaxis_iall<T>;
 
         xaxis_iall() = default;
         explicit xaxis_iall(size_type size) noexcept;
@@ -97,6 +106,9 @@ namespace xf
         size_type step_size(size_type i, size_type n = 1) const noexcept;
 
         size_type revert_index(size_type i) const noexcept;
+
+        bool operator==(const self_type& rhs) const noexcept;
+        bool operator!=(const self_type& rhs) const noexcept;
 
     private:
 
@@ -114,6 +126,7 @@ namespace xf
 
         using slice_type = xtl::variant<xaxis_irange<T>, xaxis_istepped_range<T>, xaxis_iall<T>>;
         using size_type = T;
+        using self_type = xaxis_islice<T>;
 
         xaxis_islice() = default;
         template <class S>
@@ -126,6 +139,9 @@ namespace xf
         size_type step_size(size_type i, size_type n = 1) const noexcept;
 
         size_type revert_index(size_type i) const noexcept;
+
+        bool operator==(const self_type& rhs) const noexcept;
+        bool operator!=(const self_type& rhs) const noexcept;
 
     private:
 
@@ -277,6 +293,18 @@ namespace xf
         return i - m_min;
     }
 
+    template <class T>
+    inline bool xaxis_irange<T>::operator==(const self_type& rhs) const noexcept
+    {
+        return (m_min == rhs.m_min) && (m_size == rhs.m_size);
+    }
+
+    template <class T>
+    inline bool xaxis_irange<T>::operator!=(const self_type& rhs) const noexcept
+    {
+        return !(*this == rhs);
+    }
+
     /***************************************
      * xaxis_istepped_range implementation *
      ***************************************/
@@ -315,6 +343,18 @@ namespace xf
     inline auto xaxis_istepped_range<T>::revert_index(size_type i) const noexcept -> size_type
     {
         return (i - m_min) / m_step;
+    }
+    
+    template <class T>
+    inline bool xaxis_istepped_range<T>::operator==(const self_type& rhs) const noexcept
+    {
+        return (m_min == rhs.m_min) && (m_size == rhs.m_size) && (m_step == rhs.m_step);
+    }
+
+    template <class T>
+    inline bool xaxis_istepped_range<T>::operator!=(const self_type& rhs) const noexcept
+    {
+        return !(*this == rhs);
     }
 
     /*****************************
@@ -357,6 +397,18 @@ namespace xf
         return i;
     }
 
+    template <class T>
+    inline bool xaxis_iall<T>::operator==(const self_type& rhs) const noexcept
+    {
+        return m_size == rhs.m_size;
+    }
+
+    template <class T>
+    inline bool xaxis_iall<T>::operator!=(const self_type& rhs) const noexcept
+    {
+        return !(*this == rhs);
+    }
+
     /*******************************
      * xaxis_islice implementation *
      *******************************/
@@ -396,6 +448,18 @@ namespace xf
     inline auto xaxis_islice<T>::revert_index(size_type i) const noexcept -> size_type
     {
         return xtl::visit([i](auto&& arg) { return arg.revert_index(i); }, m_slice);
+    }
+
+    template <class T>
+    inline bool xaxis_islice<T>::operator==(const self_type& rhs) const noexcept
+    {
+        return m_slice == rhs.m_slice;
+    }
+
+    template <class T>
+    inline bool xaxis_islice<T>::operator!=(const self_type& rhs) const noexcept
+    {
+        return !(*this == rhs);
     }
 
     /******************************

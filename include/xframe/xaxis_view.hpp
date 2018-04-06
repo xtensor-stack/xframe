@@ -28,6 +28,7 @@ namespace xf
     {
     public:
 
+        using self_type = xaxis_view<L, T, MT>;
         using axis_type = xaxis_variant<L, T, MT>;
         using slice_type = xaxis_islice<T>;
 
@@ -75,6 +76,9 @@ namespace xf
 
         const_reverse_iterator crbegin() const;
         const_reverse_iterator crend() const;
+
+        bool operator==(const self_type& rhs) const noexcept;
+        bool operator!=(const self_type& rhs) const noexcept;
 
     private:
 
@@ -262,6 +266,18 @@ namespace xf
     inline auto xaxis_view<L, T, MT>::crend() const -> const_reverse_iterator
     {
         return const_reverse_iterator(cbegin());
+    }
+
+    template <class L, class T, class MT>
+    inline bool xaxis_view<L, T, MT>::operator==(const self_type& rhs) const noexcept
+    {
+        return m_axis == rhs.m_axis && m_slice == rhs.m_slice;
+    }
+
+    template <class L, class T, class MT>
+    inline bool xaxis_view<L, T, MT>::operator!=(const self_type& rhs) const noexcept
+    {
+        return !(*this == rhs);
     }
 
     /**************************************
