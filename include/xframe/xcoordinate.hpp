@@ -9,6 +9,7 @@
 #ifndef XFRAME_XCOORDINATE_HPP
 #define XFRAME_XCOORDINATE_HPP
 
+#include "xtensor/xutils.hpp"
 #include "xcoordinate_base.hpp"
 
 namespace xf

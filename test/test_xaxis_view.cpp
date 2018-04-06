@@ -10,22 +10,11 @@
 #include <vector>
 #include "gtest/gtest.h"
 #include "xtl/xbasic_fixed_string.hpp"
-#include "xframe/xaxis_view.hpp"
+#include "test_fixture_view.hpp"
 
 namespace xf
 {
-    using fstring = xtl::xfixed_string<55>;
-    using saxis_type = xaxis<fstring, std::size_t>;
-    using size_type = std::size_t;
-    using axis_variant = xaxis_variant<DEFAULT_LABEL_LIST, size_type>;
-    using view_type = xaxis_view<DEFAULT_LABEL_LIST, size_type, typename axis_variant::map_container_tag>;
     using slice_type = xaxis_istepped_range<size_type>;
-
-    // { "a", "c", "d", "f", "g", "h", "m", "n" }
-    inline axis_variant make_test_view_saxis()
-    {
-        return axis_variant(saxis_type({ "a", "c", "d", "f", "g", "h", "m", "n" }));
-    }
 
     // stepped_range(1, 7, 2)
     inline slice_type make_slice()
@@ -35,27 +24,27 @@ namespace xf
 
     TEST(xaxis_view, label)
     {
-        auto a = make_test_view_saxis();
-        view_type v = view_type(a, make_slice());
+        auto a = make_variant_view_saxis();
+        axis_view_type v = axis_view_type(a, make_slice());
         EXPECT_EQ(xtl::get<fstring>(v.label(0)), v.labels<fstring>()[0]);
     }
 
     TEST(xaxis_view, size)
     {
-        auto a = make_test_view_saxis();
-        view_type v = view_type(a, make_slice());
+        auto a = make_variant_view_saxis();
+        axis_view_type v = axis_view_type(a, make_slice());
         EXPECT_EQ(v.size(), 3);
         EXPECT_FALSE(v.empty());
 
-        view_type v2 = view_type(a, slice_type(size_type(1), size_type(1), size_type(2)));
+        axis_view_type v2 = axis_view_type(a, slice_type(size_type(1), size_type(1), size_type(2)));
         EXPECT_EQ(v2.size(), 0u);
         EXPECT_TRUE(v2.empty());
     }
 
     TEST(xaxis_view, contains)
     {
-        auto a = make_test_view_saxis();
-        view_type v = view_type(a, make_slice());
+        auto a = make_variant_view_saxis();
+        axis_view_type v = axis_view_type(a, make_slice());
 
         EXPECT_TRUE(v.contains("c"));
         EXPECT_FALSE(v.contains("d"));
@@ -63,8 +52,8 @@ namespace xf
 
     TEST(xaxis_view, access)
     {
-        auto a = make_test_view_saxis();
-        view_type v = view_type(a, make_slice());
+        auto a = make_variant_view_saxis();
+        axis_view_type v = axis_view_type(a, make_slice());
 
         auto vc = v["c"];
         auto vf = v["f"];
@@ -78,8 +67,8 @@ namespace xf
 
     TEST(xaxis_view, iterator)
     {
-        auto a = make_test_view_saxis();
-        view_type v = view_type(a, make_slice());
+        auto a = make_variant_view_saxis();
+        axis_view_type v = axis_view_type(a, make_slice());
 
         auto it = v.begin();
 
@@ -121,10 +110,10 @@ namespace xf
     TEST(xaxis_view, range)
     {
         // { "a", "c", "d", "f", "g", "h", "m", "n" }
-        auto a = make_test_view_saxis();
+        auto a = make_variant_view_saxis();
 
-        auto r = range("c", "g");
-        view_type vr = view_type(a, r.build_islice(a));
+        auto r = range("c", "f");
+        axis_view_type vr = axis_view_type(a, r.build_islice(a));
         auto vrit = vr.cbegin();
         EXPECT_EQ(xtl::xget<const fstring&>(vrit->first), "c");
         ++vrit;
@@ -134,8 +123,8 @@ namespace xf
         ++vrit;
         EXPECT_EQ(vrit, vr.cend());
 
-        auto sr = range("c", "m", 2);
-        view_type vsr = view_type(a, sr.build_islice(a));
+        auto sr = range("c", "h", 2);
+        axis_view_type vsr = axis_view_type(a, sr.build_islice(a));
         auto vsrit = vsr.cbegin();
         EXPECT_EQ(xtl::xget<const fstring&>(vsrit->first), "c");
         ++vsrit;

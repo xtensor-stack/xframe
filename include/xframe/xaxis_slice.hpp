@@ -418,7 +418,7 @@ namespace xf
     template <class A>
     inline auto xaxis_range<V>::build_islice(const A& axis) const -> slice_type<A>
     {
-        return slice_type<A>(axis[m_first], axis[m_last]);
+        return slice_type<A>(axis[m_first], axis[m_last] + 1);
     }
 
     /**************************************
@@ -441,7 +441,7 @@ namespace xf
     template <class A>
     inline auto xaxis_stepped_range<V>::build_islice(const A& axis) const -> slice_type<A>
     {
-        return slice_type<A>(axis[m_first], axis[m_last], m_step);
+        return slice_type<A>(axis[m_first], axis[m_last] + 1, m_step);
     }
 
     /******************************
