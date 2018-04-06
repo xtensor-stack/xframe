@@ -6,6 +6,9 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
+#ifndef XFRAME_TEST_FIXTURE_HPP
+#define XFRAME_TEST_FIXTURE_HPP
+
 #include <cstddef>
 #include "xtl/xbasic_fixed_string.hpp"
 #include "xframe/xvariable.hpp"
@@ -331,3 +334,4 @@ namespace xf
     }
 }
 
+#endif

@@ -197,7 +197,7 @@ namespace xf
         }
         else
         {
-            throw std::out_of_range("invalid xaxis_vieww key");
+            throw std::out_of_range("invalid xaxis_view key");
         }
     }
 
