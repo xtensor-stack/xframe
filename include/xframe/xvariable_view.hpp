@@ -224,7 +224,7 @@ namespace xf
             {
                 using size_type = typename std::decay_t<E>::size_type;
                 const auto& ax = arg.second;
-                view_map.emplace(arg.first, axis_type(ax, xaxis_iall<size_type>(arg.second.size())));
+                view_map.emplace(arg.first, axis_type(ax, xt::xall<size_type>(arg.second.size())));
             }
         });
         coordinate_view_type coordinate_view(std::move(view_map));

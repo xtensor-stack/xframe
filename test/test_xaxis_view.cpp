@@ -14,7 +14,7 @@
 
 namespace xf
 {
-    using slice_type = xaxis_istepped_range<size_type>;
+    using slice_type = xt::xstepped_range<size_type>;
 
     // stepped_range(1, 7, 2)
     inline slice_type make_slice()
