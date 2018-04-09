@@ -86,6 +86,11 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const;
 
+        template <class It>
+        reference element(It first, It last);
+        template <class It>
+        const_reference element(It first, It last) const;
+
         template <class... Args>
         reference locate(Args... args);
 
@@ -315,6 +320,20 @@ namespace xf
     inline auto xvariable_base<D>::operator()(Args... args) const -> const_reference
     {
         return data()(args...);
+    }
+
+    template <class D>
+    template <class It>
+    inline auto xvariable_base<D>::element(It first, It last) -> reference
+    {
+        return data().element(first, last);
+    }
+
+    template <class D>
+    template <class It>
+    inline auto xvariable_base<D>::element(It first, It last) const -> const_reference
+    {
+        return data().element(first, last);
     }
 
     template <class D>
