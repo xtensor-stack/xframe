@@ -59,6 +59,7 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_function.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_math.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_scalar.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xvariable_view.hpp
 )
 
 OPTION(BUILD_TESTS "xframe test suite" OFF)

@@ -13,25 +13,6 @@
 
 namespace xf
 {
-    // abscissa: { "f", "g", "h", "m", "n" }
-    // ordinate: { 1, 4, 6 }
-    inline coordinate_view_type build_coordinate_view(const coordinate_type& c)
-    {
-        using map_type = typename coordinate_view_type::map_type;
-        map_type nmap;
-
-        auto r = range("f", "n");
-        auto sr = range(1, 6, 2);
-
-        const auto& abscissa = c["abscissa"];
-        const auto& ordinate = c["ordinate"];
-
-        nmap.emplace(std::make_pair("abscissa", axis_view_type(abscissa, r.build_islice(abscissa))));
-        nmap.emplace(std::make_pair("ordinate", axis_view_type(ordinate, sr.build_islice(ordinate))));
-
-        return coordinate_view(std::move(nmap));
-    }
-
     TEST(xcoordinate_view, size)
     {
         auto c = make_test_view_coordinate();

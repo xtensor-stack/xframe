@@ -6,6 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
+#include <array>
+#include <cstddef>
 #include "gtest/gtest.h"
 #include "test_fixture.hpp"
 
@@ -102,6 +104,28 @@ namespace xf
         EXPECT_EQ(v(2, 2), 9.0);
     }
 
+    TEST(xvariable, element)
+    {
+        auto v = make_test_variable();
+        std::array<std::size_t, 2> idx = { 0, 0 };
+        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 1.0);
+        idx[1] = 1;
+        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 2.0);
+        idx[1] = 2;
+        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), xtl::missing<double>());
+        idx[0] = 1; idx[1] = 0;
+        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), xtl::missing<double>());
+        idx[1] = 1;
+        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 5.0);
+        idx[1] = 2;
+        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 6.0);
+        idx[0] = 2; idx[1] = 0;
+        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 7.0);
+        idx[1] = 1;
+        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 8.0);
+        idx[1] = 2;
+        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 9.0);
+    }
     TEST(xvariable, select_inner)
     {
         auto v = make_test_variable();
@@ -197,16 +221,6 @@ namespace xf
         auto t20 = v.locate("d", 1);
         auto t21 = v.locate("d", 2);
         auto t22 = v.locate("d", 4);
-
-        /*auto t00 = v.locate({{0, "a"}, {1, 1}});
-        auto t01 = v.locate({{0, "a"}, {1, 2}});
-        auto t02 = v.locate({{0, "a"}, {1, 4}});
-        auto t10 = v.locate({{0, "c"}, {1, 1}});
-        auto t11 = v.locate({{0, "c"}, {1, 2}});
-        auto t12 = v.locate({{0, "c"}, {1, 4}});
-        auto t20 = v.locate({{0, "d"}, {1, 1}});
-        auto t21 = v.locate({{0, "d"}, {1, 2}});
-        auto t22 = v.locate({{0, "d"}, {1, 4}});*/
 
         EXPECT_EQ(t00, v(0, 0));
         EXPECT_EQ(t01, v(0, 1));
