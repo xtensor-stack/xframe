@@ -93,7 +93,7 @@ namespace xf
     {
         const coordinate_type& c = v.coordinates();
         dimension_type dim = v.dimension_mapping();
-        return variable_view_type(v, build_coordinate_view(c), std::move(dim));
+        return variable_view_type(v, build_coordinate_view(c), std::move(dim), {});
     }
 }
 

@@ -96,7 +96,32 @@ namespace xf
         EXPECT_EQ(v42, vi42);
 
         EXPECT_NO_THROW(var.select({{ "abscissa", "d" }, { "ordinate", 1 }}));
-        // TODO: fix
-        //EXPECT_ANY_THROW(view.select({{ "abscissa", "d" }, { "ordinate", 1 }}));
+        EXPECT_ANY_THROW(view.select({{ "abscissa", "d" }, { "ordinate", 1 }}));
+        EXPECT_ANY_THROW(view.select({{ "abscissa", "e" }, { "ordinate", 1 }}));
+    }
+
+    TEST(xvariable_view, view_squeeze)
+    {
+        variable_type var = make_test_view_variable();
+        variable_view_type view = select(var, { { "abscissa", "f"}, { "ordinate", range(1, 6, 2) } });
+        EXPECT_EQ(view.size(), 3u);
+        EXPECT_EQ(view.dimension(), 1u);
+        saxis_type s = { "ordinate" };
+        EXPECT_EQ(view.dimension_labels(), s.labels());
+
+        auto vi0 = view.select({ { "ordinate", 1 } });
+        auto vi1 = view.select({ { "ordinate", 4 } });
+        auto vi2 = view.select({ { "ordinate", 6 } });
+
+        auto v0 = var.select({ { "abscissa", "f" },{ "ordinate", 1 } });
+        auto v1 = var.select({ { "abscissa", "f" },{ "ordinate", 4 } });
+        auto v2 = var.select({ { "abscissa", "f" },{ "ordinate", 6 } });
+
+        EXPECT_EQ(vi0, v0);
+        EXPECT_EQ(vi1, v1);
+        EXPECT_EQ(vi2, v2);
+
+        EXPECT_NO_THROW(var.select({ { "abscissa", "f" },{ "ordinate", 5 } }));
+        EXPECT_ANY_THROW(view.select({ { "ordinate", 5 } }));
     }
 }

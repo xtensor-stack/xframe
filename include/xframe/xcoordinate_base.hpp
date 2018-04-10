@@ -55,6 +55,8 @@ namespace xf
 
         const map_type& data() const noexcept;
 
+        const_iterator find(const key_type& key) const;
+
         const_iterator begin() const noexcept;
         const_iterator end() const noexcept;
 
@@ -158,6 +160,12 @@ namespace xf
     inline auto xcoordinate_base<K, A>::data() const noexcept -> const map_type&
     {
         return m_coordinate;
+    }
+
+    template <class K, class A>
+    inline auto xcoordinate_base<K, A>::find(const key_type& key) const -> const_iterator
+    {
+        return m_coordinate.find(key);
     }
 
     template <class K, class A>
