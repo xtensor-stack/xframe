@@ -26,7 +26,6 @@ namespace xf
     {
     public:
 
-        //using slice_type = xtl::variant<xaxis_irange<T>, xaxis_istepped_range<T>, xaxis_iall<T>>;
         using slice_type = xtl::variant<xt::xrange<T>, xt::xstepped_range<T>, xt::xall<T>>;
         using size_type = T;
         using self_type = xaxis_islice<T>;
@@ -112,6 +111,31 @@ namespace xf
         size_type m_step;
     };
 
+    /*****************
+     * xaxis_squeeze *
+     *****************/
+
+    /*template <class L>
+    class xaxis_squeeze
+    {
+    public:
+
+        using value_type = slice_variant_t<L>;
+
+        xaxis_squeeze(const value_type& squeeze);
+        xaxis_squeeze(value_type&& squeeze);
+
+        template <class A>
+        using slice_type = typename A::mapped_type;
+
+        template <class A>
+        slice_type<A> build_islice(const A& axis) const;
+
+    private:
+
+        value_type m_squeeze;
+    };*/
+
     /***************
      * xaxis_slice *
      ***************/
@@ -121,7 +145,8 @@ namespace xf
     {
     public:
 
-        using storage_type = xtl::variant<xaxis_range<L>, xaxis_stepped_range<L>>;
+        using squeeze_type = slice_variant_t<L>;
+        using storage_type = xtl::variant<xaxis_range<L>, xaxis_stepped_range<L>, squeeze_type>;
 
         xaxis_slice() = default;
         template <class V>
@@ -134,6 +159,8 @@ namespace xf
 
         template <class A>
         slice_type<A> build_islice(const A& axis) const;
+
+        const squeeze_type* get_squeeze() const noexcept;
 
     private:
 
@@ -259,6 +286,29 @@ namespace xf
      * xaxis_slice implementation *
      ******************************/
 
+    /*template <class L>
+    inline xaxis_squeeze<L>::xaxis_squeeze(const value_type& squeeze)
+        : m_squeeze(squeeze)
+    {
+    }
+
+    template <class L>
+    inline xaxis_squeeze<L>::xaxis_squeeze(value_type&& squeeze)
+        : m_squeeze(std::move(squeeze))
+    {
+    }
+
+    template <class L>
+    template <class A>
+    inline auto xaxis_squeeze<L>::build_islice(const A& axis) const -> slice_type<A>
+    {
+        return axis[m_squeeze];
+    }*/
+
+    /******************************
+     * xaxis_slice implementation *
+     ******************************/
+
     template <class L>
     template <class V>
     inline xaxis_slice<L>::xaxis_slice(const V& slice)
@@ -273,11 +323,50 @@ namespace xf
     {
     }
 
+    namespace detail
+    {
+        // TODO: remove this when xtl has been released
+        template <class... Ts>
+        struct overloaded;
+
+        template <class T>
+        struct overloaded<T> : T
+        {
+            overloaded(T arg) : T(arg) {}
+            using T::operator();
+        };
+
+        template <class T1, class T2, class... Ts>
+        struct overloaded<T1, T2, Ts...> : T1, overloaded<T2, Ts...>
+        {
+            template <class... Us>
+            overloaded(T1 t1, T2 t2, Us... args) : T1(t1), overloaded<T2, Ts...>(t2, args...) {}
+
+            using T1::operator();
+            using overloaded<T2, Ts...>::operator();
+        };
+
+        template <class... Ts>
+        inline overloaded<Ts...> make_overload(Ts... arg)
+        {
+            return overloaded<Ts...>{arg...};
+        }
+    }
+
     template <class L>
     template <class A>
     inline auto xaxis_slice<L>::build_islice(const A& axis) const -> slice_type<A>
     {
-        return xtl::visit([&axis](auto&& arg) { return slice_type<A>(arg.build_islice(axis)); }, m_data);
+        return xtl::visit(
+            detail::make_overload([&axis](const auto& arg) { return slice_type<A>(arg.build_islice(axis)); },
+                                  [&axis](const squeeze_type& arg) -> slice_type<A> { throw std::runtime_error("build_islice forbidden for squeeze"); }),
+            m_data);
+    }
+
+    template <class L>
+    inline auto xaxis_slice<L>::get_squeeze() const noexcept -> const squeeze_type*
+    {
+        return xtl::get_if<squeeze_type>(&m_data);
     }
 
     /***********************************

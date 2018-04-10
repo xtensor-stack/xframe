@@ -44,8 +44,10 @@ namespace xf
         using dimension_type = typename xexpression_type::dimension_type;
         using dimension_list = typename dimension_type::label_list;
 
+        using squeeze_map = std::map<typename dimension_type::key_type, typename dimension_type::mapped_type>;
+
         template <class E>
-        xvariable_view(E&& e, coordinate_type&& coord, dimension_type&& dim);
+        xvariable_view(E&& e, coordinate_type&& coord, dimension_type&& dim, squeeze_map&& squeeze);
 
         size_type size() const noexcept;
         size_type dimension() const noexcept;
@@ -77,9 +79,13 @@ namespace xf
         template <class S>
         reference select_impl(const S& selector);
 
+        template <class Idx>
+        void fill_squeeze(Idx& index) const;
+
         CT m_e;
         coordinate_type m_coordinate;
         dimension_type m_dimension;
+        squeeze_map m_squeeze;
     };
 
     /***************************
@@ -95,8 +101,11 @@ namespace xf
 
     template <class CT>
     template <class E>
-    inline xvariable_view<CT>::xvariable_view(E&& e, coordinate_type&& coord, dimension_type&& dim)
-        : m_e(std::forward<E>(e)), m_coordinate(std::move(coord)), m_dimension(std::move(dim))
+    inline xvariable_view<CT>::xvariable_view(E&& e, coordinate_type&& coord, dimension_type&& dim, squeeze_map&& squeeze)
+        : m_e(std::forward<E>(e)),
+          m_coordinate(std::move(coord)),
+          m_dimension(std::move(dim)),
+          m_squeeze(std::move(squeeze))
     {
     }
 
@@ -176,8 +185,19 @@ namespace xf
     template <class S>
     inline auto xvariable_view<CT>::select_impl(const S& selector) -> reference
     {
-        typename S::index_type idx = selector.get_index(coordinates(), dimension_mapping());
+        typename S::index_type idx = selector.get_index(coordinates(), m_e.dimension_mapping());
+        fill_squeeze(idx);
         return data().element(idx.cbegin(), idx.cend());
+    }
+
+    template <class CT>
+    template <class Idx>
+    inline void xvariable_view<CT>::fill_squeeze(Idx& index) const
+    {
+        for (const auto& sq : m_squeeze)
+        {
+            index[m_e.dimension_mapping()[sq.first]] = sq.second;
+        }
     }
 
     /******************************************
@@ -206,31 +226,49 @@ namespace xf
     {
         using coordinate_type = typename std::decay_t<E>::coordinate_type;
         using dimension_type = typename std::decay_t<E>::dimension_type;
+        using dimension_label_list = typename dimension_type::label_list;
         using view_type = xvariable_view<xtl::closure_type_t<E>>;
+        using squeeze_map = typename view_type::squeeze_map;
         using coordinate_view_type = typename view_type::coordinate_type;
         using map_type = typename coordinate_view_type::map_type;
         using axis_type = typename coordinate_view_type::axis_type;
 
-        const coordinate_type& coords = e.coordinates();
-        map_type view_map;
-        for_each(coords.cbegin(), coords.cend(), [&view_map, &slices](auto&& arg) {
-            auto iter = slices.find(arg.first);
-            if (iter != slices.end())
+        const coordinate_type& underlying_coords = e.coordinates();
+        map_type coord_map;
+        squeeze_map sq_map;
+        dimension_label_list dim_label_list;
+
+        for(const auto& dim_label: e.dimension_labels())
+        {
+            const auto& axis = underlying_coords[dim_label];
+            auto slice_iter = slices.find(dim_label);
+            if (slice_iter != slices.end())
             {
-                const auto& ax = arg.second;
-                view_map.emplace(arg.first, axis_type(ax, (iter->second).build_islice(arg.second)));
+                if (auto* sq = (slice_iter->second).get_squeeze())
+                {
+                    sq_map[dim_label] = axis[*sq];
+                }
+                else
+                {
+                    coord_map.emplace(dim_label, axis_type(axis, (slice_iter->second).build_islice(axis)));
+                    dim_label_list.push_back(dim_label);
+                }
             }
             else
             {
                 using size_type = typename std::decay_t<E>::size_type;
-                const auto& ax = arg.second;
-                view_map.emplace(arg.first, axis_type(ax, xt::xall<size_type>(arg.second.size())));
+                coord_map.emplace(dim_label, axis_type(axis, xt::xall<size_type>(axis.size())));
+                dim_label_list.push_back(dim_label);
             }
-        });
-        coordinate_view_type coordinate_view(std::move(view_map));
-        dimension_type view_dimension(e.dimension_mapping());
+        }
 
-        return view_type(std::forward<E>(e), std::move(coordinate_view), std::move(view_dimension));
+        coordinate_view_type coordinate_view(std::move(coord_map));
+        dimension_type view_dimension(std::move(dim_label_list));
+
+        return view_type(std::forward<E>(e),
+                         std::move(coordinate_view),
+                         std::move(view_dimension),
+                         std::move(sq_map));
     }
 }
 
