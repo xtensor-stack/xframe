@@ -57,6 +57,7 @@ namespace xf
         using mapped_type = mpl::cast_t<label_list, xtl::variant>;
         using size_type = typename coordinate_type::index_type;
         using index_type = detail::xselector_index_t<size_type, N>;
+        using outer_index_type = std::pair<index_type, bool>;
         using dimension_type = D;
         using map_type = std::map<key_type, mapped_type>;
         
@@ -65,9 +66,7 @@ namespace xf
         xselector(map_type&& coord);
 
         index_type get_index(const coordinate_type& coord, const dimension_type& dim) const;
-
-        template <class V>
-        typename V::const_reference get_outer_value(const V& v, const coordinate_type& coord, const dimension_type& dim) const;
+        outer_index_type get_outer_index(const coordinate_type& coord, const dimension_type& dim) const;
 
     private:
 
@@ -183,11 +182,10 @@ namespace xf
     }
 
     template <class C, class D, std::size_t N>
-    template <class V>
-    inline auto xselector<C, D, N>::get_outer_value(const V& v, const coordinate_type& coord, const dimension_type& dim) const
-        -> typename V::const_reference
+    inline auto xselector<C, D, N>::get_outer_index(const coordinate_type& coord, const dimension_type& dim) const
+        -> outer_index_type
     {
-        index_type idx = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
+        outer_index_type res(xtl::make_sequence<index_type>(dim.size(), size_type(0)), true);
         for(const auto& c : m_coord)
         {
             auto iter = dim.find(c.first);
@@ -196,15 +194,16 @@ namespace xf
                 const auto& axis = coord[c.first];
                 if(axis.contains(c.second))
                 {
-                    idx[iter->second]= axis[c.second];
+                    res.first[iter->second]= axis[c.second];
                 }
                 else
                 {
-                    return detail::static_missing<typename V::value_type>();
+                    res.second = false;
+                    break;
                 }
             }
         }
-        return v.data().element(idx.cbegin(), idx.cend());
+        return res;
     }
 
     /*****************************

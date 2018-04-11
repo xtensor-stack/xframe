@@ -547,7 +547,8 @@ namespace xf
     template <class S>
     inline auto xvariable_base<D>::select_outer(const S& selector) const -> const_reference
     {
-        return selector.get_outer_value(*this, coordinates(), dimension_mapping());
+        typename S::outer_index_type idx = selector.get_outer_index(coordinates(), dimension_mapping());
+        return idx.second ? data().element(idx.first.cbegin(), idx.first.cend()) : detail::static_missing<value_type>();
     }
     
     template <class D>
