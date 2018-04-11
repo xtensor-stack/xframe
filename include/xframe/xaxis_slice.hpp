@@ -359,7 +359,7 @@ namespace xf
     {
         return xtl::visit(
             detail::make_overload([&axis](const auto& arg) { return slice_type<A>(arg.build_islice(axis)); },
-                                  [&axis](const squeeze_type& arg) -> slice_type<A> { throw std::runtime_error("build_islice forbidden for squeeze"); }),
+                                  [&axis](const squeeze_type&) -> slice_type<A> { throw std::runtime_error("build_islice forbidden for squeeze"); }),
             m_data);
     }
 

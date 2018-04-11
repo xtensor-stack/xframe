@@ -30,12 +30,24 @@ namespace xf
         using xselector_index_t = typename xselector_index<S, N>::type;
 
         template <class T>
-        const T& static_missing() noexcept
+        struct static_missing_impl;
+
+        template <class T, class B>
+        struct static_missing_impl<xtl::xoptional<const T&, const B&>>
         {
-            using value_type = typename T::value_type;
-            using flag_type = typename T::flag_type;
-            static T res = xtl::missing<value_type>();
-            return res;
+            using return_type = xtl::xoptional<const T&, const B&>;
+            static inline return_type get()
+            {
+                static T val = T(0);
+                static B has_val = false;
+                return return_type(val, has_val);
+            }
+        };
+
+        template <class T>
+        T static_missing() noexcept
+        {
+            return static_missing_impl<T>::get();
         }
     }
 
