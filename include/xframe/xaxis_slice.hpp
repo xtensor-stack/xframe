@@ -111,31 +111,6 @@ namespace xf
         size_type m_step;
     };
 
-    /*****************
-     * xaxis_squeeze *
-     *****************/
-
-    /*template <class L>
-    class xaxis_squeeze
-    {
-    public:
-
-        using value_type = slice_variant_t<L>;
-
-        xaxis_squeeze(const value_type& squeeze);
-        xaxis_squeeze(value_type&& squeeze);
-
-        template <class A>
-        using slice_type = typename A::mapped_type;
-
-        template <class A>
-        slice_type<A> build_islice(const A& axis) const;
-
-    private:
-
-        value_type m_squeeze;
-    };*/
-
     /***************
      * xaxis_slice *
      ***************/
@@ -281,29 +256,6 @@ namespace xf
     {
         return slice_type<A>(axis[m_first], axis[m_last] + 1, m_step);
     }
-
-    /******************************
-     * xaxis_slice implementation *
-     ******************************/
-
-    /*template <class L>
-    inline xaxis_squeeze<L>::xaxis_squeeze(const value_type& squeeze)
-        : m_squeeze(squeeze)
-    {
-    }
-
-    template <class L>
-    inline xaxis_squeeze<L>::xaxis_squeeze(value_type&& squeeze)
-        : m_squeeze(std::move(squeeze))
-    {
-    }
-
-    template <class L>
-    template <class A>
-    inline auto xaxis_squeeze<L>::build_islice(const A& axis) const -> slice_type<A>
-    {
-        return axis[m_squeeze];
-    }*/
 
     /******************************
      * xaxis_slice implementation *

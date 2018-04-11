@@ -163,6 +163,60 @@ namespace xf
         EXPECT_EQ(mis, view.missing());
     }
 
+    TEST(xvariable_view, locate)
+    {
+        variable_type var = make_test_view_variable();
+        variable_view_type view = build_view(var);
+
+        auto vi00 = view.locate("f", 1);
+        auto vi01 = view.locate("f", 4);
+        auto vi02 = view.locate("f", 6);
+        auto vi10 = view.locate("g", 1);
+        auto vi11 = view.locate("g", 4);
+        auto vi12 = view.locate("g", 6);
+        auto vi20 = view.locate("h", 1);
+        auto vi21 = view.locate("h", 4);
+        auto vi22 = view.locate("h", 6);
+        auto vi30 = view.locate("m", 1);
+        auto vi31 = view.locate("m", 4);
+        auto vi32 = view.locate("m", 6);
+        auto vi40 = view.locate("n", 1);
+        auto vi41 = view.locate("n", 4);
+        auto vi42 = view.locate("n", 6);
+
+        auto v00 = var.locate("f", 1);
+        auto v01 = var.locate("f", 4);
+        auto v02 = var.locate("f", 6);
+        auto v10 = var.locate("g", 1);
+        auto v11 = var.locate("g", 4);
+        auto v12 = var.locate("g", 6);
+        auto v20 = var.locate("h", 1);
+        auto v21 = var.locate("h", 4);
+        auto v22 = var.locate("h", 6);
+        auto v30 = var.locate("m", 1);
+        auto v31 = var.locate("m", 4);
+        auto v32 = var.locate("m", 6);
+        auto v40 = var.locate("n", 1);
+        auto v41 = var.locate("n", 4);
+        auto v42 = var.locate("n", 6);
+
+        EXPECT_EQ(v00, vi00);
+        EXPECT_EQ(v01, vi01);
+        EXPECT_EQ(v02, vi02);
+        EXPECT_EQ(v10, vi10);
+        EXPECT_EQ(v11, vi11);
+        EXPECT_EQ(v12, vi12);
+        EXPECT_EQ(v20, vi20);
+        EXPECT_EQ(v21, vi21);
+        EXPECT_EQ(v22, vi22);
+        EXPECT_EQ(v30, vi30);
+        EXPECT_EQ(v31, vi31);
+        EXPECT_EQ(v32, vi32);
+        EXPECT_EQ(v40, vi40);
+        EXPECT_EQ(v41, vi41);
+        EXPECT_EQ(v42, vi42);
+    }
+
     TEST(xvariable_view, view_squeeze)
     {
         variable_type var = make_test_view_variable();
@@ -196,5 +250,13 @@ namespace xf
         EXPECT_EQ(vio2, v2);
 
         EXPECT_EQ(view.missing(), view.select<join::outer>({ { "ordinate", 2 } }));
+
+        auto vil0 = view.locate(1);
+        auto vil1 = view.locate(4);
+        auto vil2 = view.locate(6);
+
+        EXPECT_EQ(vil0, v0);
+        EXPECT_EQ(vil1, v1);
+        EXPECT_EQ(vil2, v2);
     }
 }

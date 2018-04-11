@@ -238,7 +238,7 @@ namespace xf
     inline auto xiselector<C, D, N>::get_index(const coordinate_type& /*coord*/, const dimension_type& dim) const
         -> index_type
     {
-        index_type res = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
+        index_type res = xtl::make_sequence<index_type>(dim.size(), size_type(0));
         for(const auto& c : m_coord)
         {
             res[dim[c.first]] = c.second;
@@ -266,7 +266,7 @@ namespace xf
     inline auto xlocator<C, D, N>::get_index(const coordinate_type& coord, const dimension_type& dim) const
         -> index_type
     {
-        index_type res = xtl::make_sequence<index_type>(m_coord.size(), size_type(0));
+        index_type res = xtl::make_sequence<index_type>(dim.size(), size_type(0));
         for(const auto& c : m_coord)
         {
             res[c.first] = coord[dim.labels()[c.first]][c.second];

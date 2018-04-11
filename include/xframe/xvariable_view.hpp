@@ -44,7 +44,7 @@ namespace xf
         using dimension_type = typename xexpression_type::dimension_type;
         using dimension_list = typename dimension_type::label_list;
 
-        using squeeze_map = std::map<typename dimension_type::key_type, typename coordinate_type::index_type>;
+        using squeeze_map = std::map<typename dimension_type::mapped_type, typename coordinate_type::index_type>;
 
         template <class E>
         xvariable_view(E&& e, coordinate_type&& coord, dimension_type&& dim, squeeze_map&& squeeze);
@@ -57,6 +57,12 @@ namespace xf
         const coordinate_type& coordinates() const noexcept;
         const dimension_type& dimension_mapping() const noexcept;
 
+        template <class... Args>
+        reference locate(Args... args);
+
+        template <class... Args>
+        const_reference locate(Args... args) const;
+
         xexpression_type& data() noexcept;
         const xexpression_type& data() const noexcept;
 
@@ -66,6 +72,10 @@ namespace xf
         using selector_type = typename selector_traits<N>::selector_type;
         template <std::size_t N = dynamic()>
         using selector_map_type = typename selector_traits<N>::selector_map_type;
+        template <std::size_t N = dynamic()>
+        using locator_type = typename selector_traits<N>::locator_type;
+        template <std::size_t N = dynamic()>
+        using locator_map_type = typename selector_traits<N>::locator_map_type;
 
         template <std::size_t N = dynamic()>
         reference select(const selector_map_type<N>& selector);
@@ -98,6 +108,12 @@ namespace xf
 
         template <class Idx>
         void fill_squeeze(Idx& index) const;
+
+        template <std::size_t N, class T, class... Args>
+        void fill_locator(locator_map_type<N>& loc, std::size_t index, T idx, Args... args) const;
+
+        template <std::size_t N>
+        void fill_locator(locator_map_type<N>& loc, std::size_t index) const;
 
         CT m_e;
         coordinate_type m_coordinate;
@@ -164,6 +180,26 @@ namespace xf
     inline auto xvariable_view<CT>::dimension_mapping() const noexcept -> const dimension_type&
     {
         return m_dimension;
+    }
+
+    template <class CT>
+    template <class... Args>
+    inline auto xvariable_view<CT>::locate(Args... args) -> reference
+    {
+        constexpr std::size_t nb_args = sizeof...(Args);
+        locator_map_type<nb_args> locator;
+        fill_locator<nb_args>(locator, dimension() - nb_args, args...);
+        return select_impl(locator_type<>(std::move(locator)));
+    }
+
+    template <class CT>
+    template <class... Args>
+    inline auto xvariable_view<CT>::locate(Args... args) const -> const_reference
+    {
+        constexpr std::size_t nb_args = sizeof...(Args);
+        locator_map_type<nb_args> locator;
+        fill_locator<nb_args>(locator, dimension() - nb_args, args...);
+        return select_impl(locator_type<>(std::move(locator)));
     }
 
     template <class CT>
@@ -271,8 +307,23 @@ namespace xf
     {
         for (const auto& sq : m_squeeze)
         {
-            index[m_e.dimension_mapping()[sq.first]] = sq.second;
+            index[sq.first] = sq.second;
         }
+    }
+
+    template <class CT>
+    template <std::size_t N, class T, class... Args>
+    inline void xvariable_view<CT>::fill_locator(locator_map_type<N>& loc, std::size_t index, T idx, Args... args) const
+    {
+        std::size_t new_index = m_e.dimension_mapping()[m_dimension.labels()[index]];
+        loc[new_index] = idx;
+        fill_locator<N>(loc, index + 1, args...);
+    }
+
+    template <class CT>
+    template <std::size_t N>
+    inline void xvariable_view<CT>::fill_locator(locator_map_type<N>& loc, std::size_t index) const
+    {
     }
 
     /******************************************
@@ -304,7 +355,7 @@ namespace xf
             {
                 if (auto* sq = (slice_iter->second).get_squeeze())
                 {
-                    sq_map[dim_label] = axis[*sq];
+                    sq_map[e.dimension_mapping()[dim_label]] = axis[*sq];
                 }
                 else
                 {
