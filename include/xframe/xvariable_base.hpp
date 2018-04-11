@@ -67,7 +67,7 @@ namespace xf
         using coordinate_initializer = std::initializer_list<typename coordinate_type::value_type>;
         using key_type = typename coordinate_map::key_type;
 
-        static value_type missing();
+        static const_reference missing();
 
         size_type size() const noexcept;
         constexpr size_type dimension() const noexcept;
@@ -250,9 +250,9 @@ namespace xf
     }
 
     template <class D>
-    inline auto xvariable_base<D>::missing() -> value_type
+    inline auto xvariable_base<D>::missing() -> const_reference
     {
-        return value_type(typename value_type::value_type(), false);
+        return detail::static_missing<const_reference>();
     }
 
     template <class D>
@@ -547,7 +547,8 @@ namespace xf
     template <class S>
     inline auto xvariable_base<D>::select_outer(const S& selector) const -> const_reference
     {
-        return selector.get_outer_value(*this, coordinates(), dimension_mapping());
+        typename S::outer_index_type idx = selector.get_outer_index(coordinates(), dimension_mapping());
+        return idx.second ? data().element(idx.first.cbegin(), idx.first.cend()) : missing();
     }
     
     template <class D>

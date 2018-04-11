@@ -126,6 +126,7 @@ namespace xf
         idx[1] = 2;
         EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 9.0);
     }
+
     TEST(xvariable, select_inner)
     {
         auto v = make_test_variable();
