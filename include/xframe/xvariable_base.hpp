@@ -70,6 +70,10 @@ namespace xf
         template <std::size_t N = dynamic()>
         using selector_traits = xselector_traits<coordinate_type, dimension_type, N>;
         template <std::size_t N = dynamic()>
+        using locator_type = typename selector_traits<N>::locator_type;
+        template <std::size_t N = dynamic()>
+        using locator_map_type = typename selector_traits<N>::locator_map_type;
+        template <std::size_t N = dynamic()>
         using selector_type = typename selector_traits<N>::selector_type;
         template <std::size_t N = dynamic()>
         using selector_map_type = typename selector_traits<N>::selector_map_type;
@@ -77,10 +81,6 @@ namespace xf
         using iselector_type = typename selector_traits<N>::iselector_type;
         template <std::size_t N = dynamic()>
         using iselector_map_type = typename selector_traits<N>::iselector_map_type;
-        template <std::size_t N = dynamic()>
-        using locator_type = typename selector_traits<N>::locator_type;
-        template <std::size_t N = dynamic()>
-        using locator_map_type = typename selector_traits<N>::locator_map_type;
 
         static const_reference missing();
 
@@ -95,6 +95,13 @@ namespace xf
 
         void reshape(const coordinate_type& coords, const dimension_type& dims);
         void reshape(coordinate_type&& coords, dimension_type&& dims);
+
+        template <class Join = DEFAULT_JOIN>
+        xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
+        bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
+
+        data_type& data() noexcept;
+        const data_type& data() const noexcept;
 
         template <class... Args>
         reference operator()(Args... args);
@@ -112,13 +119,6 @@ namespace xf
 
         template <class... Args>
         const_reference locate(Args&&... args) const;
-
-        template <class Join = DEFAULT_JOIN>
-        xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
-        bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
-
-        data_type& data() noexcept;
-        const data_type& data() const noexcept;
 
         template <std::size_t N = dynamic()>
         reference select(const selector_map_type<N>& selector);
@@ -301,6 +301,40 @@ namespace xf
     }
     
     template <class D>
+    template <class Join>
+    inline xtrivial_broadcast xvariable_base<D>::broadcast_coordinates(coordinate_type& coords) const
+    {
+        return xf::broadcast_coordinates<Join>(coords, this->coordinates());
+    }
+
+    template <class D>
+    inline bool xvariable_base<D>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
+    {
+        bool ret = true;
+        if (trivial_bc)
+        {
+            dims = this->dimension_mapping();
+        }
+        else
+        {
+            ret = xf::broadcast_dimensions(dims, this->dimension_mapping());
+        }
+        return ret;
+    }
+
+    template <class D>
+    inline auto xvariable_base<D>::data() noexcept -> data_type&
+    {
+        return derived_cast().data_impl();
+    }
+
+    template <class D>
+    inline auto xvariable_base<D>::data() const noexcept -> const data_type&
+    {
+        return derived_cast().data_impl();
+    }
+
+    template <class D>
     template <class... Args>
     inline auto xvariable_base<D>::operator()(Args... args) -> reference
     {
@@ -341,40 +375,6 @@ namespace xf
     {
 
         return select_impl(build_locator(std::forward<Args>(args)...));
-    }
-
-    template <class D>
-    template <class Join>
-    inline xtrivial_broadcast xvariable_base<D>::broadcast_coordinates(coordinate_type& coords) const
-    {
-        return xf::broadcast_coordinates<Join>(coords, this->coordinates());
-    }
-
-    template <class D>
-    inline bool xvariable_base<D>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
-    {
-        bool ret = true;
-        if(trivial_bc)
-        {
-            dims = this->dimension_mapping();
-        }
-        else
-        {
-            ret = xf::broadcast_dimensions(dims, this->dimension_mapping());
-        }
-        return ret;
-    }
-
-    template <class D>
-    inline auto xvariable_base<D>::data() noexcept -> data_type&
-    {
-        return derived_cast().data_impl();
-    }
-
-    template <class D>
-    inline auto xvariable_base<D>::data() const noexcept -> const data_type&
-    {
-        return derived_cast().data_impl();
     }
 
     template <class D>
@@ -477,7 +477,7 @@ namespace xf
     {
         constexpr std::size_t nb_args = sizeof...(Args);
         locator_map_type<nb_args> locator = xtl::make_sequence<locator_map_type<nb_args>>(nb_args);
-        fill_locator<nb_args>(locator, dimension() - nb_args, std::forward<Args>(args)...);
+        fill_locator<nb_args>(locator, std::size_t(0), std::forward<Args>(args)...);
         return locator_type<nb_args>(std::move(locator));
     }
 

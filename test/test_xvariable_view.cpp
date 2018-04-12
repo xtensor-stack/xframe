@@ -163,6 +163,60 @@ namespace xf
         EXPECT_EQ(mis, view.missing());
     }
 
+    TEST(xvariable_view, iselect)
+    {
+        variable_type var = make_test_view_variable();
+        variable_view_type view = build_view(var);
+
+        auto vi00 = view.iselect({ { "abscissa", 0 },{ "ordinate", 0 } });
+        auto vi01 = view.iselect({ { "abscissa", 0 },{ "ordinate", 1 } });
+        auto vi02 = view.iselect({ { "abscissa", 0 },{ "ordinate", 2 } });
+        auto vi10 = view.iselect({ { "abscissa", 1 },{ "ordinate", 0 } });
+        auto vi11 = view.iselect({ { "abscissa", 1 },{ "ordinate", 1 } });
+        auto vi12 = view.iselect({ { "abscissa", 1 },{ "ordinate", 2 } });
+        auto vi20 = view.iselect({ { "abscissa", 2 },{ "ordinate", 0 } });
+        auto vi21 = view.iselect({ { "abscissa", 2 },{ "ordinate", 1 } });
+        auto vi22 = view.iselect({ { "abscissa", 2 },{ "ordinate", 2 } });
+        auto vi30 = view.iselect({ { "abscissa", 3 },{ "ordinate", 0 } });
+        auto vi31 = view.iselect({ { "abscissa", 3 },{ "ordinate", 1 } });
+        auto vi32 = view.iselect({ { "abscissa", 3 },{ "ordinate", 2 } });
+        auto vi40 = view.iselect({ { "abscissa", 4 },{ "ordinate", 0 } });
+        auto vi41 = view.iselect({ { "abscissa", 4 },{ "ordinate", 1 } });
+        auto vi42 = view.iselect({ { "abscissa", 4 },{ "ordinate", 2 } });
+
+        auto v00 = var.iselect({ { "abscissa", 3 },{ "ordinate", 0 } });
+        auto v01 = var.iselect({ { "abscissa", 3 },{ "ordinate", 2 } });
+        auto v02 = var.iselect({ { "abscissa", 3 },{ "ordinate", 4 } });
+        auto v10 = var.iselect({ { "abscissa", 4 },{ "ordinate", 0 } });
+        auto v11 = var.iselect({ { "abscissa", 4 },{ "ordinate", 2 } });
+        auto v12 = var.iselect({ { "abscissa", 4 },{ "ordinate", 4 } });
+        auto v20 = var.iselect({ { "abscissa", 5 },{ "ordinate", 0 } });
+        auto v21 = var.iselect({ { "abscissa", 5 },{ "ordinate", 2 } });
+        auto v22 = var.iselect({ { "abscissa", 5 },{ "ordinate", 4 } });
+        auto v30 = var.iselect({ { "abscissa", 6 },{ "ordinate", 0 } });
+        auto v31 = var.iselect({ { "abscissa", 6 },{ "ordinate", 2 } });
+        auto v32 = var.iselect({ { "abscissa", 6 },{ "ordinate", 4 } });
+        auto v40 = var.iselect({ { "abscissa", 7 },{ "ordinate", 0 } });
+        auto v41 = var.iselect({ { "abscissa", 7 },{ "ordinate", 2 } });
+        auto v42 = var.iselect({ { "abscissa", 7 },{ "ordinate", 4 } });
+
+        EXPECT_EQ(v00, vi00);
+        EXPECT_EQ(v01, vi01);
+        EXPECT_EQ(v02, vi02);
+        EXPECT_EQ(v10, vi10);
+        EXPECT_EQ(v11, vi11);
+        EXPECT_EQ(v12, vi12);
+        EXPECT_EQ(v20, vi20);
+        EXPECT_EQ(v21, vi21);
+        EXPECT_EQ(v22, vi22);
+        EXPECT_EQ(v30, vi30);
+        EXPECT_EQ(v31, vi31);
+        EXPECT_EQ(v32, vi32);
+        EXPECT_EQ(v40, vi40);
+        EXPECT_EQ(v41, vi41);
+        EXPECT_EQ(v42, vi42);
+    }
+
     TEST(xvariable_view, locate)
     {
         variable_type var = make_test_view_variable();
@@ -258,5 +312,13 @@ namespace xf
         EXPECT_EQ(vil0, v0);
         EXPECT_EQ(vil1, v1);
         EXPECT_EQ(vil2, v2);
+
+        auto vii0 = view.iselect({ { "ordinate", 0 } });
+        auto vii1 = view.iselect({ { "ordinate", 1 } });
+        auto vii2 = view.iselect({ { "ordinate", 2 } });
+
+        EXPECT_EQ(vii0, v0);
+        EXPECT_EQ(vii1, v1);
+        EXPECT_EQ(vii2, v2);
     }
 }

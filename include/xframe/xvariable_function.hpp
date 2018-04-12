@@ -105,14 +105,14 @@ namespace xf
         template <class Join = DEFAULT_JOIN>
         const dimension_type& dimension_mapping() const;
 
-        template <class... Args>
-        const_reference operator()(Args... args) const;
-        
         template <class Join = DEFAULT_JOIN>
         xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
         data_type data() const noexcept;
+
+        template <class... Args>
+        const_reference operator()(Args... args) const;
 
         template <class Join = DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
         const_reference select(const selector_map_type<N>& selector) const;
@@ -205,13 +205,6 @@ namespace xf
         compute_coordinates<Join>();
         return m_dimension_mapping;
     }
-    
-    template <class F, class R, class... CT>
-    template <class... Args>
-    inline auto xvariable_function<F, R, CT...>::operator()(Args... args) const -> const_reference
-    {
-        return access_impl(std::make_index_sequence<sizeof...(CT)>(), static_cast<size_type>(args)...);
-    }
 
     template <class F, class R, class... CT>
     template <class Join>
@@ -272,6 +265,13 @@ namespace xf
     inline auto xvariable_function<F, R, CT...>::data() const noexcept -> data_type
     {
         return data_impl(std::make_index_sequence<sizeof...(CT)>());
+    }
+
+    template <class F, class R, class... CT>
+    template <class... Args>
+    inline auto xvariable_function<F, R, CT...>::operator()(Args... args) const -> const_reference
+    {
+        return access_impl(std::make_index_sequence<sizeof...(CT)>(), static_cast<size_type>(args)...);
     }
 
     template <class F, class R, class... CT>
