@@ -24,7 +24,7 @@ namespace xf
         template <class C, class DM, std::size_t... I>
         struct xdynamic_traits_list_impl<C, DM, std::index_sequence<I...>>
         {
-            using type = xtl::mpl::vector<xselector_traits<C, DM, I>..., xselector_traits<C, DM, dynamic()>>;
+            using type = xtl::mpl::vector<xselector_traits<C, DM, I + 1>..., xselector_traits<C, DM, dynamic()>>;
         };
     }
 
@@ -50,7 +50,6 @@ namespace xf
         virtual xtl::any do_select(const selector_map_type&, join::inner) const = 0;
 
         virtual xtl::any do_iselect(const iselector_map_type&) const = 0;
-        virtual xtl::any do_mlocate(const locator_map_type&) const = 0;
     };
 
     /*********************
@@ -86,9 +85,6 @@ namespace xf
 
         template <std::size_t N>
         xtl::any iselect(const iselector_map_type<N>& sel) const;
-
-        template <std::size_t N>
-        xtl::any mlocate(const locator_map_type<N>& sel) const;
 
     protected:
 
@@ -130,9 +126,6 @@ namespace xf
 
         template <std::size_t N = std::numeric_limits<std::size_t>::max()>
         xtl::any iselect(const iselector_map_type<N>& sel) const;
-
-        template <std::size_t N = std::numeric_limits<std::size_t>::max()>
-        xtl::any mlocate(const locator_map_type<N>& sel) const;
 
     private:
 
@@ -185,6 +178,8 @@ namespace xf
         using iselector_map_type = typename T::iselector_map_type;
         using locator_map_type = typename T::locator_map_type;
 
+        static constexpr std::size_t static_dimension = T::static_dimension;
+
         virtual ~xdynamic_implementation() {}
 
         xdynamic_implementation(self_type&&) = delete;
@@ -195,7 +190,6 @@ namespace xf
         xtl::any do_select(const selector_map_type&, join::inner) const override;
 
         xtl::any do_iselect(const iselector_map_type&) const override;
-        xtl::any do_mlocate(const locator_map_type&) const override;
 
     protected:
 
@@ -267,14 +261,6 @@ namespace xf
         return base.do_iselect(sel);
     }
 
-    template <class C, class DM>
-    template <std::size_t N>
-    inline xtl::any xvariable_wrapper<C, DM>::mlocate(const locator_map_type<N>& sel) const
-    {
-        const xdynamic_interface<xselector_traits<C, DM, N>>& base = *this;
-        return base.do_mlocate(sel);
-    }
-
     /************************************
      * xdynamic_variable implementation *
      ************************************/
@@ -338,13 +324,6 @@ namespace xf
         return p_wrapper->template iselect<N>(sel);
     }
 
-    template <class C, class DM>
-    template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::mlocate(const locator_map_type<N>& sel) const
-    {
-        return p_wrapper->template mlocate<N>(sel);
-    }
-
     /*****************************************
      * xvariable_wrapper_impl implementation *
      *****************************************/
@@ -382,28 +361,21 @@ namespace xf
     inline xtl::any
     xdynamic_implementation<T, B>::do_select(const selector_map_type& sel, join::outer) const
     {
-        return this->get_variable().template select<join::outer>(sel);
+        return this->get_variable().template select<join::outer, static_dimension>(sel);
     }
 
     template <class T, class B>
     inline xtl::any
     xdynamic_implementation<T, B>::do_select(const selector_map_type& sel, join::inner) const
     {
-        return this->get_variable().template select<join::inner>(sel);
+        return this->get_variable().template select<join::inner, static_dimension>(sel);
     }
 
     template <class T, class B>
     inline xtl::any
     xdynamic_implementation<T, B>::do_iselect(const iselector_map_type& sel) const
     {
-        return this->get_variable().iselect(sel);
-    }
-
-    template <class T, class B>
-    inline xtl::any
-    xdynamic_implementation<T, B>::do_mlocate(const locator_map_type& sel) const
-    {
-        return this->get_variable().mlocate(sel);
+        return this->get_variable().template iselect<static_dimension>(sel);
     }
 
     /*****************************************

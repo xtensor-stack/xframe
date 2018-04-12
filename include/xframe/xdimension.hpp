@@ -29,7 +29,7 @@ namespace xf
         using label_list = typename base_type::label_list;
         using key_type = typename base_type::key_type;
         using mapped_type = typename base_type::mapped_type;
-        using index_type = typename base_type::index_type;
+        using map_type = typename base_type::map_type;
         using value_type = typename base_type::value_type;
         using reference = typename base_type::reference;
         using const_reference = typename base_type::const_reference;

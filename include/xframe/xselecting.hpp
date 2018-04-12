@@ -21,13 +21,13 @@ namespace xf
     namespace detail
     {
         template <class S, std::size_t N>
-        struct xselector_index
+        struct xselector_sequence
         {
-            using type = std::conditional_t<N == std::numeric_limits<S>::max(), std::vector<S>, std::array<S, N>>;
+            using type = std::conditional_t<N == std::numeric_limits<std::size_t>::max(), std::vector<S>, std::array<S, N>>;
         };
 
         template <class S, std::size_t N>
-        using xselector_index_t = typename xselector_index<S, N>::type;
+        using xselector_sequence_t = typename xselector_sequence<S, N>::type;
 
         template <class T>
         struct static_missing_impl;
@@ -68,10 +68,10 @@ namespace xf
         using label_list = typename coordinate_type::label_list;
         using mapped_type = mpl::cast_t<label_list, xtl::variant>;
         using size_type = typename coordinate_type::index_type;
-        using index_type = detail::xselector_index_t<size_type, N>;
+        using index_type = detail::xselector_sequence_t<size_type, N>;
         using outer_index_type = std::pair<index_type, bool>;
         using dimension_type = D;
-        using map_type = std::map<key_type, mapped_type>;
+        using map_type = detail::xselector_sequence_t<std::pair<key_type, mapped_type>, N>;
         
         xselector() = default;
         xselector(const map_type& coord);
@@ -100,9 +100,9 @@ namespace xf
         using coordinate_type = C;
         using key_type = typename coordinate_type::key_type;
         using size_type = typename coordinate_type::index_type;
-        using index_type = detail::xselector_index_t<size_type, N>;
+        using index_type = detail::xselector_sequence_t<size_type, N>;
         using dimension_type = D;
-        using map_type = std::map<key_type, size_type>;
+        using map_type = detail::xselector_sequence_t<std::pair<key_type, size_type>, N>;
 
         xiselector() = default;
         xiselector(const map_type& coord);
@@ -128,9 +128,9 @@ namespace xf
         using label_list = typename coordinate_type::label_list;
         using mapped_type = mpl::cast_t<label_list, xtl::variant>;
         using size_type = typename coordinate_type::index_type;
-        using index_type = detail::xselector_index_t<size_type, N>;
+        using index_type = detail::xselector_sequence_t<size_type, N>;
         using dimension_type = D;
-        using map_type = std::map<size_type, mapped_type>;
+        using map_type = detail::xselector_sequence_t<std::pair<size_type, mapped_type>, N>;
 
         xlocator() = default;
         xlocator(const map_type& coord);
@@ -159,6 +159,8 @@ namespace xf
         using iselector_map_type = typename iselector_type::map_type;
         using locator_type = xlocator<coordinate_type, dimension_type, N>;
         using locator_map_type = typename locator_type::map_type;
+
+        static constexpr std::size_t static_dimension = N;
     };
 
     /****************************

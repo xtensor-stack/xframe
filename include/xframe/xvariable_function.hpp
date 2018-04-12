@@ -80,6 +80,11 @@ namespace xf
         using dimension_type = std::common_type_t<typename std::decay_t<xvariable_closure_t<CT>>::dimension_type...>;
         using dimension_list = typename dimension_type::label_list;
 
+        template <std::size_t N = dynamic()>
+        using selector_type = xselector<coordinate_type, dimension_type, N>;
+        template <std::size_t N = dynamic()>
+        using selector_map_type = typename selector_type<N>::map_type;
+
         using expression_tag = xvariable_expression_tag;
 
         template <class Func, class U = std::enable_if<!std::is_base_of<Func, self_type>::value>>
@@ -109,11 +114,6 @@ namespace xf
 
         data_type data() const noexcept;
 
-        template <std::size_t N = dynamic()>
-        using selector_type = xselector<coordinate_type, dimension_type, N>;
-        template <std::size_t N = dynamic()>
-        using selector_map_type = typename selector_type<N>::map_type;
-
         template <class Join = DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
         const_reference select(const selector_map_type<N>& selector) const;
 
@@ -121,6 +121,7 @@ namespace xf
         const_reference select(selector_map_type<N>&& selector) const;
 
         const std::tuple<xvariable_closure_t<CT>...>& arguments() const { return m_e; }
+
     private:
 
         template <class Join>
