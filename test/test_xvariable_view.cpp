@@ -42,6 +42,60 @@ namespace xf
         EXPECT_EQ(view.dimension_labels(), s.labels());
     }
 
+    TEST(xvariable_view, access)
+    {
+        variable_type var = make_test_view_variable();
+        variable_view_type view = build_view(var);
+
+        auto vi00 = view(0, 0);
+        auto vi01 = view(0, 1);
+        auto vi02 = view(0, 2);
+        auto vi10 = view(1, 0);
+        auto vi11 = view(1, 1);
+        auto vi12 = view(1, 2);
+        auto vi20 = view(2, 0);
+        auto vi21 = view(2, 1);
+        auto vi22 = view(2, 2);
+        auto vi30 = view(3, 0);
+        auto vi31 = view(3, 1);
+        auto vi32 = view(3, 2);
+        auto vi40 = view(4, 0);
+        auto vi41 = view(4, 1);
+        auto vi42 = view(4, 2);
+
+        auto v00 = var(3, 0);
+        auto v01 = var(3, 2);
+        auto v02 = var(3, 4);
+        auto v10 = var(4, 0);
+        auto v11 = var(4, 2);
+        auto v12 = var(4, 4);
+        auto v20 = var(5, 0);
+        auto v21 = var(5, 2);
+        auto v22 = var(5, 4);
+        auto v30 = var(6, 0);
+        auto v31 = var(6, 2);
+        auto v32 = var(6, 4);
+        auto v40 = var(7, 0);
+        auto v41 = var(7, 2);
+        auto v42 = var(7, 4);
+
+        EXPECT_EQ(v00, vi00);
+        EXPECT_EQ(v01, vi01);
+        EXPECT_EQ(v02, vi02);
+        EXPECT_EQ(v10, vi10);
+        EXPECT_EQ(v11, vi11);
+        EXPECT_EQ(v12, vi12);
+        EXPECT_EQ(v20, vi20);
+        EXPECT_EQ(v21, vi21);
+        EXPECT_EQ(v22, vi22);
+        EXPECT_EQ(v30, vi30);
+        EXPECT_EQ(v31, vi31);
+        EXPECT_EQ(v32, vi32);
+        EXPECT_EQ(v40, vi40);
+        EXPECT_EQ(v41, vi41);
+        EXPECT_EQ(v42, vi42);
+    }
+
     TEST(xvariable_view, select_inner)
     {
         variable_type var = make_test_view_variable();
@@ -280,13 +334,21 @@ namespace xf
         saxis_type s = { "ordinate" };
         EXPECT_EQ(view.dimension_labels(), s.labels());
 
-        auto vi0 = view.select({ { "ordinate", 1 } });
-        auto vi1 = view.select({ { "ordinate", 4 } });
-        auto vi2 = view.select({ { "ordinate", 6 } });
-
         auto v0 = var.select({ { "abscissa", "f" },{ "ordinate", 1 } });
         auto v1 = var.select({ { "abscissa", "f" },{ "ordinate", 4 } });
         auto v2 = var.select({ { "abscissa", "f" },{ "ordinate", 6 } });
+
+        auto via0 = view(0);
+        auto via1 = view(1);
+        auto via2 = view(2);
+
+        EXPECT_EQ(via0, v0);
+        EXPECT_EQ(via1, v1);
+        EXPECT_EQ(via2, v2);
+
+        auto vi0 = view.select({ { "ordinate", 1 } });
+        auto vi1 = view.select({ { "ordinate", 4 } });
+        auto vi2 = view.select({ { "ordinate", 6 } });
 
         EXPECT_EQ(vi0, v0);
         EXPECT_EQ(vi1, v1);

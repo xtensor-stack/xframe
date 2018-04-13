@@ -72,6 +72,12 @@ namespace xf
         const xexpression_type& data() const noexcept;
 
         template <class... Args>
+        reference operator()(Args... args);
+
+        template <class... Args>
+        const_reference operator()(Args... args) const;
+
+        template <class... Args>
         reference locate(Args&&... args);
 
         template <class... Args>
@@ -107,6 +113,21 @@ namespace xf
     private:
 
         using index_type = std::vector<size_type>;
+
+        template <std::size_t... I, class... Args>
+        reference access_impl(std::index_sequence<I...>, Args... args);
+
+        template <std::size_t... I, class... Args>
+        const_reference access_impl(std::index_sequence<I...>, Args... args) const;
+
+        template <class... Args>
+        index_type build_accessor(Args&&... args) const;
+
+        template <std::size_t I, class T, class... Args>
+        void fill_accessor(index_type& accessor, T idx, Args... args) const;
+
+        template <std::size_t I>
+        void fill_accessor(index_type& accessor) const;
 
         template <std::size_t... I, class... Args>
         reference locate_impl(std::index_sequence<I...>, Args&&... args);
@@ -222,6 +243,36 @@ namespace xf
 
     template <class CT>
     template <class... Args>
+    inline auto xvariable_view<CT>::operator()(Args... args) ->reference
+    {
+        if (m_squeeze.empty())
+        {
+            return access_impl(std::make_index_sequence<sizeof...(Args)>(), args...);
+        }
+        else
+        {
+            auto idx = build_accessor(std::forward<Args>(args)...);
+            return data().element(idx.cbegin(), idx.cend());
+        }
+    }
+
+    template <class CT>
+    template <class... Args>
+    inline auto xvariable_view<CT>::operator()(Args... args) const -> const_reference
+    {
+        if (m_squeeze.empty())
+        {
+            return access_impl(std::make_index_sequence<sizeof...(Args)>(), args...);
+        }
+        else
+        {
+            auto idx = build_accessor(std::forward<Args>(args)...);
+            return data().element(idx.cbegin(), idx.cend());
+        }
+    }
+
+    template <class CT>
+    template <class... Args>
     inline auto xvariable_view<CT>::locate(Args&&... args) -> reference
     {
         if (m_squeeze.empty())
@@ -320,6 +371,46 @@ namespace xf
     inline bool xvariable_view<CT>::operator!=(const self_type& rhs) const noexcept
     {
         return !(*this == rhs);
+    }
+
+    template <class CT>
+    template <std::size_t... I, class... Args>
+    inline auto xvariable_view<CT>::access_impl(std::index_sequence<I...>, Args... args) -> reference
+    {
+        return data()(coordinates()[dimension_labels()[I]].index(args)...);
+    }
+
+    template <class CT>
+    template <std::size_t... I, class... Args>
+    inline auto xvariable_view<CT>::access_impl(std::index_sequence<I...>, Args... args) const -> const_reference
+    {
+        return data()(coordinates()[dimension_labels()[I]].index(args)...);
+    }
+
+    template <class CT>
+    template <class... Args>
+    inline auto xvariable_view<CT>::build_accessor(Args&&... args) const -> index_type
+    {
+        index_type accessor(data().dimension());
+        fill_accessor<0>(accessor, std::forward<Args>(args)...);
+        fill_squeeze(accessor);
+        return accessor;
+    }
+
+    template <class CT>
+    template <std::size_t I, class T, class... Args>
+    inline void xvariable_view<CT>::fill_accessor(index_type& accessor, T idx, Args... args) const
+    {
+        std::size_t new_index = data().dimension_mapping()[dimension_labels()[I]];
+        accessor[new_index] = coordinates()[dimension_labels()[I]].index(idx);
+        fill_accessor<I + 1>(accessor, std::forward<Args>(args)...);
+    }
+
+    template <class CT>
+    template <std::size_t I>
+    inline void xvariable_view<CT>::fill_accessor(index_type& accessor) const
+    {
+
     }
 
     template <class CT>
