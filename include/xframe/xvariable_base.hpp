@@ -70,10 +70,6 @@ namespace xf
         template <std::size_t N = dynamic()>
         using selector_traits = xselector_traits<coordinate_type, dimension_type, N>;
         template <std::size_t N = dynamic()>
-        using locator_type = typename selector_traits<N>::locator_type;
-        template <std::size_t N = dynamic()>
-        using locator_map_type = typename selector_traits<N>::locator_map_type;
-        template <std::size_t N = dynamic()>
         using selector_type = typename selector_traits<N>::selector_type;
         template <std::size_t N = dynamic()>
         using selector_map_type = typename selector_traits<N>::selector_map_type;
@@ -178,14 +174,11 @@ namespace xf
         template <class C, class DM>
         void reshape_impl(C&& coords, DM&& dims);
 
-        template <class... Args>
-        locator_type<sizeof...(Args)> build_locator(Args&&... args) const;
+        template <std::size_t... I, class... Args>
+        reference locate_impl(std::index_sequence<I...>, Args&&... args);
 
-        template <std::size_t N, class T, class... Args>
-        void fill_locator(locator_map_type<N>& loc, std::size_t index, T idx, Args&&... args) const;
-
-        template <std::size_t N>
-        void fill_locator(locator_map_type<N>& loc, std::size_t index) const;
+        template <std::size_t... I, class... Args>
+        const_reference locate_impl(std::index_sequence<I...>, Args&&... args) const;
 
         template <class S>
         reference select_impl(const S& selector);
@@ -366,15 +359,14 @@ namespace xf
     template <class... Args>
     inline auto xvariable_base<D>::locate(Args&&... args) -> reference
     {
-        return select_impl(build_locator(std::forward<Args>(args)...));
+        return locate_impl(std::make_index_sequence<sizeof...(Args)>(), std::forward<Args>(args)...);
     }
 
     template <class D>
     template <class... Args>
     inline auto xvariable_base<D>::locate(Args&&... args) const -> const_reference
     {
-
-        return select_impl(build_locator(std::forward<Args>(args)...));
+        return locate_impl(std::make_index_sequence<sizeof...(Args)>(), std::forward<Args>(args)...);
     }
 
     template <class D>
@@ -472,27 +464,17 @@ namespace xf
     }
 
     template <class D>
-    template <class... Args>
-    inline auto xvariable_base<D>::build_locator(Args&&... args) const -> locator_type<sizeof...(Args)>
+    template <std::size_t... I, class... Args>
+    inline auto xvariable_base<D>::locate_impl(std::index_sequence<I...>, Args&&... args) -> reference
     {
-        constexpr std::size_t nb_args = sizeof...(Args);
-        locator_map_type<nb_args> locator = xtl::make_sequence<locator_map_type<nb_args>>(nb_args);
-        fill_locator<nb_args>(locator, std::size_t(0), std::forward<Args>(args)...);
-        return locator_type<nb_args>(std::move(locator));
+        return data()(coordinates()[dimension_mapping().labels()[I]][args]...);
     }
 
     template <class D>
-    template <std::size_t N, class T, class... Args>
-    inline void xvariable_base<D>::fill_locator(locator_map_type<N>& loc, std::size_t index, T idx, Args&&... args) const
+    template <std::size_t... I, class... Args>
+    inline auto xvariable_base<D>::locate_impl(std::index_sequence<I...>, Args&&... args) const -> const_reference
     {
-        loc[index] = std::make_pair(index, idx);
-        fill_locator<N>(loc, index + 1, std::forward<Args>(args)...);
-    }
-
-    template <class D>
-    template <std::size_t N>
-    inline void xvariable_base<D>::fill_locator(locator_map_type<N>& loc, std::size_t index) const
-    {
+        return data()(coordinates()[dimension_mapping().labels()[I]][args]...);
     }
 
     template <class D>

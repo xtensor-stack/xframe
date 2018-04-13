@@ -42,7 +42,6 @@ namespace xf
 
         using selector_map_type = typename T::selector_map_type;
         using iselector_map_type = typename T::iselector_map_type;
-        using locator_map_type = typename T::locator_map_type;
 
         virtual ~xdynamic_interface() {}
 
@@ -69,8 +68,6 @@ namespace xf
         using selector_map_type = typename traits_type<N>::selector_map_type;
         template <std::size_t N = dynamic()>
         using iselector_map_type = typename traits_type<N>::iselector_map_type;
-        template <std::size_t N = dynamic()>
-        using locator_map_type = typename traits_type<N>::locator_map_type;
 
         virtual ~xvariable_wrapper() {}
 
@@ -107,8 +104,6 @@ namespace xf
         using selector_map_type = typename wrapper_type::template selector_map_type<N>;
         template <std::size_t N = dynamic()>
         using iselector_map_type = typename wrapper_type::template iselector_map_type<N>;
-        template <std::size_t N = dynamic()>
-        using locator_map_type = typename wrapper_type::template locator_map_type<N>;
 
         template <class V, class = std::enable_if_t<!std::is_same<std::decay_t<V>, self_type>::value, void>>
         explicit xdynamic_variable(V&&);
@@ -176,7 +171,6 @@ namespace xf
         using base_type = B;
         using selector_map_type = typename T::selector_map_type;
         using iselector_map_type = typename T::iselector_map_type;
-        using locator_map_type = typename T::locator_map_type;
 
         static constexpr std::size_t static_dimension = T::static_dimension;
 
