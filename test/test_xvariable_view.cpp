@@ -383,4 +383,16 @@ namespace xf
         EXPECT_EQ(vii1, v1);
         EXPECT_EQ(vii2, v2);
     }
+
+    TEST(xvariable_view, locate_builder)
+    {
+        variable_type var = make_test_view_variable();
+        variable_view_type view = build_view(var);
+        variable_view_type view2 = locate(var, range("f", "n"), range(1, 6, 2));
+        EXPECT_EQ(view, view2);
+
+        variable_view_type view3 = select(var, { { "abscissa", "f" },{ "ordinate", range(1, 6, 2) } });
+        variable_view_type view4 = locate(var, "f", range(1, 6, 2));
+        EXPECT_EQ(view3, view4);
+    }
 }
