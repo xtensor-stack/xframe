@@ -59,18 +59,18 @@ namespace xf
     {
     public:
 
-        static_assert(std::is_integral<T>::value, "index_type must be an integral type");
+        static_assert(std::is_integral<T>::value, "mapped_type T must be an integral type");
 
         using self_type = xaxis<L, T, MT>;
         using label_list = std::vector<L>;
         using key_type = L;
         using mapped_type = T;
-        using index_type = map_container_t<key_type, mapped_type, MT>;
-        using value_type = typename index_type::value_type;
-        using reference = typename index_type::const_reference;
-        using const_reference = typename index_type::const_reference;
-        using pointer = typename index_type::const_pointer;
-        using const_pointer = typename index_type::const_pointer;
+        using map_type = map_container_t<key_type, mapped_type, MT>;
+        using value_type = typename map_type::value_type;
+        using reference = typename map_type::const_reference;
+        using const_reference = typename map_type::const_reference;
+        using pointer = typename map_type::const_pointer;
+        using const_pointer = typename map_type::const_pointer;
         using size_type = typename label_list::size_type;
         using difference_type = typename label_list::difference_type;
         using iterator = xaxis_iterator<L, T, MT>;
@@ -126,7 +126,7 @@ namespace xf
 
     private:
 
-        typename index_type::const_iterator find_index(const key_type& key) const;
+        typename map_type::const_iterator find_index(const key_type& key) const;
 
         template <class... Args>
         bool merge_impl(const Args&... axes);
@@ -142,7 +142,7 @@ namespace xf
         bool all_sorted(const Arg& a) const noexcept;
 
         label_list m_labels;
-        index_type m_index;
+        map_type m_index;
         bool m_is_sorted;
 
         friend class xaxis_iterator<L, T, MT>;
@@ -307,7 +307,7 @@ namespace xf
     template <class L, class T, class MT>
     inline bool xaxis<L, T, MT>::contains(const key_type& key) const
     {
-        return m_index.count(key) != typename index_type::size_type(0);
+        return m_index.count(key) != typename map_type::size_type(0);
     }
 
     template <class L, class T, class MT>
@@ -404,7 +404,7 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::find_index(const key_type& key) const -> typename index_type::const_iterator
+    inline auto xaxis<L, T, MT>::find_index(const key_type& key) const -> typename map_type::const_iterator
     {
         return m_index.find(key);
     }

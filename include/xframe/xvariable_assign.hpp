@@ -88,13 +88,13 @@ namespace xt
         using size_type = typename E1::size_type;
         std::vector<size_type> index(dim_label.size(), size_type(0));
         using selector_map_type = typename E1::template selector_map_type<>;
-        selector_map_type selector;
+        selector_map_type selector(index.size());
         bool end = false;
         do
         {
             for(size_type i = 0; i < index.size(); ++i)
             {
-                selector[dim_label[i]] = coords[dim_label[i]].label(index[i]);
+                selector[i] = std::make_pair(dim_label[i], coords[dim_label[i]].label(index[i]));
             }
             e1.derived_cast().select(selector) = e2.derived_cast().select(selector);
             end = detail::increment_index(e1.derived_cast().data().shape(), index);

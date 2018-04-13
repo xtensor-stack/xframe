@@ -101,7 +101,7 @@ namespace xf
         EXPECT_EQ(opt_cast(t22), v(2, 2));
     }
 
-    TEST(xdynamic_variable, locate)
+    /*TEST(xdynamic_variable, locate)
     {
         auto v = make_test_variable();
         auto dv = make_dynamic(v);
@@ -125,5 +125,5 @@ namespace xf
         EXPECT_EQ(opt_cast(t20), v(2, 0));
         EXPECT_EQ(opt_cast(t21), v(2, 1));
         EXPECT_EQ(opt_cast(t22), v(2, 2));
-    }
+    }*/
 }

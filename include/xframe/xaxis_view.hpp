@@ -61,7 +61,8 @@ namespace xf
         size_type size() const;
 
         bool contains(const key_type& key) const;
-        const mapped_type& operator[](const key_type& key) const;
+        const mapped_type& operator[](const key_type& key) const;      
+        const mapped_type& index(size_type label_index) const;
 
         const_iterator find(const key_type& key) const;
 
@@ -203,6 +204,12 @@ namespace xf
         {
             throw std::out_of_range("invalid xaxis_view key");
         }
+    }
+
+    template <class L, class T, class MT>
+    inline auto xaxis_view<L, T, MT>::index(size_type label_index) const -> const mapped_type&
+    {
+        return this->operator[](label(label_index));
     }
 
     template <class L, class T, class MT>
