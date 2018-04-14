@@ -394,5 +394,27 @@ namespace xf
         variable_view_type view3 = select(var, { { "abscissa", "f" },{ "ordinate", range(1, 6, 2) } });
         variable_view_type view4 = locate(var, "f", range(1, 6, 2));
         EXPECT_EQ(view3, view4);
+
+        variable_view_type view5 = select(var, { {"abscissa", "f"} });
+        variable_view_type view6 = locate(var, "f", xaxis_all());
+        EXPECT_EQ(view5, view6);
+    }
+
+    TEST(xvariable_view, iselect_builder)
+    {
+        variable_type var = make_test_view_variable();
+        variable_view_type view = build_view(var);
+        variable_view_type view2 = iselect(var, { {"abscissa", irange(std::size_t(3), std::size_t(8))},
+                                                  {"ordinate", irange(std::size_t(0), std::size_t(5), std::size_t(2))} });
+        EXPECT_EQ(view, view2);
+
+        variable_view_type view3 = select(var, { { "abscissa", "f" },{ "ordinate", range(1, 6, 2) } });
+        variable_view_type view4 = iselect(var, { { "abscissa", std::size_t(3) },
+                                                  { "ordinate", irange(std::size_t(0), std::size_t(5), std::size_t(2)) } });
+        EXPECT_EQ(view3, view4);
+
+        variable_view_type view5 = select(var, { { "abscissa", "f" } });
+        variable_view_type view6 = iselect(var, { {"abscissa", std::size_t(3)} });
+        EXPECT_EQ(view5, view6);
     }
 }
