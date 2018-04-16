@@ -50,6 +50,33 @@ namespace xf
         slice_type m_slice;
     };
 
+    /*************************
+     * xaxis_extended_islice *
+     *************************/
+
+    template <class T>
+    class xaxis_extended_islice
+    {
+    public:
+
+        using all_type = xt::xall_tag;
+        using squeeze_type = T;
+        using slice_type = xaxis_islice<T>;
+        using storage_type = xtl::variant<all_type, squeeze_type, slice_type>;
+
+        xaxis_extended_islice() = default;
+        template <class S>
+        xaxis_extended_islice(S&& slice);
+
+        const all_type* get_all() const noexcept;
+        const squeeze_type* get_squeeze() const noexcept;
+        const slice_type* get_slice() const noexcept;
+
+    private:
+
+        storage_type m_data;
+    };
+
     /*******************
      * slice_variant_t *
      *******************/
@@ -111,6 +138,21 @@ namespace xf
         size_type m_step;
     };
 
+    /*************
+     * xaxis_all *
+     *************/
+
+    class xaxis_all
+    {
+    public:
+
+        template <class A>
+        using slice_type = xt::xall<typename A::mapped_type>;
+
+        template <class A>
+        slice_type<A> build_islice(const A& axis) const;
+    };
+
     /***************
      * xaxis_slice *
      ***************/
@@ -121,7 +163,7 @@ namespace xf
     public:
 
         using squeeze_type = slice_variant_t<L>;
-        using storage_type = xtl::variant<xaxis_range<L>, xaxis_stepped_range<L>, squeeze_type>;
+        using storage_type = xtl::variant<xaxis_range<L>, xaxis_stepped_range<L>, xaxis_all, squeeze_type>;
 
         xaxis_slice() = default;
         template <class V>
@@ -157,6 +199,12 @@ namespace xf
 
     template <class S, class L = DEFAULT_LABEL_LIST>
     xaxis_slice<L> range(slice_variant_t<L>&& first, slice_variant_t<L>&& last, S step);
+
+    template <class T>
+    xaxis_islice<T> irange(T first, T last);
+
+    template <class T>
+    xaxis_islice<T> irange(T first, T last, T step);
 
     /*******************************
      * xaxis_islice implementation *
@@ -211,6 +259,35 @@ namespace xf
         return !(*this == rhs);
     }
 
+    /****************************************
+     * xaxis_extended_islice implementation *
+     ****************************************/
+
+    template <class T>
+    template <class S>
+    inline xaxis_extended_islice<T>::xaxis_extended_islice(S&& slice)
+        : m_data(std::forward<S>(slice))
+    {
+    }
+
+    template <class T>
+    inline auto xaxis_extended_islice<T>::get_all() const noexcept -> const all_type*
+    {
+        return xtl::get_if<all_type>(&m_data);
+    }
+
+    template <class T>
+    inline auto xaxis_extended_islice<T>::get_squeeze() const noexcept -> const squeeze_type*
+    {
+        return xtl::get_if<squeeze_type>(&m_data);
+    }
+
+    template <class T>
+    inline auto xaxis_extended_islice<T>::get_slice() const noexcept -> const slice_type*
+    {
+        return xtl::get_if<slice_type>(&m_data);
+    }
+
     /******************************
      * xaxis_range implementation *
      ******************************/
@@ -255,6 +332,16 @@ namespace xf
     inline auto xaxis_stepped_range<V>::build_islice(const A& axis) const -> slice_type<A>
     {
         return slice_type<A>(axis[m_first], axis[m_last] + 1, m_step);
+    }
+
+    /****************************
+     * xaxis_all implementation *
+     ****************************/
+
+    template <class A>
+    inline auto xaxis_all::build_islice(const A& axis) const -> slice_type<A>
+    {
+        return slice_type<A>(axis.size());
     }
 
     /******************************
@@ -317,6 +404,18 @@ namespace xf
     inline xaxis_slice<L> range(slice_variant_t<L>&& first, slice_variant_t<L>&& last, S step)
     {
         return xaxis_slice<L>(xaxis_stepped_range<L>(std::move(first), std::move(last), step));
+    }
+
+    template <class T>
+    inline xaxis_islice<T> irange(T first, T last)
+    {
+        return xaxis_islice<T>(xt::xrange<T>(first, last));
+    }
+
+    template <class T>
+    inline xaxis_islice<T> irange(T first, T last, T step)
+    {
+        return xaxis_islice<T>(xt::xstepped_range<T>(first, last, step));
     }
 }
 
