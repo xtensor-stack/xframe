@@ -416,4 +416,20 @@ namespace xf
         variable_view_type view6 = iselect(var, { { "abscissa", 3 } });
         EXPECT_EQ(view5, view6);
     }
+
+    TEST(variable_view, view_builder)
+    {
+        variable_type var = make_test_view_variable();
+        variable_view_type view = build_view(var);
+        variable_view_type view2 = xf::view(var, irange(3, 8), irange(0, 5, 2));
+        EXPECT_EQ(view, view2);
+
+        variable_view_type view3 = select(var, { { "abscissa", "f" },{ "ordinate", range(1, 6, 2) } });
+        variable_view_type view4 = xf::view(var, 3, irange(0, 5, 2));
+        EXPECT_EQ(view3, view4);
+
+        variable_view_type view5 = select(var, { { "abscissa", "f" } });
+        variable_view_type view6 = xf::view(var, 3, xt::all());
+        EXPECT_EQ(view5, view6);
+    }
 }

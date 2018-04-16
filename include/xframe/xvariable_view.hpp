@@ -172,6 +172,9 @@ namespace xf
      * xvariable_view builders *
      ***************************/
 
+    template <class E, class... S>
+    auto view(E&& e, S&&... slices);
+
     template <class L = DEFAULT_LABEL_LIST, class E, class... S>
     auto locate(E&& e, S&&... slices);
 
@@ -570,6 +573,56 @@ namespace xf
             }
             fill_locate_view_params<I + 1>(param, e, std::forward<S>(slices)...);
         }
+
+        template <std::size_t I, class V, class E>
+        inline void fill_view_params(V& /*param*/, E& /*e*/)
+        {
+        }
+
+        template <std::size_t I, class V, class E, class SL, class... S>
+        inline void fill_view_params(V& param, E& e, SL&& sl, S&&... slices)
+        {
+            using axis_type = typename view_params<E>::axis_type;
+            using size_type = typename std::decay_t<E>::size_type;
+
+            const auto& dim_label = e.dimension_labels()[I];
+            const auto& axis = e.coordinates()[dim_label];
+            if (auto* sq = sl.get_squeeze())
+            {
+                param.sq_map[I] = *sq;
+            }
+            else if (auto* sq = sl.get_all())
+            {
+                param.coord_map.emplace(dim_label, axis_type(axis, xt::xall<size_type>(axis.size())));
+                param.dim_label_list.push_back(dim_label);
+            }
+            else
+            {
+                param.coord_map.emplace(dim_label, axis_type(axis, *(sl.get_slice())));
+                param.dim_label_list.push_back(dim_label);
+            }
+            fill_view_params<I + 1>(param, e, std::forward<S>(slices)...);
+        }
+    }
+
+    template <class E, class... S>
+    inline auto view(E&& e, S&&... slices)
+    {
+        using view_param_type = detail::view_params<E>;
+        using coordinate_view_type = typename view_param_type::coordinate_view_type;
+        using dimension_type = typename view_param_type::dimension_type;
+        using view_type = typename view_param_type::view_type;
+
+        view_param_type params;
+        detail::fill_view_params<0>(params, e, xaxis_extended_islice<typename std::decay_t<E>::size_type>(std::forward<S>(slices))...);
+
+        coordinate_view_type coordinate_view(std::move(params.coord_map));
+        dimension_type view_dimension(std::move(params.dim_label_list));
+
+        return view_type(std::forward<E>(e),
+                         std::move(coordinate_view),
+                         std::move(view_dimension),
+                         std::move(params.sq_map));
     }
 
     template <class L, class E, class... S>
