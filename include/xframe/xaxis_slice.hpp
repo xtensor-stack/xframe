@@ -22,6 +22,25 @@ namespace xf
      ****************/
 
     template <class T>
+    class xaxis_islice;
+
+    namespace detail
+    {
+        template <class T>
+        struct is_xaxis_islice : std::false_type
+        {
+        };
+
+        template <class T>
+        struct is_xaxis_islice<xaxis_islice<T>> : std::true_type
+        {
+        };
+
+        template <class S>
+        using disable_xaxis_islice_t = std::enable_if_t<!is_xaxis_islice<std::decay_t<S>>::value, void>;
+    }
+
+    template <class T>
     class xaxis_islice
     {
     public:
@@ -31,8 +50,11 @@ namespace xf
         using self_type = xaxis_islice<T>;
 
         xaxis_islice() = default;
-        template <class S>
+        template <class S, typename = detail::disable_xaxis_islice_t<S>>
         xaxis_islice(S&& slice) noexcept;
+
+        template <class S, typename = std::enable_if_t<std::is_convertible<S, T>::value, void>>
+        operator xaxis_islice<S>() const noexcept;
 
         size_type size() const noexcept;
         bool contains(size_type i) const noexcept;
@@ -55,18 +77,41 @@ namespace xf
      *************************/
 
     template <class T>
+    class xaxis_extended_islice;
+
+    namespace detail
+    {
+        template <class T>
+        struct is_xaxis_extended_islice : std::false_type
+        {
+        };
+
+        template <class T>
+        struct is_xaxis_extended_islice<xaxis_extended_islice<T>> : std::true_type
+        {
+        };
+
+        template <class S>
+        using disable_xaxis_extended_islice_t = std::enable_if_t<!is_xaxis_extended_islice<std::decay_t<S>>::value, void>;
+    }
+
+    template <class T>
     class xaxis_extended_islice
     {
     public:
 
+        using self_type = xaxis_extended_islice<T>;
         using all_type = xt::xall_tag;
         using squeeze_type = T;
         using slice_type = xaxis_islice<T>;
         using storage_type = xtl::variant<all_type, squeeze_type, slice_type>;
 
         xaxis_extended_islice() = default;
-        template <class S>
+        template <class S, typename = detail::disable_xaxis_extended_islice_t<S>>
         xaxis_extended_islice(S&& slice);
+
+        template <class S, typename = std::enable_if_t<std::is_convertible<S, T>::value, void>>
+        operator xaxis_extended_islice<S>() const noexcept;
 
         const all_type* get_all() const noexcept;
         const squeeze_type* get_squeeze() const noexcept;
@@ -206,15 +251,53 @@ namespace xf
     template <class T>
     xaxis_islice<T> irange(T first, T last, T step);
 
+    /*************************
+     * conversions functions *
+     *************************/
+
+    // TODO: remove this when it has been implemented in xtensor
+    namespace detail
+    {
+        template <class S, class T>
+        inline xaxis_islice<S> convert_slice(const xt::xrange<T>& rhs)
+        {
+            S smin = static_cast<S>(rhs(T(0)));
+            S smax = smin + static_cast<S>(rhs.size());
+            return xt::xrange<S>(smin, smax);
+        }
+
+        template <class S, class T>
+        inline xaxis_islice<S> convert_slice(const xt::xstepped_range<T>& rhs)
+        {
+            S smin = static_cast<S>(rhs(T(0)));
+            S sstep = static_cast<S>(rhs.step_size());
+            S smax = smin + static_cast<S>(rhs.size()) * sstep;
+            return xt::xstepped_range<S>(smin, smax, sstep);
+        }
+
+        template <class S, class T>
+        inline xaxis_islice<S> convert_slice(const xt::xall<T>& rhs)
+        {
+            return xt::xall<S>(static_cast<S>(rhs.size()));
+        }
+    }
+
     /*******************************
      * xaxis_islice implementation *
      *******************************/
 
     template <class T>
-    template <class S>
+    template <class S, typename>
     inline xaxis_islice<T>::xaxis_islice(S&& slice) noexcept
         : m_slice(std::forward<S>(slice))
     {
+    }
+
+    template <class T>
+    template <class S, typename>
+    inline xaxis_islice<T>::operator xaxis_islice<S>() const noexcept
+    {
+        return xtl::visit([](const auto& arg) { return detail::convert_slice<S>(arg); }, m_slice);
     }
 
     template <class T>
@@ -263,11 +346,39 @@ namespace xf
      * xaxis_extended_islice implementation *
      ****************************************/
 
+    namespace detail
+    {
+        template <class S, class T>
+        inline xaxis_extended_islice<S> convert_slice(typename xaxis_extended_islice<T>::all_type)
+        {
+            return xt::xall_tag();
+        }
+
+        template <class S, class T>
+        inline xaxis_extended_islice<S> convert_slice(const typename xaxis_extended_islice<T>::squeeze_type& squeeze)
+        {
+            return static_cast<S>(squeeze);
+        }
+
+        template <class S, class T>
+        inline xaxis_extended_islice<S> convert_slice(const xaxis_islice<T>& slice)
+        {
+            return xaxis_islice<S>(slice);
+        }
+    }
+
     template <class T>
-    template <class S>
+    template <class S, typename>
     inline xaxis_extended_islice<T>::xaxis_extended_islice(S&& slice)
         : m_data(std::forward<S>(slice))
     {
+    }
+
+    template <class T>
+    template <class S, typename>
+    inline xaxis_extended_islice<T>::operator xaxis_extended_islice<S>() const noexcept
+    {
+        return xtl::visit([](const auto& arg) { return detail::convert_slice<S, T>(arg); }, m_data);
     }
 
     template <class T>
