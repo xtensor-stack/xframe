@@ -13,48 +13,11 @@
 
 #include "xcoordinate.hpp"
 #include "xselecting.hpp"
+#include "xvariable_meta.hpp"
 #include "xvariable_scalar.hpp"
-
-namespace std
-{
-    template <class T>
-    struct common_type<T, xf::xfull_coordinate>
-    {
-        using type = T;
-    };
-
-    template <class T>
-    struct common_type<xf::xfull_coordinate, T>
-        : common_type<T, xf::xfull_coordinate>
-    {
-    };
-
-    template <>
-    struct common_type<xf::xfull_coordinate, xf::xfull_coordinate>
-    {
-        using type = xf::xfull_coordinate;
-    };
-}
 
 namespace xf
 {
-    namespace detail
-    {
-        template <class CT>
-        struct xvariable_closure
-        {
-            using type = CT;
-        };
-
-        template <class CT>
-        struct xvariable_closure<xt::xscalar<CT>>
-        {
-            using type = xvariable_scalar<CT>;
-        };
-    }
-
-    template <class CT>
-    using xvariable_closure_t = typename detail::xvariable_closure<CT>::type;
 
     /**********************
      * xvariable_function *
@@ -76,8 +39,10 @@ namespace xf
         using size_type = xt::detail::common_size_type_t<std::decay_t<CT>...>;
         using difference_type = xt::detail::common_difference_type_t<std::decay_t<CT>...>;     
 
-        using coordinate_type = std::common_type_t<typename std::decay_t<xvariable_closure_t<CT>>::coordinate_type...>;
-        using dimension_type = std::common_type_t<typename std::decay_t<xvariable_closure_t<CT>>::dimension_type...>;
+        //using coordinate_type = std::common_type_t<typename std::decay_t<xvariable_closure_t<CT>>::coordinate_type...>;
+        //using dimension_type = std::common_type_t<typename std::decay_t<xvariable_closure_t<CT>>::dimension_type...>;
+        using coordinate_type = xcommon_coordinate_type_t<CT...>;
+        using dimension_type = xcommon_dimension_type_t<CT...>;
         using dimension_list = typename dimension_type::label_list;
 
         template <std::size_t N = dynamic()>
