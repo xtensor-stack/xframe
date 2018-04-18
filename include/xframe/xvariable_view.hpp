@@ -20,12 +20,48 @@ namespace xf
      *******************/
 
     template <class CT>
-    class xvariable_view
+    class xvariable_view;
+
+    template <class CT>
+    struct xvariable_inner_types<xvariable_view<CT>>
+    {
+        using xexpression_type = std::decay_t<CT>;
+        using coordinate_type = xcoordinate_view_type_t<typename xexpression_type::coordinate_type>;
+        using dimension_type = typename xexpression_type::dimension_type;
+        using key_type = typename coordinate_type::key_type;
+        using size_type = typename coordinate_type::size_type;
+    };
+
+}
+
+namespace xt
+{
+    template <class CT>
+    struct xcontainer_inner_types<xf::xvariable_view<CT>>
+        : xf::xvariable_inner_types<xf::xvariable_view<CT>>
+    {
+        using base_type = xf::xvariable_inner_types<xf::xvariable_view<CT>>;
+        using xexpression_type = typename base_type::xexpression_type;
+        using optional_type = typename xexpression_type::value_type;
+        using temporary_coordinate_type = xf::xcoordinate<typename base_type::key_type, typename base_type::size_type>;
+        using temporary_data_type = xoptional_assembly<xarray<typename optional_type::value_type>, xarray<bool>>;
+        using temporary_type = xf::xvariable<temporary_coordinate_type, temporary_data_type>;
+    };
+}
+
+namespace xf
+{
+
+    template <class CT>
+    class xvariable_view : public xt::xview_semantic<xvariable_view<CT>>
     {
     public:
 
         using self_type = xvariable_view<CT>;
-        using xexpression_type = std::decay_t<CT>;
+        using semantic_base = xt::xview_semantic<self_type>;
+        using inner_types = xt::xcontainer_inner_types<self_type>;
+        using xexpression_type = typename inner_types::xexpression_type;
+        using data_type = typename xexpression_type::data_type;
 
         static constexpr bool is_const = std::is_const<std::remove_reference_t<CT>>::value;
         using value_type = typename xexpression_type::value_type;
@@ -40,11 +76,13 @@ namespace xf
         using size_type = typename xexpression_type::size_type;
         using difference_type = typename xexpression_type::difference_type;
 
-        using coordinate_type = xcoordinate_view_type_t<typename xexpression_type::coordinate_type>;
-        using dimension_type = typename xexpression_type::dimension_type;
+        using coordinate_type = typename inner_types::coordinate_type;
+        using dimension_type = typename inner_types::dimension_type;
         using dimension_list = typename dimension_type::label_list;
-
         using squeeze_map = std::map<typename dimension_type::mapped_type, typename coordinate_type::index_type>;
+        using temporary_type = typename inner_types::temporary_type;
+
+        using expression_tag = xvariable_expression_tag;
 
         template <std::size_t N = dynamic()>
         using selector_traits = xselector_traits<coordinate_type, dimension_type, N>;
@@ -57,10 +95,16 @@ namespace xf
         template <std::size_t N = dynamic()>
         using iselector_map_type = typename selector_traits<N>::iselector_map_type;
 
+        static const_reference missing();
+
         template <class E>
         xvariable_view(E&& e, coordinate_type&& coord, dimension_type&& dim, squeeze_map&& squeeze);
 
-        static const_reference missing();
+        xvariable_view(const xvariable_view&) = default;
+        xvariable_view& operator=(const xvariable_view&);
+
+        template <class E>
+        xvariable_view& operator=(const xt::xexpression<E>& e);
 
         size_type size() const noexcept;
         size_type dimension() const noexcept;
@@ -68,8 +112,12 @@ namespace xf
         const coordinate_type& coordinates() const noexcept;
         const dimension_type& dimension_mapping() const noexcept;
 
-        xexpression_type& data() noexcept;
-        const xexpression_type& data() const noexcept;
+        template <class Join = DEFAULT_JOIN>
+        xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
+        bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
+
+        data_type& data() noexcept;
+        const data_type& data() const noexcept;
 
         template <class... Args>
         reference operator()(Args... args);
@@ -162,10 +210,14 @@ namespace xf
         template <std::size_t N>
         void adapt_iselector(iselector_map_type<N>& selector) const;
 
+        void assign_temporary_impl(temporary_type&& tmp);
+
         CT m_e;
         coordinate_type m_coordinate;
         dimension_type m_dimension;
         squeeze_map m_squeeze;
+
+        friend class xt::xview_semantic<xvariable_view<CT>>;
     };
 
     /***************************
@@ -173,7 +225,7 @@ namespace xf
      ***************************/
 
     template <class E, class... S>
-    auto view(E&& e, S&&... slices);
+    auto ilocate(E&& e, S&&... slices);
 
     template <class L = DEFAULT_LABEL_LIST, class E, class... S>
     auto locate(E&& e, S&&... slices);
@@ -202,6 +254,21 @@ namespace xf
     inline auto xvariable_view<CT>::missing() -> const_reference
     {
         return detail::static_missing<const_reference>();
+    }
+
+    template <class CT>
+    inline xvariable_view<CT>& xvariable_view<CT>::operator=(const xvariable_view& rhs)
+    {
+        temporary_type tmp(rhs);
+        return this->assign_temporary(std::move(tmp));
+    }
+
+    template <class CT>
+    template <class E>
+    inline xvariable_view<CT>& xvariable_view<CT>::operator=(const xt::xexpression<E>& e)
+    {
+        using root_semantic = typename semantic_base::base_type;
+        return root_semantic::operator=(e);
     }
 
     template <class CT>
@@ -239,15 +306,37 @@ namespace xf
     }
 
     template <class CT>
-    inline auto xvariable_view<CT>::data() noexcept -> xexpression_type&
+    template <class Join>
+    inline xtrivial_broadcast xvariable_view<CT>::broadcast_coordinates(coordinate_type& coords) const
     {
-        return m_e;
+        return xf::broadcast_coordinates<Join>(coords, this->coordinates());
     }
 
     template <class CT>
-    inline auto xvariable_view<CT>::data() const noexcept -> const xexpression_type&
+    inline bool xvariable_view<CT>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
     {
-        return m_e;
+        bool ret = true;
+        if (trivial_bc)
+        {
+            dims = this->dimension_mapping();
+        }
+        else
+        {
+            ret = xf::broadcast_dimensions(dims, this->dimension_mapping());
+        }
+        return ret;
+    }
+
+    template <class CT>
+    inline auto xvariable_view<CT>::data() noexcept -> data_type&
+    {
+        return m_e.data();
+    }
+
+    template <class CT>
+    inline auto xvariable_view<CT>::data() const noexcept -> const data_type&
+    {
+        return m_e.data();
     }
 
     template <class CT>
@@ -261,7 +350,7 @@ namespace xf
         else
         {
             auto idx = build_accessor(std::forward<Args>(args)...);
-            return data().element(idx.cbegin(), idx.cend());
+            return m_e.element(idx.cbegin(), idx.cend());
         }
     }
 
@@ -276,7 +365,7 @@ namespace xf
         else
         {
             auto idx = build_accessor(std::forward<Args>(args)...);
-            return data().element(idx.cbegin(), idx.cend());
+            return m_e.element(idx.cbegin(), idx.cend());
         }
     }
 
@@ -291,7 +380,7 @@ namespace xf
         else
         {
             auto idx = build_locator(std::forward<Args>(args)...);
-            return data().element(idx.cbegin(), idx.cend());
+            return m_e.element(idx.cbegin(), idx.cend());
         }
     }
 
@@ -306,7 +395,7 @@ namespace xf
         else
         {
             auto idx = build_locator(std::forward<Args>(args)...);
-            return data().element(idx.cbegin(), idx.cend());
+            return m_e.element(idx.cbegin(), idx.cend());
         }
     }
 
@@ -386,21 +475,21 @@ namespace xf
     template <std::size_t... I, class... Args>
     inline auto xvariable_view<CT>::access_impl(std::index_sequence<I...>, Args... args) -> reference
     {
-        return data()(coordinates()[dimension_labels()[I]].index(args)...);
+        return m_e(coordinates()[dimension_labels()[I]].index(args)...);
     }
 
     template <class CT>
     template <std::size_t... I, class... Args>
     inline auto xvariable_view<CT>::access_impl(std::index_sequence<I...>, Args... args) const -> const_reference
     {
-        return data()(coordinates()[dimension_labels()[I]].index(args)...);
+        return m_e(coordinates()[dimension_labels()[I]].index(args)...);
     }
 
     template <class CT>
     template <class... Args>
     inline auto xvariable_view<CT>::build_accessor(Args&&... args) const -> index_type
     {
-        index_type accessor(data().dimension());
+        index_type accessor(m_e.dimension());
         fill_accessor<0>(accessor, std::forward<Args>(args)...);
         fill_squeeze(accessor);
         return accessor;
@@ -410,7 +499,7 @@ namespace xf
     template <std::size_t I, class T, class... Args>
     inline void xvariable_view<CT>::fill_accessor(index_type& accessor, T idx, Args... args) const
     {
-        std::size_t new_index = data().dimension_mapping()[dimension_labels()[I]];
+        std::size_t new_index = m_e.dimension_mapping()[dimension_labels()[I]];
         accessor[new_index] = coordinates()[dimension_labels()[I]].index(idx);
         fill_accessor<I + 1>(accessor, std::forward<Args>(args)...);
     }
@@ -426,21 +515,21 @@ namespace xf
     template <std::size_t... I, class... Args>
     inline auto xvariable_view<CT>::locate_impl(std::index_sequence<I...>, Args&&... args) -> reference
     {
-        return data()(coordinates()[dimension_mapping().labels()[I]][args]...);
+        return m_e(coordinates()[dimension_mapping().labels()[I]][args]...);
     }
 
     template <class CT>
     template <std::size_t... I, class... Args>
     inline auto xvariable_view<CT>::locate_impl(std::index_sequence<I...>, Args&&... args) const -> const_reference
     {
-        data()(coordinates()[dimension_mapping().labels()[I]][args]...);
+        m_e(coordinates()[dimension_mapping().labels()[I]][args]...);
     }
 
     template <class CT>
     template <class... Args>
     inline auto xvariable_view<CT>::build_locator(Args&&... args) const -> index_type
     {
-        index_type locator(data().dimension());
+        index_type locator(m_e.dimension());
         fill_locator<0>(locator, std::forward<Args>(args)...);
         fill_squeeze(locator);
         return locator;
@@ -450,7 +539,7 @@ namespace xf
     template <std::size_t I, class T, class... Args>
     inline void xvariable_view<CT>::fill_locator(index_type& locator, T idx, Args&&... args) const
     {
-        std::size_t new_index = data().dimension_mapping()[dimension_labels()[I]];
+        std::size_t new_index = m_e.dimension_mapping()[dimension_labels()[I]];
         locator[new_index] = coordinates()[dimension_labels()[I]][idx];
         fill_locator<I + 1>(locator, std::forward<Args>(args)...);
     }
@@ -467,7 +556,7 @@ namespace xf
     {
         typename S::index_type idx = selector.get_index(coordinates(), m_e.dimension_mapping());
         fill_squeeze(idx);
-        return data().element(idx.cbegin(), idx.cend());
+        return m_e.element(idx.cbegin(), idx.cend());
     }
 
     template <class CT>
@@ -476,7 +565,7 @@ namespace xf
     {
         typename S::index_type idx = selector.get_index(coordinates(), m_e.dimension_mapping());
         fill_squeeze(idx);
-        return data().element(idx.cbegin(), idx.cend());
+        return m_e.element(idx.cbegin(), idx.cend());
     }
 
     template <class CT>
@@ -487,7 +576,7 @@ namespace xf
         if (idx.second)
         {
             fill_squeeze(idx.first);
-            return data().element(idx.first.cbegin(), idx.first.cend());
+            return m_e.element(idx.first.cbegin(), idx.first.cend());
         }
         else
         {
@@ -526,6 +615,27 @@ namespace xf
         {
             sel.second = m_coordinate[sel.first].index(sel.second);
         }
+    }
+
+    template <class CT>
+    inline void xvariable_view<CT>::assign_temporary_impl(temporary_type&& tmp)
+    {
+        // TODO: improve this with iterators when they are available
+        const temporary_type& tmp2 = tmp;
+        /*const auto& dim_label = dimension_labels();
+        const auto& coords = coordinates();
+        std::vector<size_type> index(dim_label.size(), size_type(0));
+        selector_map_type<> selector(index.size());
+        bool end = false;
+        do
+        {
+            for (size_type i = 0; i < index.size(); ++i)
+            {
+                selector[i] = std::make_pair(dim_label[i], coords[dim_label[i]].label(index[i]));
+            }
+            this->select(selector) = tmp2.select(selector);
+            end = xt::detail::increment_index(tmp2.data().shape(), index);
+        } while (!end);*/
     }
 
     /******************************************
@@ -606,7 +716,7 @@ namespace xf
     }
 
     template <class E, class... S>
-    inline auto view(E&& e, S&&... slices)
+    inline auto ilocate(E&& e, S&&... slices)
     {
         using view_param_type = detail::view_params<E>;
         using coordinate_view_type = typename view_param_type::coordinate_view_type;
