@@ -95,6 +95,12 @@ namespace xf
         bool contains(const key_type& key) const;
         const mapped_type& operator[](const key_type& key) const;
 
+        template <class F>
+        self_type filter(const F& f) const noexcept;
+
+        template <class F>
+        self_type filter(const F& f, size_type size) const noexcept;
+
         const_iterator find(const key_type& key) const;
 
         const_iterator begin() const noexcept;
@@ -314,6 +320,24 @@ namespace xf
     inline auto xaxis<L, T, MT>::operator[](const key_type& key) const -> const mapped_type&
     {
         return m_index.at(key);
+    }
+
+    template <class L, class T, class MT>
+    template <class F>
+    inline auto xaxis<L, T, MT>::filter(const F& f) const noexcept -> self_type
+    {
+        label_list l;
+        std::copy(m_labels.cbegin(), m_labels.cend(), std::back_inserter(l), f);
+        return self_type(std::move(l), m_is_sorted);
+    }
+
+    template <class L, class T, class MT>
+    template <class F>
+    inline auto xaxis<L, T, MT>::filter(const F& f, size_type size) const noexcept -> self_type
+    {
+        label_list l(size);
+        std::copy_if(m_labels.cbegin(), m_labels.cend(), l.begin(), f);
+        return self_type(std::move(l), m_is_sorted);
     }
 
     template <class L, class T, class MT>

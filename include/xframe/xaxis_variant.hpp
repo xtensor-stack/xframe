@@ -95,6 +95,12 @@ namespace xf
         bool contains(const key_type& key) const;
         const mapped_type& operator[](const key_type& key) const;
 
+        template <class F>
+        self_type filter(const F& f) const;
+
+        template <class F>
+        self_type filter(const F& f, size_type size) const;
+
         const_iterator find(const key_type& key) const;
 
         const_iterator begin() const;
@@ -248,6 +254,20 @@ namespace xf
             return arg[xtl::get<type>(key)];
         };
         return xtl::visit(lambda, m_data);
+    }
+
+    template <class L, class T, class MT>
+    template <class F>
+    inline auto xaxis_variant<L, T, MT>::filter(const F& f) const -> self_type
+    {
+        return xtl::visit([&f](const auto& arg) { return self_type(arg.filter(f)); }, m_data);
+    }
+
+    template <class L, class T, class MT>
+    template <class F>
+    inline auto xaxis_variant<L, T, MT>::filter(const F& f, size_type size) const -> self_type
+    {
+        return xtl::visit([&f, size](const auto& arg) { return self_type(arg.filter(f, size)); }, m_data);
     }
 
     template <class L, class T, class MT>

@@ -80,4 +80,32 @@ namespace xf
         ++iter;
         EXPECT_EQ(iter, cv.key_end());
     }
+
+    TEST(xcoordinate_view, broadcasting)
+    {
+        auto c = make_test_view_coordinate();
+        auto vc = build_coordinate_view(c);
+
+        auto c2 = coordinate(std::make_pair(fstring("altitude"), make_test_view_saxis()));
+        xtrivial_broadcast res = c2.broadcast<join::inner>(vc);
+        EXPECT_TRUE(res.m_xframe_trivial);
+        EXPECT_FALSE(res.m_xtensor_trivial);
+
+        const axis_variant& c2abscissa = c2["abscissa"];
+        axis_variant vcabscissa = axis_variant(vc["abscissa"]);
+        const axis_variant& c2ordinate = c2["ordinate"];
+        axis_variant vcordinate = axis_variant(vc["ordinate"]);
+        EXPECT_EQ(c2abscissa, vcabscissa);
+        EXPECT_EQ(c2ordinate, vcordinate);
+
+        
+        auto c3 = c;
+        xtrivial_broadcast res2 = c3.broadcast<join::inner>(vc);
+        EXPECT_FALSE(res2.m_xframe_trivial);
+        EXPECT_TRUE(res2.m_xtensor_trivial);
+        const axis_variant& c3abscissa = c3["abscissa"];
+        const axis_variant& c3ordinate = c3["ordinate"];
+        EXPECT_EQ(c3abscissa, vcabscissa);
+        EXPECT_EQ(c3ordinate, vcordinate);
+    }
 }

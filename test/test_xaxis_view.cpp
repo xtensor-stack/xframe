@@ -166,4 +166,14 @@ namespace xf
         sextended_type res2 = std::size_t(2);
         EXPECT_EQ(*(is5.get_squeeze()), *(ss5.get_squeeze()));
     }
+
+    TEST(xaxis_view, conversion)
+    {
+        auto a = make_variant_view_saxis();
+        axis_view_type v = axis_view_type(a, make_slice());
+        axis_variant vf = axis_variant(v);
+        EXPECT_EQ(vf["c"], 0u);
+        EXPECT_EQ(vf["f"], 1u);
+        EXPECT_EQ(vf["h"], 2u);
+    }
 }
