@@ -53,6 +53,8 @@ namespace xf
         template <class S>
         xaxis_view(const axis_type& axis, S&& slice);
 
+        explicit operator axis_type() const;
+
         template <class LB>
         label_list<LB> labels() const;
         key_type label(size_type i) const;
@@ -63,6 +65,12 @@ namespace xf
         bool contains(const key_type& key) const;
         const mapped_type& operator[](const key_type& key) const;      
         const mapped_type& index(size_type label_index) const;
+
+        template <class F>
+        axis_type filter(const F& f) const;
+
+        template <class F>
+        axis_type filter(const F& f, size_type size) const;
 
         const_iterator find(const key_type& key) const;
 
@@ -157,6 +165,12 @@ namespace xf
     }
 
     template <class L, class T, class MT>
+    inline xaxis_view<L, T, MT>::operator axis_type() const
+    {
+        return m_axis.filter([this](const auto& arg) { return this->contains(arg); }, size());
+    }
+
+    template <class L, class T, class MT>
     template <class LB>
     inline auto xaxis_view<L, T, MT>::labels() const -> label_list<LB>
     {
@@ -210,6 +224,20 @@ namespace xf
     inline auto xaxis_view<L, T, MT>::index(size_type label_index) const -> const mapped_type&
     {
         return this->operator[](label(label_index));
+    }
+
+    template <class L, class T, class MT>
+    template <class F>
+    inline auto xaxis_view<L, T, MT>::filter(const F& f) const -> axis_type
+    {
+        return m_axis.filter([&f, this](const auto& arg) { return f(arg) && this->contains(arg); });
+    }
+
+    template <class L, class T, class MT>
+    template <class F>
+    inline auto xaxis_view<L, T, MT>::filter(const F& f, size_type size) const -> axis_type
+    {
+        return m_axis.filter([&f, this](const auto& arg) { return f(arg) && this->contains(arg); }, size);
     }
 
     template <class L, class T, class MT>

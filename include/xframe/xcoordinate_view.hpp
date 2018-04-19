@@ -10,7 +10,7 @@
 #define XFRAME_XCOORDINATE_VIEW_HPP
 
 #include "xaxis_view.hpp"
-#include "xcoordinate.hpp"
+#include "xcoordinate_base.hpp"
 
 namespace xf
 {
@@ -59,6 +59,9 @@ namespace xf
     /*************************
      * xcoordinate_view_type *
      *************************/
+
+    template <class K, class S, class MT, class L>
+    class xcoordinate;
 
     template <class C>
     struct xcoordinate_view_type;

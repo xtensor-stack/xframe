@@ -10,7 +10,7 @@
 #define XFRAME_XCOORDINATE_HPP
 
 #include "xtensor/xutils.hpp"
-#include "xcoordinate_base.hpp"
+#include "xcoordinate_view.hpp"
 
 namespace xf
 {
@@ -83,8 +83,12 @@ namespace xf
 
     private:
 
+        using coordinate_view_type = xcoordinate_view < K, S, MT, L>;
+
         template <class Join, class... Args>
         xtrivial_broadcast broadcast_impl(const self_type& c, const Args&... coordinates);
+        template <class Join, class... Args>
+        xtrivial_broadcast broadcast_impl(const coordinate_view_type& c, const Args&... coordinates);
         template <class Join, class... Args>
         xtrivial_broadcast broadcast_impl(const xfull_coordinate& c, const Args&... coordinates);
         template <class Join>
@@ -92,6 +96,8 @@ namespace xf
 
         template <class Join, class... Args>
         xtrivial_broadcast broadcast_empty(const self_type& c, const Args&... coordinates);
+        template <class Join, class... Args>
+        xtrivial_broadcast broadcast_empty(const coordinate_view_type& c, const Args&... coordinates);
         template <class Join, class... Args>
         xtrivial_broadcast broadcast_empty(const xfull_coordinate& c, const Args&... coordinates);
         template <class Join>
@@ -282,10 +288,33 @@ namespace xf
             }
             else
             {
-                const auto& key = inserted.first->first;
                 auto& axis = inserted.first->second;
-                res.m_xframe_trivial &= detail::axis_broadcast<Join>::apply(axis, c[key]);
+                res.m_xframe_trivial &= detail::axis_broadcast<Join>::apply(axis, iter->second);
             } 
+        }
+        XFRAME_TRACE_COORDINATES_RESULT(*this, res);
+        return res;
+    }
+
+    template <class K, class S, class MT, class L>
+    template <class Join, class... Args>
+    inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast_impl(const coordinate_view_type& c, const Args&... coordinates)
+    {
+        auto res = broadcast_impl<Join>(coordinates...);
+        XFRAME_TRACE_BROADCAST_COORDINATES(*this, c);
+        for (auto iter = c.begin(); iter != c.end(); ++iter)
+        {
+            mapped_type axis = mapped_type(iter->second);
+            auto it = this->coordinate().find(iter->first);
+            if (it == this->coordinate().end())
+            {
+                this->coordinate().insert(std::make_pair(iter->first, std::move(axis)));
+                res.m_xtensor_trivial = false;
+            }
+            else
+            {
+                res.m_xframe_trivial &= detail::axis_broadcast<Join>::apply(it->second, axis);
+            }
         }
         XFRAME_TRACE_COORDINATES_RESULT(*this, res);
         return res;
@@ -310,6 +339,18 @@ namespace xf
     inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast_empty(const self_type& c, const Args&... coordinates)
     {
         this->coordinate() = c.data();
+        return broadcast_impl<Join>(coordinates...);
+    }
+
+    template <class K, class S, class MT, class L>
+    template <class Join, class... Args>
+    inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast_empty(const coordinate_view_type& c, const Args&... coordinates)
+    {
+        map_type& m = this->coordinate();
+        for (auto iter = c.data().cbegin(); iter != c.data().cend(); ++iter)
+        {
+            m.insert(std::make_pair(iter->first, mapped_type(iter->second)));
+        }
         return broadcast_impl<Join>(coordinates...);
     }
 
