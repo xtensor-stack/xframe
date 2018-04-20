@@ -95,9 +95,6 @@ namespace xf
         template <std::size_t... I, class... Args>
         const_reference access_impl(std::index_sequence<I...>, Args... args) const;
 
-        template <class Join, std::size_t... I>
-        xtrivial_broadcast broadcast_coordinates_impl(std::index_sequence<I...>, coordinate_type& coords) const;
-
         template <std::size_t... I>
         data_type data_impl(std::index_sequence<I...>) const noexcept;
 
@@ -113,6 +110,7 @@ namespace xf
         mutable dimension_type m_dimension_mapping;
         mutable join::join_id m_join_id;
         mutable bool m_coordinate_computed;
+        mutable xtrivial_broadcast m_trivial_broadcast;
     };
 
     /*************************************
@@ -175,7 +173,10 @@ namespace xf
     template <class Join>
     inline xtrivial_broadcast xvariable_function<F, R, CT...>::broadcast_coordinates(coordinate_type& coords) const
     {
-        return broadcast_coordinates_impl<Join>(std::make_index_sequence<sizeof...(CT)>(), coords);
+        auto func = [&coords](xtrivial_broadcast trivial, const auto& arg) {
+            return arg.template broadcast_coordinates<Join>(coords) && trivial;
+        };
+        return xt::accumulate(func, xtrivial_broadcast(true, true), m_e);
     }
 
     namespace detail
@@ -216,7 +217,6 @@ namespace xf
         bool ret = true;
         if(trivial_bc)
         {
-            //dims = std::get<0>(m_e).dimension_mapping();
             dims = detail::get_first_non_scalar(m_e).dimension_mapping();
         }
         else
@@ -260,8 +260,8 @@ namespace xf
         if(!m_coordinate_computed || m_join_id != Join::id())
         {
             m_coordinate.clear();
-            auto res = broadcast_coordinates<Join>(m_coordinate);
-            broadcast_dimensions(m_dimension_mapping, res.m_xtensor_trivial);
+            m_trivial_broadcast = broadcast_coordinates<Join>(m_coordinate);
+            broadcast_dimensions(m_dimension_mapping, m_trivial_broadcast.m_xtensor_trivial);
             m_coordinate_computed = true;
             m_join_id = Join::id();
         }
@@ -272,14 +272,6 @@ namespace xf
     inline auto xvariable_function<F, R, CT...>::access_impl(std::index_sequence<I...>, Args... args) const -> const_reference
     {
         return m_f(xt::detail::get_element(std::get<I>(m_e), args...)...);
-    }
-    
-    template <class F, class R, class... CT>
-    template <class Join, std::size_t... I>
-    inline xtrivial_broadcast
-    xvariable_function<F, R, CT...>::broadcast_coordinates_impl(std::index_sequence<I...>, coordinate_type& coords) const
-    {
-        return xf::broadcast_coordinates<Join>(coords, std::get<I>(m_e).coordinates()...);
     }
 
     template <class F, class R, class... CT>

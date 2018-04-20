@@ -347,5 +347,43 @@ namespace xf
             CHECK_EQUALITY(res, c, d, sl, /)
         }
     }
+
+
+#define CHECK_COMPOSED_EQUALITY(RES, A, B, SL)                                 \
+    for(std::size_t i = 0; i < sl.size(); ++i)                                 \
+    {                                                                          \
+        EXPECT_EQ(RES.select(SL[i]), 3 * (A.select(SL[i]) + B.select(SL[i]))); \
+    }
+
+    TEST(xvariable_assign, composed_function)
+    {
+        DEFINE_TEST_VARIABLES();
+        {
+            SCOPED_TRACE("same coordinate");
+            variable_type res = a;
+            EXPECT_EQ(res(0, 0), a(0, 0));
+            res = 3 * (a + a);
+            selector_list sl = make_selector_list_aa();
+            CHECK_COMPOSED_EQUALITY(res, a, a, sl)
+        }
+
+        {
+            SCOPED_TRACE("different coordinates");
+            variable_type res = a;
+            EXPECT_EQ(res(0, 0), a(0, 0));
+            res = 3 * (a + b);
+            selector_list sl = make_selector_list_ab();
+            CHECK_COMPOSED_EQUALITY(res, a, b, sl)
+        }
+
+        {
+            SCOPED_TRACE("broadcasting coordinates");
+            variable_type res = a;
+            EXPECT_EQ(res(0, 0), a(0, 0));
+            res = 3 * (c + d);
+            selector_list sl = make_selector_list_cd();
+            CHECK_COMPOSED_EQUALITY(res, c, d, sl)
+        }
+    }
 }
 

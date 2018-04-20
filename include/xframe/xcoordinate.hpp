@@ -43,6 +43,8 @@ namespace xf
         bool m_xframe_trivial;
     };
 
+    xtrivial_broadcast operator&&(const xtrivial_broadcast& lhs, const xtrivial_broadcast& rhs) noexcept;
+
     template <class K, class S, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
     class xcoordinate : public xcoordinate_base<K, xaxis_variant<L, S, MT>>
     {
@@ -191,6 +193,12 @@ namespace xf
     /******************************
      * xcoordinate implementation *
      ******************************/
+
+    inline xtrivial_broadcast operator&&(const xtrivial_broadcast& lhs, const xtrivial_broadcast& rhs) noexcept
+    {
+        return xtrivial_broadcast(lhs.m_xtensor_trivial && rhs.m_xtensor_trivial,
+                                  lhs.m_xframe_trivial && rhs.m_xframe_trivial);
+    }
 
     inline xtrivial_broadcast::xtrivial_broadcast(bool xtensor_trivial, bool xframe_trivial)
         : m_xtensor_trivial(xtensor_trivial), m_xframe_trivial(xframe_trivial)
