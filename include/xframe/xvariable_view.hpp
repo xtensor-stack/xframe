@@ -403,7 +403,7 @@ namespace xf
     template <std::size_t N>
     inline auto xvariable_view<CT>::select(const selector_map_type<N>& selector) -> reference
     {
-        return select(selector_type<N>(selector));
+        return select_impl(selector_type<N>(selector));
     }
 
     template <class CT>
@@ -622,7 +622,7 @@ namespace xf
     {
         // TODO: improve this with iterators when they are available
         const temporary_type& tmp2 = tmp;
-        /*const auto& dim_label = dimension_labels();
+        const auto& dim_label = dimension_labels();
         const auto& coords = coordinates();
         std::vector<size_type> index(dim_label.size(), size_type(0));
         selector_map_type<> selector(index.size());
@@ -635,7 +635,7 @@ namespace xf
             }
             this->select(selector) = tmp2.select(selector);
             end = xt::detail::increment_index(tmp2.data().shape(), index);
-        } while (!end);*/
+        } while (!end);
     }
 
     /******************************************
