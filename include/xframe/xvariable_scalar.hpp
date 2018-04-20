@@ -43,7 +43,7 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const noexcept;
 
-        template <class C, class Join = DEFAULT_JOIN>
+        template <class Join = DEFAULT_JOIN, class C>
         xtrivial_broadcast broadcast_coordinates(C& coords) const noexcept;
 
         template <class D>
@@ -111,7 +111,7 @@ namespace xf
     }
 
     template <class CT>
-    template <class C, class Join>
+    template <class Join, class C>
     inline xtrivial_broadcast xvariable_scalar<CT>::broadcast_coordinates(C& /*coords*/) const noexcept
     {
         return xtrivial_broadcast(true, true);
