@@ -112,8 +112,8 @@ namespace xf
         const coordinate_type& coordinates() const noexcept;
         const dimension_type& dimension_mapping() const noexcept;
 
-        template <class Join = DEFAULT_JOIN>
-        xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
+        template <class Join = DEFAULT_JOIN, class C = coordinate_type>
+        xtrivial_broadcast broadcast_coordinates(C& coords) const;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
         data_type& data() noexcept;
@@ -306,8 +306,8 @@ namespace xf
     }
 
     template <class CT>
-    template <class Join>
-    inline xtrivial_broadcast xvariable_view<CT>::broadcast_coordinates(coordinate_type& coords) const
+    template <class Join, class C>
+    inline xtrivial_broadcast xvariable_view<CT>::broadcast_coordinates(C& coords) const
     {
         return xf::broadcast_coordinates<Join>(coords, this->coordinates());
     }
