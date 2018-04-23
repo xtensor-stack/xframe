@@ -149,7 +149,14 @@ namespace xt
     inline void xexpression_assigner<xvariable_expression_tag>::assert_compatible_shape(const xexpression<E1>& e1,
                                                                                         const xexpression<E2>& e2)
     {
-        throw std::runtime_error("assert_compatible_shape not implemented");
+        const auto& c1 = e1.derived_cast().coordinates();
+        const auto& l2 = e2.derived_cast().dimension_labels();
+        bool res = std::accumulate(l2.cbegin(), l2.cend(), true,
+            [&c1](bool res, const auto& arg) { return res && c1.contains(arg); });
+        if (!res)
+        {
+            throw std::runtime_error("Incompatible dimensions of expressions");
+        }
     }
 
     template <class E1, class E2>

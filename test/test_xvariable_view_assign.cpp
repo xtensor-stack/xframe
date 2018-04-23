@@ -49,4 +49,34 @@ namespace xf
             CHECK_EQUALITY(vrescd, vc, vd, sl, +)
         }
     }
+
+    TEST(xvariable_view_assign, assign_a_plus_b)
+    {
+        DEFINE_TEST_VIEW_VARIABLES();
+        {
+            SCOPED_TRACE("same coordinate");
+            xt::noalias(vresaa) = va + va;
+            selector_list sl = make_selector_list_aa();
+            CHECK_EQUALITY(vresaa, va, va, sl, +)
+        }
+
+        {
+            SCOPED_TRACE("different coordinates");
+            xt::noalias(vresab) = va + vb;
+            selector_list sl = make_selector_list_ab();
+            CHECK_EQUALITY(vresab, va, vb, sl, +)
+        }
+
+        {
+            SCOPED_TRACE("broadcasting coordinates");
+            xt::noalias(vrescd) = vc + vd;
+            selector_list sl = make_selector_list_cd();
+            CHECK_EQUALITY(vrescd, vc, vd, sl, +)
+        }
+
+        {
+            SCOPED_TRACE("Incompatible shapes");
+            EXPECT_ANY_THROW(xt::noalias(vresaa) = va + vb);
+        }
+    }
 }
