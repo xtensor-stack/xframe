@@ -115,6 +115,38 @@ namespace xf
         map_type m_coord;
     };
 
+    /************
+     * xlocator *
+     ************/
+
+    template <class C, class D, std::size_t N>
+    class xlocator
+    {
+    public:
+
+        static_assert(is_coordinate<C>::value, "first parameter of xlocator must be xcoordinate");
+        static_assert(is_dimension<D>::value, "second parameter of xlocator must be xdimension");
+
+        using coordinate_type = C;
+        using key_type = typename coordinate_type::key_type;
+        using label_list = typename coordinate_type::label_list;
+        using mapped_type = mpl::cast_t<label_list, xtl::variant>;
+        using size_type = typename coordinate_type::index_type;
+        using index_type = detail::xselector_sequence_t<size_type, N>;
+        using dimension_type = D;
+        using sequence_type = detail::xselector_sequence_t<mapped_type, N>;
+
+        xlocator() = default;
+        xlocator(const sequence_type& coord);
+        xlocator(sequence_type&& coord);
+
+        index_type get_index(const coordinate_type& coord, const dimension_type& dim) const;
+
+    private:
+
+        sequence_type m_coord;
+    };
+
     /********************
      * xselector_traits *
      ********************/
@@ -129,6 +161,8 @@ namespace xf
         using selector_map_type = typename selector_type::map_type;
         using iselector_type = xiselector<coordinate_type, dimension_type, N>;
         using iselector_map_type = typename iselector_type::map_type;
+        using locator_type = xlocator<coordinate_type, dimension_type, N>;
+        using locator_sequence_type = typename locator_type::sequence_type;
 
         static constexpr std::size_t static_dimension = N;
     };
@@ -217,6 +251,35 @@ namespace xf
         }
         return res;
     }
+
+    /***************************
+     * xlocator implementation *
+     ***************************/
+
+    template <class C, class D, std::size_t N>
+    inline xlocator<C, D, N>::xlocator(const sequence_type& coord)
+        : m_coord(coord)
+    {
+    }
+
+    template <class C, class D, std::size_t N>
+    inline xlocator<C, D, N>::xlocator(sequence_type&& coord)
+        : m_coord(std::move(coord))
+    {
+    }
+
+    template <class C, class D, std::size_t N>
+    inline auto xlocator<C, D, N>::get_index(const coordinate_type& coord, const dimension_type& dim) const
+        -> index_type
+    {
+        index_type res = xtl::make_sequence<index_type>(dim.size(), size_type(0));
+        for (std::size_t i = 0; i < m_coord.size(); ++i)
+        {
+            res[i] = coord[dim.labels()[i]][m_coord[i]];
+        }
+        return res;
+    }
+
 }
 
 #endif

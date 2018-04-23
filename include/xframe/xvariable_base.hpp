@@ -77,6 +77,10 @@ namespace xf
         using iselector_type = typename selector_traits<N>::iselector_type;
         template <std::size_t N = dynamic()>
         using iselector_map_type = typename selector_traits<N>::iselector_map_type;
+        template <std::size_t N = dynamic()>
+        using locator_type = typename selector_traits<N>::locator_type;
+        template <std::size_t N = dynamic()>
+        using locator_sequence_type = typename selector_traits<N>::locator_sequence_type;
 
         static const_reference missing();
 
@@ -113,6 +117,18 @@ namespace xf
 
         template <class... Args>
         const_reference locate(Args&&... args) const;
+
+        template <std::size_t N = dynamic()>
+        reference locate_element(const locator_sequence_type<N>& locator);
+
+        template <std::size_t N = dynamic()>
+        const_reference locate_element(const locator_sequence_type<N>& locator) const;
+
+        template <std::size_t N = dynamic()>
+        reference locate_element(locator_sequence_type<N>&& locator);
+
+        template <std::size_t N = dynamic()>
+        const_reference locate_element(locator_sequence_type<N>&& locator) const;
 
         template <std::size_t N = dynamic()>
         reference select(const selector_map_type<N>& selector);
@@ -315,31 +331,31 @@ namespace xf
     }
 
     template <class D>
-    inline auto xvariable_base<D>::compute_shape() const -> typename data_type::shape_type
+    template <std::size_t N>
+    inline auto xvariable_base<D>::locate_element(const locator_sequence_type<N>& locator) -> reference
     {
-        using shape_type = typename data_type::shape_type;
-        shape_type shape(dimension());
-        for (auto& c : coordinates())
-        {
-            shape[dimension_mapping()[c.first]] = c.second.size();
-        }
-        return shape;
+        return select_impl(locator_type<N>(locator));
     }
 
     template <class D>
-    template <class C, class DM>
-    inline void xvariable_base<D>::resize_impl(C&& coords, DM&& dims)
+    template <std::size_t N>
+    inline auto xvariable_base<D>::locate_element(const locator_sequence_type<N>& locator) const -> const_reference
     {
-        coordinate_base::resize(std::forward<C>(coords), std::forward<DM>(dims));
-        data().resize(compute_shape());
+        return select_impl(locator_type<N>(locator));
     }
 
     template <class D>
-    template <class C, class DM>
-    inline void xvariable_base<D>::reshape_impl(C&& coords, DM&& dims)
+    template <std::size_t N>
+    inline auto xvariable_base<D>::locate_element(locator_sequence_type<N>&& locator) -> reference
     {
-        coordinate_base::resize(std::forward<C>(coords), std::forward<DM>(dims));
-        data().reshape(compute_shape());
+        return select_impl(locator_type<N>(std::move(locator)));
+    }
+
+    template <class D>
+    template <std::size_t N>
+    inline auto xvariable_base<D>::locate_element(locator_sequence_type<N>&& locator) const -> const_reference
+    {
+        return select_impl(locator_type<N>(std::move(locator)));
     }
 
     template <class D>
@@ -404,6 +420,34 @@ namespace xf
         dimension_list tmp(coord.size());
         std::transform(coord.begin(), coord.end(), tmp.begin(), [](const auto& p) { return p.first; });
         return dimension_type(std::move(tmp));
+    }
+
+    template <class D>
+    inline auto xvariable_base<D>::compute_shape() const -> typename data_type::shape_type
+    {
+        using shape_type = typename data_type::shape_type;
+        shape_type shape(dimension());
+        for (auto& c : coordinates())
+        {
+            shape[dimension_mapping()[c.first]] = c.second.size();
+        }
+        return shape;
+    }
+
+    template <class D>
+    template <class C, class DM>
+    inline void xvariable_base<D>::resize_impl(C&& coords, DM&& dims)
+    {
+        coordinate_base::resize(std::forward<C>(coords), std::forward<DM>(dims));
+        data().resize(compute_shape());
+    }
+
+    template <class D>
+    template <class C, class DM>
+    inline void xvariable_base<D>::reshape_impl(C&& coords, DM&& dims)
+    {
+        coordinate_base::resize(std::forward<C>(coords), std::forward<DM>(dims));
+        data().reshape(compute_shape());
     }
 
     template <class D>

@@ -234,6 +234,31 @@ namespace xf
         EXPECT_EQ(t22, v(2, 2));
     }
 
+    TEST(xvariable, locate_element)
+    {
+        auto v = make_test_variable();
+
+        auto t00 = v.locate_element({ "a", 1 });
+        auto t01 = v.locate_element({ "a", 2 });
+        auto t02 = v.locate_element({ "a", 4 });
+        auto t10 = v.locate_element({ "c", 1 });
+        auto t11 = v.locate_element({ "c", 2 });
+        auto t12 = v.locate_element({ "c", 4 });
+        auto t20 = v.locate_element({ "d", 1 });
+        auto t21 = v.locate_element({ "d", 2 });
+        auto t22 = v.locate_element({ "d", 4 });
+
+        EXPECT_EQ(t00, v(0, 0));
+        EXPECT_EQ(t01, v(0, 1));
+        EXPECT_EQ(t02, v(0, 2));
+        EXPECT_EQ(t10, v(1, 0));
+        EXPECT_EQ(t11, v(1, 1));
+        EXPECT_EQ(t12, v(1, 2));
+        EXPECT_EQ(t20, v(2, 0));
+        EXPECT_EQ(t21, v(2, 1));
+        EXPECT_EQ(t22, v(2, 2));
+    }
+
     TEST(xvariable, generator)
     {
         dimension_type dim({ "abscissa", "ordinate" });
