@@ -11,8 +11,7 @@
 
 #include "xtensor/xnoalias.hpp"
 
-#include "xcoordinate.hpp"
-#include "xdimension.hpp"
+#include "xcoordinate_system.hpp"
 #include "xselecting.hpp"
 
 namespace xf
@@ -34,16 +33,17 @@ namespace xf
     struct xvariable_inner_types;
 
     template <class D>
-    class xvariable_base
+    class xvariable_base : private xcoordinate_system<D>
     {
     public:
 
         using self_type = xvariable_base<D>;
         using derived_type = D;
+        using coordinate_base = xcoordinate_system<D>;
         using inner_types = xvariable_inner_types<D>;
 
         using data_closure_type = typename inner_types::data_closure_type;
-        using coordinate_closure_type = typename inner_types::coordinate_closure_type;
+        using coordinate_closure_type = typename coordinate_base::coordinate_closure_type;
         static constexpr bool is_data_const = std::is_const<std::remove_reference_t<data_closure_type>>::value;
 
         using data_type = typename inner_types::data_type;
@@ -59,8 +59,8 @@ namespace xf
         using size_type = typename data_type::size_type;
         using difference_type = typename data_type::difference_type;
 
-        using coordinate_type = typename inner_types::coordinate_type;
-        using dimension_type = typename inner_types::dimension_type;
+        using coordinate_type = typename coordinate_base::coordinate_type;
+        using dimension_type = typename coordinate_base::dimension_type;
         using dimension_list = typename dimension_type::label_list;
 
         using coordinate_map = typename coordinate_type::map_type;
@@ -80,21 +80,19 @@ namespace xf
 
         static const_reference missing();
 
-        size_type size() const noexcept;
-        constexpr size_type dimension() const noexcept;
-        const dimension_list& dimension_labels() const noexcept;        
-        const coordinate_type& coordinates() const noexcept;
-        const dimension_type& dimension_mapping() const noexcept;
+        using coordinate_base::size;
+        using coordinate_base::dimension;
+        using coordinate_base::dimension_labels;
+        using coordinate_base::coordinates;
+        using coordinate_base::dimension_mapping;
+        using coordinate_base::broadcast_coordinates;
+        using coordinate_base::broadcast_dimensions;
 
         void resize(const coordinate_type& coords, const dimension_type& dims);
         void resize(coordinate_type&& coords, dimension_type&& dims);
 
         void reshape(const coordinate_type& coords, const dimension_type& dims);
         void reshape(coordinate_type&& coords, dimension_type&& dims);
-
-        template <class Join = DEFAULT_JOIN>
-        xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
-        bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
         data_type& data() noexcept;
         const data_type& data() const noexcept;
@@ -195,19 +193,18 @@ namespace xf
         derived_type& derived_cast() noexcept;
         const derived_type& derived_cast() const noexcept;
 
-        coordinate_closure_type m_coordinate;
-        dimension_type m_dimension_mapping;
+        //coordinate_closure_type m_coordinate;
+        //dimension_type m_dimension_mapping;
     };
 
-    /****************************
+    /*********************************
      * xvariable_base implementation *
-     ****************************/
+     *********************************/
 
     template <class D>
     template <class C, class DM>
     inline xvariable_base<D>::xvariable_base(C&& coords, DM&& dims)
-        : m_coordinate(std::forward<C>(coords)),
-          m_dimension_mapping(std::forward<DM>(dims))
+        : coordinate_base(std::forward<C>(coords), std::forward<DM>(dims))
     {
         // TODO: add assertion on data.shape, coordinate and dimension_mapping
         // consistency
@@ -238,36 +235,6 @@ namespace xf
     {
         return detail::static_missing<const_reference>();
     }
-
-    template <class D>
-    inline auto xvariable_base<D>::size() const noexcept -> size_type
-    {
-        return data().size();
-    }
-
-    template <class D>
-    inline constexpr auto xvariable_base<D>::dimension() const noexcept -> size_type
-    {
-        return data().dimension();
-    }
-
-    template <class D>
-    inline auto xvariable_base<D>::dimension_labels() const noexcept -> const dimension_list&
-    {
-        return m_dimension_mapping.labels();
-    }
-
-    template <class D>
-    inline auto xvariable_base<D>::coordinates() const noexcept -> const coordinate_type&
-    {
-        return m_coordinate;
-    }
-
-    template <class D>
-    inline auto xvariable_base<D>::dimension_mapping() const noexcept -> const dimension_type&
-    {
-        return m_dimension_mapping;
-    }
     
     template <class D>
     inline void xvariable_base<D>::resize(const coordinate_type& coords, const dimension_type& dims)
@@ -291,28 +258,6 @@ namespace xf
     inline void xvariable_base<D>::reshape(coordinate_type&& coords, dimension_type&& dims)
     {
         reshape_impl(std::move(coords), std::move(dims));
-    }
-    
-    template <class D>
-    template <class Join>
-    inline xtrivial_broadcast xvariable_base<D>::broadcast_coordinates(coordinate_type& coords) const
-    {
-        return xf::broadcast_coordinates<Join>(coords, this->coordinates());
-    }
-
-    template <class D>
-    inline bool xvariable_base<D>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
-    {
-        bool ret = true;
-        if (trivial_bc)
-        {
-            dims = this->dimension_mapping();
-        }
-        else
-        {
-            ret = xf::broadcast_dimensions(dims, this->dimension_mapping());
-        }
-        return ret;
     }
 
     template <class D>
@@ -373,10 +318,10 @@ namespace xf
     inline auto xvariable_base<D>::compute_shape() const -> typename data_type::shape_type
     {
         using shape_type = typename data_type::shape_type;
-        shape_type shape(m_dimension_mapping.size());
-        for (auto& c : m_coordinate)
+        shape_type shape(dimension());
+        for (auto& c : coordinates())
         {
-            shape[m_dimension_mapping[c.first]] = c.second.size();
+            shape[dimension_mapping()[c.first]] = c.second.size();
         }
         return shape;
     }
@@ -385,8 +330,7 @@ namespace xf
     template <class C, class DM>
     inline void xvariable_base<D>::resize_impl(C&& coords, DM&& dims)
     {
-        m_coordinate = std::forward<C>(coords);
-        m_dimension_mapping = std::forward<DM>(dims);
+        coordinate_base::resize(std::forward<C>(coords), std::forward<DM>(dims));
         data().resize(compute_shape());
     }
 
@@ -394,8 +338,7 @@ namespace xf
     template <class C, class DM>
     inline void xvariable_base<D>::reshape_impl(C&& coords, DM&& dims)
     {
-        m_coordinate = std::forward<C>(coords);
-        m_dimension_mapping = std::forward<DM>(dims);
+        coordinate_base::resize(std::forward<C>(coords), std::forward<DM>(dims));
         data().reshape(compute_shape());
     }
 

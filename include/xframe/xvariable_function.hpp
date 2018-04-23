@@ -39,8 +39,6 @@ namespace xf
         using size_type = xt::detail::common_size_type_t<std::decay_t<CT>...>;
         using difference_type = xt::detail::common_difference_type_t<std::decay_t<CT>...>;     
 
-        //using coordinate_type = std::common_type_t<typename std::decay_t<xvariable_closure_t<CT>>::coordinate_type...>;
-        //using dimension_type = std::common_type_t<typename std::decay_t<xvariable_closure_t<CT>>::dimension_type...>;
         using coordinate_type = xcommon_coordinate_type_t<CT...>;
         using dimension_type = xcommon_dimension_type_t<CT...>;
         using dimension_list = typename dimension_type::label_list;
