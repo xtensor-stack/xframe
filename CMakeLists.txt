@@ -44,6 +44,7 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate_base.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate_system.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xdimension.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xdynamic_variable.hpp
