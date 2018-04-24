@@ -98,6 +98,10 @@ namespace xf
         using iselector_type = typename selector_traits<N>::iselector_type;
         template <std::size_t N = dynamic()>
         using iselector_map_type = typename selector_traits<N>::iselector_map_type;
+        template <std::size_t N = dynamic()>
+        using locator_type = typename selector_traits<N>::locator_type;
+        template <std::size_t N = dynamic()>
+        using locator_sequence_type = typename selector_traits<N>::locator_sequence_type;
 
         static const_reference missing();
 
@@ -132,6 +136,18 @@ namespace xf
 
         template <class... Args>
         const_reference locate(Args&&... args) const;
+
+        template <std::size_t N = dynamic()>
+        reference locate_element(const locator_sequence_type<N>& locator);
+
+        template <std::size_t N = dynamic()>
+        const_reference locate_element(const locator_sequence_type<N>& locator) const;
+
+        template <std::size_t N = dynamic()>
+        reference locate_element(locator_sequence_type<N>&& locator);
+
+        template <std::size_t N = dynamic()>
+        const_reference locate_element(locator_sequence_type<N>&& locator) const;
 
         template <std::size_t N = dynamic()>
         reference select(const selector_map_type<N>& selector);
@@ -190,6 +206,9 @@ namespace xf
 
         template <std::size_t I>
         void fill_locator(index_type& locator) const;
+
+        template <std::size_t N>
+        index_type build_element_locator(locator_sequence_type<N>&& locator) const;
 
         template <class S>
         reference select_impl(const S& selector);
@@ -341,6 +360,40 @@ namespace xf
 
     template <class CT>
     template <std::size_t N>
+    inline auto xvariable_view<CT>::locate_element(const locator_sequence_type<N>& locator) -> reference
+    {
+        locator_sequence_type<N> tmp(locator);
+        auto idx = build_element_locator<N>(std::move(tmp));
+        return m_e.element(idx.cbegin(), idx.cend());
+    }
+
+    template <class CT>
+    template <std::size_t N>
+    inline auto xvariable_view<CT>::locate_element(const locator_sequence_type<N>& locator) const -> const_reference
+    {
+        locator_sequence_type<N> tmp(locator);
+        auto idx = build_element_locator<N>(std::move(locator));
+        return m_e.element(idx.cbegin(), idx.cend());
+    }
+
+    template <class CT>
+    template <std::size_t N>
+    inline auto xvariable_view<CT>::locate_element(locator_sequence_type<N>&& locator) -> reference
+    {
+        auto idx = build_element_locator<N>(std::move(locator));
+        return m_e.element(idx.cbegin(), idx.cend());
+    }
+
+    template <class CT>
+    template <std::size_t N>
+    inline auto xvariable_view<CT>::locate_element(locator_sequence_type<N>&& locator) const -> const_reference
+    {
+        auto idx = build_element_locator<N>(std::move(locator));
+        return m_e.element(idx.cbegin(), idx.cend());
+    }
+
+    template <class CT>
+    template <std::size_t N>
     inline auto xvariable_view<CT>::select(const selector_map_type<N>& selector) -> reference
     {
         return select_impl(selector_type<N>(selector));
@@ -476,6 +529,45 @@ namespace xf
     template <std::size_t I>
     inline void xvariable_view<CT>::fill_locator(index_type&) const
     {
+    }
+
+    template <class CT>
+    template <std::size_t N>
+    inline auto xvariable_view<CT>::build_element_locator(locator_sequence_type<N>&& locator) const -> index_type
+    {
+        if (m_squeeze.empty())
+        {
+            locator_type<N> loc(std::move(locator));
+            return loc.get_index(coordinates(), dimension_mapping());
+        }
+        else
+        {
+            index_type res(m_e.dimension());
+            size_type current_index = size_type(0);
+            size_type i = size_type(0);
+            const auto& coord = m_e.coordinates();
+            const auto& dims = m_e.dimension_mapping();
+            while (i != locator.size())
+            {
+                auto iter = m_squeeze.find(current_index);
+                if (iter != m_squeeze.cend())
+                {
+                    res[current_index] = iter->second;
+                }
+                else
+                {
+                    res[current_index] = coord[dims.labels()[current_index]][locator[i]];
+                    ++i;
+                }
+                ++current_index;
+            }
+            while (current_index != res.size())
+            {
+                res[current_index] = m_squeeze.find(current_index)->second;
+                ++current_index;
+            }
+            return res;
+        }
     }
 
     template <class CT>
