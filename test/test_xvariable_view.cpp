@@ -96,6 +96,47 @@ namespace xf
         EXPECT_EQ(v42, vi42);
     }
 
+    TEST(xvariable_view, element)
+    {
+        variable_type var = make_test_view_variable();
+        variable_view_type view = build_view(var);
+        std::array<std::size_t, 2> idx = { 0, 0 };
+
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(3, 0));
+        idx[1] = 1;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(3, 2));
+        idx[1] = 2;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(3, 4));
+        idx[0] = 1;
+        idx[1] = 0;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(4, 0));
+        idx[1] = 1;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(4, 2));
+        idx[1] = 2;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(4, 4));
+        idx[0] = 2;
+        idx[1] = 0;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(5, 0));
+        idx[1] = 1;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(5, 2));
+        idx[1] = 2;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(5, 4));
+        idx[0] = 3;
+        idx[1] = 0;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(6, 0));
+        idx[1] = 1;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(6, 2));
+        idx[1] = 2;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(6, 4));
+        idx[0] = 4;
+        idx[1] = 0;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(7, 0));
+        idx[1] = 1;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(7, 2));
+        idx[1] = 2;
+        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(7, 4));
+    }
+
     TEST(xvariable_view, select_inner)
     {
         variable_type var = make_test_view_variable();
@@ -400,6 +441,17 @@ namespace xf
         EXPECT_EQ(via1, v1);
         EXPECT_EQ(via2, v2);
 
+        std::array<std::size_t, 1> idx = { 0 };
+        auto viae0 = view.element(idx.cbegin(), idx.cend());
+        idx[0] = 1;
+        auto viae1 = view.element(idx.cbegin(), idx.cend());
+        idx[0] = 2;
+        auto viae2 = view.element(idx.cbegin(), idx.cend());
+
+        EXPECT_EQ(viae0, v0);
+        EXPECT_EQ(viae1, v1);
+        EXPECT_EQ(viae2, v2);
+
         auto vi0 = view.select({ { "ordinate", 1 } });
         auto vi1 = view.select({ { "ordinate", 4 } });
         auto vi2 = view.select({ { "ordinate", 6 } });
@@ -428,6 +480,14 @@ namespace xf
         EXPECT_EQ(vil0, v0);
         EXPECT_EQ(vil1, v1);
         EXPECT_EQ(vil2, v2);
+
+        auto vile0 = view.locate_element({ 1 });
+        auto vile1 = view.locate_element({ 4 });
+        auto vile2 = view.locate_element({ 6 });
+
+        EXPECT_EQ(vile0, v0);
+        EXPECT_EQ(vile1, v1);
+        EXPECT_EQ(vile2, v2);
 
         auto vii0 = view.iselect({ { "ordinate", 0 } });
         auto vii1 = view.iselect({ { "ordinate", 1 } });

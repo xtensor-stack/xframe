@@ -131,6 +131,12 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const;
 
+        template <class It>
+        reference element(It first, It last);
+
+        template <class It>
+        const_reference element(It first, It last) const;
+
         template <class... Args>
         reference locate(Args&&... args);
 
@@ -191,6 +197,9 @@ namespace xf
 
         template <std::size_t I>
         void fill_accessor(index_type& accessor) const;
+
+        template <class It>
+        index_type build_element_accessor(It first, It last) const;
 
         template <std::size_t... I, class... Args>
         reference locate_impl(std::index_sequence<I...>, Args&&... args);
@@ -326,6 +335,22 @@ namespace xf
             auto idx = build_accessor(std::forward<Args>(args)...);
             return m_e.element(idx.cbegin(), idx.cend());
         }
+    }
+
+    template <class CT>
+    template <class It>
+    inline auto xvariable_view<CT>::element(It first, It last) -> reference
+    {
+        auto idx = build_element_accessor(first, last);
+        return m_e.element(idx.cbegin(), idx.cend());
+    }
+
+    template <class CT>
+    template <class It>
+    inline auto xvariable_view<CT>::element(It first, It last) const -> const_reference
+    {
+        auto idx = build_element_accessor(first, last);
+        return m_e.element(idx.cbegin(), idx.cend());
     }
 
     template <class CT>
@@ -487,9 +512,35 @@ namespace xf
 
     template <class CT>
     template <std::size_t I>
-    inline void xvariable_view<CT>::fill_accessor(index_type& accessor) const
+    inline void xvariable_view<CT>::fill_accessor(index_type& /*accessor*/) const
     {
+    }
 
+    template <class CT>
+    template <class It>
+    inline auto xvariable_view<CT>::build_element_accessor(It first, It last) const -> index_type
+    {
+        index_type res(m_e.dimension());
+        size_type current_index = 0;
+        size_type i = 0;
+        while (first != last)
+        {
+            auto iter = m_squeeze.find(current_index);
+            if (iter != m_squeeze.end())
+            {
+                res[current_index++] = iter->second;
+            }
+            else
+            {
+                res[current_index++] = coordinates()[dimension_labels()[i++]].index(*first++);
+            }
+        }
+        while (current_index != res.size())
+        {
+            res[current_index] = m_squeeze.find(current_index)->second;
+            ++current_index;
+        }
+        return res;
     }
 
     template <class CT>
