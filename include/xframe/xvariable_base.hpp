@@ -168,14 +168,10 @@ namespace xf
         xvariable_base() = default;
         xvariable_base(coordinate_initializer coords);
         
-        template <class C, class DM>
+        template <class C, class DM, class = enable_xvariable<C, DM>>
         xvariable_base(C&& coords, DM&& dims);
-
-        template <class DM>
-        xvariable_base(const coordinate_map& coords, DM&& dims);
-
-        template <class DM>
-        xvariable_base(coordinate_map&& coords, DM&& dims);
+        xvariable_base(const coordinate_map& coords, const dimension_list& dims);
+        xvariable_base(coordinate_map&& coords, dimension_list&& dims);
 
         ~xvariable_base() = default;
 
@@ -224,7 +220,7 @@ namespace xf
      *********************************/
 
     template <class D>
-    template <class C, class DM>
+    template <class C, class DM, class>
     inline xvariable_base<D>::xvariable_base(C&& coords, DM&& dims)
         : coordinate_base(std::forward<C>(coords), std::forward<DM>(dims))
     {
@@ -239,16 +235,14 @@ namespace xf
     }
 
     template <class D>
-    template <class DM>
-    inline xvariable_base<D>::xvariable_base(const coordinate_map& coords, DM&& dims)
-        : xvariable_base(coordinate_type(coords), std::forward<DM>(dims))
+    inline xvariable_base<D>::xvariable_base(const coordinate_map& coords, const dimension_list& dims)
+        : xvariable_base(coordinate_type(coords), dimension_type(dims))
     {
     }
 
     template <class D>
-    template <class DM>
-    inline xvariable_base<D>::xvariable_base(coordinate_map&& coords, DM&& dims)
-        : xvariable_base(coordinate_type(std::move(coords)), std::forward<DM>(dims))
+    inline xvariable_base<D>::xvariable_base(coordinate_map&& coords, dimension_list&& dims)
+        : xvariable_base(coordinate_type(std::move(coords)), dimension_type(std::move(dims)))
     {
     }
 

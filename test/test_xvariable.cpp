@@ -42,8 +42,8 @@ namespace xf
         variable_type::coordinate_map m2(m);
 
         data_type d = make_test_data();
-        dimension_type dim_map = {"abscissa", "ordinate"};
-        dimension_type dim_map2(dim_map);
+        dimension_type::label_list dim_map = {"abscissa", "ordinate"};
+        dimension_type::label_list dim_map2(dim_map);
         auto v2 = variable_type(d, m, dim_map);
         auto v3 = variable_type(d, std::move(m), std::move(dim_map));
 
