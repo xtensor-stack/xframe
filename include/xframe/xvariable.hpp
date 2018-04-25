@@ -118,11 +118,29 @@ namespace xf
      * variable generator functions *
      ********************************/
 
+    namespace detail
+    {
+        template <class T>
+        struct variable_data_type
+        {
+            using type = xt::xoptional_assembly<xt::xarray<T>, xt::xarray<bool>>;
+        };
+
+        template <class T>
+        using variable_data_type_t = typename variable_data_type<T>::type;
+    }
+
     template <class D, class C, class DM, class = enable_xvariable_t<C, DM>>
     auto variable(D&& data, C&& coord, DM&& dims) -> xvariable<xtl::closure_type_t<C>, xtl::closure_type_t<D>>;
 
     template <class D, class C, class DM, class = enable_coordinate_map_t<C>>
     auto variable(D&& data, C&& coord, DM&& dims) -> xvariable<get_coordinate_type_t<C>, xtl::closure_type_t<D>>;
+
+    template <class T, class C, class DM, class = enable_xvariable_t<C, DM>>
+    auto variable(C&& coord, DM&& dims) -> xvariable<xtl::closure_type_t<C>, detail::variable_data_type_t<T>>;
+
+    template <class T, class C, class DM, class = enable_coordinate_map_t<C>>
+    auto variable(C&& coord, DM&& dims) -> xvariable<get_coordinate_type_t<C>, detail::variable_data_type_t<T>>;
 
     /****************************
      * xvariable implementation *
@@ -234,6 +252,20 @@ namespace xf
     {
         using type = xvariable<decltype(coordinate(std::forward<C>(coord))), xtl::closure_type_t<D>>;
         return type(std::forward<D>(data), coordinate(std::forward<C>(coord)), std::forward<DM>(dims));
+    }
+
+    template <class T, class C, class DM, class>
+    auto variable(C&& coord, DM&& dims) -> xvariable<xtl::closure_type_t<C>, detail::variable_data_type_t<T>>
+    {
+        using type = xvariable<xtl::closure_type_t<C>, detail::variable_data_type_t<T>>;
+        return type(std::forward<C>(coord), std::forward<DM>(dims));
+    }
+
+    template <class T, class C, class DM, class>
+    auto variable(C&& coord, DM&& dims) -> xvariable<get_coordinate_type_t<C>, detail::variable_data_type_t<T>>
+    {
+        using type = xvariable<get_coordinate_type_t<C>, detail::variable_data_type_t<T>>;
+        return type(coordinate(std::forward<C>(coord)), std::forward<DM>(dims));
     }
 }
 
