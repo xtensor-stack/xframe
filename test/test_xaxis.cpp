@@ -228,4 +228,18 @@ namespace xf
         EXPECT_TRUE(t2);
         EXPECT_EQ(tmp, a1);
     }
+
+    bool filter_function(const fstring& value)
+    {
+        return value < "d";
+    };
+
+    TEST(xaxis, filter)
+    {
+        axis_type a = { "a", "b", "d", "e" };
+        axis_type filtered_a = a.filter([](const auto& arg) { return arg < "d"; });
+        EXPECT_EQ(filtered_a.size(), 2);
+        EXPECT_EQ(a["a"], 0);
+        EXPECT_EQ(a["b"], 1);
+    }
 }
