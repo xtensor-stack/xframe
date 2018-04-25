@@ -129,7 +129,7 @@ namespace xf
         axis_type a1 = { "a", "b", "d", "e" };
         axis_type a2 = { "b", "c", "d" };
         axis_type a3 = { "c", "g" };
-        axis_type res; 
+        axis_type res;
         bool t1 = merge_axes(res, a1, a2, a3);
         EXPECT_FALSE(t1);
         EXPECT_EQ(res["a"], 0);
@@ -145,11 +145,28 @@ namespace xf
         EXPECT_FALSE(t2);
         EXPECT_EQ(res2, a1);
 
+        axis_type a5 = { "a", "b", "d", "e" };
+        axis_type a6 = { "a", "b", "d", "e" };
+        axis_type res3;
+        bool t3 = merge_axes(res3, a5, a6);
+        EXPECT_TRUE(t3);
+
+        axis_type a7 = { "e", "f" };
+        axis_type a8 = { "a", "b", "c", "d" };
+        axis_type res4;
+        merge_axes(res4, a7, a8);
+        EXPECT_EQ(res4["a"], 0);
+        EXPECT_EQ(res4["b"], 1);
+        EXPECT_EQ(res4["c"], 2);
+        EXPECT_EQ(res4["d"], 3);
+        EXPECT_EQ(res4["e"], 4);
+        EXPECT_EQ(res4["f"], 5);
+
         xaxis<int, std::size_t> ia1 = { 1, 2, 4};
         xaxis<int, std::size_t> ia2 = { 1, 4, 5};
         xaxis<int, std::size_t> iares;
-        bool t3 = merge_axes(iares, ia1, ia2);
-        EXPECT_FALSE(t3);
+        bool t4 = merge_axes(iares, ia1, ia2);
+        EXPECT_FALSE(t4);
         EXPECT_EQ(iares[1], 0);
         EXPECT_EQ(iares[2], 1);
         EXPECT_EQ(iares[4], 2);
@@ -212,4 +229,3 @@ namespace xf
         EXPECT_EQ(tmp, a1);
     }
 }
-
