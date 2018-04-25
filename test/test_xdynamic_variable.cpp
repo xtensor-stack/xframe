@@ -12,7 +12,12 @@
 
 namespace xf
 {
-    inline xtl::xoptional<const double&, const bool&> opt_cast(xtl::any arg)
+    inline xtl::xoptional<double&, bool&> opt_cast(xtl::any arg)
+    {
+        return xtl::any_cast<xtl::xoptional<double&, bool&>>(arg);
+    }
+
+    inline xtl::xoptional<const double&, const bool&> const_opt_cast(xtl::any arg)
     {
         return xtl::any_cast<xtl::xoptional<const double&, const bool&>>(arg);
     }
@@ -58,21 +63,21 @@ namespace xf
         auto t21 = dv.select<join::outer>({ { "abscissa", "d" },{ "ordinate", 2 } });
         auto t22 = dv.select<join::outer>({ { "abscissa", "d" },{ "ordinate", 4 } });
 
-        EXPECT_EQ(opt_cast(t00), v(0, 0));
-        EXPECT_EQ(opt_cast(t01), v(0, 1));
-        EXPECT_EQ(opt_cast(t02), v(0, 2));
-        EXPECT_EQ(opt_cast(t10), v(1, 0));
-        EXPECT_EQ(opt_cast(t11), v(1, 1));
-        EXPECT_EQ(opt_cast(t12), v(1, 2));
-        EXPECT_EQ(opt_cast(t20), v(2, 0));
-        EXPECT_EQ(opt_cast(t21), v(2, 1));
-        EXPECT_EQ(opt_cast(t22), v(2, 2));
+        EXPECT_EQ(const_opt_cast(t00), v(0, 0));
+        EXPECT_EQ(const_opt_cast(t01), v(0, 1));
+        EXPECT_EQ(const_opt_cast(t02), v(0, 2));
+        EXPECT_EQ(const_opt_cast(t10), v(1, 0));
+        EXPECT_EQ(const_opt_cast(t11), v(1, 1));
+        EXPECT_EQ(const_opt_cast(t12), v(1, 2));
+        EXPECT_EQ(const_opt_cast(t20), v(2, 0));
+        EXPECT_EQ(const_opt_cast(t21), v(2, 1));
+        EXPECT_EQ(const_opt_cast(t22), v(2, 2));
 
         auto t100 = dv.select<join::outer>({ { "abscissa", "a" },{ "ordinate", 1 },{ "altitude", 1 } });
-        EXPECT_EQ(opt_cast(t100), opt_cast(t00));
+        EXPECT_EQ(const_opt_cast(t100), const_opt_cast(t00));
 
         auto mis = dv.select<join::outer>({ { "abscissa", "e" },{ "ordinate", 1 } });
-        EXPECT_EQ(opt_cast(mis), v.missing());
+        EXPECT_EQ(const_opt_cast(mis), v.missing());
     }
 
     TEST(xdynamic_variable, iselect)

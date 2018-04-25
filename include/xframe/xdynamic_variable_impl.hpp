@@ -40,15 +40,24 @@ namespace xf
     {
     public:
 
-        using selector_map_type = typename T::selector_map_type;
-        using iselector_map_type = typename T::iselector_map_type;
+        using selector_sequence_type = typename T::selector_sequence_type;
+        using iselector_sequence_type = typename T::iselector_sequence_type;
 
         virtual ~xdynamic_base() {}
 
-        virtual xtl::any do_select(const selector_map_type&, join::outer) const = 0;
-        virtual xtl::any do_select(const selector_map_type&, join::inner) const = 0;
+        virtual xtl::any do_select(const selector_sequence_type&) = 0;
+        virtual xtl::any do_select(const selector_sequence_type&, join::outer) const = 0;
+        virtual xtl::any do_select(const selector_sequence_type&, join::inner) const = 0;
 
-        virtual xtl::any do_iselect(const iselector_map_type&) const = 0;
+        virtual xtl::any do_select(selector_sequence_type&&) = 0;
+        virtual xtl::any do_select(selector_sequence_type&&, join::outer) const = 0;
+        virtual xtl::any do_select(selector_sequence_type&&, join::inner) const = 0;
+
+        virtual xtl::any do_iselect(const iselector_sequence_type&) = 0;
+        virtual xtl::any do_iselect(const iselector_sequence_type&) const = 0;
+
+        virtual xtl::any do_iselect(iselector_sequence_type&&) = 0;
+        virtual xtl::any do_iselect(iselector_sequence_type&&) const = 0;
     };
 
     /*********************
@@ -65,9 +74,9 @@ namespace xf
         template <std::size_t N = dynamic()>
         using traits_type = xselector_traits<C, DM, N>;
         template <std::size_t N = dynamic()>
-        using selector_map_type = typename traits_type<N>::selector_map_type;
+        using selector_sequence_type = typename traits_type<N>::selector_sequence_type;
         template <std::size_t N = dynamic()>
-        using iselector_map_type = typename traits_type<N>::iselector_map_type;
+        using iselector_sequence_type = typename traits_type<N>::iselector_sequence_type;
 
         virtual ~xvariable_wrapper() {}
 
@@ -77,11 +86,29 @@ namespace xf
 
         virtual self_type* clone() const = 0;
 
+        template <std::size_t N>
+        xtl::any select(const selector_sequence_type<N>& sel);
+
         template <class Join, std::size_t N>
-        xtl::any select(const selector_map_type<N>& sel) const;
+        xtl::any select(const selector_sequence_type<N>& sel) const;
 
         template <std::size_t N>
-        xtl::any iselect(const iselector_map_type<N>& sel) const;
+        xtl::any select(selector_sequence_type<N>&& sel);
+
+        template <class Join, std::size_t N>
+        xtl::any select(selector_sequence_type<N>&& sel) const;
+
+        template <std::size_t N>
+        xtl::any iselect(const iselector_sequence_type<N>& sel);
+
+        template <std::size_t N>
+        xtl::any iselect(const iselector_sequence_type<N>& sel) const;
+
+        template <std::size_t N>
+        xtl::any iselect(iselector_sequence_type<N>&& sel);
+
+        template <std::size_t N>
+        xtl::any iselect(iselector_sequence_type<N>&& sel) const;
 
     protected:
 
@@ -113,6 +140,7 @@ namespace xf
         xvariable_wrapper_impl(variable_type&& variable);
         xvariable_wrapper_impl(const self_type& rhs) = default;
 
+        variable_type& get_variable();
         const variable_type& get_variable() const;
 
     private:
@@ -131,8 +159,8 @@ namespace xf
 
         using self_type = xdynamic_implementation<T, B>;
         using base_type = B;
-        using selector_map_type = typename T::selector_map_type;
-        using iselector_map_type = typename T::iselector_map_type;
+        using selector_sequence_type = typename T::selector_sequence_type;
+        using iselector_sequence_type = typename T::iselector_sequence_type;
 
         static constexpr std::size_t static_dimension = T::static_dimension;
 
@@ -142,10 +170,19 @@ namespace xf
         xdynamic_implementation& operator=(const self_type&) = delete;
         xdynamic_implementation& operator=(self_type&&) = delete;
 
-        xtl::any do_select(const selector_map_type&, join::outer) const override;
-        xtl::any do_select(const selector_map_type&, join::inner) const override;
+        xtl::any do_select(const selector_sequence_type&) override;
+        xtl::any do_select(const selector_sequence_type&, join::outer) const override;
+        xtl::any do_select(const selector_sequence_type&, join::inner) const override;
 
-        xtl::any do_iselect(const iselector_map_type&) const override;
+        xtl::any do_select(selector_sequence_type&&) override;
+        xtl::any do_select(selector_sequence_type&&, join::outer) const override;
+        xtl::any do_select(selector_sequence_type&&, join::inner) const override;
+
+        xtl::any do_iselect(const iselector_sequence_type&) override;
+        xtl::any do_iselect(const iselector_sequence_type&) const override;
+
+        xtl::any do_iselect(iselector_sequence_type&&) override;
+        xtl::any do_iselect(iselector_sequence_type&&) const override;
 
     protected:
 
@@ -199,8 +236,16 @@ namespace xf
      ************************************/
 
     template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::select(const selector_sequence_type<N>& sel)
+    {
+        xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_select(sel);
+    }
+
+    template <class C, class DM>
     template <class Join, std::size_t N>
-    inline xtl::any xvariable_wrapper<C, DM>::select(const selector_map_type<N>& sel) const
+    inline xtl::any xvariable_wrapper<C, DM>::select(const selector_sequence_type<N>& sel) const
     {
         const xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
         return base.do_select(sel, Join());
@@ -208,10 +253,50 @@ namespace xf
 
     template <class C, class DM>
     template <std::size_t N>
-    inline xtl::any xvariable_wrapper<C, DM>::iselect(const iselector_map_type<N>& sel) const
+    inline xtl::any xvariable_wrapper<C, DM>::select(selector_sequence_type<N>&& sel)
+    {
+        xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_select(std::move(sel));
+    }
+
+    template <class C, class DM>
+    template <class Join, std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::select(selector_sequence_type<N>&& sel) const
+    {
+        const xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_select(std::move(sel), Join());
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::iselect(const iselector_sequence_type<N>& sel)
+    {
+        xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_iselect(sel);
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::iselect(const iselector_sequence_type<N>& sel) const
     {
         const xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
         return base.do_iselect(sel);
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::iselect(iselector_sequence_type<N>&& sel)
+    {
+        xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_iselect(std::move(sel));
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::iselect(iselector_sequence_type<N>&& sel) const
+    {
+        const xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_iselect(std::move(sel));
     }
 
     /*****************************************
@@ -228,6 +313,12 @@ namespace xf
     inline xvariable_wrapper_impl<V>::xvariable_wrapper_impl(variable_type&& variable)
         : m_variable(std::move(variable))
     {
+    }
+
+    template <class V>
+    inline auto xvariable_wrapper_impl<V>::get_variable() -> variable_type&
+    {
+        return m_variable;
     }
 
     template <class V>
@@ -249,23 +340,72 @@ namespace xf
 
     template <class T, class B>
     inline xtl::any
-        xdynamic_implementation<T, B>::do_select(const selector_map_type& sel, join::outer) const
+        xdynamic_implementation<T, B>::do_select(const selector_sequence_type& sel)
+    {
+        return this->get_variable().template select<static_dimension>(sel);
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_select(const selector_sequence_type& sel, join::outer) const
     {
         return this->get_variable().template select<join::outer, static_dimension>(sel);
     }
 
     template <class T, class B>
     inline xtl::any
-        xdynamic_implementation<T, B>::do_select(const selector_map_type& sel, join::inner) const
+        xdynamic_implementation<T, B>::do_select(const selector_sequence_type& sel, join::inner) const
     {
         return this->get_variable().template select<join::inner, static_dimension>(sel);
     }
 
     template <class T, class B>
     inline xtl::any
-        xdynamic_implementation<T, B>::do_iselect(const iselector_map_type& sel) const
+        xdynamic_implementation<T, B>::do_select(selector_sequence_type&& sel)
+    {
+        return this->get_variable().template select<static_dimension>(std::move(sel));
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_select(selector_sequence_type&& sel, join::outer) const
+    {
+        return this->get_variable().template select<join::outer, static_dimension>(std::move(sel));
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_select(selector_sequence_type&& sel, join::inner) const
+    {
+        return this->get_variable().template select<join::inner, static_dimension>(std::move(sel));
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_iselect(const iselector_sequence_type& sel)
     {
         return this->get_variable().template iselect<static_dimension>(sel);
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_iselect(const iselector_sequence_type& sel) const
+    {
+        return this->get_variable().template iselect<static_dimension>(sel);
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_iselect(iselector_sequence_type&& sel)
+    {
+        return this->get_variable().template iselect<static_dimension>(std::move(sel));
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_iselect(iselector_sequence_type&& sel) const
+    {
+        return this->get_variable().template iselect<static_dimension>(std::move(sel));
     }
 
     /********************************
