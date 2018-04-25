@@ -157,6 +157,8 @@ namespace xf
         using coordinate_type = C;
         using dimension_type = DM;
 
+        using size_type = typename coordinate_type::index_type;
+        using index_type = detail::xselector_sequence_t<size_type, N>;
         using selector_type = xselector<coordinate_type, dimension_type, N>;
         using selector_sequence_type = typename selector_type::sequence_type;
         using iselector_type = xiselector<coordinate_type, dimension_type, N>;

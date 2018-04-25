@@ -70,6 +70,8 @@ namespace xf
         template <std::size_t N = dynamic()>
         using selector_traits = xselector_traits<coordinate_type, dimension_type, N>;
         template <std::size_t N = dynamic()>
+        using index_type = typename selector_traits<N>::index_type;
+        template <std::size_t N = dynamic()>
         using selector_type = typename selector_traits<N>::selector_type;
         template <std::size_t N = dynamic()>
         using selector_sequence_type = typename selector_traits<N>::selector_sequence_type;
@@ -107,10 +109,17 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const;
 
-        template <class It>
-        reference element(It first, It last);
-        template <class It>
-        const_reference element(It first, It last) const;
+        template <std::size_t N = dynamic()>
+        reference element(const index_type<N>& index);
+
+        template <std::size_t N = dynamic()>
+        const_reference element(const index_type<N>& index) const;
+
+        template <std::size_t N = dynamic()>
+        reference element(index_type<N>&& index);
+
+        template <std::size_t N = dynamic()>
+        const_reference element(index_type<N>&& index) const;
 
         template <class... Args>
         reference locate(Args&&... args);
@@ -300,17 +309,31 @@ namespace xf
     }
 
     template <class D>
-    template <class It>
-    inline auto xvariable_base<D>::element(It first, It last) -> reference
+    template <std::size_t N>
+    inline auto xvariable_base<D>::element(const index_type<N>& index) -> reference
     {
-        return data().element(first, last);
+        return data().element(index.cbegin(), index.cend());
     }
 
     template <class D>
-    template <class It>
-    inline auto xvariable_base<D>::element(It first, It last) const -> const_reference
+    template <std::size_t N>
+    inline auto xvariable_base<D>::element(const index_type<N>& index) const -> const_reference
     {
-        return data().element(first, last);
+        return data().element(index.cbegin(), index.cend());
+    }
+
+    template <class D>
+    template <std::size_t N>
+    inline auto xvariable_base<D>::element(index_type<N>&& index) -> reference
+    {
+        return data().element(index.cbegin(), index.cend());
+    }
+
+    template <class D>
+    template <std::size_t N>
+    inline auto xvariable_base<D>::element(index_type<N>&& index) const -> const_reference
+    {
+        return data().element(index.cbegin(), index.cend());
     }
 
     template <class D>

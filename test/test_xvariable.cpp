@@ -107,24 +107,15 @@ namespace xf
     TEST(xvariable, element)
     {
         auto v = make_test_variable();
-        std::array<std::size_t, 2> idx = { 0, 0 };
-        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 1.0);
-        idx[1] = 1;
-        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 2.0);
-        idx[1] = 2;
-        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), xtl::missing<double>());
-        idx[0] = 1; idx[1] = 0;
-        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), xtl::missing<double>());
-        idx[1] = 1;
-        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 5.0);
-        idx[1] = 2;
-        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 6.0);
-        idx[0] = 2; idx[1] = 0;
-        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 7.0);
-        idx[1] = 1;
-        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 8.0);
-        idx[1] = 2;
-        EXPECT_EQ(v.element(idx.cbegin(), idx.cend()), 9.0);
+        EXPECT_EQ(v.element({ 0, 0 }), 1.0);
+        EXPECT_EQ(v.element({ 0, 1 }), 2.0);
+        EXPECT_EQ(v.element({ 0, 2 }), xtl::missing<double>());
+        EXPECT_EQ(v.element({ 1, 0 }), xtl::missing<double>());
+        EXPECT_EQ(v.element({ 1, 1 }), 5.0);
+        EXPECT_EQ(v.element({ 1, 2 }), 6.0);
+        EXPECT_EQ(v.element({ 2, 0 }), 7.0);
+        EXPECT_EQ(v.element({ 2, 1 }), 8.0);
+        EXPECT_EQ(v.element({ 2, 2 }), 9.0);
     }
 
     TEST(xvariable, select_inner)

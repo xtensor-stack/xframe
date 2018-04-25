@@ -100,41 +100,22 @@ namespace xf
     {
         variable_type var = make_test_view_variable();
         variable_view_type view = build_view(var);
-        std::array<std::size_t, 2> idx = { 0, 0 };
 
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(3, 0));
-        idx[1] = 1;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(3, 2));
-        idx[1] = 2;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(3, 4));
-        idx[0] = 1;
-        idx[1] = 0;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(4, 0));
-        idx[1] = 1;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(4, 2));
-        idx[1] = 2;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(4, 4));
-        idx[0] = 2;
-        idx[1] = 0;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(5, 0));
-        idx[1] = 1;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(5, 2));
-        idx[1] = 2;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(5, 4));
-        idx[0] = 3;
-        idx[1] = 0;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(6, 0));
-        idx[1] = 1;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(6, 2));
-        idx[1] = 2;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(6, 4));
-        idx[0] = 4;
-        idx[1] = 0;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(7, 0));
-        idx[1] = 1;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(7, 2));
-        idx[1] = 2;
-        EXPECT_EQ(view.element(idx.cbegin(), idx.cend()), var(7, 4));
+        EXPECT_EQ(view.element({ 0, 0 }), var(3, 0));
+        EXPECT_EQ(view.element({ 0, 1 }), var(3, 2));
+        EXPECT_EQ(view.element({ 0, 2 }), var(3, 4));
+        EXPECT_EQ(view.element({ 1, 0 }), var(4, 0));
+        EXPECT_EQ(view.element({ 1, 1 }), var(4, 2));
+        EXPECT_EQ(view.element({ 1, 2 }), var(4, 4));
+        EXPECT_EQ(view.element({ 2, 0 }), var(5, 0));
+        EXPECT_EQ(view.element({ 2, 1 }), var(5, 2));
+        EXPECT_EQ(view.element({ 2, 2 }), var(5, 4));
+        EXPECT_EQ(view.element({ 3, 0 }), var(6, 0));
+        EXPECT_EQ(view.element({ 3, 1 }), var(6, 2));
+        EXPECT_EQ(view.element({ 3, 2 }), var(6, 4));
+        EXPECT_EQ(view.element({ 4, 0 }), var(7, 0));
+        EXPECT_EQ(view.element({ 4, 1 }), var(7, 2));
+        EXPECT_EQ(view.element({ 4, 2 }), var(7, 4));
     }
 
     TEST(xvariable_view, select_inner)
@@ -441,12 +422,9 @@ namespace xf
         EXPECT_EQ(via1, v1);
         EXPECT_EQ(via2, v2);
 
-        std::array<std::size_t, 1> idx = { 0 };
-        auto viae0 = view.element(idx.cbegin(), idx.cend());
-        idx[0] = 1;
-        auto viae1 = view.element(idx.cbegin(), idx.cend());
-        idx[0] = 2;
-        auto viae2 = view.element(idx.cbegin(), idx.cend());
+        auto viae0 = view.element({ 0 });
+        auto viae1 = view.element({ 1 });
+        auto viae2 = view.element({ 2 });
 
         EXPECT_EQ(viae0, v0);
         EXPECT_EQ(viae1, v1);
