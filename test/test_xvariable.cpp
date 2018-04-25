@@ -13,6 +13,25 @@
 
 namespace xf
 {
+    TEST(xvariable, empty_data_constructor)
+    {
+        variable_type::coordinate_map m;
+        m["abscissa"] = make_test_saxis();
+        m["ordinate"] = make_test_iaxis();
+        variable_type::coordinate_map m2(m);
+
+        dimension_type dim_map = { "abscissa", "ordinate" };
+        dimension_type dim_map2(dim_map);
+
+        auto v1 = variable<double>(m, dim_map);
+        auto v2 = variable<double>(std::move(m2), std::move(dim_map2));
+
+        using shape_type = std::decay_t<decltype(v1.data().shape())>;
+        shape_type shape = { 3, 3 };
+        EXPECT_EQ(v1.data().shape(), shape);
+        EXPECT_EQ(v2.data().shape(), shape);
+    }
+
     TEST(xvariable, constructor)
     {
         auto v1 = variable_type(make_test_data(), make_test_coordinate(), dimension_type({"abscissa", "ordinate"}));
