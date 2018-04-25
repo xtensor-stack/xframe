@@ -91,13 +91,15 @@ namespace xf
         template <std::size_t N = dynamic()>
         using selector_traits = xselector_traits<coordinate_type, dimension_type, N>;
         template <std::size_t N = dynamic()>
+        using index_type = typename selector_traits<N>::index_type;
+        template <std::size_t N = dynamic()>
         using selector_type = typename selector_traits<N>::selector_type;
         template <std::size_t N = dynamic()>
-        using selector_map_type = typename selector_traits<N>::selector_map_type;
+        using selector_sequence_type = typename selector_traits<N>::selector_sequence_type;
         template <std::size_t N = dynamic()>
         using iselector_type = typename selector_traits<N>::iselector_type;
         template <std::size_t N = dynamic()>
-        using iselector_map_type = typename selector_traits<N>::iselector_map_type;
+        using iselector_sequence_type = typename selector_traits<N>::iselector_sequence_type;
         template <std::size_t N = dynamic()>
         using locator_type = typename selector_traits<N>::locator_type;
         template <std::size_t N = dynamic()>
@@ -131,11 +133,17 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const;
 
-        template <class It>
-        reference element(It first, It last);
+        template <std::size_t N = dynamic()>
+        reference element(const index_type<N>& index);
 
-        template <class It>
-        const_reference element(It first, It last) const;
+        template <std::size_t N = dynamic()>
+        const_reference element(const index_type<N>& index) const;
+
+        template <std::size_t N = dynamic()>
+        reference element(index_type<N>&& index);
+
+        template <std::size_t N = dynamic()>
+        const_reference element(index_type<N>&& index) const;
 
         template <class... Args>
         reference locate(Args&&... args);
@@ -156,32 +164,32 @@ namespace xf
         const_reference locate_element(locator_sequence_type<N>&& locator) const;
 
         template <std::size_t N = dynamic()>
-        reference select(const selector_map_type<N>& selector);
+        reference select(const selector_sequence_type<N>& selector);
 
         template <class Join = DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
-        const_reference select(const selector_map_type<N>& selector) const;
+        const_reference select(const selector_sequence_type<N>& selector) const;
 
         template <std::size_t N = dynamic()>
-        reference select(selector_map_type<N>&& selector);
+        reference select(selector_sequence_type<N>&& selector);
 
         template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
-        const_reference select(selector_map_type<N>&& selector) const;
+        const_reference select(selector_sequence_type<N>&& selector) const;
 
         template <std::size_t N = dynamic()>
-        reference iselect(const iselector_map_type<N>& selector);
+        reference iselect(const iselector_sequence_type<N>& selector);
 
         template <std::size_t N = dynamic()>
-        const_reference iselect(const iselector_map_type<N>& selector) const;
+        const_reference iselect(const iselector_sequence_type<N>& selector) const;
 
         template <std::size_t N = dynamic()>
-        reference iselect(iselector_map_type<N>&& selector);
+        reference iselect(iselector_sequence_type<N>&& selector);
 
         template <std::size_t N = dynamic()>
-        const_reference iselect(iselector_map_type<N>&& selector) const;
+        const_reference iselect(iselector_sequence_type<N>&& selector) const;
 
     private:
 
-        using index_type = std::vector<size_type>;
+        using internal_index_type = std::vector<size_type>;
 
         template <std::size_t... I, class... Args>
         reference access_impl(std::index_sequence<I...>, Args... args);
@@ -190,16 +198,16 @@ namespace xf
         const_reference access_impl(std::index_sequence<I...>, Args... args) const;
 
         template <class... Args>
-        index_type build_accessor(Args&&... args) const;
+        internal_index_type build_accessor(Args&&... args) const;
 
         template <std::size_t I, class T, class... Args>
-        void fill_accessor(index_type& accessor, T idx, Args... args) const;
+        void fill_accessor(internal_index_type& accessor, T idx, Args... args) const;
 
         template <std::size_t I>
-        void fill_accessor(index_type& accessor) const;
+        void fill_accessor(internal_index_type& accessor) const;
 
         template <class It>
-        index_type build_element_accessor(It first, It last) const;
+        internal_index_type build_element_accessor(It first, It last) const;
 
         template <std::size_t... I, class... Args>
         reference locate_impl(std::index_sequence<I...>, Args&&... args);
@@ -208,16 +216,16 @@ namespace xf
         const_reference locate_impl(std::index_sequence<I...>, Args&&... args) const;
 
         template <class... Args>
-        index_type build_locator(Args&&... args) const;
+        internal_index_type build_locator(Args&&... args) const;
 
         template <std::size_t I, class T, class... Args>
-        void fill_locator(index_type& locator, T idx, Args&&... args) const;
+        void fill_locator(internal_index_type& locator, T idx, Args&&... args) const;
 
         template <std::size_t I>
-        void fill_locator(index_type& locator) const;
+        void fill_locator(internal_index_type& locator) const;
 
         template <std::size_t N>
-        index_type build_element_locator(locator_sequence_type<N>&& locator) const;
+        internal_index_type build_element_locator(locator_sequence_type<N>&& locator) const;
 
         template <class S>
         reference select_impl(const S& selector);
@@ -235,7 +243,7 @@ namespace xf
         void fill_squeeze(Idx& index) const;
 
         template <std::size_t N>
-        void adapt_iselector(iselector_map_type<N>& selector) const;
+        void adapt_iselector(iselector_sequence_type<N>& selector) const;
 
         void assign_temporary_impl(temporary_type&& tmp);
 
@@ -318,7 +326,7 @@ namespace xf
         else
         {
             auto idx = build_accessor(std::forward<Args>(args)...);
-            return m_e.element(idx.cbegin(), idx.cend());
+            return m_e.element(idx);
         }
     }
 
@@ -333,24 +341,40 @@ namespace xf
         else
         {
             auto idx = build_accessor(std::forward<Args>(args)...);
-            return m_e.element(idx.cbegin(), idx.cend());
+            return m_e.element(idx);
         }
     }
 
     template <class CT>
-    template <class It>
-    inline auto xvariable_view<CT>::element(It first, It last) -> reference
+    template <std::size_t N>
+    inline auto xvariable_view<CT>::element(const index_type<N>& index) -> reference
     {
-        auto idx = build_element_accessor(first, last);
+        auto idx = build_element_accessor(index.cbegin(), index.cend());
         return m_e.element(idx.cbegin(), idx.cend());
     }
 
     template <class CT>
-    template <class It>
-    inline auto xvariable_view<CT>::element(It first, It last) const -> const_reference
+    template <std::size_t N>
+    inline auto xvariable_view<CT>::element(const index_type<N>& index) const -> const_reference
     {
-        auto idx = build_element_accessor(first, last);
+        auto idx = build_element_accessor(index.cbegin(), index.cend());
         return m_e.element(idx.cbegin(), idx.cend());
+    }
+
+    template <class CT>
+    template <std::size_t N>
+    inline auto xvariable_view<CT>::element(index_type<N>&& index) -> reference
+    {
+        auto idx = build_element_accessor(index.cbegin(), index.cend());
+        return m_e.element(idx);
+    }
+
+    template <class CT>
+    template <std::size_t N>
+    inline auto xvariable_view<CT>::element(index_type<N>&& index) const -> const_reference
+    {
+        auto idx = build_element_accessor(index.cbegin(), index.cend());
+        return m_e.element(idx);
     }
 
     template <class CT>
@@ -364,7 +388,7 @@ namespace xf
         else
         {
             auto idx = build_locator(std::forward<Args>(args)...);
-            return m_e.element(idx.cbegin(), idx.cend());
+            return m_e.element(idx);
         }
     }
 
@@ -379,7 +403,7 @@ namespace xf
         else
         {
             auto idx = build_locator(std::forward<Args>(args)...);
-            return m_e.element(idx.cbegin(), idx.cend());
+            return m_e.element(idx);
         }
     }
 
@@ -389,7 +413,7 @@ namespace xf
     {
         locator_sequence_type<N> tmp(locator);
         auto idx = build_element_locator<N>(std::move(tmp));
-        return m_e.element(idx.cbegin(), idx.cend());
+        return m_e.element(idx);
     }
 
     template <class CT>
@@ -398,7 +422,7 @@ namespace xf
     {
         locator_sequence_type<N> tmp(locator);
         auto idx = build_element_locator<N>(std::move(locator));
-        return m_e.element(idx.cbegin(), idx.cend());
+        return m_e.element(idx);
     }
 
     template <class CT>
@@ -406,7 +430,7 @@ namespace xf
     inline auto xvariable_view<CT>::locate_element(locator_sequence_type<N>&& locator) -> reference
     {
         auto idx = build_element_locator<N>(std::move(locator));
-        return m_e.element(idx.cbegin(), idx.cend());
+        return m_e.element(idx);
     }
 
     template <class CT>
@@ -414,65 +438,65 @@ namespace xf
     inline auto xvariable_view<CT>::locate_element(locator_sequence_type<N>&& locator) const -> const_reference
     {
         auto idx = build_element_locator<N>(std::move(locator));
-        return m_e.element(idx.cbegin(), idx.cend());
+        return m_e.element(idx);
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::select(const selector_map_type<N>& selector) -> reference
+    inline auto xvariable_view<CT>::select(const selector_sequence_type<N>& selector) -> reference
     {
         return select_impl(selector_type<N>(selector));
     }
 
     template <class CT>
     template <class Join, std::size_t N>
-    inline auto xvariable_view<CT>::select(const selector_map_type<N>& selector) const -> const_reference
+    inline auto xvariable_view<CT>::select(const selector_sequence_type<N>& selector) const -> const_reference
     {
         return select_join<Join>(selector_type<N>(selector));
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::select(selector_map_type<N>&& selector) -> reference
+    inline auto xvariable_view<CT>::select(selector_sequence_type<N>&& selector) -> reference
     {
         return select_impl(selector_type<N>(std::move(selector)));
     }
 
     template <class CT>
     template <class Join, std::size_t N>
-    inline auto xvariable_view<CT>::select(selector_map_type<N>&& selector) const -> const_reference
+    inline auto xvariable_view<CT>::select(selector_sequence_type<N>&& selector) const -> const_reference
     {
         return select_join<Join>(selector_type<N>(std::move(selector)));
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::iselect(const iselector_map_type<N>& selector) -> reference
+    inline auto xvariable_view<CT>::iselect(const iselector_sequence_type<N>& selector) -> reference
     {
-        return iselect(iselector_map_type<N>(selector));
+        return iselect(iselector_sequence_type<N>(selector));
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::iselect(const iselector_map_type<N>& selector) const -> const_reference
+    inline auto xvariable_view<CT>::iselect(const iselector_sequence_type<N>& selector) const -> const_reference
     {
-        return iselect(iselector_map_type<N>(selector));
+        return iselect(iselector_sequence_type<N>(selector));
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::iselect(iselector_map_type<N>&& selector) -> reference
+    inline auto xvariable_view<CT>::iselect(iselector_sequence_type<N>&& selector) -> reference
     {
-        iselector_map_type<N> tmp_selector(std::move(selector));
+        iselector_sequence_type<N> tmp_selector(std::move(selector));
         adapt_iselector<N>(tmp_selector);
         return select_impl(iselector_type<N>(std::move(tmp_selector)));
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::iselect(iselector_map_type<N>&& selector) const -> const_reference
+    inline auto xvariable_view<CT>::iselect(iselector_sequence_type<N>&& selector) const -> const_reference
     {
-        iselector_map_type<N> tmp_selector(std::move(selector));
+        iselector_sequence_type<N> tmp_selector(std::move(selector));
         adapt_iselector<N>(tmp_selector);
         return select_impl(iselector_type<N>(std::move(tmp_selector)));
     }
@@ -493,9 +517,9 @@ namespace xf
 
     template <class CT>
     template <class... Args>
-    inline auto xvariable_view<CT>::build_accessor(Args&&... args) const -> index_type
+    inline auto xvariable_view<CT>::build_accessor(Args&&... args) const -> internal_index_type
     {
-        index_type accessor(m_e.dimension());
+        internal_index_type accessor(m_e.dimension());
         fill_accessor<0>(accessor, std::forward<Args>(args)...);
         fill_squeeze(accessor);
         return accessor;
@@ -503,7 +527,7 @@ namespace xf
 
     template <class CT>
     template <std::size_t I, class T, class... Args>
-    inline void xvariable_view<CT>::fill_accessor(index_type& accessor, T idx, Args... args) const
+    inline void xvariable_view<CT>::fill_accessor(internal_index_type& accessor, T idx, Args... args) const
     {
         std::size_t new_index = m_e.dimension_mapping()[dimension_labels()[I]];
         accessor[new_index] = coordinates()[dimension_labels()[I]].index(idx);
@@ -512,15 +536,15 @@ namespace xf
 
     template <class CT>
     template <std::size_t I>
-    inline void xvariable_view<CT>::fill_accessor(index_type& /*accessor*/) const
+    inline void xvariable_view<CT>::fill_accessor(internal_index_type& /*accessor*/) const
     {
     }
 
     template <class CT>
     template <class It>
-    inline auto xvariable_view<CT>::build_element_accessor(It first, It last) const -> index_type
+    inline auto xvariable_view<CT>::build_element_accessor(It first, It last) const -> internal_index_type
     {
-        index_type res(m_e.dimension());
+        internal_index_type res(m_e.dimension());
         size_type current_index = 0;
         size_type i = 0;
         while (first != last)
@@ -559,9 +583,9 @@ namespace xf
 
     template <class CT>
     template <class... Args>
-    inline auto xvariable_view<CT>::build_locator(Args&&... args) const -> index_type
+    inline auto xvariable_view<CT>::build_locator(Args&&... args) const -> internal_index_type
     {
-        index_type locator(m_e.dimension());
+        internal_index_type locator(m_e.dimension());
         fill_locator<0>(locator, std::forward<Args>(args)...);
         fill_squeeze(locator);
         return locator;
@@ -569,7 +593,7 @@ namespace xf
 
     template <class CT>
     template <std::size_t I, class T, class... Args>
-    inline void xvariable_view<CT>::fill_locator(index_type& locator, T idx, Args&&... args) const
+    inline void xvariable_view<CT>::fill_locator(internal_index_type& locator, T idx, Args&&... args) const
     {
         std::size_t new_index = m_e.dimension_mapping()[dimension_labels()[I]];
         locator[new_index] = coordinates()[dimension_labels()[I]][idx];
@@ -578,13 +602,13 @@ namespace xf
 
     template <class CT>
     template <std::size_t I>
-    inline void xvariable_view<CT>::fill_locator(index_type&) const
+    inline void xvariable_view<CT>::fill_locator(internal_index_type&) const
     {
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::build_element_locator(locator_sequence_type<N>&& locator) const -> index_type
+    inline auto xvariable_view<CT>::build_element_locator(locator_sequence_type<N>&& locator) const -> internal_index_type
     {
         if (m_squeeze.empty())
         {
@@ -593,7 +617,7 @@ namespace xf
         }
         else
         {
-            index_type res(m_e.dimension());
+            internal_index_type res(m_e.dimension());
             size_type current_index = size_type(0);
             size_type i = size_type(0);
             const auto& coord = m_e.coordinates();
@@ -627,7 +651,7 @@ namespace xf
     {
         typename S::index_type idx = selector.get_index(coordinates(), m_e.dimension_mapping());
         fill_squeeze(idx);
-        return m_e.element(idx.cbegin(), idx.cend());
+        return m_e.element(idx);
     }
 
     template <class CT>
@@ -636,7 +660,7 @@ namespace xf
     {
         typename S::index_type idx = selector.get_index(coordinates(), m_e.dimension_mapping());
         fill_squeeze(idx);
-        return m_e.element(idx.cbegin(), idx.cend());
+        return m_e.element(idx);
     }
 
     template <class CT>
@@ -647,7 +671,7 @@ namespace xf
         if (idx.second)
         {
             fill_squeeze(idx.first);
-            return m_e.element(idx.first.cbegin(), idx.first.cend());
+            return m_e.element(idx.first);
         }
         else
         {
@@ -680,7 +704,7 @@ namespace xf
 
     template <class CT>
     template <std::size_t N>
-    inline void xvariable_view<CT>::adapt_iselector(iselector_map_type<N>& selector) const
+    inline void xvariable_view<CT>::adapt_iselector(iselector_sequence_type<N>& selector) const
     {
         for (auto& sel : selector)
         {
@@ -696,7 +720,7 @@ namespace xf
         const auto& dim_label = dimension_labels();
         const auto& coords = coordinates();
         std::vector<size_type> index(dim_label.size(), size_type(0));
-        selector_map_type<> selector(index.size());
+        selector_sequence_type<> selector(index.size());
         bool end = false;
         do
         {
