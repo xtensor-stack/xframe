@@ -46,7 +46,7 @@ namespace xf
         explicit xdimension(const label_list& labels);
         explicit xdimension(label_list&& labels);
         xdimension(std::initializer_list<key_type> init);
-        
+
         template <class InputIt>
         xdimension(InputIt first, InputIt last);
 
@@ -127,32 +127,32 @@ namespace xf
 
     template <class L, class T>
     inline xdimension<L, T>::xdimension()
-        : base_type(false)
+        : base_type()
     {
     }
 
     template <class L, class T>
     inline xdimension<L, T>::xdimension(const label_list& labels)
-        : base_type(labels, false)
+        : base_type(labels)
     {
     }
 
     template <class L, class T>
     inline xdimension<L, T>::xdimension(label_list&& labels)
-        : base_type(std::move(labels), false)
+        : base_type(std::move(labels))
     {
     }
 
     template <class L, class T>
     inline xdimension<L, T>::xdimension(std::initializer_list<key_type> init)
-        : base_type(init, false)
+        : base_type(init)
     {
     }
 
     template <class L, class T>
     template <class InputIt>
     inline xdimension<L, T>::xdimension(InputIt first, InputIt last)
-        : base_type(first, last, false)
+        : base_type(first, last)
     {
     }
 
@@ -195,7 +195,7 @@ namespace xf
         base_type::set_labels(a.labels());
         return broadcast_impl(dims...);
     }
-    
+
     template <class L, class T>
     template <class... Args>
     bool xdimension<L, T>::broadcast_empty(const xfull_coordinate& /*a*/, const Args&... dims)
@@ -214,7 +214,7 @@ namespace xf
     {
         return lhs.labels() == rhs.labels();
     }
-    
+
     template <class L, class T>
     inline bool operator!=(const xdimension<L, T>& lhs, const xdimension<L, T>& rhs) noexcept
     {

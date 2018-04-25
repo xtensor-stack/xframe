@@ -124,6 +124,18 @@ namespace xf
         EXPECT_EQ(itd, a.end());
     }
 
+    TEST(xaxis, is_sorted)
+    {
+        axis_type a = { "a", "b", "c" };
+        EXPECT_TRUE(a.is_sorted());
+
+        axis_type b = { "b", "b", "c" };
+        EXPECT_TRUE(b.is_sorted());
+
+        axis_type c = { "c", "b", "a" };
+        EXPECT_FALSE(c.is_sorted());
+    }
+
     TEST(xaxis, merge)
     {
         axis_type a1 = { "a", "b", "d", "e" };
@@ -175,14 +187,17 @@ namespace xf
 
     TEST(xaxis, merge_unsorted)
     {
-        axis_type a1({ "a", "b", "d", "e" }, false);
-        axis_type a2({ "d", "e" }, false);
-        axis_type a3({ "h", "c", "a", "b", "d", "e" }, false);
-        axis_type a4({ "h", "b", "c", "e" }, false);
+        axis_type a1({ "a", "b", "d", "e" });
+        axis_type a2({ "d", "e" });
+        axis_type a3({ "h", "c", "a", "b", "d", "e" });
+        axis_type a4({ "h", "b", "c", "e" });
 
         axis_type res1;
         bool t1 = merge_axes(res1, a1, a2);
         EXPECT_FALSE(t1);
+        EXPECT_TRUE(a1.is_sorted());
+        EXPECT_TRUE(a2.is_sorted());
+        EXPECT_TRUE(res1.is_sorted());
         EXPECT_EQ(res1.size(), 4u);
         EXPECT_EQ(res1["a"], 0);
         EXPECT_EQ(res1["b"], 1);
@@ -192,6 +207,9 @@ namespace xf
         axis_type res2;
         bool t2 = merge_axes(res2, a1, a3);
         EXPECT_FALSE(t2);
+        EXPECT_TRUE(a1.is_sorted());
+        EXPECT_FALSE(a3.is_sorted());
+        EXPECT_FALSE(res2.is_sorted());
         EXPECT_EQ(res2.size(), 6u);
         EXPECT_EQ(res2["h"], 0);
         EXPECT_EQ(res2["c"], 1);
@@ -203,6 +221,9 @@ namespace xf
         axis_type res3;
         bool t3 = merge_axes(res3, a1, a4);
         EXPECT_FALSE(t3);
+        EXPECT_TRUE(a1.is_sorted());
+        EXPECT_FALSE(a4.is_sorted());
+        EXPECT_FALSE(res3.is_sorted());
         EXPECT_EQ(res3.size(), 6u);
         EXPECT_EQ(res3["h"], 0);
         EXPECT_EQ(res3["c"], 1);
