@@ -46,7 +46,7 @@ namespace xf
         template <std::size_t N = dynamic()>
         using selector_type = xselector<coordinate_type, dimension_type, N>;
         template <std::size_t N = dynamic()>
-        using selector_map_type = typename selector_type<N>::map_type;
+        using selector_sequence_type = typename selector_type<N>::sequence_type;
 
         using expression_tag = xvariable_expression_tag;
 
@@ -78,10 +78,10 @@ namespace xf
         const_reference operator()(Args... args) const;
 
         template <class Join = DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
-        const_reference select(const selector_map_type<N>& selector) const;
+        const_reference select(const selector_sequence_type<N>& selector) const;
 
         template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
-        const_reference select(selector_map_type<N>&& selector) const;
+        const_reference select(selector_sequence_type<N>&& selector) const;
 
         const std::tuple<xvariable_closure_t<CT>...>& arguments() const { return m_e; }
 
@@ -239,14 +239,14 @@ namespace xf
 
     template <class F, class R, class... CT>
     template <class Join, std::size_t N>
-    inline auto xvariable_function<F, R, CT...>::select(const selector_map_type<N>& selector) const -> const_reference
+    inline auto xvariable_function<F, R, CT...>::select(const selector_sequence_type<N>& selector) const -> const_reference
     {
         return select_impl<Join>(std::make_index_sequence<sizeof...(CT)>(), selector);
     }
 
     template <class F, class R, class... CT>
     template <class Join, std::size_t N>
-    inline auto xvariable_function<F, R, CT...>::select(selector_map_type<N>&& selector) const -> const_reference
+    inline auto xvariable_function<F, R, CT...>::select(selector_sequence_type<N>&& selector) const -> const_reference
     {
         return select_impl<Join>(std::make_index_sequence<sizeof...(CT)>(), std::move(selector));
     }

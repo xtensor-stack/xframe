@@ -235,7 +235,7 @@ namespace xf
      * selectors *
      *************/
 
-    using dict_type = typename variable_type::selector_map_type<>;
+    using dict_type = typename variable_type::selector_sequence_type<>;
     using selector_list = std::vector<dict_type>;
 
     inline dict_type make_selector_aa()

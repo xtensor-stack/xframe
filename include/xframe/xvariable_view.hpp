@@ -93,11 +93,11 @@ namespace xf
         template <std::size_t N = dynamic()>
         using selector_type = typename selector_traits<N>::selector_type;
         template <std::size_t N = dynamic()>
-        using selector_map_type = typename selector_traits<N>::selector_map_type;
+        using selector_sequence_type = typename selector_traits<N>::selector_sequence_type;
         template <std::size_t N = dynamic()>
         using iselector_type = typename selector_traits<N>::iselector_type;
         template <std::size_t N = dynamic()>
-        using iselector_map_type = typename selector_traits<N>::iselector_map_type;
+        using iselector_sequence_type = typename selector_traits<N>::iselector_sequence_type;
         template <std::size_t N = dynamic()>
         using locator_type = typename selector_traits<N>::locator_type;
         template <std::size_t N = dynamic()>
@@ -156,28 +156,28 @@ namespace xf
         const_reference locate_element(locator_sequence_type<N>&& locator) const;
 
         template <std::size_t N = dynamic()>
-        reference select(const selector_map_type<N>& selector);
+        reference select(const selector_sequence_type<N>& selector);
 
         template <class Join = DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
-        const_reference select(const selector_map_type<N>& selector) const;
+        const_reference select(const selector_sequence_type<N>& selector) const;
 
         template <std::size_t N = dynamic()>
-        reference select(selector_map_type<N>&& selector);
+        reference select(selector_sequence_type<N>&& selector);
 
         template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
-        const_reference select(selector_map_type<N>&& selector) const;
+        const_reference select(selector_sequence_type<N>&& selector) const;
 
         template <std::size_t N = dynamic()>
-        reference iselect(const iselector_map_type<N>& selector);
+        reference iselect(const iselector_sequence_type<N>& selector);
 
         template <std::size_t N = dynamic()>
-        const_reference iselect(const iselector_map_type<N>& selector) const;
+        const_reference iselect(const iselector_sequence_type<N>& selector) const;
 
         template <std::size_t N = dynamic()>
-        reference iselect(iselector_map_type<N>&& selector);
+        reference iselect(iselector_sequence_type<N>&& selector);
 
         template <std::size_t N = dynamic()>
-        const_reference iselect(iselector_map_type<N>&& selector) const;
+        const_reference iselect(iselector_sequence_type<N>&& selector) const;
 
     private:
 
@@ -235,7 +235,7 @@ namespace xf
         void fill_squeeze(Idx& index) const;
 
         template <std::size_t N>
-        void adapt_iselector(iselector_map_type<N>& selector) const;
+        void adapt_iselector(iselector_sequence_type<N>& selector) const;
 
         void assign_temporary_impl(temporary_type&& tmp);
 
@@ -419,60 +419,60 @@ namespace xf
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::select(const selector_map_type<N>& selector) -> reference
+    inline auto xvariable_view<CT>::select(const selector_sequence_type<N>& selector) -> reference
     {
         return select_impl(selector_type<N>(selector));
     }
 
     template <class CT>
     template <class Join, std::size_t N>
-    inline auto xvariable_view<CT>::select(const selector_map_type<N>& selector) const -> const_reference
+    inline auto xvariable_view<CT>::select(const selector_sequence_type<N>& selector) const -> const_reference
     {
         return select_join<Join>(selector_type<N>(selector));
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::select(selector_map_type<N>&& selector) -> reference
+    inline auto xvariable_view<CT>::select(selector_sequence_type<N>&& selector) -> reference
     {
         return select_impl(selector_type<N>(std::move(selector)));
     }
 
     template <class CT>
     template <class Join, std::size_t N>
-    inline auto xvariable_view<CT>::select(selector_map_type<N>&& selector) const -> const_reference
+    inline auto xvariable_view<CT>::select(selector_sequence_type<N>&& selector) const -> const_reference
     {
         return select_join<Join>(selector_type<N>(std::move(selector)));
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::iselect(const iselector_map_type<N>& selector) -> reference
+    inline auto xvariable_view<CT>::iselect(const iselector_sequence_type<N>& selector) -> reference
     {
-        return iselect(iselector_map_type<N>(selector));
+        return iselect(iselector_sequence_type<N>(selector));
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::iselect(const iselector_map_type<N>& selector) const -> const_reference
+    inline auto xvariable_view<CT>::iselect(const iselector_sequence_type<N>& selector) const -> const_reference
     {
-        return iselect(iselector_map_type<N>(selector));
+        return iselect(iselector_sequence_type<N>(selector));
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::iselect(iselector_map_type<N>&& selector) -> reference
+    inline auto xvariable_view<CT>::iselect(iselector_sequence_type<N>&& selector) -> reference
     {
-        iselector_map_type<N> tmp_selector(std::move(selector));
+        iselector_sequence_type<N> tmp_selector(std::move(selector));
         adapt_iselector<N>(tmp_selector);
         return select_impl(iselector_type<N>(std::move(tmp_selector)));
     }
 
     template <class CT>
     template <std::size_t N>
-    inline auto xvariable_view<CT>::iselect(iselector_map_type<N>&& selector) const -> const_reference
+    inline auto xvariable_view<CT>::iselect(iselector_sequence_type<N>&& selector) const -> const_reference
     {
-        iselector_map_type<N> tmp_selector(std::move(selector));
+        iselector_sequence_type<N> tmp_selector(std::move(selector));
         adapt_iselector<N>(tmp_selector);
         return select_impl(iselector_type<N>(std::move(tmp_selector)));
     }
@@ -680,7 +680,7 @@ namespace xf
 
     template <class CT>
     template <std::size_t N>
-    inline void xvariable_view<CT>::adapt_iselector(iselector_map_type<N>& selector) const
+    inline void xvariable_view<CT>::adapt_iselector(iselector_sequence_type<N>& selector) const
     {
         for (auto& sel : selector)
         {
@@ -696,7 +696,7 @@ namespace xf
         const auto& dim_label = dimension_labels();
         const auto& coords = coordinates();
         std::vector<size_type> index(dim_label.size(), size_type(0));
-        selector_map_type<> selector(index.size());
+        selector_sequence_type<> selector(index.size());
         bool end = false;
         do
         {

@@ -71,18 +71,18 @@ namespace xf
         using index_type = detail::xselector_sequence_t<size_type, N>;
         using outer_index_type = std::pair<index_type, bool>;
         using dimension_type = D;
-        using map_type = detail::xselector_sequence_t<std::pair<key_type, mapped_type>, N>;
+        using sequence_type = detail::xselector_sequence_t<std::pair<key_type, mapped_type>, N>;
         
         xselector() = default;
-        xselector(const map_type& coord);
-        xselector(map_type&& coord);
+        xselector(const sequence_type& coord);
+        xselector(sequence_type&& coord);
 
         index_type get_index(const coordinate_type& coord, const dimension_type& dim) const;
         outer_index_type get_outer_index(const coordinate_type& coord, const dimension_type& dim) const;
 
     private:
 
-        map_type m_coord;
+        sequence_type m_coord;
     };
 
     /**************
@@ -102,17 +102,17 @@ namespace xf
         using size_type = typename coordinate_type::index_type;
         using index_type = detail::xselector_sequence_t<size_type, N>;
         using dimension_type = D;
-        using map_type = detail::xselector_sequence_t<std::pair<key_type, size_type>, N>;
+        using sequence_type = detail::xselector_sequence_t<std::pair<key_type, size_type>, N>;
 
         xiselector() = default;
-        xiselector(const map_type& coord);
-        xiselector(map_type&& coord);
+        xiselector(const sequence_type& coord);
+        xiselector(sequence_type&& coord);
 
         index_type get_index(const coordinate_type& coord, const dimension_type& dim) const;
 
     private:
 
-        map_type m_coord;
+        sequence_type m_coord;
     };
 
     /************
@@ -158,9 +158,9 @@ namespace xf
         using dimension_type = DM;
 
         using selector_type = xselector<coordinate_type, dimension_type, N>;
-        using selector_map_type = typename selector_type::map_type;
+        using selector_sequence_type = typename selector_type::sequence_type;
         using iselector_type = xiselector<coordinate_type, dimension_type, N>;
-        using iselector_map_type = typename iselector_type::map_type;
+        using iselector_sequence_type = typename iselector_type::sequence_type;
         using locator_type = xlocator<coordinate_type, dimension_type, N>;
         using locator_sequence_type = typename locator_type::sequence_type;
 
@@ -172,13 +172,13 @@ namespace xf
      ****************************/
 
     template <class C, class D, std::size_t N>
-    inline xselector<C, D, N>::xselector(const map_type& coord)
+    inline xselector<C, D, N>::xselector(const sequence_type& coord)
         : m_coord(coord)
     {
     }
 
     template <class C, class D, std::size_t N>
-    inline xselector<C, D, N>::xselector(map_type&& coord)
+    inline xselector<C, D, N>::xselector(sequence_type&& coord)
         : m_coord(std::move(coord))
     {
     }
@@ -229,13 +229,13 @@ namespace xf
      *****************************/
 
     template <class C, class D, std::size_t N>
-    inline xiselector<C, D, N>::xiselector(const map_type& coord)
+    inline xiselector<C, D, N>::xiselector(const sequence_type& coord)
         : m_coord(coord)
     {
     }
 
     template <class C, class D, std::size_t N>
-    inline xiselector<C, D, N>::xiselector(map_type&& coord)
+    inline xiselector<C, D, N>::xiselector(sequence_type&& coord)
         : m_coord(std::move(coord))
     {
     }

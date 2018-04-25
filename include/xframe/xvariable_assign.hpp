@@ -87,8 +87,8 @@ namespace xt
         const auto& coords = e1.derived_cast().coordinates();
         using size_type = typename E1::size_type;
         std::vector<size_type> index(dim_label.size(), size_type(0));
-        using selector_map_type = typename E1::template selector_map_type<>;
-        selector_map_type selector(index.size());
+        using selector_sequence_type = typename E1::template selector_sequence_type<>;
+        selector_sequence_type selector(index.size());
         bool end = false;
         do
         {

@@ -72,11 +72,11 @@ namespace xf
         template <std::size_t N = dynamic()>
         using selector_type = typename selector_traits<N>::selector_type;
         template <std::size_t N = dynamic()>
-        using selector_map_type = typename selector_traits<N>::selector_map_type;
+        using selector_sequence_type = typename selector_traits<N>::selector_sequence_type;
         template <std::size_t N = dynamic()>
         using iselector_type = typename selector_traits<N>::iselector_type;
         template <std::size_t N = dynamic()>
-        using iselector_map_type = typename selector_traits<N>::iselector_map_type;
+        using iselector_sequence_type = typename selector_traits<N>::iselector_sequence_type;
         template <std::size_t N = dynamic()>
         using locator_type = typename selector_traits<N>::locator_type;
         template <std::size_t N = dynamic()>
@@ -131,28 +131,28 @@ namespace xf
         const_reference locate_element(locator_sequence_type<N>&& locator) const;
 
         template <std::size_t N = dynamic()>
-        reference select(const selector_map_type<N>& selector);
+        reference select(const selector_sequence_type<N>& selector);
 
         template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
-        const_reference select(const selector_map_type<N>& selector) const;
+        const_reference select(const selector_sequence_type<N>& selector) const;
 
         template <std::size_t N = dynamic()>
-        reference select(selector_map_type<N>&& selector);
+        reference select(selector_sequence_type<N>&& selector);
 
         template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
-        const_reference select(selector_map_type<N>&& selector) const;
+        const_reference select(selector_sequence_type<N>&& selector) const;
 
         template <std::size_t N = dynamic()>
-        reference iselect(const iselector_map_type<N>& selector);
+        reference iselect(const iselector_sequence_type<N>& selector);
 
         template <std::size_t N = dynamic()>
-        const_reference iselect(const iselector_map_type<N>& selector) const;
+        const_reference iselect(const iselector_sequence_type<N>& selector) const;
 
         template <std::size_t N = dynamic()>
-        reference iselect(iselector_map_type<N>&& selector);
+        reference iselect(iselector_sequence_type<N>&& selector);
 
         template <std::size_t N = dynamic()>
-        const_reference iselect(iselector_map_type<N>&& selector) const;
+        const_reference iselect(iselector_sequence_type<N>&& selector) const;
 
     protected:
 
@@ -208,9 +208,6 @@ namespace xf
 
         derived_type& derived_cast() noexcept;
         const derived_type& derived_cast() const noexcept;
-
-        //coordinate_closure_type m_coordinate;
-        //dimension_type m_dimension_mapping;
     };
 
     /*********************************
@@ -360,56 +357,56 @@ namespace xf
 
     template <class D>
     template <std::size_t N>
-    inline auto xvariable_base<D>::select(const selector_map_type<N>& selector) -> reference
+    inline auto xvariable_base<D>::select(const selector_sequence_type<N>& selector) -> reference
     {
         return select_impl(selector_type<N>(selector));
     }
 
     template <class D>
     template <class Join, std::size_t N>
-    inline auto xvariable_base<D>::select(const selector_map_type<N>& selector) const -> const_reference
+    inline auto xvariable_base<D>::select(const selector_sequence_type<N>& selector) const -> const_reference
     {
         return select_join<Join>(selector_type<N>(selector));
     }
 
     template <class D>
     template <std::size_t N>
-    inline auto xvariable_base<D>::select(selector_map_type<N>&& selector) -> reference
+    inline auto xvariable_base<D>::select(selector_sequence_type<N>&& selector) -> reference
     {
         return select_impl(selector_type<N>(std::move(selector)));
     }
 
     template <class D>
     template <class Join, std::size_t N>
-    inline auto xvariable_base<D>::select(selector_map_type<N>&& selector) const -> const_reference
+    inline auto xvariable_base<D>::select(selector_sequence_type<N>&& selector) const -> const_reference
     {
         return select_join<Join>(selector_type<N>(std::move(selector)));
     }
 
     template <class D>
     template <std::size_t N>
-    inline auto xvariable_base<D>::iselect(const iselector_map_type<N>& selector) -> reference
+    inline auto xvariable_base<D>::iselect(const iselector_sequence_type<N>& selector) -> reference
     {
         return select_impl(iselector_type<N>(selector));
     }
 
     template <class D>
     template <std::size_t N>
-    inline auto xvariable_base<D>::iselect(const iselector_map_type<N>& selector) const -> const_reference
+    inline auto xvariable_base<D>::iselect(const iselector_sequence_type<N>& selector) const -> const_reference
     {
         return select_impl(iselector_type<N>(selector));
     }
 
     template <class D>
     template <std::size_t N>
-    inline auto xvariable_base<D>::iselect(iselector_map_type<N>&& selector) -> reference
+    inline auto xvariable_base<D>::iselect(iselector_sequence_type<N>&& selector) -> reference
     {
         return select_impl(iselector_type<N>(std::move(selector)));
     }
 
     template <class D>
     template <std::size_t N>
-    inline auto xvariable_base<D>::iselect(iselector_map_type<N>&& selector) const -> const_reference
+    inline auto xvariable_base<D>::iselect(iselector_sequence_type<N>&& selector) const -> const_reference
     {
         return select_impl(iselector_type<N>(std::move(selector)));
     }
