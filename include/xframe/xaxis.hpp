@@ -327,7 +327,7 @@ namespace xf
     inline auto xaxis<L, T, MT>::filter(const F& f) const noexcept -> self_type
     {
         label_list l;
-        std::copy(m_labels.cbegin(), m_labels.cend(), std::back_inserter(l), f);
+        std::copy_if(m_labels.cbegin(), m_labels.cend(), std::back_inserter(l), f);
         return self_type(std::move(l), m_is_sorted);
     }
 
