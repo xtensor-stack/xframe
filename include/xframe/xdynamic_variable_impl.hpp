@@ -40,22 +40,32 @@ namespace xf
     {
     public:
 
+        using index_type = typename T::index_type;
         using selector_sequence_type = typename T::selector_sequence_type;
         using iselector_sequence_type = typename T::iselector_sequence_type;
+        using locator_sequence_type = typename T::locator_sequence_type;
 
         virtual ~xdynamic_base() {}
+
+        virtual xtl::any do_element(const index_type&) = 0;
+        virtual xtl::any do_element(const index_type&) const = 0;
+        virtual xtl::any do_element(index_type&&) = 0;
+        virtual xtl::any do_element(index_type&&) const = 0;
+
+        virtual xtl::any do_locate_element(const locator_sequence_type&) = 0;
+        virtual xtl::any do_locate_element(const locator_sequence_type&) const = 0;
+        virtual xtl::any do_locate_element(locator_sequence_type&&) = 0;
+        virtual xtl::any do_locate_element(locator_sequence_type&&) const = 0;
 
         virtual xtl::any do_select(const selector_sequence_type&) = 0;
         virtual xtl::any do_select(const selector_sequence_type&, join::outer) const = 0;
         virtual xtl::any do_select(const selector_sequence_type&, join::inner) const = 0;
-
         virtual xtl::any do_select(selector_sequence_type&&) = 0;
         virtual xtl::any do_select(selector_sequence_type&&, join::outer) const = 0;
         virtual xtl::any do_select(selector_sequence_type&&, join::inner) const = 0;
 
         virtual xtl::any do_iselect(const iselector_sequence_type&) = 0;
         virtual xtl::any do_iselect(const iselector_sequence_type&) const = 0;
-
         virtual xtl::any do_iselect(iselector_sequence_type&&) = 0;
         virtual xtl::any do_iselect(iselector_sequence_type&&) const = 0;
     };
@@ -74,9 +84,13 @@ namespace xf
         template <std::size_t N = dynamic()>
         using traits_type = xselector_traits<C, DM, N>;
         template <std::size_t N = dynamic()>
+        using index_type = typename traits_type<N>::index_type;
+        template <std::size_t N = dynamic()>
         using selector_sequence_type = typename traits_type<N>::selector_sequence_type;
         template <std::size_t N = dynamic()>
         using iselector_sequence_type = typename traits_type<N>::iselector_sequence_type;
+        template <std::size_t N = dynamic()>
+        using locator_sequence_type = typename traits_type<N>::locator_sequence_type;
 
         virtual ~xvariable_wrapper() {}
 
@@ -85,6 +99,30 @@ namespace xf
         xvariable_wrapper& operator=(self_type&&) = delete;
 
         virtual self_type* clone() const = 0;
+
+        template <std::size_t N>
+        xtl::any element(const index_type<N>& index);
+
+        template <std::size_t N>
+        xtl::any element(const index_type<N>& index) const;
+
+        template <std::size_t N>
+        xtl::any element(index_type<N>&& index);
+
+        template <std::size_t N>
+        xtl::any element(index_type<N>&& index) const;
+
+        template <std::size_t N>
+        xtl::any locate_element(const locator_sequence_type<N>& loc);
+
+        template <std::size_t N>
+        xtl::any locate_element(const locator_sequence_type<N>& loc) const;
+
+        template <std::size_t N>
+        xtl::any locate_element(locator_sequence_type<N>&& loc);
+
+        template <std::size_t N>
+        xtl::any locate_element(locator_sequence_type<N>&& loc) const;
 
         template <std::size_t N>
         xtl::any select(const selector_sequence_type<N>& sel);
@@ -159,8 +197,10 @@ namespace xf
 
         using self_type = xdynamic_implementation<T, B>;
         using base_type = B;
+        using index_type = typename T::index_type;
         using selector_sequence_type = typename T::selector_sequence_type;
         using iselector_sequence_type = typename T::iselector_sequence_type;
+        using locator_sequence_type = typename T::locator_sequence_type;
 
         static constexpr std::size_t static_dimension = T::static_dimension;
 
@@ -170,17 +210,25 @@ namespace xf
         xdynamic_implementation& operator=(const self_type&) = delete;
         xdynamic_implementation& operator=(self_type&&) = delete;
 
+        xtl::any do_element(const index_type&) override;
+        xtl::any do_element(const index_type&) const override;
+        xtl::any do_element(index_type&&) override;
+        xtl::any do_element(index_type&&) const override;
+
+        xtl::any do_locate_element(const locator_sequence_type&) override;
+        xtl::any do_locate_element(const locator_sequence_type&) const override;
+        xtl::any do_locate_element(locator_sequence_type&&) override;
+        xtl::any do_locate_element(locator_sequence_type&&) const override;
+
         xtl::any do_select(const selector_sequence_type&) override;
         xtl::any do_select(const selector_sequence_type&, join::outer) const override;
         xtl::any do_select(const selector_sequence_type&, join::inner) const override;
-
         xtl::any do_select(selector_sequence_type&&) override;
         xtl::any do_select(selector_sequence_type&&, join::outer) const override;
         xtl::any do_select(selector_sequence_type&&, join::inner) const override;
 
         xtl::any do_iselect(const iselector_sequence_type&) override;
         xtl::any do_iselect(const iselector_sequence_type&) const override;
-
         xtl::any do_iselect(iselector_sequence_type&&) override;
         xtl::any do_iselect(iselector_sequence_type&&) const override;
 
@@ -234,6 +282,70 @@ namespace xf
     /************************************
      * xvariable_wrapper implementation *
      ************************************/
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::element(const index_type<N>& index)
+    {
+        xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_element(index);
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::element(const index_type<N>& index) const
+    {
+        const xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_element(index);
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::element(index_type<N>&& index)
+    {
+        xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_element(std::move(index));
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::element(index_type<N>&& index) const
+    {
+        const xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_element(std::move(index));
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::locate_element(const locator_sequence_type<N>& loc)
+    {
+        xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_locate_element(loc);
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::locate_element(const locator_sequence_type<N>& loc) const
+    {
+        const xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_locate_element(loc);
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::locate_element(locator_sequence_type<N>&& loc)
+    {
+        xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_locate_element(std::move(loc));
+    }
+
+    template <class C, class DM>
+    template <std::size_t N>
+    inline xtl::any xvariable_wrapper<C, DM>::locate_element(locator_sequence_type<N>&& loc) const
+    {
+        const xdynamic_base<xselector_traits<C, DM, N>>& base = *this;
+        return base.do_locate_element(std::move(loc));
+    }
 
     template <class C, class DM>
     template <std::size_t N>
@@ -336,6 +448,62 @@ namespace xf
     inline xdynamic_implementation<T, B>::xdynamic_implementation(V&& variable)
         : base_type(std::forward<V>(variable))
     {
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_element(const index_type& index)
+    {
+        return this->get_variable().template element<static_dimension>(index);
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_element(const index_type& index) const
+    {
+        return this->get_variable().template element<static_dimension>(index);
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_element(index_type&& index)
+    {
+        return this->get_variable().template element<static_dimension>(std::move(index));
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_element(index_type&& index) const
+    {
+        return this->get_variable().template element<static_dimension>(std::move(index));
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_locate_element(const locator_sequence_type& loc)
+    {
+        return this->get_variable().template locate_element<static_dimension>(loc);
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_locate_element(const locator_sequence_type& loc) const
+    {
+        return this->get_variable().template locate_element<static_dimension>(loc);
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_locate_element(locator_sequence_type&& loc)
+    {
+        return this->get_variable().template locate_element<static_dimension>(std::move(loc));
+    }
+
+    template <class T, class B>
+    inline xtl::any
+        xdynamic_implementation<T, B>::do_locate_element(locator_sequence_type&& loc) const
+    {
+        return this->get_variable().template locate_element<static_dimension>(std::move(loc));
     }
 
     template <class T, class B>
