@@ -63,6 +63,7 @@ namespace xf
         using data_closure_type = typename base_type::data_closure_type;
         using coordinate_map = typename base_type::coordinate_map;
         using coordinate_initializer = typename base_type::coordinate_initializer;
+        using dimension_list = typename base_type::dimension_list;
         using temporary_type = typename semantic_base::temporary_type;
 
         using expression_tag = xvariable_expression_tag;
@@ -71,23 +72,18 @@ namespace xf
 
         template <class C, class DM, class = enable_xvariable<C, DM>>
         explicit xvariable(C&& coords, DM&& dims);
-
-        template <class DM>
-        explicit xvariable(const coordinate_map& coords, DM&& dims);
-
-        template <class DM>
-        explicit xvariable(coordinate_map&& coords, DM&& dims);
-
+        explicit xvariable(const coordinate_map& coords, const dimension_list& dims);
+        explicit xvariable(coordinate_map&& coords, dimension_list&& dims);
         explicit xvariable(coordinate_initializer coords);
 
         template <class D, class C, class DM, class = enable_xvariable_t<C, DM>>
         explicit xvariable(D&& data, C&& coords, DM&& dims);
 
-        template <class D, class DM>
-        explicit xvariable(D&& data, const coordinate_map& coords, DM&& dims);
+        template <class D>
+        explicit xvariable(D&& data, const coordinate_map& coords, const dimension_list& dims);
 
-        template <class D, class DM>
-        explicit xvariable(D&& data, coordinate_map&& coords, DM&& dims);
+        template <class D>
+        explicit xvariable(D&& data, coordinate_map&& coords, dimension_list&& dims);
 
         template <class D>
         explicit xvariable(D&& data, coordinate_initializer coords);
@@ -155,17 +151,15 @@ namespace xf
     }
 
     template <class CCT, class ECT>
-    template <class DM>
-    inline xvariable<CCT, ECT>::xvariable(const coordinate_map& coords, DM&& dims)
-        : base_type(coords, std::forward<DM>(dims)),
+    inline xvariable<CCT, ECT>::xvariable(const coordinate_map& coords, const dimension_list& dims)
+        : base_type(coords, dims),
           m_data(base_type::compute_shape())
     {
     }
 
     template <class CCT, class ECT>
-    template <class DM>
-    inline xvariable<CCT, ECT>::xvariable(coordinate_map&& coords, DM&& dims)
-        : base_type(std::move(coords), std::forward<DM>(dims)),
+    inline xvariable<CCT, ECT>::xvariable(coordinate_map&& coords, dimension_list&& dims)
+        : base_type(std::move(coords), std::move(dims)),
           m_data(base_type::compute_shape())
     {
     }
@@ -186,17 +180,17 @@ namespace xf
     }
 
     template <class CCT, class ECT>
-    template <class D, class DM>
-    inline xvariable<CCT, ECT>::xvariable(D&& data, const coordinate_map& coords, DM&& dims)
-        : base_type(coords, std::forward<DM>(dims)),
+    template <class D>
+    inline xvariable<CCT, ECT>::xvariable(D&& data, const coordinate_map& coords, const dimension_list& dims)
+        : base_type(coords, dims),
           m_data(std::forward<D>(data))
     {
     }
 
     template <class CCT, class ECT>
-    template <class D, class DM>
-    inline xvariable<CCT, ECT>::xvariable(D&& data, coordinate_map&& coords, DM&& dims)
-        : base_type(std::move(coords), std::forward<DM>(dims)),
+    template <class D>
+    inline xvariable<CCT, ECT>::xvariable(D&& data, coordinate_map&& coords, dimension_list&& dims)
+        : base_type(std::move(coords), std::move(dims)),
           m_data(std::forward<D>(data))
     {
     }
