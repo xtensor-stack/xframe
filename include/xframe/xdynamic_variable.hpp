@@ -18,13 +18,17 @@ namespace xf
      * xdynamic_variable *
      *********************/
     
-    template <class C, class DM>
+    // T should be one of the following options:
+    // - xtl::any
+    // - xtl::variant<T0, T1, ... Tn>
+    // - a simple value type
+    template <class C, class DM, class T = xtl::any>
     class xdynamic_variable
     {
     public:
 
-        using self_type = xdynamic_variable<C, DM>;
-        using wrapper_type = xvariable_wrapper<C, DM>;
+        using self_type = xdynamic_variable<C, DM, T>;
+        using wrapper_type = xvariable_wrapper<C, DM, T>;
         template <std::size_t N = dynamic()>
         using index_type = typename wrapper_type::template index_type<N>;
         template <std::size_t N = dynamic()>
@@ -33,6 +37,10 @@ namespace xf
         using iselector_sequence_type = typename wrapper_type::template iselector_sequence_type<N>;
         template <std::size_t N = dynamic()>
         using locator_sequence_type = typename wrapper_type::template locator_sequence_type<N>;
+
+        using value_type = typename wrapper_type::value_type;
+        using reference = typename wrapper_type::reference;
+        using const_reference = typename wrapper_type::const_reference;
 
         template <class V, class = std::enable_if_t<!std::is_same<std::decay_t<V>, self_type>::value, void>>
         explicit xdynamic_variable(V&&);
@@ -45,95 +53,110 @@ namespace xf
         self_type& operator=(const self_type&);
         self_type& operator=(self_type&&);
 
-        template <std::size_t N = dynamic()>
-        xtl::any element(const index_type<N>& index);
+        template <class... Args>
+        reference operator()(Args... args);
+
+        template <class... Args>
+        const_reference operator()(Args... args) const;
 
         template <std::size_t N = dynamic()>
-        xtl::any element(const index_type<N>& index) const;
+        reference element(const index_type<N>& index);
 
         template <std::size_t N = dynamic()>
-        xtl::any element(index_type<N>&& index);
+        const_reference element(const index_type<N>& index) const;
 
         template <std::size_t N = dynamic()>
-        xtl::any element(index_type<N>&& index) const;
+        reference element(index_type<N>&& index);
 
         template <std::size_t N = dynamic()>
-        xtl::any locate_element(const locator_sequence_type<N>& loc);
+        const_reference element(index_type<N>&& index) const;
+
+        template <class... Args>
+        reference locate(Args&&... args);
+
+        template <class... Args>
+        const_reference locate(Args&&... args) const;
 
         template <std::size_t N = dynamic()>
-        xtl::any locate_element(const locator_sequence_type<N>& loc) const;
+        reference locate_element(const locator_sequence_type<N>& loc);
 
         template <std::size_t N = dynamic()>
-        xtl::any locate_element(locator_sequence_type<N>&& loc);
+        const_reference locate_element(const locator_sequence_type<N>& loc) const;
 
         template <std::size_t N = dynamic()>
-        xtl::any locate_element(locator_sequence_type<N>&& loc) const;
+        reference locate_element(locator_sequence_type<N>&& loc);
 
         template <std::size_t N = dynamic()>
-        xtl::any select(const selector_sequence_type<N>& sel);
+        const_reference locate_element(locator_sequence_type<N>&& loc) const;
+
+        template <std::size_t N = dynamic()>
+        reference select(const selector_sequence_type<N>& sel);
 
         template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
-        xtl::any select(const selector_sequence_type<N>& sel) const;
+        const_reference select(const selector_sequence_type<N>& sel) const;
 
         template <std::size_t N = dynamic()>
-        xtl::any select(selector_sequence_type<N>&& sel);
+        reference select(selector_sequence_type<N>&& sel);
 
         template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
-        xtl::any select(selector_sequence_type<N>&& sel) const;
+        const_reference select(selector_sequence_type<N>&& sel) const;
 
         template <std::size_t N = dynamic()>
-        xtl::any iselect(const iselector_sequence_type<N>& sel);
+        reference iselect(const iselector_sequence_type<N>& sel);
 
         template <std::size_t N = dynamic()>
-        xtl::any iselect(const iselector_sequence_type<N>& sel) const;
+        const_reference iselect(const iselector_sequence_type<N>& sel) const;
 
         template <std::size_t N = dynamic()>
-        xtl::any iselect(iselector_sequence_type<N>&& sel);
+        reference iselect(iselector_sequence_type<N>&& sel);
 
         template <std::size_t N = dynamic()>
-        xtl::any iselect(iselector_sequence_type<N>&& sel) const;
+        const_reference iselect(iselector_sequence_type<N>&& sel) const;
 
     private:
+
+        template <class... Args>
+        index_type<> make_index(Args... args);
 
         wrapper_type* p_wrapper;
     };
 
-    template <class V>
+    template < class T = xtl::any, class V>
     auto make_dynamic(V&& variable);
 
     /************************************
      * xdynamic_variable implementation *
      ************************************/
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <class V, class>
-    inline xdynamic_variable<C, DM>::xdynamic_variable(V&& variable)
-        : p_wrapper(new xdynamic_leaf<std::decay_t<V>>(std::forward<V>(variable)))
+    inline xdynamic_variable<C, DM, T>::xdynamic_variable(V&& variable)
+        : p_wrapper(new xdynamic_leaf<std::decay_t<V>, T>(std::forward<V>(variable)))
     {
     }
 
-    template <class C, class DM>
-    inline xdynamic_variable<C, DM>::~xdynamic_variable()
+    template <class C, class DM, class T>
+    inline xdynamic_variable<C, DM, T>::~xdynamic_variable()
     {
         delete p_wrapper;
         p_wrapper = nullptr;
     }
 
-    template <class C, class DM>
-    inline xdynamic_variable<C, DM>::xdynamic_variable(const self_type& rhs)
+    template <class C, class DM, class T>
+    inline xdynamic_variable<C, DM, T>::xdynamic_variable(const self_type& rhs)
         : p_wrapper(rhs.p_wrapper->clone())
     {
     }
 
-    template <class C, class DM>
-    inline xdynamic_variable<C, DM>::xdynamic_variable(self_type&& rhs)
+    template <class C, class DM, class T>
+    inline xdynamic_variable<C, DM, T>::xdynamic_variable(self_type&& rhs)
         : p_wrapper(rhs.p_wrapper)
     {
         rhs.p_wrapper = nullptr;
     }
 
-    template <class C, class DM>
-    inline auto xdynamic_variable<C, DM>::operator=(const self_type& rhs) -> self_type&
+    template <class C, class DM, class T>
+    inline auto xdynamic_variable<C, DM, T>::operator=(const self_type& rhs) -> self_type&
     {
         if (this != &rhs)
         {
@@ -143,131 +166,170 @@ namespace xf
         return *this;
     }
 
-    template <class C, class DM>
-    inline auto xdynamic_variable<C, DM>::operator=(self_type&& rhs) -> self_type&
+    template <class C, class DM, class T>
+    inline auto xdynamic_variable<C, DM, T>::operator=(self_type&& rhs) -> self_type&
     {
         std::swap(p_wrapper, rhs.p_wrapper);
         return *this;
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
+    template <class... Args>
+    inline auto xdynamic_variable<C, DM, T>::operator()(Args... args) -> reference
+    {
+        return element(make_index(args...));
+    }
+
+    template <class C, class DM, class T>
+    template <class... Args>
+    inline auto xdynamic_variable<C, DM, T>::operator()(Args... args) const -> const_reference
+    {
+        return element(make_index(args...));
+    }
+
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::element(const index_type<N>& index)
+    inline auto xdynamic_variable<C, DM, T>::element(const index_type<N>& index) -> reference
     {
         return p_wrapper->template element<N>(index);
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::element(const index_type<N>& index) const
+    inline auto xdynamic_variable<C, DM, T>::element(const index_type<N>& index) const -> const_reference
     {
         return p_wrapper->template element<N>(index);
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::element(index_type<N>&& index)
+    inline auto xdynamic_variable<C, DM, T>::element(index_type<N>&& index) -> reference
     {
         return p_wrapper->template element<N>(std::move(index));
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::element(index_type<N>&& index) const
+    inline auto xdynamic_variable<C, DM, T>::element(index_type<N>&& index) const -> const_reference
     {
         return p_wrapper->template element<N>(std::move(index));
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
+    template <class... Args>
+    inline auto xdynamic_variable<C, DM, T>::locate(Args&&... args) -> reference
+    {
+        locator_sequence_type<> loc = { std::forward<Args>(args)... };
+        return locate_element(std::move(loc));
+    }
+
+    template <class C, class DM, class T>
+    template <class... Args>
+    inline auto xdynamic_variable<C, DM, T>::locate(Args&&... args) const -> const_reference
+    {
+        locator_sequence_type<> loc = { std::forward<Args>(args)... };
+        return locate_element(std::move(loc));
+    }
+
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::locate_element(const locator_sequence_type<N>& loc)
+    inline auto xdynamic_variable<C, DM, T>::locate_element(const locator_sequence_type<N>& loc) -> reference
     {
         return p_wrapper->template locate_element<N>(loc);
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::locate_element(const locator_sequence_type<N>& loc) const
+    inline auto xdynamic_variable<C, DM, T>::locate_element(const locator_sequence_type<N>& loc) const -> const_reference
     {
         return p_wrapper->template locate_element<N>(loc);
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::locate_element(locator_sequence_type<N>&& loc)
+    inline auto xdynamic_variable<C, DM, T>::locate_element(locator_sequence_type<N>&& loc) -> reference
     {
         return p_wrapper->template locate_element<N>(std::move(loc));
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::locate_element(locator_sequence_type<N>&& loc) const
+    inline auto xdynamic_variable<C, DM, T>::locate_element(locator_sequence_type<N>&& loc) const -> const_reference
     {
         return p_wrapper->template locate_element<N>(std::move(loc));
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::select(const selector_sequence_type<N>& sel)
+    inline auto xdynamic_variable<C, DM, T>::select(const selector_sequence_type<N>& sel) -> reference
     {
         return p_wrapper->template select<N>(sel);
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <class Join, std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::select(const selector_sequence_type<N>& sel) const
+    inline auto xdynamic_variable<C, DM, T>::select(const selector_sequence_type<N>& sel) const -> const_reference
     {
         return p_wrapper->template select<Join, N>(sel);
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::select(selector_sequence_type<N>&& sel)
+    inline auto xdynamic_variable<C, DM, T>::select(selector_sequence_type<N>&& sel) -> reference
     {
         return p_wrapper->template select<N>(std::move(sel));
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <class Join, std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::select(selector_sequence_type<N>&& sel) const
+    inline auto xdynamic_variable<C, DM, T>::select(selector_sequence_type<N>&& sel) const -> const_reference
     {
         return p_wrapper->template select<Join, N>(std::move(sel));
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::iselect(const iselector_sequence_type<N>& sel)
+    inline auto xdynamic_variable<C, DM, T>::iselect(const iselector_sequence_type<N>& sel) -> reference
     {
         return p_wrapper->template iselect<N>(sel);
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::iselect(const iselector_sequence_type<N>& sel) const
+    inline auto xdynamic_variable<C, DM, T>::iselect(const iselector_sequence_type<N>& sel) const -> const_reference
     {
         return p_wrapper->template iselect<N>(sel);
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::iselect(iselector_sequence_type<N>&& sel)
+    inline auto xdynamic_variable<C, DM, T>::iselect(iselector_sequence_type<N>&& sel) -> reference
     {
         return p_wrapper->template iselect<N>(std::move(sel));
     }
 
-    template <class C, class DM>
+    template <class C, class DM, class T>
     template <std::size_t N>
-    inline xtl::any xdynamic_variable<C, DM>::iselect(iselector_sequence_type<N>&& sel) const
+    inline auto xdynamic_variable<C, DM, T>::iselect(iselector_sequence_type<N>&& sel) const -> const_reference
     {
         return p_wrapper->template iselect<N>(std::move(sel));
     }
 
-    template <class V>
+    template <class C, class DM, class T>
+    template <class... Args>
+    inline auto xdynamic_variable<C, DM, T>::make_index(Args... args) -> index_type<>
+    {
+        using size_type = typename index_type<>::value_type;
+        index_type<> res = { static_cast<size_type>(args)... };
+        return res;
+    }
+
+    template <class T, class V>
     inline auto make_dynamic(V&& variable)
     {
         using coordinate_type = typename std::decay_t<V>::coordinate_type;
         using dimension_type = typename std::decay_t<V>::dimension_type;
-        return xdynamic_variable<coordinate_type, dimension_type>(std::forward<V>(variable));
+        return xdynamic_variable<coordinate_type, dimension_type, T>(std::forward<V>(variable));
     }
 }
 

@@ -22,6 +22,32 @@ namespace xf
         return xtl::any_cast<xtl::xoptional<const double&, const bool&>>(arg);
     }
 
+    TEST(xdynamic_variable, access)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic(v);
+
+        auto t00 = dv(0, 0);
+        auto t01 = dv(0, 1);
+        auto t02 = dv(0, 2);
+        auto t10 = dv(1, 0);
+        auto t11 = dv(1, 1);
+        auto t12 = dv(1, 2);
+        auto t20 = dv(2, 0);
+        auto t21 = dv(2, 1);
+        auto t22 = dv(2, 2);
+
+        EXPECT_EQ(opt_cast(t00), v(0, 0));
+        EXPECT_EQ(opt_cast(t01), v(0, 1));
+        EXPECT_EQ(opt_cast(t02), v(0, 2));
+        EXPECT_EQ(opt_cast(t10), v(1, 0));
+        EXPECT_EQ(opt_cast(t11), v(1, 1));
+        EXPECT_EQ(opt_cast(t12), v(1, 2));
+        EXPECT_EQ(opt_cast(t20), v(2, 0));
+        EXPECT_EQ(opt_cast(t21), v(2, 1));
+        EXPECT_EQ(opt_cast(t22), v(2, 2));
+    }
+
     TEST(xdynamic_variable, element)
     {
         auto v = make_test_variable();
@@ -132,6 +158,32 @@ namespace xf
         EXPECT_EQ(opt_cast(t22), v(2, 2));
     }
 
+    TEST(xdynamic_variable, locate)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic(v);
+
+        auto t00 = dv.locate("a", 1);
+        auto t01 = dv.locate("a", 2);
+        auto t02 = dv.locate("a", 4);
+        auto t10 = dv.locate("c", 1);
+        auto t11 = dv.locate("c", 2);
+        auto t12 = dv.locate("c", 4);
+        auto t20 = dv.locate("d", 1);
+        auto t21 = dv.locate("d", 2);
+        auto t22 = dv.locate("d", 4);
+
+        EXPECT_EQ(opt_cast(t00), v(0, 0));
+        EXPECT_EQ(opt_cast(t01), v(0, 1));
+        EXPECT_EQ(opt_cast(t02), v(0, 2));
+        EXPECT_EQ(opt_cast(t10), v(1, 0));
+        EXPECT_EQ(opt_cast(t11), v(1, 1));
+        EXPECT_EQ(opt_cast(t12), v(1, 2));
+        EXPECT_EQ(opt_cast(t20), v(2, 0));
+        EXPECT_EQ(opt_cast(t21), v(2, 1));
+        EXPECT_EQ(opt_cast(t22), v(2, 2));
+    }
+
     TEST(xdynamic_variable, locate_element)
     {
         auto v = make_test_variable();
@@ -156,5 +208,71 @@ namespace xf
         EXPECT_EQ(opt_cast(t20), v(2, 0));
         EXPECT_EQ(opt_cast(t21), v(2, 1));
         EXPECT_EQ(opt_cast(t22), v(2, 2));
+    }
+
+    template <class V>
+    inline xtl::xoptional<double&, bool&> variant_get(V& v)
+    {
+        return xtl::get<xtl::xoptional<double&, bool&>>(v);
+    }
+
+    template <class V>
+    inline xtl::xoptional<const double&, const bool&> const_variant_get(V& v)
+    {
+        return xtl::get<xtl::xoptional<const double&, const bool&>>(v);
+    }
+
+    TEST(xdynamic_variable, make_variant)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic<xtl::variant<double, int>>(v);
+        
+        auto ta00 = dv(0, 0);
+        EXPECT_EQ(variant_get(ta00), v(0, 0));
+
+        auto t00 = dv.element({ 0, 0 });
+        EXPECT_EQ(variant_get(t00), v(0, 0));
+
+        auto ts00 = dv.select({ { "abscissa", "a" },{ "ordinate", 1 } });
+        EXPECT_EQ(variant_get(ts00), v(0, 0));
+
+        auto tsc00 = dv.select<join::outer>({ { "abscissa", "a" },{ "ordinate", 1 } });
+        EXPECT_EQ(const_variant_get(tsc00), v(0, 0));
+
+        auto tis00 = dv.iselect({ { "abscissa", 0 },{ "ordinate", 0 } });
+        EXPECT_EQ(variant_get(tis00), v(0, 0));
+
+        auto tl00 = dv.locate("a", 1);
+        EXPECT_EQ(variant_get(tl00), v(0, 0));
+
+        auto tle00 = dv.locate_element({ "a", 1 });
+        EXPECT_EQ(variant_get(tle00), v(0, 0));
+    }
+
+    TEST(xdynamic_variable, make_simple)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic<double>(v);
+
+        auto ta00 = dv(0, 0);
+        EXPECT_EQ(ta00, v(0, 0));
+
+        auto t00 = dv.element({ 0, 0 });
+        EXPECT_EQ(t00, v(0, 0));
+
+        auto ts00 = dv.select({ { "abscissa", "a" },{ "ordinate", 1 } });
+        EXPECT_EQ(ts00, v(0, 0));
+
+        auto tsc00 = dv.select<join::outer>({ { "abscissa", "a" },{ "ordinate", 1 } });
+        EXPECT_EQ(tsc00, v(0, 0));
+
+        auto tis00 = dv.iselect({ { "abscissa", 0 },{ "ordinate", 0 } });
+        EXPECT_EQ(tis00, v(0, 0));
+
+        auto tl00 = dv.locate("a", 1);
+        EXPECT_EQ(tl00, v(0, 0));
+
+        auto tle00 = dv.locate_element({ "a", 1 });
+        EXPECT_EQ(tle00, v(0, 0));
     }
 }
