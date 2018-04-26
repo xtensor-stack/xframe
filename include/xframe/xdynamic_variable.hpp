@@ -53,6 +53,12 @@ namespace xf
         self_type& operator=(const self_type&);
         self_type& operator=(self_type&&);
 
+        template <class... Args>
+        reference operator()(Args... args);
+
+        template <class... Args>
+        const_reference operator()(Args... args) const;
+
         template <std::size_t N = dynamic()>
         reference element(const index_type<N>& index);
 
@@ -64,6 +70,12 @@ namespace xf
 
         template <std::size_t N = dynamic()>
         const_reference element(index_type<N>&& index) const;
+
+        template <class... Args>
+        reference locate(Args&&... args);
+
+        template <class... Args>
+        const_reference locate(Args&&... args) const;
 
         template <std::size_t N = dynamic()>
         reference locate_element(const locator_sequence_type<N>& loc);
@@ -102,6 +114,9 @@ namespace xf
         const_reference iselect(iselector_sequence_type<N>&& sel) const;
 
     private:
+
+        template <class... Args>
+        index_type<> make_index(Args... args);
 
         wrapper_type* p_wrapper;
     };
@@ -159,6 +174,20 @@ namespace xf
     }
 
     template <class C, class DM, class T>
+    template <class... Args>
+    inline auto xdynamic_variable<C, DM, T>::operator()(Args... args) -> reference
+    {
+        return element(make_index(args...));
+    }
+
+    template <class C, class DM, class T>
+    template <class... Args>
+    inline auto xdynamic_variable<C, DM, T>::operator()(Args... args) const -> const_reference
+    {
+        return element(make_index(args...));
+    }
+
+    template <class C, class DM, class T>
     template <std::size_t N>
     inline auto xdynamic_variable<C, DM, T>::element(const index_type<N>& index) -> reference
     {
@@ -184,6 +213,22 @@ namespace xf
     inline auto xdynamic_variable<C, DM, T>::element(index_type<N>&& index) const -> const_reference
     {
         return p_wrapper->template element<N>(std::move(index));
+    }
+
+    template <class C, class DM, class T>
+    template <class... Args>
+    inline auto xdynamic_variable<C, DM, T>::locate(Args&&... args) -> reference
+    {
+        locator_sequence_type<> loc = { std::forward<Args>(args)... };
+        return locate_element(std::move(loc));
+    }
+
+    template <class C, class DM, class T>
+    template <class... Args>
+    inline auto xdynamic_variable<C, DM, T>::locate(Args&&... args) const -> const_reference
+    {
+        locator_sequence_type<> loc = { std::forward<Args>(args)... };
+        return locate_element(std::move(loc));
     }
 
     template <class C, class DM, class T>
@@ -268,6 +313,15 @@ namespace xf
     inline auto xdynamic_variable<C, DM, T>::iselect(iselector_sequence_type<N>&& sel) const -> const_reference
     {
         return p_wrapper->template iselect<N>(std::move(sel));
+    }
+
+    template <class C, class DM, class T>
+    template <class... Args>
+    inline auto xdynamic_variable<C, DM, T>::make_index(Args... args) -> index_type<>
+    {
+        using size_type = typename index_type<>::value_type;
+        index_type<> res = { static_cast<size_type>(args)... };
+        return res;
     }
 
     template <class T, class V>
