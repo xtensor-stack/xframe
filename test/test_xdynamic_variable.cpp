@@ -22,6 +22,73 @@ namespace xf
         return xtl::any_cast<xtl::xoptional<const double&, const bool&>>(arg);
     }
 
+    TEST(xdynamic_variable, size)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic(v);
+        EXPECT_EQ(dv.size(), v.size());
+    }
+
+    TEST(xdynamic_variable, dimension)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic(v);
+        EXPECT_EQ(dv.dimension(), v.dimension());
+    }
+
+    TEST(xdynamic_variable, dimension_labels)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic(v);
+        EXPECT_EQ(dv.dimension_labels(), v.dimension_labels());
+    }
+
+    TEST(xdynamic_variable, coordinates)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic(v);
+        EXPECT_EQ(dv.coordinates(), v.coordinates());
+    }
+
+    TEST(xdynamic_variable, dimension_mapping)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic(v);
+        EXPECT_EQ(dv.dimension_mapping(), v.dimension_mapping());
+    }
+
+    TEST(xdynamic_variable, broadcast_coordinates)
+    {
+        auto coord_res = make_merge_coordinate();
+        auto v = make_test_variable2();
+        auto dv = make_dynamic(v);
+
+        auto c = make_test_coordinate();
+        auto res = dv.template broadcast_coordinates<join::outer>(c);
+
+        EXPECT_FALSE(res.m_xtensor_trivial);
+        EXPECT_FALSE(res.m_xframe_trivial);
+        EXPECT_EQ(c, coord_res);
+
+        auto coord_res2 = make_intersect_coordinate();
+        auto c2 = make_test_coordinate();
+        auto res2 = dv.template broadcast_coordinates<join::inner>(c2);
+
+        EXPECT_FALSE(res2.m_xtensor_trivial);
+        EXPECT_FALSE(res2.m_xframe_trivial);
+        EXPECT_EQ(c2, coord_res2);
+    }
+
+    TEST(xdynamic_variable, broadcast_dimensions)
+    {
+        auto v = make_test_variable2();
+        auto dv = make_dynamic(v);
+
+        auto c = dimension_type({ "abscissa", "ordinate" });
+        bool res = dv.broadcast_dimensions(c);
+        EXPECT_EQ(c, dv.dimension_mapping());
+    }
+
     TEST(xdynamic_variable, access)
     {
         auto v = make_test_variable();
