@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <vector>
 #include "gtest/gtest.h"
+#include "xframe/xaxis_base.hpp"
 #include "xframe/xaxis.hpp"
 #include "xtl/xbasic_fixed_string.hpp"
 

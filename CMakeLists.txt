@@ -21,7 +21,7 @@ foreach(ver ${xframe_version_defines})
         set(XFRAME_VERSION_${CMAKE_MATCH_1} "${CMAKE_MATCH_2}" CACHE INTERNAL "")
     endif()
 endforeach()
-set(${PROJECT_NAME}_VERSION 
+set(${PROJECT_NAME}_VERSION
     ${XFRAME_VERSION_MAJOR}.${XFRAME_VERSION_MINOR}.${XFRAME_VERSION_PATCH})
 message(STATUS "xframe v${${PROJECT_NAME}_VERSION}")
 
@@ -39,6 +39,8 @@ include_directories(${xtl_INCLUDE_DIRS})
 
 set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xaxis_base.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xaxis_default.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_slice.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_variant.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_view.hpp

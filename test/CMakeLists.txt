@@ -81,6 +81,7 @@ set(XFRAME_TESTS
     test_fixture.hpp
     test_fixture_view.hpp
     test_xaxis.cpp
+    test_xaxis_default.cpp
     test_xaxis_view.cpp
     test_xcoordinate.cpp
     test_xcoordinate_view.cpp
@@ -105,4 +106,3 @@ endif()
 target_link_libraries(${XFRAME_TARGET} ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 add_custom_target(xtest COMMAND test_xframe DEPENDS ${XFRAME_TARGET})
-
