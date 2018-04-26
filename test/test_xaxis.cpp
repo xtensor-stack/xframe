@@ -250,11 +250,6 @@ namespace xf
         EXPECT_EQ(tmp, a1);
     }
 
-    bool filter_function(const fstring& value)
-    {
-        return value < "d";
-    };
-
     TEST(xaxis, filter)
     {
         axis_type a = { "a", "b", "d", "e" };
