@@ -41,6 +41,14 @@ namespace xf
         using value_type = typename wrapper_type::value_type;
         using reference = typename wrapper_type::reference;
         using const_reference = typename wrapper_type::const_reference;
+        using pointer = typename wrapper_type::pointer;
+        using const_pointer = typename wrapper_type::const_pointer;
+        using size_type = typename wrapper_type::size_type;
+        using difference_type = typename wrapper_type::difference_type;
+
+        using coordinate_type = typename wrapper_type::coordinate_type;
+        using dimension_type = typename wrapper_type::dimension_type;
+        using dimension_list = typename wrapper_type::dimension_list;
 
         template <class V, class = std::enable_if_t<!std::is_same<std::decay_t<V>, self_type>::value, void>>
         explicit xdynamic_variable(V&&);
@@ -52,6 +60,17 @@ namespace xf
 
         self_type& operator=(const self_type&);
         self_type& operator=(self_type&&);
+
+        size_type size() const;
+        size_type dimension() const;
+        const dimension_list& dimension_labels() const;
+        const coordinate_type& coordinates() const;
+        const dimension_type& dimension_mapping() const;
+
+        template <class Join>
+        xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
+
+        bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
         template <class... Args>
         reference operator()(Args... args);
@@ -171,6 +190,49 @@ namespace xf
     {
         std::swap(p_wrapper, rhs.p_wrapper);
         return *this;
+    }
+
+    template <class C, class DM, class T>
+    inline auto xdynamic_variable<C, DM, T>::size() const -> size_type
+    {
+        return p_wrapper->size();
+    }
+
+    template <class C, class DM, class T>
+    inline auto xdynamic_variable<C, DM, T>::dimension() const -> size_type
+    {
+        return p_wrapper->dimension();
+    }
+
+    template <class C, class DM, class T>
+    inline auto xdynamic_variable<C, DM, T>::dimension_labels() const -> const dimension_list&
+    {
+        return p_wrapper->dimension_labels();
+    }
+
+    template <class C, class DM, class T>
+    inline auto xdynamic_variable<C, DM, T>::coordinates() const -> const coordinate_type&
+    {
+        return p_wrapper->coordinates();
+    }
+
+    template <class C, class DM, class T>
+    inline auto xdynamic_variable<C, DM, T>::dimension_mapping() const -> const dimension_type&
+    {
+        return p_wrapper->dimension_mapping();
+    }
+
+    template <class C, class DM, class T>
+    template <class Join>
+    inline xtrivial_broadcast xdynamic_variable<C, DM, T>::broadcast_coordinates(coordinate_type& coords) const
+    {
+        return p_wrapper->broadcast_coordinates(coords, Join());
+    }
+
+    template <class C, class DM, class T>
+    inline bool xdynamic_variable<C, DM, T>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
+    {
+        return p_wrapper->broadcast_dimensions(dims, trivial_bc);
     }
 
     template <class C, class DM, class T>

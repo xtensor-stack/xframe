@@ -29,6 +29,8 @@ namespace xf
             using value_type = xtl::xoptional<T, bool>;
             using reference = xtl::xoptional<T&, bool&>;
             using const_reference = xtl::xoptional<const T&, const bool&>;
+            using pointer = xtl::xclosure_pointer<reference>;
+            using const_pointer = xtl::xclosure_pointer<const_reference>;
         };
 
         template <class T>
@@ -43,6 +45,8 @@ namespace xf
             using value_type = xtl::any;
             using reference = xtl::any;
             using const_reference = xtl::any;
+            using pointer = xtl::xclosure_pointer<reference>;
+            using const_pointer = xtl::xclosure_pointer<const_reference>;
         };
 
         template <class... T>
@@ -51,6 +55,8 @@ namespace xf
             using value_type = xtl::variant<xtl::xoptional<T, bool>...>;
             using reference = xtl::variant<xtl::xoptional<T&, bool&>...>;
             using const_reference = xtl::variant<xtl::xoptional<const T&, const bool&>...>;
+            using pointer = xtl::xclosure_pointer<reference>;
+            using const_pointer = xtl::xclosure_pointer<const_reference>;
         };
     }
 
@@ -62,6 +68,8 @@ namespace xf
         using value_type = typename traits_type::value_type;
         using reference = typename traits_type::reference;
         using const_reference = typename traits_type::const_reference;
+        using pointer = typename traits_type::pointer;
+        using const_pointer = typename traits_type::const_pointer;
     };
 
     namespace detail
@@ -144,9 +152,17 @@ namespace xf
         template <std::size_t N = dynamic()>
         using locator_sequence_type = typename traits_type<N>::locator_sequence_type;
 
+        using coordinate_type = C;
+        using dimension_type = DM;
+        using dimension_list = typename dimension_type::label_list;
+
         using value_type = typename traits_type<>::value_type;
         using reference = typename traits_type<>::reference;
         using const_reference = typename traits_type<>::const_reference;
+        using pointer = typename traits_type<>::pointer;
+        using const_pointer = typename traits_type<>::const_pointer;
+        using size_type = typename coordinate_type::size_type;
+        using difference_type = typename coordinate_type::difference_type;
 
         virtual ~xvariable_wrapper() {}
 
@@ -155,6 +171,16 @@ namespace xf
         xvariable_wrapper& operator=(self_type&&) = delete;
 
         virtual self_type* clone() const = 0;
+
+        virtual size_type size() const = 0;
+        virtual size_type dimension() const = 0;
+        virtual const dimension_list& dimension_labels() const = 0;
+        virtual const coordinate_type& coordinates() const = 0;
+        virtual const dimension_type& dimension_mapping() const = 0;
+
+        virtual xtrivial_broadcast broadcast_coordinates(coordinate_type& coords, join::outer) const = 0;
+        virtual xtrivial_broadcast broadcast_coordinates(coordinate_type& coords, join::inner) const = 0;
+        virtual bool broadcast_dimensions(dimension_type& dims, bool trivial_bc) const = 0;
 
         template <std::size_t N>
         reference element(const index_type<N>& index);
@@ -221,12 +247,27 @@ namespace xf
 
         using variable_type = V;
         using self_type = xvariable_wrapper_impl<variable_type, T>;
+        using base_type = xvariable_wrapper<typename V::coordinate_type, typename V::dimension_type, T>;
+        using size_type = typename base_type::size_type;
+        using coordinate_type = typename base_type::coordinate_type;
+        using dimension_type = typename base_type::dimension_type;
+        using dimension_list = typename base_type::dimension_list;
 
         virtual ~xvariable_wrapper_impl() {}
 
         xvariable_wrapper_impl(self_type&&) = delete;
         xvariable_wrapper_impl& operator=(const self_type&) = delete;
         xvariable_wrapper_impl& operator=(self_type&&) = delete;
+
+        size_type size() const override;
+        size_type dimension() const override;
+        const dimension_list& dimension_labels() const override;
+        const coordinate_type& coordinates() const override;
+        const dimension_type& dimension_mapping() const override;
+
+        xtrivial_broadcast broadcast_coordinates(coordinate_type& coords, join::outer) const override;
+        xtrivial_broadcast broadcast_coordinates(coordinate_type& coords, join::inner) const override;
+        bool broadcast_dimensions(dimension_type& dims, bool trivial_bc) const override;
 
     protected:
 
@@ -500,6 +541,54 @@ namespace xf
         return m_variable;
     }
 
+    template <class V, class T>
+    auto xvariable_wrapper_impl<V, T>::size() const -> size_type
+    {
+        return m_variable.size();
+    }
+
+    template <class V, class T>
+    auto xvariable_wrapper_impl<V, T>::dimension() const -> size_type
+    {
+        return m_variable.dimension();
+    }
+
+    template <class V, class T>
+    auto xvariable_wrapper_impl<V, T>::dimension_labels() const -> const dimension_list&
+    {
+        return m_variable.dimension_labels();
+    }
+
+    template <class V, class T>
+    auto xvariable_wrapper_impl<V, T>::coordinates() const -> const coordinate_type&
+    {
+        return m_variable.coordinates();
+    }
+
+    template <class V, class T>
+    auto xvariable_wrapper_impl<V, T>::dimension_mapping() const -> const dimension_type&
+    {
+        return m_variable.dimension_mapping();
+    }
+
+    template <class V, class T>
+    xtrivial_broadcast xvariable_wrapper_impl<V, T>::broadcast_coordinates(coordinate_type& coords, join::outer) const
+    {
+        return m_variable.template broadcast_coordinates<join::outer>(coords);
+    }
+
+    template <class V, class T>
+    xtrivial_broadcast xvariable_wrapper_impl<V, T>::broadcast_coordinates(coordinate_type& coords, join::inner) const
+    {
+        return m_variable.template broadcast_coordinates<join::inner>(coords);
+    }
+
+    template <class V, class T>
+    bool xvariable_wrapper_impl<V, T>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
+    {
+        return m_variable.broadcast_dimensions(dims, trivial_bc);
+    }
+
    /***************************
     * xdynamic_implementation *
     ***************************/
@@ -512,110 +601,109 @@ namespace xf
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_element(const index_type& index) -> reference
+    auto xdynamic_implementation<T, B>::do_element(const index_type& index) -> reference
     {
         return this->get_variable().template element<static_dimension>(index);
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_element(const index_type& index) const -> const_reference
+    auto xdynamic_implementation<T, B>::do_element(const index_type& index) const -> const_reference
     {
         return this->get_variable().template element<static_dimension>(index);
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_element(index_type&& index) -> reference
+    auto xdynamic_implementation<T, B>::do_element(index_type&& index) -> reference
     {
         return this->get_variable().template element<static_dimension>(std::move(index));
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_element(index_type&& index) const -> const_reference
+    auto xdynamic_implementation<T, B>::do_element(index_type&& index) const -> const_reference
     {
         return this->get_variable().template element<static_dimension>(std::move(index));
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_locate_element(const locator_sequence_type& loc) -> reference
+    auto xdynamic_implementation<T, B>::do_locate_element(const locator_sequence_type& loc) -> reference
     {
         return this->get_variable().template locate_element<static_dimension>(loc);
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_locate_element(const locator_sequence_type& loc) const -> const_reference
+    auto xdynamic_implementation<T, B>::do_locate_element(const locator_sequence_type& loc) const -> const_reference
     {
         return this->get_variable().template locate_element<static_dimension>(loc);
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_locate_element(locator_sequence_type&& loc) -> reference
+    auto xdynamic_implementation<T, B>::do_locate_element(locator_sequence_type&& loc) -> reference
     {
         return this->get_variable().template locate_element<static_dimension>(std::move(loc));
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_locate_element(locator_sequence_type&& loc) const -> const_reference
+    auto xdynamic_implementation<T, B>::do_locate_element(locator_sequence_type&& loc) const -> const_reference
     {
         return this->get_variable().template locate_element<static_dimension>(std::move(loc));
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_select(const selector_sequence_type& sel) -> reference
+    auto xdynamic_implementation<T, B>::do_select(const selector_sequence_type& sel) -> reference
     {
         return this->get_variable().template select<static_dimension>(sel);
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_select(const selector_sequence_type& sel, join::outer) const -> const_reference
+    auto xdynamic_implementation<T, B>::do_select(const selector_sequence_type& sel, join::outer) const -> const_reference
     {
         return this->get_variable().template select<join::outer, static_dimension>(sel);
     }
 
     template <class T, class B>
-    inline auto
-        xdynamic_implementation<T, B>::do_select(const selector_sequence_type& sel, join::inner) const -> const_reference
+    auto xdynamic_implementation<T, B>::do_select(const selector_sequence_type& sel, join::inner) const -> const_reference
     {
         return this->get_variable().template select<join::inner, static_dimension>(sel);
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_select(selector_sequence_type&& sel) -> reference
+    auto xdynamic_implementation<T, B>::do_select(selector_sequence_type&& sel) -> reference
     {
         return this->get_variable().template select<static_dimension>(std::move(sel));
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_select(selector_sequence_type&& sel, join::outer) const -> const_reference
+    auto xdynamic_implementation<T, B>::do_select(selector_sequence_type&& sel, join::outer) const -> const_reference
     {
         return this->get_variable().template select<join::outer, static_dimension>(std::move(sel));
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_select(selector_sequence_type&& sel, join::inner) const -> const_reference
+    auto xdynamic_implementation<T, B>::do_select(selector_sequence_type&& sel, join::inner) const -> const_reference
     {
         return this->get_variable().template select<join::inner, static_dimension>(std::move(sel));
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_iselect(const iselector_sequence_type& sel) -> reference
+    auto xdynamic_implementation<T, B>::do_iselect(const iselector_sequence_type& sel) -> reference
     {
         return this->get_variable().template iselect<static_dimension>(sel);
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_iselect(const iselector_sequence_type& sel) const -> const_reference
+    auto xdynamic_implementation<T, B>::do_iselect(const iselector_sequence_type& sel) const -> const_reference
     {
         return this->get_variable().template iselect<static_dimension>(sel);
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_iselect(iselector_sequence_type&& sel) -> reference
+    auto xdynamic_implementation<T, B>::do_iselect(iselector_sequence_type&& sel) -> reference
     {
         return this->get_variable().template iselect<static_dimension>(std::move(sel));
     }
 
     template <class T, class B>
-    inline auto xdynamic_implementation<T, B>::do_iselect(iselector_sequence_type&& sel) const -> const_reference
+    auto xdynamic_implementation<T, B>::do_iselect(iselector_sequence_type&& sel) const -> const_reference
     {
         return this->get_variable().template iselect<static_dimension>(std::move(sel));
     }
