@@ -20,16 +20,20 @@ namespace xf
         m["ordinate"] = make_test_iaxis();
         variable_type::coordinate_map m2(m);
 
-        dimension_type dim_map = { "abscissa", "ordinate" };
-        dimension_type dim_map2(dim_map);
+        dimension_type::label_list dim_map = { "abscissa", "ordinate" };
+        dimension_type::label_list dim_map2(dim_map);
 
-        auto v1 = variable<double>(m, dim_map);
-        auto v2 = variable<double>(std::move(m2), std::move(dim_map2));
+        auto v1 = variable_type(m, dim_map);
+        auto v2 = variable_type(std::move(m2), std::move(dim_map2));
+        auto v3 = variable_type({ {"abscissa", make_test_saxis()}, {"ordinate", make_test_iaxis()} });
 
         using shape_type = std::decay_t<decltype(v1.data().shape())>;
         shape_type shape = { 3, 3 };
         EXPECT_EQ(v1.data().shape(), shape);
         EXPECT_EQ(v2.data().shape(), shape);
+        EXPECT_EQ(v3.data().shape(), shape);
+        EXPECT_EQ(v3.dimension_labels()[0], "abscissa");
+        EXPECT_EQ(v3.dimension_labels()[1], "ordinate");
     }
 
     TEST(xvariable, constructor)
@@ -62,9 +66,6 @@ namespace xf
 
         auto v7 = variable_type(std::move(m2), std::move(dim_map2));
         EXPECT_EQ(v7.data().shape(), data_type::shape_type({ 3, 3 }));
-
-        auto v8 = variable_type({ { "abscissa", make_test_saxis() },{ "ordinate", make_test_iaxis() } });
-        EXPECT_EQ(v8.data().shape(), data_type::shape_type({ 3, 3 }));
     }
 
     TEST(xvariable, size)
@@ -282,6 +283,8 @@ namespace xf
         dimension_type dim({ "abscissa", "ordinate" });
         coordinate_type coord1 = make_test_coordinate();
         data_type data1 = make_test_data();
+        using shape_type = std::decay_t<decltype(data1.shape())>;
+        shape_type shape = { 3, 3 };
 
         auto var1 = variable(data1, coord1, dim);
         using var1_type = decltype(var1);
@@ -290,6 +293,7 @@ namespace xf
         EXPECT_TRUE(coord1_res);
         EXPECT_TRUE(data1_res);
         EXPECT_EQ(var1(0, 0), 1.0);
+        EXPECT_EQ(var1.shape(), shape);
 
         const coordinate_type coord2 = make_test_coordinate();
         const data_type data2 = make_test_data();
@@ -300,6 +304,7 @@ namespace xf
         EXPECT_TRUE(coord2_res);
         EXPECT_TRUE(data2_res);
         EXPECT_EQ(var2(0, 0), 1.0);
+        EXPECT_EQ(var2.shape(), shape);
 
         auto var3 = variable(make_test_data(), make_test_coordinate(), dim);
         using var3_type = decltype(var3);
@@ -308,14 +313,25 @@ namespace xf
         EXPECT_TRUE(coord3_res);
         EXPECT_TRUE(data3_res);
         EXPECT_EQ(var3(0, 0), 1.0);
+        EXPECT_EQ(var3.shape(), shape);
+
+        auto var4 = variable<double>(make_test_coordinate(), dim);
+        using var4_type = decltype(var4);
+        bool coord4_res = std::is_same<var4_type::coordinate_closure_type, var4_type::coordinate_type>::value;
+        bool data4_res = std::is_same<var4_type::data_closure_type, var4_type::data_type>::value;
+        EXPECT_TRUE(coord4_res);
+        EXPECT_TRUE(data4_res);
+        EXPECT_EQ(var4.shape(), shape);
     }
 
     TEST(xvariable, map_generator)
     {
-        dimension_type dim({ "abscissa", "ordinate" });
+        dimension_type::label_list dim({ "abscissa", "ordinate" });
         coordinate_type coord1 = make_test_coordinate();
         data_type data1 = make_test_data();
         coordinate_type::map_type coord_map = coord1.data();
+        using shape_type = std::decay_t<decltype(data1.shape())>;
+        shape_type shape = { 3, 3 };
 
         auto var1 = variable(data1, coord_map, dim);
         using var1_type = decltype(var1);
@@ -324,6 +340,15 @@ namespace xf
         EXPECT_TRUE(coord1_res);
         EXPECT_TRUE(data1_res);
         EXPECT_EQ(var1(0, 0), 1.0);
+        EXPECT_EQ(var1.shape(), shape);
+
+        auto var2 = variable<double>(coord_map, dim);
+        using var2_type = decltype(var2);
+        bool coord2_res = std::is_same<var2_type::coordinate_closure_type, var2_type::coordinate_type>::value;
+        bool data2_res = std::is_same<var2_type::data_closure_type, var2_type::data_type>::value;
+        EXPECT_TRUE(coord2_res);
+        EXPECT_TRUE(data2_res);
+        EXPECT_EQ(var2.shape(), shape);
     }
 
     TEST(xvariable, print)

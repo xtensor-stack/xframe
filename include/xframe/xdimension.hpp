@@ -114,10 +114,26 @@ namespace xf
         struct is_dimension_impl<xdimension<L, T>> : std::true_type
         {
         };
+
+        template <class L>
+        struct is_dimension_list_impl : std::false_type
+        {
+        };
+
+        template <class L>
+        struct is_dimension_list_impl<std::vector<L>>
+            : std::true_type
+        {
+        };
     }
 
     template <class T>
     struct is_dimension : detail::is_dimension_impl<std::decay_t<T>>
+    {
+    };
+
+    template <class T>
+    struct is_dimension_list : detail::is_dimension_list_impl<std::decay_t<T>>
     {
     };
 

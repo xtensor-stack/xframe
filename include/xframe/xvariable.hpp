@@ -127,19 +127,55 @@ namespace xf
 
         template <class T>
         using variable_data_type_t = typename variable_data_type<T>::type;
+
+        template <class D, class C, class DM>
+        struct xvariable_type1 : std::enable_if<is_coordinate_system<C, DM>::value,
+            xvariable<xtl::closure_type_t<C>, xtl::closure_type_t<D>>>
+        {
+        };
+
+        template <class D, class C, class DM>
+        using xvariable_type1_t = typename xvariable_type1<D, C, DM>::type;
+
+        template <class D, class C, class L>
+        struct xvariable_type2 : std::enable_if<is_coordinate_map<C>::value && is_dimension_list<L>::value,
+            xvariable<get_coordinate_type_t<C>, xtl::closure_type_t<D>>>
+        {
+        };
+
+        template <class D, class C, class L>
+        using xvariable_type2_t = typename xvariable_type2<D, C, L>::type;
+
+        template <class T, class C, class DM>
+        struct xvariable_type3 : std::enable_if<is_coordinate_system<C, DM>::value,
+            xvariable<xtl::closure_type_t<C>, variable_data_type_t<T>>>
+        {
+        };
+
+        template <class T, class C, class DM>
+        using xvariable_type3_t = typename xvariable_type3<T, C, DM>::type;
+
+        template <class T, class C, class L>
+        struct xvariable_type4 : std::enable_if<is_coordinate_map<C>::value && is_dimension_list<L>::value,
+            xvariable<get_coordinate_type_t<C>, variable_data_type_t<T>>>
+        {
+        };
+
+        template <class T, class C, class L>
+        using xvariable_type4_t = typename xvariable_type4<T, C, L>::type;
     }
 
-    template <class D, class C, class DM, class = enable_xvariable_t<C, DM>>
-    auto variable(D&& data, C&& coord, DM&& dims) -> xvariable<xtl::closure_type_t<C>, xtl::closure_type_t<D>>;
+    template <class D, class C, class DM>
+    detail::xvariable_type1_t<D, C, DM> variable(D&& data, C&& coord, DM&& dims);
 
-    template <class D, class C, class DM, class = enable_coordinate_map_t<C>>
-    auto variable(D&& data, C&& coord, DM&& dims) -> xvariable<get_coordinate_type_t<C>, xtl::closure_type_t<D>>;
+    template <class D, class C, class L>
+    detail::xvariable_type2_t<D, C, L> variable(D&& data, C&& coord_map, L&& dim_list);
 
-    template <class T, class C, class DM, class = enable_xvariable_t<C, DM>>
-    auto variable(C&& coord, DM&& dims) -> xvariable<xtl::closure_type_t<C>, detail::variable_data_type_t<T>>;
+    template <class T, class C, class DM>
+    detail::xvariable_type3_t<T, C, DM> variable(C&& coord, DM&& dims);
 
-    template <class T, class C, class DM, class = enable_coordinate_map_t<C>>
-    auto variable(C&& coord, DM&& dims) -> xvariable<get_coordinate_type_t<C>, detail::variable_data_type_t<T>>;
+    template <class T, class C, class L>
+    detail::xvariable_type4_t<T, C, L> variable(C&& coord_map, L&& dim_list);
 
     /****************************
      * xvariable implementation *
@@ -237,32 +273,41 @@ namespace xf
     * generator functions implementation *
     **************************************/
 
-    template <class D, class C, class DM, class>
-    inline auto variable(D&& data, C&& coord, DM&& dims) -> xvariable<xtl::closure_type_t<C>, xtl::closure_type_t<D>>
+    template <class D, class C, class DM>
+    inline detail::xvariable_type1_t<D, C, DM> variable(D&& data, C&& coord, DM&& dims)
     {
-        using type = xvariable<xtl::closure_type_t<C>, xtl::closure_type_t<D>>;
+        using type = detail::xvariable_type1_t<D, C, DM>;
         return type(std::forward<D>(data), std::forward<C>(coord), std::forward<DM>(dims));
     }
 
-    template <class D, class C, class DM, class>
-    inline auto variable(D&& data, C&& coord, DM&& dims) -> xvariable<get_coordinate_type_t<C>, xtl::closure_type_t<D>>
+    template <class D, class C, class L>
+    inline detail::xvariable_type2_t<D, C, L> variable(D&& data, C&& coord_map, L&& dim_list)
     {
-        using type = xvariable<decltype(coordinate(std::forward<C>(coord))), xtl::closure_type_t<D>>;
-        return type(std::forward<D>(data), coordinate(std::forward<C>(coord)), std::forward<DM>(dims));
+        using type = detail::xvariable_type2_t<D, C, L>;
+        using axis_type = typename std::decay_t<C>::mapped_type;
+        using mapped_type = typename axis_type::mapped_type;
+        using dimension_type = xdimension<typename std::decay_t<L>::value_type, mapped_type>;
+        return type(std::forward<D>(data),
+                    coordinate(std::forward<C>(coord_map)),
+                    dimension_type(std::forward<L>(dim_list)));
     }
 
-    template <class T, class C, class DM, class>
-    auto variable(C&& coord, DM&& dims) -> xvariable<xtl::closure_type_t<C>, detail::variable_data_type_t<T>>
+    template <class T, class C, class DM>
+    inline detail::xvariable_type3_t<T, C, DM> variable(C&& coord, DM&& dims)
     {
-        using type = xvariable<xtl::closure_type_t<C>, detail::variable_data_type_t<T>>;
+        using type = detail::xvariable_type3_t<T, C, DM>;
         return type(std::forward<C>(coord), std::forward<DM>(dims));
     }
 
-    template <class T, class C, class DM, class>
-    auto variable(C&& coord, DM&& dims) -> xvariable<get_coordinate_type_t<C>, detail::variable_data_type_t<T>>
+    template <class T, class C, class L>
+    inline detail::xvariable_type4_t<T, C, L> variable(C&& coord_map, L&& dim_list)
     {
-        using type = xvariable<get_coordinate_type_t<C>, detail::variable_data_type_t<T>>;
-        return type(coordinate(std::forward<C>(coord)), std::forward<DM>(dims));
+        using type = detail::xvariable_type4_t<T, C, L>;
+        using axis_type = typename std::decay_t<C>::mapped_type;
+        using mapped_type = typename axis_type::mapped_type;
+        using dimension_type = xdimension<typename std::decay_t<L>::value_type, mapped_type>;
+        return type(coordinate(std::forward<C>(coord_map)),
+                    dimension_type(std::forward<L>(dim_list)));
     }
 
     template <class CCT, class ECT>
