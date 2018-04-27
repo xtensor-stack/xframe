@@ -49,6 +49,7 @@ namespace xf
         using coordinate_type = typename wrapper_type::coordinate_type;
         using dimension_type = typename wrapper_type::dimension_type;
         using dimension_list = typename wrapper_type::dimension_list;
+        using shape_type = typename wrapper_type::shape_type;
 
         template <class V, class = std::enable_if_t<!std::is_same<std::decay_t<V>, self_type>::value, void>>
         explicit xdynamic_variable(V&&);
@@ -71,6 +72,8 @@ namespace xf
         xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
 
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
+
+        const shape_type& shape() const noexcept;
 
         template <class... Args>
         reference operator()(Args... args);
@@ -238,6 +241,12 @@ namespace xf
     inline bool xdynamic_variable<C, DM, T>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
     {
         return p_wrapper->broadcast_dimensions(dims, trivial_bc);
+    }
+
+    template <class C, class DM, class T>
+    inline auto xdynamic_variable<C, DM, T>::shape() const noexcept -> const shape_type&
+    {
+        return p_wrapper->shape();
     }
 
     template <class C, class DM, class T>

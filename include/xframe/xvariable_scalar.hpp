@@ -28,6 +28,8 @@ namespace xf
         using size_type = typename data_type::size_type;
         using difference_type = typename data_type::difference_type;
 
+        using shape_type = std::array<size_type, 0>;
+
         using coordinate_type = xfull_coordinate;
         using dimension_type = xfull_coordinate;
 
@@ -39,6 +41,7 @@ namespace xf
         size_type dimension() const noexcept;
         coordinate_type coordinates() const noexcept;
         dimension_type dimension_mapping() const noexcept;
+        const shape_type& shape() const noexcept;
 
         template <class... Args>
         const_reference operator()(Args... args) const noexcept;
@@ -101,6 +104,13 @@ namespace xf
     inline auto xvariable_scalar<CT>::dimension_mapping() const noexcept -> dimension_type
     {
         return xfull_coordinate();
+    }
+
+    template <class CT>
+    inline auto xvariable_scalar<CT>::shape() const noexcept -> const shape_type&
+    {
+        static shape_type zero_shape;
+        return zero_shape;
     }
 
     template <class CT>

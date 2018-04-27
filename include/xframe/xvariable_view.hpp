@@ -83,6 +83,7 @@ namespace xf
         using coordinate_type = typename coordinate_base::coordinate_type;
         using dimension_type = typename coordinate_base::dimension_type;
         using dimension_list = typename dimension_type::label_list;
+        using shape_type = typename data_type::shape_type;
         using squeeze_map = std::map<typename dimension_type::mapped_type, typename coordinate_type::index_type>;
         using temporary_type = typename inner_types::temporary_type;
 
@@ -123,6 +124,8 @@ namespace xf
         using coordinate_base::dimension_mapping;
         using coordinate_base::broadcast_coordinates;
         using coordinate_base::broadcast_dimensions;
+
+        const shape_type& shape() const noexcept;
 
         data_type& data() noexcept;
         const data_type& data() const noexcept;
@@ -301,6 +304,12 @@ namespace xf
     {
         using root_semantic = typename semantic_base::base_type;
         return root_semantic::operator=(e);
+    }
+
+    template <class CT>
+    inline auto xvariable_view<CT>::shape() const noexcept -> const shape_type&
+    {
+        return data().shape();
     }
 
     template <class CT>

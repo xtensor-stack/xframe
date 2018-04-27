@@ -89,6 +89,16 @@ namespace xf
         EXPECT_EQ(c, dv.dimension_mapping());
     }
 
+    TEST(xdynamic_variable, shape)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic<double>(v);
+
+        auto shape = dv.shape();
+        std::decay_t<decltype(dv.shape())> expected = { 3, 3 };
+        EXPECT_EQ(shape, expected);
+    }
+
     TEST(xdynamic_variable, access)
     {
         auto v = make_test_variable();

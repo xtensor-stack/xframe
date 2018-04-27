@@ -39,6 +39,8 @@ namespace xf
         using size_type = xt::detail::common_size_type_t<std::decay_t<CT>...>;
         using difference_type = xt::detail::common_difference_type_t<std::decay_t<CT>...>;     
 
+        using shape_type = typename data_type::shape_type;
+
         using coordinate_type = xcommon_coordinate_type_t<CT...>;
         using dimension_type = xcommon_dimension_type_t<CT...>;
         using dimension_list = typename dimension_type::label_list;
@@ -72,6 +74,7 @@ namespace xf
         xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
+        shape_type shape() const noexcept;
         data_type data() const noexcept;
 
         template <class... Args>
@@ -225,6 +228,12 @@ namespace xf
             ret = merge_dimension_mapping(std::make_index_sequence<sizeof...(CT)>(), dims);
         }
         return ret;
+    }
+
+    template <class F, class R, class... CT>
+    inline auto xvariable_function<F, R, CT...>::shape() const noexcept -> shape_type
+    {
+        return data().shape();
     }
 
     template <class F, class R, class... CT>

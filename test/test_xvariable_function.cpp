@@ -90,6 +90,16 @@ namespace xf
         EXPECT_EQ(d4, f.m_b.dimension_mapping());
     }
 
+    TEST(xvariable_function, shape)
+    {
+        xfunction_features f;
+        using shape_type = std::decay_t<decltype(f.m_a.shape())>;
+        auto s1 = (f.m_a + f.m_a).shape();
+        EXPECT_EQ(s1, shape_type({ 3, 3 }));
+        auto s2 = (f.m_a + f.m_b).shape();
+        EXPECT_EQ(s2, shape_type({ 3, 3, 3 }));
+    }
+
     TEST(xvariable_function, access)
     {
         xfunction_features f;
