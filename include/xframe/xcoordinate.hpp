@@ -154,7 +154,10 @@ namespace xf
         };
 
         template <class T>
-        struct get_coordinate_type_impl;
+        struct get_coordinate_type_impl
+        {
+            using type = T;
+        };
 
         template <class K, class L, class S, class MT>
         struct get_coordinate_type_impl<std::map<K, xaxis_variant<L, S, MT>>>

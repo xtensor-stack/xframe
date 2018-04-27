@@ -18,11 +18,15 @@ namespace xf
 {
     using xt::noalias;
 
+    template <class C, class DM>
+    struct is_coordinate_system
+    {
+        static constexpr bool value = is_coordinate<C>::value && is_dimension<DM>::value;
+    };
+
     template <class C , class DM>
     struct enable_xvariable
-        : std::enable_if<is_coordinate<C>::value && is_dimension<DM>::value,
-                         xt::void_t<>
-          >
+        : std::enable_if<is_coordinate_system<C, DM>::value, xt::void_t<>>
     {
     };
 
