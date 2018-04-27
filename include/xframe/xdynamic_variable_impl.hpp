@@ -164,6 +164,8 @@ namespace xf
         using size_type = typename coordinate_type::size_type;
         using difference_type = typename coordinate_type::difference_type;
 
+        using shape_type = xt::svector<size_type>;
+
         virtual ~xvariable_wrapper() {}
 
         xvariable_wrapper(self_type&&) = delete;
@@ -181,6 +183,8 @@ namespace xf
         virtual xtrivial_broadcast broadcast_coordinates(coordinate_type& coords, join::outer) const = 0;
         virtual xtrivial_broadcast broadcast_coordinates(coordinate_type& coords, join::inner) const = 0;
         virtual bool broadcast_dimensions(dimension_type& dims, bool trivial_bc) const = 0;
+
+        virtual const shape_type& shape() const noexcept = 0;
 
         template <std::size_t N>
         reference element(const index_type<N>& index);
@@ -254,6 +258,7 @@ namespace xf
         using coordinate_type = typename base_type::coordinate_type;
         using dimension_type = typename base_type::dimension_type;
         using dimension_list = typename base_type::dimension_list;
+        using shape_type = typename base_type::shape_type;
 
         virtual ~xvariable_wrapper_impl() {}
 
@@ -270,6 +275,8 @@ namespace xf
         xtrivial_broadcast broadcast_coordinates(coordinate_type& coords, join::outer) const override;
         xtrivial_broadcast broadcast_coordinates(coordinate_type& coords, join::inner) const override;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc) const override;
+
+        const shape_type& shape() const noexcept override;
 
         std::ostream& print(std::ostream& out) const override;
 
@@ -591,6 +598,12 @@ namespace xf
     bool xvariable_wrapper_impl<V, T>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
     {
         return m_variable.broadcast_dimensions(dims, trivial_bc);
+    }
+
+    template <class V, class T>
+    auto xvariable_wrapper_impl<V, T>::shape() const noexcept -> const shape_type&
+    {
+        return xtl::forward_sequence<shape_type>(m_variable.shape());
     }
 
     template <class V, class T>

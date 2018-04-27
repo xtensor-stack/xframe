@@ -97,7 +97,7 @@ namespace xt
                 selector[i] = std::make_pair(dim_label[i], coords[dim_label[i]].label(index[i]));
             }
             e1.derived_cast().select(selector) = e2.derived_cast().select(selector);
-            end = detail::increment_index(e1.derived_cast().data().shape(), index);
+            end = detail::increment_index(e1.derived_cast().shape(), index);
         }
         while(!end);
     }

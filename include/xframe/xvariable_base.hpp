@@ -59,6 +59,8 @@ namespace xf
         using size_type = typename data_type::size_type;
         using difference_type = typename data_type::difference_type;
 
+        using shape_type = typename data_type::shape_type;
+
         using coordinate_type = typename coordinate_base::coordinate_type;
         using dimension_type = typename coordinate_base::dimension_type;
         using dimension_list = typename dimension_type::label_list;
@@ -93,6 +95,8 @@ namespace xf
         using coordinate_base::dimension_mapping;
         using coordinate_base::broadcast_coordinates;
         using coordinate_base::broadcast_dimensions;
+
+        const shape_type& shape() const;
 
         void resize(const coordinate_type& coords, const dimension_type& dims);
         void resize(coordinate_type&& coords, dimension_type&& dims);
@@ -252,6 +256,12 @@ namespace xf
         return detail::static_missing<const_reference>();
     }
     
+    template <class D>
+    inline auto xvariable_base<D>::shape() const -> const shape_type&
+    {
+        return data().shape();
+    }
+
     template <class D>
     inline void xvariable_base<D>::resize(const coordinate_type& coords, const dimension_type& dims)
     {

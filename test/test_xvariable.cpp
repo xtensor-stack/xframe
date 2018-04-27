@@ -93,6 +93,14 @@ namespace xf
         EXPECT_EQ(v.dimension_labels(), s.labels());
     }
 
+    TEST(xvariable, shape)
+    {
+        auto v = make_test_variable();
+        auto shape = v.shape();
+        std::decay_t<decltype(v.shape())> expected = { 3, 3 };
+        EXPECT_EQ(shape, expected);
+    }
+
     TEST(xvariable, resize)
     {
         auto v1 = make_test_variable();
