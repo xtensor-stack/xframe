@@ -342,4 +342,24 @@ namespace xf
         auto tle00 = dv.locate_element({ "a", 1 });
         EXPECT_EQ(tle00, v(0, 0));
     }
+
+    TEST(xdynamic_variable, print)
+    {
+        auto v = make_test_variable();
+        auto dv = make_dynamic<double>(v);
+
+        std::string expected =
+R"variable({{  1,   2, N/A},
+ {N/A,   5,   6},
+ {  7,   8,   9}}
+Coordinates:
+abscissa: (a, c, d, )
+ordinate: (1, 2, 4, )
+)variable";
+
+        std::ostringstream oss;
+        oss << dv;
+        std::string res = oss.str();
+        EXPECT_EQ(res, expected);
+    }
 }

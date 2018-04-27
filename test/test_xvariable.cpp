@@ -317,4 +317,22 @@ namespace xf
         EXPECT_TRUE(data1_res);
         EXPECT_EQ(var1(0, 0), 1.0);
     }
+
+    TEST(xvariable, print)
+    {
+        auto var = make_test_variable();
+        std::string expected =
+R"variable({{  1,   2, N/A},
+ {N/A,   5,   6},
+ {  7,   8,   9}}
+Coordinates:
+abscissa: (a, c, d, )
+ordinate: (1, 2, 4, )
+)variable";
+
+        std::ostringstream oss;
+        oss << var;
+        std::string res = oss.str();
+        EXPECT_EQ(res, expected);
+    }
 }

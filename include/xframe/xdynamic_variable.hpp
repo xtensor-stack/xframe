@@ -132,6 +132,8 @@ namespace xf
         template <std::size_t N = dynamic()>
         const_reference iselect(iselector_sequence_type<N>&& sel) const;
 
+        std::ostream& print(std::ostream& out) const;
+
     private:
 
         template <class... Args>
@@ -139,6 +141,9 @@ namespace xf
 
         wrapper_type* p_wrapper;
     };
+
+    template <class C, class DM, class T>
+    std::ostream& operator<<(std::ostream& out, const xdynamic_variable<C, DM, T>& v);
 
     template < class T = xtl::any, class V>
     auto make_dynamic(V&& variable);
@@ -378,12 +383,24 @@ namespace xf
     }
 
     template <class C, class DM, class T>
+    inline std::ostream& xdynamic_variable<C, DM, T>::print(std::ostream& out) const
+    {
+        return p_wrapper->print(out);
+    }
+
+    template <class C, class DM, class T>
     template <class... Args>
     inline auto xdynamic_variable<C, DM, T>::make_index(Args... args) -> index_type<>
     {
         using size_type = typename index_type<>::value_type;
         index_type<> res = { static_cast<size_type>(args)... };
         return res;
+    }
+
+    template <class C, class DM, class T>
+    inline std::ostream& operator<<(std::ostream& out, const xdynamic_variable<C, DM, T>& v)
+    {
+        return v.print(out);
     }
 
     template <class T, class V>

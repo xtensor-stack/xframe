@@ -111,6 +111,9 @@ namespace xf
         mutable xtrivial_broadcast m_trivial_broadcast;
     };
 
+    template <class F, class R, class... CT>
+    std::ostream& operator<<(std::ostream& out, const xvariable_function<F, R, CT...>& f);
+
     /*************************************
      * xvariable_function implementation *
      *************************************/
@@ -291,6 +294,12 @@ namespace xf
     bool xvariable_function<F, R, CT...>::merge_dimension_mapping(std::index_sequence<I...>, dimension_type& dims) const
     {
         return xf::broadcast_dimensions(dims, std::get<I>(m_e).dimension_mapping()...);
+    }
+
+    template <class F, class R, class... CT>
+    inline std::ostream& operator<<(std::ostream& out, const xvariable_function<F, R, CT...>& f)
+    {
+        return print_variable_expression(out, f);
     }
 }
 
