@@ -110,6 +110,9 @@ namespace xf
         friend class xvariable_base<xvariable<CCT, ECT>>;
     };
 
+    template <class CCT, class ECT>
+    std::ostream& operator<<(std::ostream& out, const xvariable<CCT, ECT>& v);
+
     /********************************
      * variable generator functions *
      ********************************/
@@ -260,6 +263,12 @@ namespace xf
     {
         using type = xvariable<get_coordinate_type_t<C>, detail::variable_data_type_t<T>>;
         return type(coordinate(std::forward<C>(coord)), std::forward<DM>(dims));
+    }
+
+    template <class CCT, class ECT>
+    inline std::ostream& operator<<(std::ostream& out, const xvariable<CCT, ECT>& v)
+    {
+        return print_variable_expression(out, v);
     }
 }
 

@@ -230,6 +230,8 @@ namespace xf
         template <std::size_t N>
         const_reference iselect(iselector_sequence_type<N>&& sel) const;
 
+        virtual std::ostream& print(std::ostream& out) const = 0;
+
     protected:
 
         xvariable_wrapper() = default;
@@ -268,6 +270,8 @@ namespace xf
         xtrivial_broadcast broadcast_coordinates(coordinate_type& coords, join::outer) const override;
         xtrivial_broadcast broadcast_coordinates(coordinate_type& coords, join::inner) const override;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc) const override;
+
+        std::ostream& print(std::ostream& out) const override;
 
     protected:
 
@@ -587,6 +591,12 @@ namespace xf
     bool xvariable_wrapper_impl<V, T>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
     {
         return m_variable.broadcast_dimensions(dims, trivial_bc);
+    }
+
+    template <class V, class T>
+    std::ostream& xvariable_wrapper_impl<V, T>::print(std::ostream& out) const
+    {
+        return out << m_variable;
     }
 
    /***************************

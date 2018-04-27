@@ -10,7 +10,10 @@
 #define XFRAME_XFRAME_UTILS_HPP
 
 #include <iterator>
+#include <ostream>
 #include <string>
+
+#include "xtensor/xio.hpp"
 
 #include "xframe_config.hpp"
 #include "xframe_trace.hpp"
@@ -138,6 +141,32 @@ namespace xf
     inline bool intersect_to(CO& output, const CI&... input)
     {
         return detail::intersect_to_impl(output, input...);
+    }
+
+    /******************
+     * print function *
+     ******************/
+
+    template <class V>
+    inline std::ostream& print_variable_expression(std::ostream& out, const V& v)
+    {
+        const auto& dims = v.dimension_labels();
+        const auto& coords = v.coordinates();
+
+        out << v.data() << std::endl;
+        out << "Coordinates:" << std::endl;
+
+        std::size_t max_length = std::accumulate(dims.cbegin(), dims.cend(), std::size_t(0),
+            [](std::size_t res, const auto& d) { return std::max(res, d.size()); });
+
+        for (const auto& d : dims)
+        {
+            std::size_t nb_spaces = max_length - d.size();
+            std::string spaces(nb_spaces, ' ');
+            out << d << spaces << ": " << coords[d] << std::endl;
+        }
+
+        return out;
     }
 }
 
