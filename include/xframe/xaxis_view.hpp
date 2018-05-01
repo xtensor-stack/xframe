@@ -30,7 +30,7 @@ namespace xf
 
         using self_type = xaxis_view<L, T, MT>;
         using axis_type = xaxis_variant<L, T, MT>;
-        using slice_type = xaxis_islice<T>;
+        using slice_type = xt::xslice_variant<T>;
 
         using key_type = typename axis_type::key_type;
         using mapped_type = typename axis_type::mapped_type;
