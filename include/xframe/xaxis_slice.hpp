@@ -17,56 +17,6 @@
 namespace xf
 {
 
-    /*************************
-     * xaxis_extended_islice *
-     *************************/
-
-    template <class T>
-    class xaxis_extended_islice;
-
-    namespace detail
-    {
-        template <class T>
-        struct is_xaxis_extended_islice : std::false_type
-        {
-        };
-
-        template <class T>
-        struct is_xaxis_extended_islice<xaxis_extended_islice<T>> : std::true_type
-        {
-        };
-
-        template <class S>
-        using disable_xaxis_extended_islice_t = std::enable_if_t<!is_xaxis_extended_islice<std::decay_t<S>>::value, void>;
-    }
-
-    template <class T>
-    class xaxis_extended_islice
-    {
-    public:
-
-        using self_type = xaxis_extended_islice<T>;
-        using all_type = xt::xall_tag;
-        using squeeze_type = T;
-        using slice_type = xt::xslice_variant<T>;
-        using storage_type = xtl::variant<all_type, squeeze_type, slice_type>;
-
-        xaxis_extended_islice() = default;
-        template <class S, typename = detail::disable_xaxis_extended_islice_t<S>>
-        xaxis_extended_islice(S&& slice);
-
-        template <class S, typename = std::enable_if_t<std::is_convertible<S, T>::value, void>>
-        operator xaxis_extended_islice<S>() const noexcept;
-
-        const all_type* get_all() const noexcept;
-        const squeeze_type* get_squeeze() const noexcept;
-        const slice_type* get_slice() const noexcept;
-
-    private:
-
-        storage_type m_data;
-    };
-
     /*******************
      * slice_variant_t *
      *******************/
@@ -185,63 +135,6 @@ namespace xf
 
     template <class S, class L = DEFAULT_LABEL_LIST>
     xaxis_slice<L> range(slice_variant_t<L>&& first, slice_variant_t<L>&& last, S step);
-
-    /****************************************
-     * xaxis_extended_islice implementation *
-     ****************************************/
-
-    namespace detail
-    {
-        template <class S, class T>
-        inline xaxis_extended_islice<S> convert_slice(typename xaxis_extended_islice<T>::all_type)
-        {
-            return xt::xall_tag();
-        }
-
-        template <class S, class T>
-        inline xaxis_extended_islice<S> convert_slice(const typename xaxis_extended_islice<T>::squeeze_type& squeeze)
-        {
-            return static_cast<S>(squeeze);
-        }
-
-        template <class S, class T>
-        inline xaxis_extended_islice<S> convert_slice(const xt::xslice_variant<T>& slice)
-        {
-            return xt::xslice_variant<S>(slice);
-        }
-    }
-
-    template <class T>
-    template <class S, typename>
-    inline xaxis_extended_islice<T>::xaxis_extended_islice(S&& slice)
-        : m_data(std::forward<S>(slice))
-    {
-    }
-
-    template <class T>
-    template <class S, typename>
-    inline xaxis_extended_islice<T>::operator xaxis_extended_islice<S>() const noexcept
-    {
-        return xtl::visit([](const auto& arg) { return detail::convert_slice<S, T>(arg); }, m_data);
-    }
-
-    template <class T>
-    inline auto xaxis_extended_islice<T>::get_all() const noexcept -> const all_type*
-    {
-        return xtl::get_if<all_type>(&m_data);
-    }
-
-    template <class T>
-    inline auto xaxis_extended_islice<T>::get_squeeze() const noexcept -> const squeeze_type*
-    {
-        return xtl::get_if<squeeze_type>(&m_data);
-    }
-
-    template <class T>
-    inline auto xaxis_extended_islice<T>::get_slice() const noexcept -> const slice_type*
-    {
-        return xtl::get_if<slice_type>(&m_data);
-    }
 
     /******************************
      * xaxis_range implementation *

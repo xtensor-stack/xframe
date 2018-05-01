@@ -6,6 +6,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
+// The content of this file should be moved to xtensor / xslice.hpp
+
 #ifndef XFRAME_XTENSOR_XSLICE_HPP
 #define XFRAME_XTENSOR_XSLICE_HPP
 
@@ -17,9 +19,9 @@
 namespace xt
 {
 
-    /********************************************************
-     * xslice_variant should be moved to xtensor/xslice.hpp *
-     ********************************************************/
+    /******************
+     * xslice_variant *
+     ******************/
 
     template <class T>
     class xslice_variant;
@@ -72,9 +74,61 @@ namespace xt
         slice_type m_slice;
     };
 
+    /*******************
+     * xslice_extended *
+     *******************/
+
+    template <class T>
+    class xslice_extended;
+
+    namespace detail
+    {
+        template <class T>
+        struct is_xslice_extended : std::false_type
+        {
+        };
+
+        template <class T>
+        struct is_xslice_extended<xslice_extended<T>> : std::true_type
+        {
+        };
+
+        template <class S>
+        using disable_xslice_extended_t = std::enable_if_t<!is_xslice_extended<std::decay_t<S>>::value, void>;
+    }
+
+    template <class T>
+    class xslice_extended
+    {
+    public:
+
+        using self_type = xslice_extended<T>;
+        using all_type = xall_tag;
+        using squeeze_type = T;
+        using slice_type = xslice_variant<T>;
+        using storage_type = xtl::variant<all_type, squeeze_type, slice_type>;
+
+        xslice_extended() = default;
+        template <class S, typename = detail::disable_xslice_extended_t<S>>
+        xslice_extended(S&& slice);
+
+        template <class S, typename = std::enable_if_t<std::is_convertible<S, T>::value, void>>
+        operator xslice_extended<S>() const noexcept;
+
+        const all_type* get_all() const noexcept;
+        const squeeze_type* get_squeeze() const noexcept;
+        const slice_type* get_slice() const noexcept;
+
+    private:
+
+        storage_type m_data;
+    };
+
     /********************
      * helper functions *
      ********************/
+
+    // TODO: check if these functions are still required
 
     template <class T>
     xslice_variant<T> variant_range(T first, T last);
@@ -170,6 +224,63 @@ namespace xt
     inline bool xslice_variant<T>::operator!=(const self_type& rhs) const noexcept
     {
         return !(*this == rhs);
+    }
+
+    /**********************************
+     * xslice_extended implementation *
+     **********************************/
+
+    namespace detail
+    {
+        template <class S, class T>
+        inline xslice_extended<S> convert_slice(typename xslice_extended<T>::all_type)
+        {
+            return xall_tag();
+        }
+
+        template <class S, class T>
+        inline xslice_extended<S> convert_slice(const typename xslice_extended<T>::squeeze_type& squeeze)
+        {
+            return static_cast<S>(squeeze);
+        }
+
+        template <class S, class T>
+        inline xslice_extended<S> convert_slice(const xt::xslice_variant<T>& slice)
+        {
+            return xslice_variant<S>(slice);
+        }
+    }
+
+    template <class T>
+    template <class S, typename>
+    inline xslice_extended<T>::xslice_extended(S&& slice)
+        : m_data(std::forward<S>(slice))
+    {
+    }
+
+    template <class T>
+    template <class S, typename>
+    inline xslice_extended<T>::operator xslice_extended<S>() const noexcept
+    {
+        return xtl::visit([](const auto& arg) { return detail::convert_slice<S, T>(arg); }, m_data);
+    }
+
+    template <class T>
+    inline auto xslice_extended<T>::get_all() const noexcept -> const all_type*
+    {
+        return xtl::get_if<all_type>(&m_data);
+    }
+
+    template <class T>
+    inline auto xslice_extended<T>::get_squeeze() const noexcept -> const squeeze_type*
+    {
+        return xtl::get_if<squeeze_type>(&m_data);
+    }
+
+        template <class T>
+    inline auto xslice_extended<T>::get_slice() const noexcept -> const slice_type*
+    {
+        return xtl::get_if<slice_type>(&m_data);
     }
 
     /***********************************

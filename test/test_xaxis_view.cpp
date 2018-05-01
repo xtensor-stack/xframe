@@ -153,8 +153,8 @@ namespace xf
         EXPECT_EQ(ss3.size(), std::size_t(is3.size()));
         EXPECT_EQ(ss3.step_size(0), std::size_t(is3.step_size(0)));
 
-        using sextended_type = xaxis_extended_islice<std::size_t>;
-        using iextended_type = xaxis_extended_islice<int>;
+        using sextended_type = xt::xslice_extended<std::size_t>;
+        using iextended_type = xt::xslice_extended<int>;
 
         iextended_type is4 = is3;
         sextended_type ss4 = is4;
