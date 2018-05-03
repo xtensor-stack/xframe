@@ -11,20 +11,57 @@
 
 #include <functional>
 #include "xtl/xclosure.hpp"
+#include "xtl/xmeta_utils.hpp"
 #include "xtl/xvariant.hpp"
 #include "xaxis.hpp"
+#include "xaxis_default.hpp"
 
 namespace xf
 {
 
     namespace detail
     {
+        template <class V, class S, class... L>
+        struct add_default_axis;
+
+        template <class... A, class S>
+        struct add_default_axis<xtl::variant<A...>, S>
+        {
+            using type = xtl::variant<A...>;
+        };
+
+        template <class... A, class S, class L1, class... L>
+        struct add_default_axis<xtl::variant<A...>, S, L1, L...>
+        {
+            using variant_type = xtl::variant<A...>;
+            using type = typename xtl::mpl::if_t<std::is_integral<L1>,
+                add_default_axis<xtl::variant<A..., xaxis_default<L1, S>>, S, L...>,
+                add_default_axis<xtl::variant<A...>, S, L...>>::type;                              
+        };
+
+        template <class V, class S, class... L>
+        using add_default_axis_t = typename add_default_axis<V, S, L...>::type;
+
+        template <class V>
+        struct get_axis_variant_iterator;
+
+        template <class... A>
+        struct get_axis_variant_iterator<xtl::variant<A...>>
+        {
+            using type = xtl::variant<typename A::const_iterator...>;
+        };
+
+        template <class V>
+        using get_axis_variant_iterator_t = typename get_axis_variant_iterator<V>::type;
+
         template <class S, class MT, class TL>
         struct xaxis_variant_traits;
 
         template <class S, class MT, template <class...> class TL, class... L>
         struct xaxis_variant_traits<S, MT, TL<L...>>
         {
+            //using tmp_storage_type = xtl::variant<xaxis<L, S, MT>...>;
+            //using storage_type = add_default_axis_t<tmp_storage_type, S, L...>;
             using storage_type = xtl::variant<xaxis<L, S, MT>...>;
             // Convenient for defining other types, but do not use it
             using label_list = std::vector<xtl::variant<L...>>;
@@ -38,7 +75,7 @@ namespace xf
             using const_pointer = xtl::xclosure_pointer<const_reference>;
             using size_type = typename label_list::size_type;
             using difference_type = typename label_list::difference_type;
-            using subiterator = xtl::variant<typename xaxis<L, S, MT>::const_iterator...>;
+            using subiterator = get_axis_variant_iterator_t<storage_type>;
         };
     }
 
