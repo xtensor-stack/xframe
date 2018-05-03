@@ -52,7 +52,7 @@ namespace xf
         using reverse_iterator = typename base_type::reverse_iterator;
         using const_reverse_iterator = typename base_type::const_reverse_iterator;
 
-        static_assert(std::is_integral<T>::value, "key_type L must be an integral type");
+        static_assert(std::is_integral<key_type>::value, "key_type L must be an integral type");
 
         explicit xaxis_default(const size_type& size = 0);
 
