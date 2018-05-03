@@ -29,7 +29,7 @@ namespace xf
      * xaxis_default *
      *****************/
 
-    template <class L, class T>
+    template <class L, class T = std::size_t>
     class xaxis_default : public xaxis_base<xaxis_default<L, T>>
     {
     public:
