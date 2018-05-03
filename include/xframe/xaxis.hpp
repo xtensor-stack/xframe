@@ -67,7 +67,7 @@ namespace xf
         using base_type = xaxis_base<xaxis>;
         using self_type = xaxis<L, T, MT>;
         using key_type = typename base_type::key_type;
-        using label_list = std::vector<key_type>;
+        using label_list = typename base_type::label_list;
         using mapped_type = typename base_type::mapped_type;
         using map_type = map_container_t<key_type, mapped_type, MT>;
         using value_type = typename map_type::value_type;
@@ -91,9 +91,6 @@ namespace xf
         xaxis(InputIt first, InputIt last);
 
         bool is_sorted() const noexcept;
-
-        bool empty() const noexcept;
-        size_type size() const noexcept;
 
         bool contains(const key_type& key) const;
         const mapped_type& operator[](const key_type& key) const;
@@ -291,18 +288,6 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline bool xaxis<L, T, MT>::empty() const noexcept
-    {
-        return this->labels().empty();
-    }
-
-    template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::size() const noexcept -> size_type
-    {
-        return this->labels().size();
-    }
-
-    template <class L, class T, class MT>
     inline bool xaxis<L, T, MT>::contains(const key_type& key) const
     {
         return m_index.count(key) != typename map_type::size_type(0);
@@ -351,7 +336,7 @@ namespace xf
     template <class... Args>
     inline bool xaxis<L, T, MT>::merge(const Args&... axes)
     {
-        return empty() ? merge_empty(axes...) : merge_impl(axes...);
+        return this->empty() ? merge_empty(axes...) : merge_impl(axes...);
     }
 
     template <class L, class T, class MT>

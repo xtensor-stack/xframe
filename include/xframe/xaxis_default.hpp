@@ -38,12 +38,16 @@ namespace xf
         using self_type = xaxis_default<L, T>;
         using axis_type = xaxis<L, T>;
         using key_type = typename base_type::key_type;
-        using label_list = std::vector<key_type>;
+        using label_list = typename base_type::label_list;
         using mapped_type = typename base_type::mapped_type;
+        using value_type = std::pair<key_type, mapped_type>;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
         using size_type = typename base_type::size_type;
         using difference_type = typename base_type::difference_type;
         using iterator = typename base_type::iterator;
-        using iterator_value_type = std::pair<key_type, mapped_type>;
         using const_iterator = typename base_type::const_iterator;
         using reverse_iterator = typename base_type::reverse_iterator;
         using const_reverse_iterator = typename base_type::const_reverse_iterator;
@@ -53,9 +57,6 @@ namespace xf
         explicit xaxis_default(const size_type& size = 0);
 
         bool is_sorted() const noexcept;
-
-        bool empty() const noexcept;
-        const size_type size() const noexcept;
 
         bool contains(const key_type& key) const;
         mapped_type operator[](const key_type& key) const;
@@ -73,11 +74,7 @@ namespace xf
 
     protected:
 
-        void populate_labels();
-
-    private:
-
-        const size_type m_size;
+        void populate_labels(const size_type& size = 0);
     };
 
     /********************
@@ -98,10 +95,10 @@ namespace xf
 
     template <class L, class T>
     class xaxis_default_iterator : public xtl::xrandom_access_iterator_base<xaxis_default_iterator<L, T>,
-                                                                   typename xaxis_default<L, T>::iterator_value_type,
+                                                                   typename xaxis_default<L, T>::value_type,
                                                                    typename xaxis_default<L, T>::difference_type,
-                                                                   const typename xaxis_default<L, T>::iterator_value_type*,
-                                                                   const typename xaxis_default<L, T>::iterator_value_type&>
+                                                                   typename xaxis_default<L, T>::const_pointer,
+                                                                   typename xaxis_default<L, T>::const_reference>
     {
 
     public:
@@ -111,9 +108,9 @@ namespace xf
         using label_list = typename container_type::label_list;
         using key_type = typename container_type::key_type;
         using mapped_type = typename container_type::mapped_type;
-        using value_type = typename container_type::iterator_value_type;
-        using reference = const value_type&;
-        using pointer = const value_type*;
+        using value_type = typename container_type::value_type;
+        using reference = typename container_type::const_reference;
+        using pointer = typename container_type::const_pointer;
         using difference_type = typename label_list::difference_type;
         using iterator_category = std::random_access_iterator_tag;
 
@@ -154,9 +151,9 @@ namespace xf
 
     template <class L, class T>
     inline xaxis_default<L, T>::xaxis_default(const size_type& size)
-        : base_type(), m_size(size)
+        : base_type()
     {
-        populate_labels();
+        populate_labels(size);
     }
 
     template <class L, class T>
@@ -166,21 +163,9 @@ namespace xf
     }
 
     template <class L, class T>
-    inline bool xaxis_default<L, T>::empty() const noexcept
-    {
-        return m_size == 0;
-    }
-
-    template <class L, class T>
-    inline auto xaxis_default<L, T>::size() const noexcept -> const size_type
-    {
-        return m_size;
-    }
-
-    template <class L, class T>
     inline bool xaxis_default<L, T>::contains(const key_type& key) const
     {
-        return key_type(0) <= key && key < key_type(m_size);
+        return key_type(0) <= key && key < key_type(this->size());
     }
 
     template <class L, class T>
@@ -218,14 +203,14 @@ namespace xf
     template <class L, class T>
     inline auto xaxis_default<L, T>::cend() const noexcept -> const_iterator
     {
-        return const_iterator(mapped_type(m_size));
+        return const_iterator(mapped_type(this->size()));
     }
 
     template <class L, class T>
-    inline void xaxis_default<L, T>::populate_labels()
+    inline void xaxis_default<L, T>::populate_labels(const size_type& size)
     {
         auto& labels = this->mutable_labels();
-        for(size_type i = 0; i < m_size; ++i)
+        for(size_type i = 0; i < size; ++i)
         {
             labels.push_back(key_type(i));
         }

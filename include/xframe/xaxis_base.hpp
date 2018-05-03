@@ -50,6 +50,9 @@ namespace xf
 
         const label_list& labels() const noexcept;
 
+        bool empty() const noexcept;
+        size_type size() const noexcept;
+
         const_iterator begin() const noexcept;
         const_iterator end() const noexcept;
 
@@ -182,6 +185,18 @@ namespace xf
     inline auto xaxis_base<D>::labels() const noexcept -> const label_list&
     {
         return m_labels;
+    }
+
+    template <class D>
+    inline bool xaxis_base<D>::empty() const noexcept
+    {
+        return m_labels.empty();
+    }
+
+    template <class D>
+    inline auto xaxis_base<D>::size() const noexcept -> size_type
+    {
+        return m_labels.size();
     }
 
     template <class D>
