@@ -19,12 +19,16 @@
 
 #include "xtl/xiterator_base.hpp"
 
+#include "xaxis_base.hpp"
 #include "xframe_utils.hpp"
 
 namespace xf
 {
     template <class L, class T, class MT>
     class xaxis_iterator;
+
+    template <class L, class T>
+    class xaxis_default;
 
     /*********************
      * map container tag *
@@ -56,28 +60,27 @@ namespace xf
      *********/
 
     template <class L, class T, class MT = hash_map_tag>
-    class xaxis
+    class xaxis : public xaxis_base<xaxis<L, T, MT>>
     {
     public:
 
-        static_assert(std::is_integral<T>::value, "mapped_type T must be an integral type");
-
+        using base_type = xaxis_base<xaxis>;
         using self_type = xaxis<L, T, MT>;
-        using label_list = std::vector<L>;
-        using key_type = L;
-        using mapped_type = T;
+        using key_type = typename base_type::key_type;
+        using label_list = typename base_type::label_list;
+        using mapped_type = typename base_type::mapped_type;
         using map_type = map_container_t<key_type, mapped_type, MT>;
         using value_type = typename map_type::value_type;
         using reference = typename map_type::const_reference;
         using const_reference = typename map_type::const_reference;
         using pointer = typename map_type::const_pointer;
         using const_pointer = typename map_type::const_pointer;
-        using size_type = typename label_list::size_type;
-        using difference_type = typename label_list::difference_type;
-        using iterator = xaxis_iterator<L, T, MT>;
-        using const_iterator = iterator;
-        using reverse_iterator = std::reverse_iterator<iterator>;
-        using const_reverse_iterator = reverse_iterator;
+        using size_type = typename base_type::size_type;
+        using difference_type = typename base_type::difference_type;
+        using iterator = typename base_type::iterator;
+        using const_iterator = typename base_type::const_iterator;
+        using reverse_iterator = typename base_type::reverse_iterator;
+        using const_reverse_iterator = typename base_type::const_reverse_iterator;
 
         explicit xaxis();
         explicit xaxis(const label_list& labels);
@@ -87,11 +90,7 @@ namespace xf
         template <class InputIt>
         xaxis(InputIt first, InputIt last);
 
-        const label_list& labels() const noexcept;
         bool is_sorted() const noexcept;
-
-        bool empty() const noexcept;
-        size_type size() const noexcept;
 
         bool contains(const key_type& key) const;
         const mapped_type& operator[](const key_type& key) const;
@@ -104,17 +103,8 @@ namespace xf
 
         const_iterator find(const key_type& key) const;
 
-        const_iterator begin() const noexcept;
-        const_iterator end() const noexcept;
-
         const_iterator cbegin() const noexcept;
         const_iterator cend() const noexcept;
-
-        const_reverse_iterator rbegin() const noexcept;
-        const_reverse_iterator rend() const noexcept;
-
-        const_reverse_iterator crbegin() const noexcept;
-        const_reverse_iterator crend() const noexcept;
 
         template <class... Args>
         bool merge(const Args&... axes);
@@ -141,9 +131,11 @@ namespace xf
         template <class... Args>
         bool merge_impl(const Args&... axes);
 
-        template <class... Args>
-        bool merge_empty(const self_type& a, const Args&... axes);
+        template <class D, class... Args>
+        bool merge_empty(const xaxis_base<D>& a, const Args&... axes);
         bool merge_empty();
+
+        bool init_is_sorted() const noexcept;
 
         template <class Arg, class... Args>
         bool all_sorted(const Arg& a, const Args&... axes) const noexcept;
@@ -151,29 +143,30 @@ namespace xf
         template <class Arg>
         bool all_sorted(const Arg& a) const noexcept;
 
-        bool init_is_sorted() const noexcept;
-
-        label_list m_labels;
         map_type m_index;
         bool m_is_sorted;
 
         friend class xaxis_iterator<L, T, MT>;
+        friend class xaxis_default<L, T>;
     };
-
-    template <class L, class T, class MT>
-    bool operator==(const xaxis<L, T, MT>& lhs, const xaxis<L, T, MT>& rhs) noexcept;
-
-    template <class L, class T, class MT>
-    bool operator!=(const xaxis<L, T, MT>& lhs, const xaxis<L, T, MT>& rhs) noexcept;
-
-    template <class OS, class L, class T, class MT>
-    OS& operator<<(OS& out, const xaxis<L, T, MT>& axis);
 
     template <class L, class T, class MT, class... Args>
     bool merge_axes(xaxis<L, T, MT>& output, const Args&... axes);
 
     template <class L, class T, class MT, class... Args>
     bool intersect_axes(xaxis<L, T, MT>& output, const Args&... axes);
+
+    /********************
+    * xaxis_inner_types *
+    *********************/
+
+    template <class L, class T, class MT>
+    struct xaxis_inner_types<xaxis<L, T, MT>>
+    {
+        using key_type = L;
+        using mapped_type = T;
+        using iterator = xaxis_iterator<L, T, MT>;
+    };
 
     /******************
      * xaxis_iterator *
@@ -232,40 +225,18 @@ namespace xf
     bool operator<(const xaxis_iterator<L, T, MT>& lhs, const xaxis_iterator<L, T, MT>& rhs) noexcept;
 
     /************************
-     * is_axis metafunction *
-     ************************/
-
-    namespace detail
-    {
-        template <class T>
-        struct is_axis_impl : std::false_type
-        {
-        };
-
-        template <class L, class T, class MT>
-        struct is_axis_impl<xaxis<L, T, MT>> : std::true_type
-        {
-        };
-    }
-
-    template <class T>
-    struct is_axis : detail::is_axis_impl<std::decay_t<T>>
-    {
-    };
-
-    /************************
      * xaxis implementation *
      ************************/
 
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis()
-        : m_labels(), m_index(), m_is_sorted(true)
+        : base_type(), m_index(), m_is_sorted(true)
     {
     }
 
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(const label_list& labels)
-        : m_labels(labels), m_index(), m_is_sorted()
+        : base_type(labels), m_index(), m_is_sorted()
     {
         m_is_sorted = init_is_sorted();
         populate_index();
@@ -273,7 +244,7 @@ namespace xf
 
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(label_list&& labels)
-        : m_labels(std::move(labels)), m_index(), m_is_sorted()
+        : base_type(labels), m_index(), m_is_sorted()
     {
         m_is_sorted = init_is_sorted();
         populate_index();
@@ -281,21 +252,21 @@ namespace xf
 
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(const label_list& labels, bool is_sorted)
-        : m_labels(labels), m_index(), m_is_sorted(is_sorted)
+        : base_type(labels), m_index(), m_is_sorted(is_sorted)
     {
         populate_index();
     }
 
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(label_list&& labels, bool is_sorted)
-        : m_labels(std::move(labels)), m_index(), m_is_sorted(is_sorted)
+        : base_type(labels), m_index(), m_is_sorted(is_sorted)
     {
         populate_index();
     }
 
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(std::initializer_list<key_type> init)
-        : m_labels(init), m_index(), m_is_sorted()
+        : base_type(init), m_index(), m_is_sorted()
     {
         m_is_sorted = init_is_sorted();
         populate_index();
@@ -304,34 +275,16 @@ namespace xf
     template <class L, class T, class MT>
     template <class InputIt>
     inline xaxis<L, T, MT>::xaxis(InputIt first, InputIt last)
-        : m_labels(first, last), m_index(), m_is_sorted()
+        : base_type(first, last), m_index(), m_is_sorted()
     {
         m_is_sorted = init_is_sorted();
         populate_index();
     }
 
     template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::labels() const noexcept -> const label_list&
-    {
-        return m_labels;
-    }
-
-    template <class L, class T, class MT>
     inline bool xaxis<L, T, MT>::is_sorted() const noexcept
     {
         return m_is_sorted;
-    }
-
-    template <class L, class T, class MT>
-    inline bool xaxis<L, T, MT>::empty() const noexcept
-    {
-        return m_labels.empty();
-    }
-
-    template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::size() const noexcept -> size_type
-    {
-        return m_labels.size();
     }
 
     template <class L, class T, class MT>
@@ -350,18 +303,14 @@ namespace xf
     template <class F>
     inline auto xaxis<L, T, MT>::filter(const F& f) const noexcept -> self_type
     {
-        label_list l;
-        std::copy_if(m_labels.cbegin(), m_labels.cend(), std::back_inserter(l), f);
-        return self_type(std::move(l), m_is_sorted);
+        return self_type(base_type::filter_labels(f), m_is_sorted);
     }
 
     template <class L, class T, class MT>
     template <class F>
     inline auto xaxis<L, T, MT>::filter(const F& f, size_type size) const noexcept -> self_type
     {
-        label_list l(size);
-        std::copy_if(m_labels.cbegin(), m_labels.cend(), l.begin(), f);
-        return self_type(std::move(l), m_is_sorted);
+        return self_type(base_type::filter_labels(f, size), m_is_sorted);
     }
 
     template <class L, class T, class MT>
@@ -372,65 +321,29 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::begin() const noexcept -> const_iterator
-    {
-        return cbegin();
-    }
-
-    template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::end() const noexcept -> const_iterator
-    {
-        return cend();
-    }
-
-    template <class L, class T, class MT>
     inline auto xaxis<L, T, MT>::cbegin() const noexcept -> const_iterator
     {
-        return const_iterator(this, m_labels.begin());
+        return const_iterator(this, this->labels().begin());
     }
 
     template <class L, class T, class MT>
     inline auto xaxis<L, T, MT>::cend() const noexcept -> const_iterator
     {
-        return const_iterator(this, m_labels.end());
-    }
-
-    template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::rbegin() const noexcept -> const_reverse_iterator
-    {
-        return crbegin();
-    }
-
-    template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::rend() const noexcept -> const_reverse_iterator
-    {
-        return crend();
-    }
-
-    template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::crbegin() const noexcept -> const_reverse_iterator
-    {
-        return const_reverse_iterator(cend());
-    }
-
-    template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::crend() const noexcept -> const_reverse_iterator
-    {
-        return const_reverse_iterator(cbegin());
+        return const_iterator(this, this->labels().end());
     }
 
     template <class L, class T, class MT>
     template <class... Args>
     inline bool xaxis<L, T, MT>::merge(const Args&... axes)
     {
-        return empty() ? merge_empty(axes...) : merge_impl(axes...);
+        return this->empty() ? merge_empty(axes...) : merge_impl(axes...);
     }
 
     template <class L, class T, class MT>
     template <class... Args>
     inline bool xaxis<L, T, MT>::intersect(const Args&... axes)
     {
-        bool res = intersect_to(m_labels, axes.labels()...);
+        bool res = intersect_to(this->mutable_labels(), axes.labels()...);
         populate_index();
         return res;
     }
@@ -438,16 +351,16 @@ namespace xf
     template <class L, class T, class MT>
     inline void xaxis<L, T, MT>::populate_index()
     {
-        for(size_type i = 0; i < m_labels.size(); ++i)
+        for(size_type i = 0; i < this->labels().size(); ++i)
         {
-            m_index[m_labels[i]] = T(i);
+            m_index[this->labels()[i]] = T(i);
         }
     }
 
     template <class L, class T, class MT>
     void xaxis<L, T, MT>::set_labels(const label_list& labels)
     {
-        m_labels = labels;
+        this->mutable_labels() = labels;
         populate_index();
     }
 
@@ -464,7 +377,7 @@ namespace xf
         bool res = true;
         if(all_sorted(*this, axes...))
         {
-            res = merge_to(m_labels, axes.labels()...);
+            res = merge_to(this->mutable_labels(), axes.labels()...);
             populate_index();
         }
         else
@@ -480,10 +393,10 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    template <class... Args>
-    inline bool xaxis<L, T, MT>::merge_empty(const self_type& a, const Args&... axes)
+    template <class D, class... Args>
+    inline bool xaxis<L, T, MT>::merge_empty(const xaxis_base<D>& a, const Args&... axes)
     {
-        m_labels = a.labels();
+        this->mutable_labels() = a.labels();
         return merge_impl(axes...);
     }
 
@@ -491,6 +404,12 @@ namespace xf
     inline bool xaxis<L, T, MT>::merge_empty()
     {
         return true;
+    }
+
+    template <class L, class T, class MT>
+    inline bool xaxis<L, T, MT>::init_is_sorted() const noexcept
+    {
+        return std::is_sorted(this->labels().begin(), this->labels().end());
     }
 
     template <class L, class T, class MT>
@@ -508,18 +427,13 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline bool xaxis<L, T, MT>::init_is_sorted() const noexcept
-    {
-        return std::is_sorted(m_labels.begin(), m_labels.end());
-    }
-
-    template <class L, class T, class MT>
     template <class Arg, class... Args>
     inline bool xaxis<L, T, MT>::merge_unsorted(bool broadcasting, const Arg& a, const Args&... axes)
     {
         bool res = merge_unsorted(broadcasting, axes...);
-        auto output_iter = m_labels.rbegin();
-        auto output_end = m_labels.rend();
+        auto& labels = this->mutable_labels();
+        auto output_iter = labels.rbegin();
+        auto output_end = labels.rend();
         auto input_iter = a.rbegin();
         auto input_end = a.rend();
         while ((output_iter != output_end) && (input_iter != input_end) && (*output_iter == *input_iter))
@@ -537,7 +451,7 @@ namespace xf
         else if(output_iter == output_end)
         {
             std::copy(a.begin(), a.begin() + std::distance(input_iter, input_end),
-                      std::inserter(m_labels, m_labels.begin()));
+                      std::inserter(labels, labels.begin()));
             populate_index();
             res &= broadcasting;
         }
@@ -547,13 +461,13 @@ namespace xf
             {
                 if(!contains(*input_iter))
                 {
-                    if(output_iter != m_labels.rbegin())
+                    if(output_iter != labels.rbegin())
                     {
-                        m_labels.insert(m_labels.begin(), *input_iter);
+                        labels.insert(labels.begin(), *input_iter);
                     }
                     else
                     {
-                        m_labels.push_back(*input_iter);
+                        labels.push_back(*input_iter);
                     }
                 }
                 ++input_iter;
@@ -568,28 +482,6 @@ namespace xf
     inline bool xaxis<L, T, MT>::merge_unsorted(bool /*broadcasting*/)
     {
         return true;
-    }
-
-    template <class L, class T, class MT>
-    inline bool operator==(const xaxis<L, T, MT>& lhs, const xaxis<L, T, MT>& rhs) noexcept
-    {
-        return lhs.labels() == rhs.labels();
-    }
-
-    template <class L, class T, class MT>
-    inline bool operator!=(const xaxis<L, T, MT>& lhs, const xaxis<L, T, MT>& rhs) noexcept
-    {
-        return !(lhs == rhs);
-    }
-
-    template <class OS, class L, class T, class MT>
-    inline OS& operator<<(OS& out, const xaxis<L, T, MT>& axis)
-    {
-        using iterator = std::ostream_iterator<L, typename OS::char_type, typename OS::traits_type>;
-        out << '(';
-        std::copy(axis.labels().begin(), axis.labels().end(), iterator(out, ", "));
-        out << ')';
-        return out;
     }
 
     template <class L, class T, class MT, class... Args>
