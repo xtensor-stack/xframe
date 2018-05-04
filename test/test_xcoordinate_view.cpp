@@ -86,7 +86,7 @@ namespace xf
         auto c = make_test_view_coordinate();
         auto vc = build_coordinate_view(c);
 
-        auto c2 = coordinate(std::make_pair(fstring("altitude"), make_test_view_saxis()));
+        auto c2 = coordinate<fstring>({{fstring("altitude"), make_test_view_saxis()}});
         xtrivial_broadcast res = c2.broadcast<join::inner>(vc);
         EXPECT_TRUE(res.m_xframe_trivial);
         EXPECT_FALSE(res.m_xtensor_trivial);
@@ -98,7 +98,7 @@ namespace xf
         EXPECT_EQ(c2abscissa, vcabscissa);
         EXPECT_EQ(c2ordinate, vcordinate);
 
-        
+
         auto c3 = c;
         xtrivial_broadcast res2 = c3.broadcast<join::inner>(vc);
         EXPECT_FALSE(res2.m_xframe_trivial);

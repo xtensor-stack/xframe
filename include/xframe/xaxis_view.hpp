@@ -86,6 +86,8 @@ namespace xf
         const_reverse_iterator crbegin() const;
         const_reverse_iterator crend() const;
 
+        axis_type as_xaxis() const;
+
         bool operator==(const self_type& rhs) const noexcept;
         bool operator!=(const self_type& rhs) const noexcept;
 
@@ -301,6 +303,12 @@ namespace xf
     inline auto xaxis_view<L, T, MT>::crend() const -> const_reverse_iterator
     {
         return const_reverse_iterator(cbegin());
+    }
+
+    template <class L, class T, class MT>
+    inline auto xaxis_view<L, T, MT>::as_xaxis() const -> axis_type
+    {
+        return m_axis.as_xaxis();
     }
 
     template <class L, class T, class MT>

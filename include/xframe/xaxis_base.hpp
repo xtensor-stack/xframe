@@ -110,21 +110,8 @@ namespace xf
      * is_axis metafunction *
      ************************/
 
-    namespace detail
-    {
-        template <class T>
-        struct is_axis_impl : std::false_type
-        {
-        };
-
-        template <class D>
-        struct is_axis_impl<xaxis_base<D>> : std::true_type
-        {
-        };
-    }
-
     template <class T>
-    struct is_axis : detail::is_axis_impl<std::decay_t<T>>
+    struct is_axis : std::is_base_of<xaxis_base<T>, T>
     {
     };
 

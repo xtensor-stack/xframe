@@ -10,7 +10,9 @@
 #define XFRAME_XCOORDINATE_HPP
 
 #include "xtensor/xutils.hpp"
+#include "xframe_config.hpp"
 #include "xcoordinate_view.hpp"
+#include "xnamed_axis.hpp"
 
 namespace xf
 {
@@ -26,7 +28,7 @@ namespace xf
         {
             static constexpr join_id id() { return join_id::outer_id; }
         };
-        
+
         struct inner
         {
             static constexpr join_id id() { return join_id::inner_id; }
@@ -72,8 +74,8 @@ namespace xf
         explicit xcoordinate(const map_type& axes);
         explicit xcoordinate(map_type&& axes);
         xcoordinate(std::initializer_list<value_type> init);
-        template <class... LB>
-        explicit xcoordinate(std::pair<K, xaxis<LB, S, MT>>... axes);
+        template <class... K1>
+        explicit xcoordinate(xnamed_axis<K1, S, MT, L>... axes);
 
         void clear();
 
@@ -106,14 +108,14 @@ namespace xf
         xtrivial_broadcast broadcast_empty();
     };
 
-    template <class K, class S, class MT, class L>
+    template <class K, class S = std::size_t, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
     xcoordinate<K, S, MT, L> coordinate(const std::map<K, xaxis_variant<L, S, MT>>& axes);
 
-    template <class K, class S, class MT, class L>
+    template <class K, class S = std::size_t, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
     xcoordinate<K, S, MT, L> coordinate(std::map<K, xaxis_variant<L, S, MT>>&& axes);
 
-    template <class K, class S, class MT, class... L>
-    xcoordinate<K, S, MT> coordinate(std::pair<K, xaxis<L, S, MT>>... axes);
+    template <class K, class... K1, class S, class MT, class L>
+    xcoordinate<K, S, MT, L> coordinate(xnamed_axis<K, S, MT, L> axis, xnamed_axis<K1, S, MT, L>... axes);
 
     template <class Join, class K, class S, class MT, class L, class... Args>
     xtrivial_broadcast broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates);
@@ -227,9 +229,9 @@ namespace xf
     }
 
     template <class K, class S, class MT, class L>
-    template <class... LB>
-    inline xcoordinate<K, S, MT, L>::xcoordinate(std::pair<K, xaxis<LB, S, MT>>... axes)
-        : base_type(std::move(axes)...)
+    template <class... K1>
+    inline xcoordinate<K, S, MT, L>::xcoordinate(xnamed_axis<K1, S, MT, L>... axes)
+        : base_type({ value_type(std::move(axes).name(), std::move(axes).axis())... })
     {
     }
 
@@ -301,7 +303,7 @@ namespace xf
             {
                 auto& axis = inserted.first->second;
                 res.m_xframe_trivial &= detail::axis_broadcast<Join>::apply(axis, iter->second);
-            } 
+            }
         }
         XFRAME_TRACE_COORDINATES_RESULT(*this, res);
         return res;
@@ -349,7 +351,11 @@ namespace xf
     template <class Join, class... Args>
     inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast_empty(const self_type& c, const Args&... coordinates)
     {
-        this->coordinate() = c.data();
+        map_type& m = this->coordinate();
+        for (auto iter = c.data().cbegin(); iter != c.data().cend(); ++iter)
+        {
+            m.insert(std::make_pair(iter->first, mapped_type(iter->second.as_xaxis())));
+        }
         return broadcast_impl<Join>(coordinates...);
     }
 
@@ -360,7 +366,7 @@ namespace xf
         map_type& m = this->coordinate();
         for (auto iter = c.data().cbegin(); iter != c.data().cend(); ++iter)
         {
-            m.insert(std::make_pair(iter->first, mapped_type(iter->second)));
+            m.insert(std::make_pair(iter->first, mapped_type(iter->second.as_xaxis())));
         }
         return broadcast_impl<Join>(coordinates...);
     }
@@ -391,11 +397,11 @@ namespace xf
         return xcoordinate<K, S, MT, L>(std::move(axes));
     }
 
-    template <class K, class S, class MT, class... L>
-    inline xcoordinate<K, S, MT> coordinate(std::pair<K, xaxis<L, S, MT>>... axes)
+    template <class K, class... K1, class S, class MT, class L>
+    xcoordinate<K, S, MT, L> coordinate(xnamed_axis<K, S, MT, L> axis, xnamed_axis<K1, S, MT, L>... axes)
     {
-        return xcoordinate<K, S, MT>(std::move(axes)...);
-    }
+        return xcoordinate<K, S, MT, L>(axis, axes...);
+    };
 
     template <class Join, class K, class S, class MT, class L, class... Args>
     inline xtrivial_broadcast broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates)
@@ -405,4 +411,3 @@ namespace xf
 }
 
 #endif
-

@@ -86,10 +86,6 @@ namespace xf
 
     private:
 
-        template <class AX1, class... AX>
-        void insert_impl(std::pair<K, AX1> axis, std::pair<K, AX>... axes);
-        void insert_impl();
-
         map_type m_coordinate;
     };
 
@@ -121,8 +117,8 @@ namespace xf
     template <class K, class A>
     template <class... AX>
     inline xcoordinate_base<K, A>::xcoordinate_base(std::pair<K, AX>... axes)
+        : m_coordinate({std::move(axes)...})
     {
-        insert_impl(std::move(axes)...);
     }
 
     template <class K, class A>
@@ -208,19 +204,6 @@ namespace xf
     inline auto xcoordinate_base<K, A>::coordinate() noexcept -> map_type&
     {
         return m_coordinate;
-    }
-
-    template <class K, class A>
-    template <class AX1, class... AX>
-    inline void xcoordinate_base<K, A>::insert_impl(std::pair<K, AX1> axis, std::pair<K, AX>... axes)
-    {
-        m_coordinate.insert(value_type(std::move(axis.first), std::move(axis.second)));
-        insert_impl(std::move(axes)...);
-    }
-
-    template <class K, class A>
-    inline void xcoordinate_base<K, A>::insert_impl()
-    {
     }
 
     template <class OS, class K, class A>

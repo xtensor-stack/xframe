@@ -12,12 +12,14 @@
 #include <cstddef>
 #include "xtl/xbasic_fixed_string.hpp"
 #include "xframe/xvariable.hpp"
+#include "xframe/xnamed_axis.hpp"
 
 namespace xf
 {
     using fstring = xtl::xfixed_string<55>;
-    using saxis_type = xaxis<fstring, std::size_t>; 
+    using saxis_type = xaxis<fstring, std::size_t>;
     using iaxis_type = xaxis<int, std::size_t>;
+    using daxis_type = xaxis_default<int, std::size_t>;
     using dimension_type = xdimension<fstring, std::size_t>;
     using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
     using int_data_type = xt::xoptional_assembly<xt::xarray<int>, xt::xarray<bool>>;
@@ -55,6 +57,12 @@ namespace xf
         return iaxis_type({1, 4, 5});
     }
 
+    // { 0, 1, 2 }
+    inline daxis_type make_test_daxis()
+    {
+        return daxis_type(3);
+    }
+
     /***************
      * coordinates *
      ***************/
@@ -65,16 +73,21 @@ namespace xf
     {
         fstring s1 = "abscissa";
         fstring s2 = "ordinate";
-        return coordinate(std::make_pair(s1, make_test_saxis()), std::make_pair(s2, make_test_iaxis()));
+        return coordinate<fstring>({
+            {s1, make_test_saxis()},
+            {s2, make_test_iaxis()}
+        });
     }
 
     // abscissa: { "a", "d", "e" }
     // ordinate: { 1, 4, 5 }
     inline coordinate_type make_test_coordinate2()
     {
-        fstring s1 = "abscissa";
-        fstring s2 = "ordinate";
-        return coordinate(std::make_pair(s1, make_test_saxis2()), std::make_pair(s2, make_test_iaxis2()));
+        const fstring s1 = "abscissa";
+        return coordinate<fstring>(
+            named_axis(s1, make_test_saxis2()),
+            named_axis("ordinate", make_test_iaxis2())
+        );
     }
 
     // abscissa: { "a", "d", "e" }
@@ -85,9 +98,26 @@ namespace xf
         fstring s1 = "abscissa";
         fstring s2 = "ordinate";
         fstring s3 = "altitude";
-        return coordinate(std::make_pair(s1, make_test_saxis2()),
-                          std::make_pair(s2, make_test_iaxis2()),
-                          std::make_pair(s3, make_test_iaxis()));
+        return coordinate<fstring>({
+            {s1, make_test_saxis2()},
+            {s2, make_test_iaxis2()},
+            {s3, make_test_iaxis()}
+        });
+    }
+
+    // abscissa: { "a", "d", "e" }
+    // ordinate: { 1, 4, 5 }
+    // altitude: { 0, 1, 2 }
+    inline coordinate_type make_test_coordinate4()
+    {
+        fstring s1 = "abscissa";
+        fstring s2 = "ordinate";
+        fstring s3 = "altitude";
+        return coordinate<fstring>({
+            {s1, make_test_saxis2()},
+            {s2, make_test_iaxis2()},
+            {s3, make_test_daxis()}
+        });
     }
 
     // abscissa: { "a", "c", "d", "e" }
@@ -97,9 +127,24 @@ namespace xf
     {
         saxis_type sres = { "a", "c", "d", "e" };
         iaxis_type ires = { 1, 2, 4, 5 };
-        return coordinate(std::make_pair(fstring("abscissa"), std::move(sres)),
-                          std::make_pair(fstring("ordinate"), std::move(ires)),
-                          std::make_pair(fstring("altitude"), make_test_iaxis()));
+        return coordinate<fstring>({
+            {fstring("abscissa"), std::move(sres)},
+            {fstring("ordinate"), std::move(ires)},
+            {fstring("altitude"), make_test_iaxis()},
+        });
+    }
+
+    // abscissa: { "a", "d", "e" }
+    // ordinate: { 1, 4, 5 }
+    // altitude: { 0, 1, 2, 4 }
+    inline coordinate_type make_merge_coordinate2()
+    {
+        iaxis_type ires = { 0, 1, 2, 4 };
+        return coordinate<fstring>({
+            {fstring("abscissa"), make_test_saxis2()},
+            {fstring("ordinate"), make_test_iaxis2()},
+            {fstring("altitude"), std::move(ires)},
+        });
     }
 
     // abscissa: { "a", "d" }
@@ -109,9 +154,26 @@ namespace xf
     {
         saxis_type sres = { "a", "d" };
         iaxis_type ires = { 1, 4 };
-        return coordinate(std::make_pair(fstring("abscissa"), std::move(sres)),
-                          std::make_pair(fstring("ordinate"), std::move(ires)),
-                          std::make_pair(fstring("altitude"), make_test_iaxis()));
+        return coordinate<fstring>({
+            {fstring("abscissa"), std::move(sres)},
+            {fstring("ordinate"), std::move(ires)},
+            {fstring("altitude"), make_test_iaxis()}
+        });
+    }
+
+    // abscissa: { "a", "d", "e" }
+    // ordinate: { 1, 4, 5 }
+    // altitude: { 1, 2 }
+    inline coordinate_type make_intersect_coordinate2()
+    {
+        saxis_type sres = { "a", "d", "e" };
+        iaxis_type ires = { 1, 4, 5 };
+        iaxis_type ires2 = { 1, 2 };
+        return coordinate<fstring>({
+            {fstring("abscissa"), std::move(sres)},
+            {fstring("ordinate"), std::move(ires)},
+            {fstring("altitude"), std::move(ires2)}
+        });
     }
 
     /*************
@@ -208,7 +270,7 @@ namespace xf
     // altitude: { 1, 2, 4 }
     // abscissa: { "a", "d", "e" }
     // ordinate: { 1, 4, 5 }
-    // dims: {{"altitude", 0}, { "abscissa", 1 }, { "ordinate", 2 }} 
+    // dims: {{"altitude", 0}, { "abscissa", 1 }, { "ordinate", 2 }}
     // data = make_test_data2
     inline variable_type make_test_variable4()
     {
