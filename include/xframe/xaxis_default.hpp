@@ -171,7 +171,7 @@ namespace xf
     template <class L, class T>
     inline auto xaxis_default<L, T>::operator[](const key_type& key) const -> mapped_type
     {
-        return this->labels().at(key);
+        return mapped_type(this->labels().at(key));
     }
 
     template <class L, class T>

@@ -93,7 +93,7 @@ namespace xf
         bool is_sorted() const noexcept;
 
         bool contains(const key_type& key) const;
-        const mapped_type& operator[](const key_type& key) const;
+        mapped_type operator[](const key_type& key) const;
 
         template <class F>
         self_type filter(const F& f) const noexcept;
@@ -294,7 +294,7 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::operator[](const key_type& key) const -> const mapped_type&
+    inline auto xaxis<L, T, MT>::operator[](const key_type& key) const -> mapped_type
     {
         return m_index.at(key);
     }
