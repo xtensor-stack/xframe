@@ -36,7 +36,7 @@ namespace xf
             using variant_type = xtl::variant<A...>;
             using type = typename xtl::mpl::if_t<std::is_integral<L1>,
                 add_default_axis<xtl::variant<A..., xaxis_default<L1, S>>, S, L...>,
-                add_default_axis<xtl::variant<A...>, S, L...>>::type;                              
+                add_default_axis<xtl::variant<A...>, S, L...>>::type;
         };
 
         template <class V, class S, class... L>
@@ -60,9 +60,8 @@ namespace xf
         template <class S, class MT, template <class...> class TL, class... L>
         struct xaxis_variant_traits<S, MT, TL<L...>>
         {
-            //using tmp_storage_type = xtl::variant<xaxis<L, S, MT>...>;
-            //using storage_type = add_default_axis_t<tmp_storage_type, S, L...>;
-            using storage_type = xtl::variant<xaxis<L, S, MT>...>;
+            using tmp_storage_type = xtl::variant<xaxis<L, S, MT>...>;
+            using storage_type = add_default_axis_t<tmp_storage_type, S, L...>;
             // Convenient for defining other types, but do not use it
             using label_list = std::vector<xtl::variant<L...>>;
             using key_type = xtl::variant<typename xaxis<L, S, MT>::key_type...>;
@@ -92,7 +91,7 @@ namespace xf
     public:
 
         static_assert(std::is_integral<T>::value, "index_type must be an integral type");
-        
+
         using self_type = xaxis_variant<L, T, MT>;
         using map_container_tag = MT;
         using traits_type = detail::xaxis_variant_traits<T, MT, L>;
@@ -121,7 +120,7 @@ namespace xf
         xaxis_variant(const xaxis<LB, T, MT>& axis);
         template <class LB>
         xaxis_variant(xaxis<LB, T, MT>&& axis);
-        
+
         template <class LB>
         const label_list<LB>& labels() const;
         key_type label(size_type i) const;
@@ -185,7 +184,7 @@ namespace xf
                                                                             typename xaxis_variant<L, T, MT>::const_reference>
     {
     public:
-        
+
         using self_type = xaxis_variant_iterator<L, T, MT>;
         using container_type = xaxis_variant<L, T, MT>;
         using key_reference = typename container_type::key_reference;
@@ -195,7 +194,7 @@ namespace xf
         using difference_type = typename container_type::difference_type;
         using iterator_category = std::random_access_iterator_tag;
         using subiterator = typename container_type::subiterator;
-        
+
         xaxis_variant_iterator() = default;
         xaxis_variant_iterator(subiterator it);
 

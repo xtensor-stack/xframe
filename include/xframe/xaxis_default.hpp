@@ -25,6 +25,9 @@ namespace xf
     template <class L, class T>
     class xaxis_default_iterator;
 
+    template <class L1, class T1, class MT1>
+    class xaxis_variant;
+
     /*****************
      * xaxis_default *
      *****************/
@@ -75,6 +78,17 @@ namespace xf
     protected:
 
         void populate_labels(const size_type& size = 0);
+
+    private:
+
+        template <class... Args>
+        bool merge(const Args&... /*axes*/);
+
+        template <class... Args>
+        bool intersect(const Args&... /*axes*/);
+
+        template <class L1, class T1, class MT1>
+        friend class xaxis_variant;
     };
 
     /********************
@@ -214,6 +228,20 @@ namespace xf
         {
             labels.push_back(key_type(i));
         }
+    }
+
+    template <class L, class T>
+    template <class... Args>
+    inline bool xaxis_default<L, T>::merge(const Args&... /*axes*/)
+    {
+        throw std::runtime_error("merge forbidden for xaxis_default");
+    }
+
+    template <class L, class T>
+    template <class... Args>
+    inline bool xaxis_default<L, T>::intersect(const Args&... /*axes*/)
+    {
+        throw std::runtime_error("intersect forbidden for xaxis_default");
     }
 
     /*****************************************
