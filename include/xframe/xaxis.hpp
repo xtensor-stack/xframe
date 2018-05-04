@@ -244,7 +244,7 @@ namespace xf
 
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(label_list&& labels)
-        : base_type(labels), m_index(), m_is_sorted()
+        : base_type(std::move(labels)), m_index(), m_is_sorted()
     {
         m_is_sorted = init_is_sorted();
         populate_index();
