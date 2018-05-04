@@ -15,9 +15,9 @@
 
 namespace xf
 {
-    using axis_type = xaxis<int, std::size_t>;
+    using axis_type = xaxis<int>;
     using label_type = std::vector<int>;
-    using axis_default_type = xaxis_default<int, std::size_t>;
+    using axis_default_type = xaxis_default<int>;
 
     TEST(xaxis_default, labels)
     {

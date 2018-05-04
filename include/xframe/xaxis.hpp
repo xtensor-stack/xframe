@@ -59,7 +59,7 @@ namespace xf
      * xaxis *
      *********/
 
-    template <class L, class T, class MT = hash_map_tag>
+    template <class L, class T = std::size_t, class MT = hash_map_tag>
     class xaxis : public xaxis_base<xaxis<L, T, MT>>
     {
     public:
