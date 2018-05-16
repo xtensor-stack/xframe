@@ -39,7 +39,7 @@ namespace xf
     TEST(xvariable, constructor)
     {
         auto v1 = variable_type(make_test_data(), make_test_coordinate(), dimension_type({"abscissa", "ordinate"}));
-        
+
         variable_type::coordinate_map m;
         m["abscissa"] = make_test_saxis();
         m["ordinate"] = make_test_iaxis();
@@ -111,7 +111,7 @@ namespace xf
 
         saxis_type a = { "a", "c" };
         dimension_type dim = { "abscissa" };
-        auto c = coordinate(std::make_pair(fstring("abscissa"), a));
+        auto c = coordinate<fstring>({{fstring("abscissa"), a}});
         v1.resize(c, dim);
         auto shape2 = v1.data().shape();
         decltype(shape2) res2 = { 2 };

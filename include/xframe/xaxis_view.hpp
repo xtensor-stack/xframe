@@ -63,8 +63,8 @@ namespace xf
         size_type size() const;
 
         bool contains(const key_type& key) const;
-        const mapped_type& operator[](const key_type& key) const;      
-        const mapped_type& index(size_type label_index) const;
+        mapped_type operator[](const key_type& key) const;
+        mapped_type index(size_type label_index) const;
 
         template <class F>
         axis_type filter(const F& f) const;
@@ -85,6 +85,8 @@ namespace xf
 
         const_reverse_iterator crbegin() const;
         const_reverse_iterator crend() const;
+
+        axis_type as_xaxis() const;
 
         bool operator==(const self_type& rhs) const noexcept;
         bool operator!=(const self_type& rhs) const noexcept;
@@ -207,9 +209,9 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline auto xaxis_view<L, T, MT>::operator[](const key_type& key) const -> const mapped_type&
+    inline auto xaxis_view<L, T, MT>::operator[](const key_type& key) const -> mapped_type
     {
-        const mapped_type& idx = m_axis[key];
+        mapped_type idx = m_axis[key];
         if (m_slice.contains(idx))
         {
             return idx;
@@ -221,7 +223,7 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline auto xaxis_view<L, T, MT>::index(size_type label_index) const -> const mapped_type&
+    inline auto xaxis_view<L, T, MT>::index(size_type label_index) const -> mapped_type
     {
         return this->operator[](label(label_index));
     }
@@ -301,6 +303,12 @@ namespace xf
     inline auto xaxis_view<L, T, MT>::crend() const -> const_reverse_iterator
     {
         return const_reverse_iterator(cbegin());
+    }
+
+    template <class L, class T, class MT>
+    inline auto xaxis_view<L, T, MT>::as_xaxis() const -> axis_type
+    {
+        return m_axis.as_xaxis();
     }
 
     template <class L, class T, class MT>

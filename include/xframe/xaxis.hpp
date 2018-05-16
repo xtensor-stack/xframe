@@ -87,13 +87,16 @@ namespace xf
         explicit xaxis(label_list&& labels);
         xaxis(std::initializer_list<key_type> init);
 
+        template <class L1>
+        explicit xaxis(xaxis_default<L1, T> axis);
+
         template <class InputIt>
         xaxis(InputIt first, InputIt last);
 
         bool is_sorted() const noexcept;
 
         bool contains(const key_type& key) const;
-        const mapped_type& operator[](const key_type& key) const;
+        mapped_type operator[](const key_type& key) const;
 
         template <class F>
         self_type filter(const F& f) const noexcept;
@@ -131,8 +134,8 @@ namespace xf
         template <class... Args>
         bool merge_impl(const Args&... axes);
 
-        template <class D, class... Args>
-        bool merge_empty(const xaxis_base<D>& a, const Args&... axes);
+        template <class Arg1, class... Args>
+        bool merge_empty(const Arg1& a, const Args&... axes);
         bool merge_empty();
 
         bool init_is_sorted() const noexcept;
@@ -273,6 +276,16 @@ namespace xf
     }
 
     template <class L, class T, class MT>
+    template <class L1>
+    inline xaxis<L, T, MT>::xaxis(xaxis_default<L1, T> axis)
+        : base_type(axis.labels()), m_index(), m_is_sorted(true)
+    {
+        static_assert(std::is_same<L, L1>::value, "key_type L and key_type L1 must be the same");
+
+        populate_index();
+    }
+
+    template <class L, class T, class MT>
     template <class InputIt>
     inline xaxis<L, T, MT>::xaxis(InputIt first, InputIt last)
         : base_type(first, last), m_index(), m_is_sorted()
@@ -294,7 +307,7 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline auto xaxis<L, T, MT>::operator[](const key_type& key) const -> const mapped_type&
+    inline auto xaxis<L, T, MT>::operator[](const key_type& key) const -> mapped_type
     {
         return m_index.at(key);
     }
@@ -393,8 +406,8 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    template <class D, class... Args>
-    inline bool xaxis<L, T, MT>::merge_empty(const xaxis_base<D>& a, const Args&... axes)
+    template <class Arg1, class... Args>
+    inline bool xaxis<L, T, MT>::merge_empty(const Arg1& a, const Args&... axes)
     {
         this->mutable_labels() = a.labels();
         return merge_impl(axes...);

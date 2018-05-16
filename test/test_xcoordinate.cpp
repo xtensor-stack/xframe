@@ -18,7 +18,7 @@ namespace xf
     TEST(xcoordinate, constructor)
     {
         auto c1 = make_test_coordinate();
-        
+
         using map_type = typename std::decay_t<decltype(c1)>::map_type;
         map_type m;
         m["abscissa"] = make_test_saxis();
@@ -114,6 +114,20 @@ namespace xf
         EXPECT_EQ(cres2, coord_res);
     }
 
+    TEST(xcoordinate, merge_axis_default)
+    {
+        auto coord_res = make_merge_coordinate2();
+        auto c1 = make_test_coordinate3();
+        auto c2 = make_test_coordinate4();
+        decltype(c1) cres1;
+        broadcast_coordinates<join::outer>(cres1, c1, c2);
+        EXPECT_EQ(cres1, coord_res);
+
+        decltype(c1) cres2;
+        broadcast_coordinates<join::outer>(cres2, c2, c1);
+        EXPECT_EQ(cres1, cres2);
+    }
+
     TEST(xcoordinate, intersect)
     {
         auto c1 = make_test_coordinate();
@@ -127,5 +141,20 @@ namespace xf
         EXPECT_FALSE(res.m_xframe_trivial);
         EXPECT_EQ(cres, coord_res);
     }
-}
 
+    TEST(xcoordinate, intersect_axis_default)
+    {
+        auto c1 = make_test_coordinate3();
+        auto c2 = make_test_coordinate4();
+
+        auto coord_res = make_intersect_coordinate2();
+
+        decltype(c1) cres1;
+        broadcast_coordinates<join::inner>(cres1, c1, c2);
+        EXPECT_EQ(cres1, coord_res);
+
+        decltype(c1) cres2;
+        broadcast_coordinates<join::inner>(cres2, c2, c1);
+        EXPECT_EQ(cres2, coord_res);
+    }
+}

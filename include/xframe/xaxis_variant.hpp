@@ -33,10 +33,9 @@ namespace xf
         template <class... A, class S, class L1, class... L>
         struct add_default_axis<xtl::variant<A...>, S, L1, L...>
         {
-            using variant_type = xtl::variant<A...>;
             using type = typename xtl::mpl::if_t<std::is_integral<L1>,
                 add_default_axis<xtl::variant<A..., xaxis_default<L1, S>>, S, L...>,
-                add_default_axis<xtl::variant<A...>, S, L...>>::type;                              
+                add_default_axis<xtl::variant<A...>, S, L...>>::type;
         };
 
         template <class V, class S, class... L>
@@ -60,9 +59,8 @@ namespace xf
         template <class S, class MT, template <class...> class TL, class... L>
         struct xaxis_variant_traits<S, MT, TL<L...>>
         {
-            //using tmp_storage_type = xtl::variant<xaxis<L, S, MT>...>;
-            //using storage_type = add_default_axis_t<tmp_storage_type, S, L...>;
-            using storage_type = xtl::variant<xaxis<L, S, MT>...>;
+            using tmp_storage_type = xtl::variant<xaxis<L, S, MT>...>;
+            using storage_type = add_default_axis_t<tmp_storage_type, S, L...>;
             // Convenient for defining other types, but do not use it
             using label_list = std::vector<xtl::variant<L...>>;
             using key_type = xtl::variant<typename xaxis<L, S, MT>::key_type...>;
@@ -92,7 +90,7 @@ namespace xf
     public:
 
         static_assert(std::is_integral<T>::value, "index_type must be an integral type");
-        
+
         using self_type = xaxis_variant<L, T, MT>;
         using map_container_tag = MT;
         using traits_type = detail::xaxis_variant_traits<T, MT, L>;
@@ -121,7 +119,11 @@ namespace xf
         xaxis_variant(const xaxis<LB, T, MT>& axis);
         template <class LB>
         xaxis_variant(xaxis<LB, T, MT>&& axis);
-        
+        template <class LB>
+        xaxis_variant(const xaxis_default<LB, T>& axis);
+        template <class LB>
+        xaxis_variant(xaxis_default<LB, T>&& axis);
+
         template <class LB>
         const label_list<LB>& labels() const;
         key_type label(size_type i) const;
@@ -129,8 +131,10 @@ namespace xf
         bool empty() const;
         size_type size() const;
 
+        bool is_sorted() const noexcept;
+
         bool contains(const key_type& key) const;
-        const mapped_type& operator[](const key_type& key) const;
+        mapped_type operator[](const key_type& key) const;
 
         template <class F>
         self_type filter(const F& f) const;
@@ -158,16 +162,20 @@ namespace xf
         template <class... Args>
         bool intersect(const Args&... axes);
 
+        self_type as_xaxis() const;
+
         bool operator==(const self_type& rhs) const;
         bool operator!=(const self_type& rhs) const;
 
     private:
 
+        template <class LB>
+        const label_list<LB>& labels_impl() const;
+
         storage_type m_data;
 
         template <class OS, class L1, class T1, class MT1>
         friend OS& operator<<(OS&, const xaxis_variant<L1, T1, MT1>&);
-
     };
 
     template <class OS, class L, class T, class MT>
@@ -185,7 +193,7 @@ namespace xf
                                                                             typename xaxis_variant<L, T, MT>::const_reference>
     {
     public:
-        
+
         using self_type = xaxis_variant_iterator<L, T, MT>;
         using container_type = xaxis_variant<L, T, MT>;
         using key_reference = typename container_type::key_reference;
@@ -195,7 +203,7 @@ namespace xf
         using difference_type = typename container_type::difference_type;
         using iterator_category = std::random_access_iterator_tag;
         using subiterator = typename container_type::subiterator;
-        
+
         xaxis_variant_iterator() = default;
         xaxis_variant_iterator(subiterator it);
 
@@ -248,9 +256,47 @@ namespace xf
 
     template <class L, class T, class MT>
     template <class LB>
+    inline xaxis_variant<L, T, MT>::xaxis_variant(const xaxis_default<LB, T>& axis)
+        : m_data(axis)
+    {
+    }
+
+    template <class L, class T, class MT>
+    template <class LB>
+    inline xaxis_variant<L, T, MT>::xaxis_variant(xaxis_default<LB, T>&& axis)
+        : m_data(std::move(axis))
+    {
+    }
+
+    template <class L, class T, class MT>
+    template <class LB>
     inline auto xaxis_variant<L, T, MT>::labels() const -> const label_list<LB>&
     {
-        return xtl::get<xaxis<LB, T>>(m_data).labels();
+        return xtl::mpl::static_if<std::is_integral<LB>::value>([&](auto self) -> const label_list<LB>&
+        {
+            return self(*this).template labels_impl<LB>();
+        }, /*else*/ [&](auto /*self*/) -> const label_list<LB>&
+        {
+            return xtl::get<xaxis<LB, T>>(m_data).labels();
+        });
+    }
+
+    template <class L, class T, class MT>
+    template <class LB>
+    inline auto xaxis_variant<L, T, MT>::labels_impl() const -> const label_list<LB>&
+    {
+        if (auto* t = xtl::get_if<xaxis<LB, T>>(&m_data))
+        {
+            return t->labels();
+        }
+        else if (auto* t = xtl::get_if<xaxis_default<LB, T>>(&m_data))
+        {
+            return t->labels();
+        }
+        else
+        {
+            throw std::runtime_error("Error occured while getting the labels");
+        }
     }
 
     template <class L, class T, class MT>
@@ -272,6 +318,12 @@ namespace xf
     }
 
     template <class L, class T, class MT>
+    inline bool xaxis_variant<L, T, MT>::is_sorted() const noexcept
+    {
+        return xtl::visit([](auto&& arg) { return arg.is_sorted(); }, m_data);
+    }
+
+    template <class L, class T, class MT>
     inline bool xaxis_variant<L, T, MT>::contains(const key_type& key) const
     {
         auto lambda = [&key](auto&& arg) -> bool
@@ -283,9 +335,9 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline auto xaxis_variant<L, T, MT>::operator[](const key_type& key) const -> const mapped_type&
+    inline auto xaxis_variant<L, T, MT>::operator[](const key_type& key) const -> mapped_type
     {
-        auto lambda = [&key](auto&& arg) -> const mapped_type&
+        auto lambda = [&key](auto&& arg) -> mapped_type
         {
             using type = typename std::decay_t<decltype(arg)>::key_type;
             return arg[xtl::get<type>(key)];
@@ -366,14 +418,41 @@ namespace xf
         return xtl::visit([](auto&& arg) { return subiterator(arg.cbegin()); }, m_data);
     }
 
+    template <class L, class T, class MT, class K>
+    struct xaxis_variant_adaptor
+    {
+        using axis_variant_type = xaxis_variant<L, T, MT>;
+        using key_type = K;
+        using label_list = typename axis_variant_type::template label_list<K>;
+
+        xaxis_variant_adaptor(const axis_variant_type& axis)
+            : m_axis(axis)
+        {
+        };
+
+        inline const label_list& labels() const
+        {
+            return m_axis.template labels<key_type>();
+        };
+
+        inline bool is_sorted() const noexcept
+        {
+            return m_axis.is_sorted();
+        };
+
+    private:
+
+        const axis_variant_type& m_axis;
+    };
+
     template <class L, class T, class MT>
     template <class... Args>
     inline bool xaxis_variant<L, T, MT>::merge(const Args&... axes)
     {
         auto lambda = [&axes...](auto&& arg) -> bool
         {
-            using type = std::decay_t<decltype(arg)>;
-            return arg.merge(xtl::get<type>(axes.m_data)...);
+            using key_type = typename std::decay_t<decltype(arg)>::key_type;
+            return arg.merge(xaxis_variant_adaptor<L, T, MT, key_type>(axes)...);
         };
         return xtl::visit(lambda, m_data);
     }
@@ -384,10 +463,16 @@ namespace xf
     {
         auto lambda = [&axes...](auto&& arg) -> bool
         {
-            using type = std::decay_t<decltype(arg)>;
-            return arg.intersect(xtl::get<type>(axes.m_data)...);
+            using key_type = typename std::decay_t<decltype(arg)>::key_type;
+            return arg.intersect(xaxis_variant_adaptor<L, T, MT, key_type>(axes)...);
         };
         return xtl::visit(lambda, m_data);
+    }
+
+    template <class L, class T, class MT>
+    inline auto xaxis_variant<L, T, MT>::as_xaxis() const -> self_type
+    {
+        return xtl::visit([](auto&& arg) { return self_type(xaxis<typename std::decay_t<decltype(arg)>::key_type, T, MT>(arg)); }, m_data);
     }
 
     template <class L, class T, class MT>

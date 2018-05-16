@@ -51,7 +51,10 @@ namespace xf
     {
         fstring s1 = "abscissa";
         fstring s2 = "ordinate";
-        return coordinate(std::make_pair(s1, make_test_view_saxis()), std::make_pair(s2, make_test_view_iaxis()));
+        return coordinate<fstring>({
+            {s1, make_test_view_saxis()},
+            {s2, make_test_view_iaxis()}
+        });
     }
 
     // abscissa: { "a", "c", "d", "f", "g", "h", "m", "n" }
