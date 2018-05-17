@@ -597,7 +597,7 @@ namespace xf
         return lhs.less_than(rhs);
     }
 
-    template <class L, class T = std::size_t>
+    template <class T = std::size_t, class L>
     inline auto axis(L start, L stop, L step = 1) noexcept
     {
         auto range = xt::arange(start, stop, step);
