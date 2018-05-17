@@ -137,24 +137,24 @@ namespace xf
 
     TEST(xaxis_view, slice_conversion)
     {
-        using saxis_slice_type = xaxis_islice<std::size_t>;
-        using iaxis_slice_type = xaxis_islice<int>;
+        using saxis_slice_type = xt::xslice_variant<std::size_t>;
+        using iaxis_slice_type = xt::xslice_variant<int>;
 
         iaxis_slice_type is1 = xt::xall<int>(4);
         saxis_slice_type ss1(is1);
         EXPECT_EQ(ss1.size(), std::size_t(4));
 
-        iaxis_slice_type is2 = irange(2, 4);
+        iaxis_slice_type is2 = xt::variant_range(2, 4);
         saxis_slice_type ss2(is2);
         EXPECT_EQ(ss2.size(), std::size_t(is2.size()));
 
-        iaxis_slice_type is3 = irange(2, 9, 2);
+        iaxis_slice_type is3 = xt::variant_range(2, 9, 2);
         saxis_slice_type ss3(is3);
         EXPECT_EQ(ss3.size(), std::size_t(is3.size()));
         EXPECT_EQ(ss3.step_size(0), std::size_t(is3.step_size(0)));
 
-        using sextended_type = xaxis_extended_islice<std::size_t>;
-        using iextended_type = xaxis_extended_islice<int>;
+        using sextended_type = xt::xslice_extended<std::size_t>;
+        using iextended_type = xt::xslice_extended<int>;
 
         iextended_type is4 = is3;
         sextended_type ss4 = is4;

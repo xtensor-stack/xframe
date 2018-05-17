@@ -270,7 +270,7 @@ namespace xf
     auto select(E&& e, std::map<typename std::decay_t<E>::key_type, xaxis_slice<L>>&& slices);
 
     template <class E, class T = typename std::decay_t<E>::size_type>
-    auto iselect(E&& e, std::map<typename std::decay_t<E>::key_type, xaxis_extended_islice<T>> && slices);
+    auto iselect(E&& e, std::map<typename std::decay_t<E>::key_type, xt::xslice_extended<T>> && slices);
 
     /*********************************
      * xvariable_view implementation *
@@ -828,7 +828,7 @@ namespace xf
         using view_type = typename view_param_type::view_type;
 
         view_param_type params;
-        detail::fill_view_params<0>(params, e, xaxis_extended_islice<typename std::decay_t<E>::size_type>(std::forward<S>(slices))...);
+        detail::fill_view_params<0>(params, e, xt::xslice_extended<typename std::decay_t<E>::size_type>(std::forward<S>(slices))...);
 
         coordinate_view_type coordinate_view(std::move(params.coord_map));
         dimension_type view_dimension(std::move(params.dim_label_list));
@@ -910,7 +910,7 @@ namespace xf
     }
 
     template <class E, class T>
-    inline auto iselect(E&& e, std::map<typename std::decay_t<E>::key_type, xaxis_extended_islice<T>>&& slices)
+    inline auto iselect(E&& e, std::map<typename std::decay_t<E>::key_type, xt::xslice_extended<T>>&& slices)
     {
         using coordinate_type = typename std::decay_t<E>::coordinate_type;
         using dimension_type = typename std::decay_t<E>::dimension_type;
