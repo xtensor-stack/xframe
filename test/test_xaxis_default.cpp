@@ -19,6 +19,18 @@ namespace xf
     using label_type = std::vector<int>;
     using axis_default_type = xaxis_default<int>;
 
+    TEST(xaxis_default, axis)
+    {
+        auto a = axis(4);
+        auto labels = a.labels();
+
+        EXPECT_EQ(0u, labels[0]);
+        EXPECT_EQ(1u, labels[1]);
+        EXPECT_EQ(2u, labels[2]);
+        EXPECT_EQ(3u, labels[3]);
+        EXPECT_EQ(4u, labels.size());
+    }
+
     TEST(xaxis_default, labels)
     {
         axis_default_type a(4);

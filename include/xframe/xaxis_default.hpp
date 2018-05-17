@@ -334,6 +334,12 @@ namespace xf
     {
         return lhs.less_than(rhs);
     }
+
+    template <class L, class T = std::size_t>
+    inline auto axis(L size) noexcept
+    {
+        return xaxis_default<L, T>(size);
+    }
 }
 
 #endif

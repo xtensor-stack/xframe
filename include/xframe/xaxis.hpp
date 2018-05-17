@@ -19,6 +19,8 @@
 
 #include "xtl/xiterator_base.hpp"
 
+#include "xtensor/xbuilder.hpp"
+
 #include "xaxis_base.hpp"
 #include "xframe_utils.hpp"
 
@@ -593,6 +595,13 @@ namespace xf
     inline bool operator<(const xaxis_iterator<L, T, MT>& lhs, const xaxis_iterator<L, T, MT>& rhs) noexcept
     {
         return lhs.less_than(rhs);
+    }
+
+    template <class L, class T = std::size_t>
+    inline auto axis(L start, L stop, L step = 1) noexcept
+    {
+        auto range = xt::arange(start, stop, step);
+        return xaxis<L, T>(range.begin(), range.end());
     }
 }
 

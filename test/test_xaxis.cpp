@@ -18,6 +18,9 @@ namespace xf
     using fstring = xtl::xfixed_string<55>;
     using label_type = std::vector<fstring>;
     using axis_type = xaxis<fstring>;
+    using caxis_type = xaxis<char>;
+    using iaxis_type = xaxis<int>;
+    using daxis_type = xaxis<double>;
 
     TEST(xaxis, constructors)
     {
@@ -46,6 +49,21 @@ namespace xf
             axis_type a(l.cbegin(), l.cend());
             EXPECT_EQ(l, a.labels());
         }
+    }
+
+    TEST(xaxis, axis)
+    {
+        caxis_type a = axis('a', 'd');
+        EXPECT_EQ(a.size(), 3);
+        EXPECT_EQ(a['a'], 0);
+        EXPECT_EQ(a['b'], 1);
+        EXPECT_EQ(a['c'], 2);
+
+        daxis_type c = axis(0., 1., 0.1);
+        EXPECT_EQ(c.size(), 10);
+        EXPECT_EQ(c[0.], 0);
+        EXPECT_EQ(c[0.1], 1);
+        EXPECT_EQ(c[0.9], 9);
     }
 
     TEST(xaxis, size)
