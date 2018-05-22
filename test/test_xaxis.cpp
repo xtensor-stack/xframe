@@ -59,6 +59,13 @@ namespace xf
         EXPECT_EQ(a['b'], 1);
         EXPECT_EQ(a['c'], 2);
 
+        caxis_type b = axis({'b', 'e', 'f', 'g'});
+        EXPECT_EQ(b.size(), 4);
+        EXPECT_EQ(b['b'], 0);
+        EXPECT_EQ(b['e'], 1);
+        EXPECT_EQ(b['f'], 2);
+        EXPECT_EQ(b['g'], 3);
+
         daxis_type c = axis(0., 1., 0.1);
         EXPECT_EQ(c.size(), 10);
         EXPECT_EQ(c[0.], 0);
