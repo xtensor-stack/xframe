@@ -603,6 +603,12 @@ namespace xf
         auto range = xt::arange(start, stop, step);
         return xaxis<L, T>(range.begin(), range.end());
     }
+
+    template <class T = std::size_t, class L>
+    inline auto axis(std::initializer_list<L> init) noexcept
+    {
+        return xaxis<L, T>(init);
+    }
 }
 
 #endif
