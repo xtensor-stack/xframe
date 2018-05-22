@@ -17,7 +17,7 @@
 #include <cstddef>
 #include "xtl/xbasic_fixed_string.hpp"
 #include "xtl/xmeta_utils.hpp"
-#define DEFAULT_LABEL_LIST xtl::mpl::vector<int, std::size_t, xtl::xfixed_string<55>>
+#define DEFAULT_LABEL_LIST xtl::mpl::vector<int, std::size_t, char, xtl::xfixed_string<55>>
 #endif
 
 #ifndef DEFAULT_JOIN
