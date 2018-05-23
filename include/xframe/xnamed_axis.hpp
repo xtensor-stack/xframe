@@ -80,7 +80,7 @@ namespace xf
     {
         static_assert(is_axis<std::decay_t<A>>::value, "axis must be an axis type");
 
-        using T = typename A::mapped_type;
+        using T = typename std::decay_t<A>::mapped_type;
 
         return xnamed_axis<K, T>(name, axis);
     }
@@ -90,7 +90,7 @@ namespace xf
     {
         static_assert(is_axis<std::decay_t<A>>::value, "axis must be an axis type");
 
-        using T = typename A::mapped_type;
+        using T = typename std::decay_t<A>::mapped_type;
 
         return xnamed_axis<const char*, T>(name, axis);
     }

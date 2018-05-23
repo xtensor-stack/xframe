@@ -10,6 +10,7 @@
 #include <cstddef>
 #include "gtest/gtest.h"
 #include "test_fixture.hpp"
+#include "xframe/xnamed_axis.hpp"
 
 namespace xf
 {
@@ -75,6 +76,13 @@ namespace xf
 
         auto v2 = variable_type();
         EXPECT_EQ(1u, v2.size());
+    }
+
+    TEST(xvariable, axis_accessor)
+    {
+        auto v1 = make_test_variable();
+        auto a = v1["ordinate"].axis();
+        EXPECT_EQ(a.size(), 3);
     }
 
     TEST(xvariable, dimension)
