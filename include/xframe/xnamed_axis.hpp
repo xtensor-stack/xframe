@@ -96,7 +96,7 @@ namespace xf
     }
 
     template <class LB, class K, class T>
-    auto get_labels(xnamed_axis<K, T> n_axis)
+    auto get_labels(const xnamed_axis<K, T>& n_axis) -> const typename xaxis<LB, T>::label_list&
     {
         return get_labels<LB>(n_axis.axis());
     }

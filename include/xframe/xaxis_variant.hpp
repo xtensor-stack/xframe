@@ -592,7 +592,7 @@ namespace xf
     }
 
     template <class LB, class L, class T, class MT>
-    auto get_labels(xaxis_variant<L, T, MT> axis_variant)
+    auto get_labels(const xaxis_variant<L, T, MT>& axis_variant) -> const typename xaxis<LB, T, MT>::label_list&
     {
         using label_list = typename xaxis<LB, T, MT>::label_list;
 
