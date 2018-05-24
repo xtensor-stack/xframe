@@ -590,6 +590,16 @@ namespace xf
     {
         return lhs.less_than(rhs);
     }
+
+    template <class LB, class L, class T, class MT>
+    auto get_labels(const xaxis_variant<L, T, MT>& axis_variant) -> const typename xaxis<LB, T, MT>::label_list&
+    {
+        using label_list = typename xaxis<LB, T, MT>::label_list;
+
+        const label_list& labels = axis_variant.template labels<LB>();
+
+        return labels;
+    }
 }
 
 #endif

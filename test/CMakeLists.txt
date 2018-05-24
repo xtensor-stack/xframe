@@ -82,12 +82,14 @@ set(XFRAME_TESTS
     test_fixture_view.hpp
     test_xaxis.cpp
     test_xaxis_default.cpp
+    test_xaxis_variant.cpp
     test_xaxis_view.cpp
     test_xcoordinate.cpp
     test_xcoordinate_view.cpp
     test_xdimension.cpp
     test_xdynamic_variable.cpp
     test_xframe_utils.cpp
+    test_xnamed_axis.cpp
     test_xsequence_view.cpp
     test_xvariable.cpp
     test_xvariable_assign.cpp
