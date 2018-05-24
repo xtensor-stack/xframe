@@ -82,6 +82,7 @@ set(XFRAME_TESTS
     test_fixture_view.hpp
     test_xaxis.cpp
     test_xaxis_default.cpp
+    test_xaxis_variant.cpp
     test_xaxis_view.cpp
     test_xcoordinate.cpp
     test_xcoordinate_view.cpp
