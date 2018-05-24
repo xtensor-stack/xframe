@@ -37,7 +37,7 @@ namespace xf
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using size_type = xt::detail::common_size_type_t<std::decay_t<CT>...>;
-        using difference_type = xt::detail::common_difference_type_t<std::decay_t<CT>...>;     
+        using difference_type = xt::detail::common_difference_type_t<std::decay_t<CT>...>;
 
         using shape_type = typename data_type::shape_type;
 
@@ -149,7 +149,7 @@ namespace xf
         const coordinate_type& coords = coordinates<Join>();
         return coords.size();
     }
-    
+
     template <class F, class R, class... CT>
     template <class Join>
     inline auto xvariable_function<F, R, CT...>::dimension_labels() const-> const dimension_list&
@@ -290,7 +290,7 @@ namespace xf
     {
         return data_type(m_f, std::get<I>(m_e).data()...);
     }
-    
+
     template <class F, class R, class... CT>
     template <class Join, std::size_t... I, class S>
     inline auto xvariable_function<F, R, CT...>::select_impl(std::index_sequence<I...>, S&& selector) const -> const_reference

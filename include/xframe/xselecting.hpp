@@ -10,9 +10,13 @@
 #define XFRAME_XSELECTING_HPP
 
 #include <limits>
+
 #include "xtl/xsequence.hpp"
 #include "xtl/xoptional.hpp"
+
+#include "xframe_utils.hpp"
 #include "xcoordinate.hpp"
+#include "xdimension.hpp"
 
 namespace xf
 {
@@ -20,15 +24,6 @@ namespace xf
 
     namespace detail
     {
-        template <class S, std::size_t N>
-        struct xselector_sequence
-        {
-            using type = std::conditional_t<N == std::numeric_limits<std::size_t>::max(), std::vector<S>, std::array<S, N>>;
-        };
-
-        template <class S, std::size_t N>
-        using xselector_sequence_t = typename xselector_sequence<S, N>::type;
-
         template <class T>
         struct static_missing_impl;
 
@@ -72,7 +67,7 @@ namespace xf
         using outer_index_type = std::pair<index_type, bool>;
         using dimension_type = D;
         using sequence_type = detail::xselector_sequence_t<std::pair<key_type, mapped_type>, N>;
-        
+
         xselector() = default;
         xselector(const sequence_type& coord);
         xselector(sequence_type&& coord);
@@ -285,4 +280,3 @@ namespace xf
 }
 
 #endif
-

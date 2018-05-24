@@ -10,7 +10,7 @@
 #ifndef XFRAME_XNAMED_AXIS_HPP
 #define XFRAME_XNAMED_AXIS_HPP
 
-#include "xaxis_base.hpp"
+#include "xaxis_math.hpp"
 #include "xaxis.hpp"
 #include "xaxis_default.hpp"
 #include "xaxis_variant.hpp"
@@ -22,13 +22,22 @@ namespace xf
      * xnamed_axis *
      ***************/
 
-    template <class K, class T, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
-    class xnamed_axis
+    template <class K, class T, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST, class LT = xtl::mpl::cast_t<L, xtl::variant>>
+    class xnamed_axis : public xt::xexpression<xnamed_axis<K, T, MT, L, LT>>
     {
     public:
 
         using name_type = K;
         using axis_variant_type = xaxis_variant<L, T, MT>;
+        using size_type = typename axis_variant_type::size_type;
+
+        using value_type = LT;
+        using reference = value_type;
+        using const_reference = const value_type;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+
+        using expression_tag = xaxis_expression_tag;
 
         template <class A>
         xnamed_axis(const name_type& name, A&& axis);
@@ -38,6 +47,8 @@ namespace xf
         const name_type& name() const & noexcept;
 
         const axis_variant_type& axis() const & noexcept;
+
+        const value_type& label(size_type i) const & noexcept;
 
     private:
 
@@ -49,30 +60,36 @@ namespace xf
      * xnamed_axis implementation *
      ******************************/
 
-    template <class K, class T, class MT, class L>
+    template <class K, class T, class MT, class L, class LT>
     template <class A>
-    inline xnamed_axis<K, T, MT, L>::xnamed_axis(const name_type& name, A&& axis)
+    inline xnamed_axis<K, T, MT, L, LT>::xnamed_axis(const name_type& name, A&& axis)
         : m_name(name), m_axis(std::forward<A>(axis))
     {
     }
 
-    template <class K, class T, class MT, class L>
+    template <class K, class T, class MT, class L, class LT>
     template <class A>
-    inline xnamed_axis<K, T, MT, L>::xnamed_axis(name_type&& name, A&& axis)
+    inline xnamed_axis<K, T, MT, L, LT>::xnamed_axis(name_type&& name, A&& axis)
         : m_name(std::move(name)), m_axis(std::forward<A>(axis))
     {
     }
 
-    template <class K, class T, class MT, class L>
-    inline auto xnamed_axis<K, T, MT, L>::name() const & noexcept -> const name_type&
+    template <class K, class T, class MT, class L, class LT>
+    inline auto xnamed_axis<K, T, MT, L, LT>::name() const & noexcept -> const name_type&
     {
         return m_name;
     }
 
-    template <class K, class T, class MT, class L>
-    inline auto xnamed_axis<K, T, MT, L>::axis() const & noexcept -> const axis_variant_type&
+    template <class K, class T, class MT, class L, class LT>
+    inline auto xnamed_axis<K, T, MT, L, LT>::axis() const & noexcept -> const axis_variant_type&
     {
         return m_axis;
+    }
+
+    template <class K, class T, class MT, class L, class LT>
+    inline auto xnamed_axis<K, T, MT, L, LT>::label(size_type i) const & noexcept -> const LT&
+    {
+        return get_labels<LT>(m_axis)[i];
     }
 
     template <class K, class A>
@@ -80,9 +97,10 @@ namespace xf
     {
         static_assert(is_axis<std::decay_t<A>>::value, "axis must be an axis type");
 
-        using T = typename std::decay_t<A>::mapped_type;
+        using key_type = typename std::decay_t<A>::key_type;
+        using mapped_type = typename std::decay_t<A>::mapped_type;
 
-        return xnamed_axis<K, T>(name, axis);
+        return xnamed_axis<K, mapped_type, hash_map_tag, DEFAULT_LABEL_LIST, key_type>(name, axis);
     }
 
     template <class A>
@@ -90,13 +108,14 @@ namespace xf
     {
         static_assert(is_axis<std::decay_t<A>>::value, "axis must be an axis type");
 
-        using T = typename std::decay_t<A>::mapped_type;
+        using key_type = typename std::decay_t<A>::key_type;
+        using mapped_type = typename std::decay_t<A>::mapped_type;
 
-        return xnamed_axis<const char*, T>(name, axis);
+        return xnamed_axis<const char*, mapped_type, hash_map_tag, DEFAULT_LABEL_LIST, key_type>(name, axis);
     }
 
-    template <class LB, class K, class T>
-    auto get_labels(const xnamed_axis<K, T>& n_axis) -> const typename xaxis<LB, T>::label_list&
+    template <class LB, class K, class T, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
+    auto get_labels(const xnamed_axis<K, T, MT, L, LB>& n_axis) -> const typename xaxis<LB, T, MT>::label_list&
     {
         return get_labels<LB>(n_axis.axis());
     }

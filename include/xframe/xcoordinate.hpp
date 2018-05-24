@@ -74,8 +74,8 @@ namespace xf
         explicit xcoordinate(const map_type& axes);
         explicit xcoordinate(map_type&& axes);
         xcoordinate(std::initializer_list<value_type> init);
-        template <class... K1>
-        explicit xcoordinate(xnamed_axis<K1, S, MT, L>... axes);
+        template <class... K1, class... LT>
+        explicit xcoordinate(xnamed_axis<K1, S, MT, L, LT>... axes);
 
         void clear();
 
@@ -114,8 +114,8 @@ namespace xf
     template <class K, class S = std::size_t, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
     xcoordinate<K, S, MT, L> coordinate(std::map<K, xaxis_variant<L, S, MT>>&& axes);
 
-    template <class K, class... K1, class S, class MT, class L>
-    xcoordinate<K, S, MT, L> coordinate(xnamed_axis<K, S, MT, L> axis, xnamed_axis<K1, S, MT, L>... axes);
+    template <class K, class... K1, class S, class MT, class L, class LT, class... LT1>
+    xcoordinate<K, S, MT, L> coordinate(xnamed_axis<K, S, MT, L, LT> axis, xnamed_axis<K1, S, MT, L, LT1>... axes);
 
     template <class Join, class K, class S, class MT, class L, class... Args>
     xtrivial_broadcast broadcast_coordinates(xcoordinate<K, S, MT, L>& output, const Args&... coordinates);
@@ -229,8 +229,8 @@ namespace xf
     }
 
     template <class K, class S, class MT, class L>
-    template <class... K1>
-    inline xcoordinate<K, S, MT, L>::xcoordinate(xnamed_axis<K1, S, MT, L>... axes)
+    template <class... K1, class... LT>
+    inline xcoordinate<K, S, MT, L>::xcoordinate(xnamed_axis<K1, S, MT, L, LT>... axes)
         : base_type({ value_type(std::move(axes).name(), std::move(axes).axis())... })
     {
     }
@@ -397,8 +397,8 @@ namespace xf
         return xcoordinate<K, S, MT, L>(std::move(axes));
     }
 
-    template <class K, class... K1, class S, class MT, class L>
-    xcoordinate<K, S, MT, L> coordinate(xnamed_axis<K, S, MT, L> axis, xnamed_axis<K1, S, MT, L>... axes)
+    template <class K, class... K1, class S, class MT, class L, class LT, class... LT1>
+    xcoordinate<K, S, MT, L> coordinate(xnamed_axis<K, S, MT, L, LT> axis, xnamed_axis<K1, S, MT, L, LT1>... axes)
     {
         return xcoordinate<K, S, MT, L>(axis, axes...);
     };
