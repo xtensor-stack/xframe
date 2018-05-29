@@ -609,6 +609,12 @@ namespace xf
     {
         return xaxis<L, T>(init);
     }
+
+    template <class T = std::size_t>
+    inline auto axis(std::initializer_list<const char*> init) noexcept
+    {
+        return xaxis<xtl::xfixed_string<55>, T>(init.begin(), init.end());
+    }
 }
 
 #endif
