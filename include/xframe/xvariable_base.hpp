@@ -13,6 +13,7 @@
 
 #include "xcoordinate_system.hpp"
 #include "xselecting.hpp"
+#include "xnamed_axis.hpp"
 
 namespace xf
 {
@@ -68,10 +69,13 @@ namespace xf
         using coordinate_type = typename coordinate_base::coordinate_type;
         using dimension_type = typename coordinate_base::dimension_type;
         using dimension_list = typename dimension_type::label_list;
+        using axis_type = typename coordinate_type::axis_type;
 
         using coordinate_map = typename coordinate_type::map_type;
         using coordinate_initializer = std::initializer_list<typename coordinate_type::value_type>;
         using key_type = typename coordinate_map::key_type;
+
+        using named_axis_type = xnamed_axis<key_type, typename axis_type::mapped_type>;
 
         template <std::size_t N = dynamic()>
         using selector_traits = xselector_traits<coordinate_type, dimension_type, N>;
@@ -110,6 +114,8 @@ namespace xf
 
         data_type& data() noexcept;
         const data_type& data() const noexcept;
+
+        named_axis_type operator[](const key_type& key) const;
 
         template <class... Args>
         reference operator()(Args... args);
@@ -175,7 +181,7 @@ namespace xf
 
         xvariable_base() = default;
         xvariable_base(coordinate_initializer coords);
-        
+
         template <class C, class DM, class = enable_xvariable<C, DM>>
         xvariable_base(C&& coords, DM&& dims);
         xvariable_base(const coordinate_map& coords, const dimension_list& dims);
@@ -259,7 +265,7 @@ namespace xf
     {
         return detail::static_missing<const_reference>();
     }
-    
+
     template <class D>
     inline auto xvariable_base<D>::shape() const -> const shape_type&
     {
@@ -277,7 +283,7 @@ namespace xf
     {
         resize_impl(std::move(coords), std::move(dims));
     }
-    
+
     template <class D>
     inline void xvariable_base<D>::reshape(const coordinate_type& coords, const dimension_type& dims)
     {
@@ -300,6 +306,12 @@ namespace xf
     inline auto xvariable_base<D>::data() const noexcept -> const data_type&
     {
         return derived_cast().data_impl();
+    }
+
+    template <class D>
+    inline auto xvariable_base<D>::operator[](const key_type& key) const -> named_axis_type
+    {
+        return named_axis_type(key, coordinates()[key]);
     }
 
     template <class D>
@@ -441,7 +453,7 @@ namespace xf
     {
         return select_impl(iselector_type<N>(std::move(selector)));
     }
-    
+
     template <class D>
     inline auto xvariable_base<D>::make_dimension_mapping(coordinate_initializer coord) -> dimension_type
     {
@@ -507,7 +519,7 @@ namespace xf
         typename S::index_type idx = selector.get_index(coordinates(), dimension_mapping());
         return data().element(idx.cbegin(), idx.cend());
     }
-    
+
     template <class D>
     template <class S>
     inline auto xvariable_base<D>::select_outer(const S& selector) const -> const_reference
@@ -515,7 +527,7 @@ namespace xf
         typename S::outer_index_type idx = selector.get_outer_index(coordinates(), dimension_mapping());
         return idx.second ? data().element(idx.first.cbegin(), idx.first.cend()) : missing();
     }
-    
+
     template <class D>
     template <class Join, class S>
     inline auto xvariable_base<D>::select_join(const S& selector) const -> const_reference
@@ -543,4 +555,3 @@ namespace xf
 }
 
 #endif
-
