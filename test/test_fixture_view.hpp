@@ -57,9 +57,16 @@ namespace xf
         });
     }
 
-    // abscissa: { "a", "c", "d", "f", "g", "h", "m", "n" }
-    // ordinate: { 1, 2, 4, 5, 6, 8, 12, 13 }
-    // dims: {{ "abscissa", 0 }, { "ordinate", 1 }}
+    //                              ordinate
+    //                 1,   2,   4,   5,   6,   8,  12,  13
+    //           a {{  0,   1,   2,   3,   4,   5,   6,   7},
+    //           c  {  8,   9,  10,  11,  12,  13,  14,  15},
+    //           d  { 16,  17,  18, N/A, N/A,  21,  22,  23},
+    // abscissa  f  { 24,  25,  26,  27,  28,  29,  30,  31},
+    //           g  { 32,  33,  34,  35,  36,  37,  38,  39},
+    //           h  { 40,  41,  42,  43,  44,  45,  46,  47},
+    //           m  { 48,  49,  50,  51,  52,  53,  54,  55},
+    //           n  { 56,  57,  58,  59,  60,  61,  62,  63}}
     inline variable_type make_test_view_variable()
     {
         coordinate_type c = make_test_view_coordinate();
