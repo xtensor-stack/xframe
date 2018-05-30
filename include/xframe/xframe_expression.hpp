@@ -26,6 +26,18 @@ namespace xf
     struct xvariable_comparable : xtl::conjunction<is_xvariable_expression<E>...>
     {
     };
+
+    struct xaxis_expression_tag {};
+
+    template <class E>
+    struct is_xaxis_expression : std::is_same<xt::xexpression_tag_t<E>, xaxis_expression_tag>
+    {
+    };
+
+    template <class... E>
+    struct xaxis_comparable : xtl::conjunction<is_xaxis_expression<E>...>
+    {
+    };
 }
 
 #endif

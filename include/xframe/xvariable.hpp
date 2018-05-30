@@ -256,7 +256,7 @@ namespace xf
     {
         return semantic_base::assign(e);
     }
-    
+
     template <class CCT, class ECT>
     inline auto xvariable<CCT, ECT>::data_impl() noexcept -> data_type&
     {

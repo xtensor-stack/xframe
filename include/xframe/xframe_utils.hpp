@@ -77,6 +77,15 @@ namespace xf
             res &= merge_to_impl(out, input...);
             return res;
         }
+
+        template <class S, std::size_t N>
+        struct xselector_sequence
+        {
+            using type = std::conditional_t<N == std::numeric_limits<std::size_t>::max(), std::vector<S>, std::array<S, N>>;
+        };
+
+        template <class S, std::size_t N>
+        using xselector_sequence_t = typename xselector_sequence<S, N>::type;
     }
 
     template <class CO, class... CI>
