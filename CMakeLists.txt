@@ -68,6 +68,7 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_assign.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_base.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_function.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xvariable_masked_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_math.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_meta.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_scalar.hpp
