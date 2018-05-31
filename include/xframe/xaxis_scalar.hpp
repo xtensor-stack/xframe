@@ -48,7 +48,7 @@ namespace xf
 
         xaxis_scalar(const xt::xscalar<CT>& v) noexcept;
 
-        template <class S>
+        template <std::size_t N = dynamic(), class S>
         const_reference operator()(S&& /*selector*/) const;
 
     private:
@@ -67,7 +67,7 @@ namespace xf
     }
 
     template <class CT>
-    template <class S>
+    template <std::size_t N, class S>
     auto xaxis_scalar<CT>::operator()(S&& /*selector*/) const -> const_reference
     {
         return m_data;

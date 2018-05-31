@@ -47,7 +47,7 @@ namespace xf
         template <class Func, class U = std::enable_if<!std::is_base_of<Func, self_type>::value>>
         xaxis_function(Func&& f, CT... e) noexcept;
 
-        template <std::size_t N = std::numeric_limits<size_type>::max()>
+        template <std::size_t N = dynamic()>
         const_reference operator()(const selector_sequence_type<N>& selector) const;
 
     private:
@@ -82,7 +82,11 @@ namespace xf
     template <std::size_t N, std::size_t... I>
     inline auto xaxis_function<F, R, CT...>::evaluate(std::index_sequence<I...>, const selector_sequence_type<N>& selector) const -> const_reference
     {
-        return m_f(std::get<I>(m_e)(selector)...);
+#ifdef _MSC_VER
+        return m_f(std::get<I>(m_e).operator()<N>(selector)...);
+#else
+        return m_f(std::get<I>(m_e).template operator()<N>(selector)...);
+#endif
     }
 }
 

@@ -17,6 +17,9 @@
 
 namespace xf
 {
+    template <class CTV, class CTAX>
+    class xvariable_masked_view;
+
     using xt::noalias;
 
     template <class C, class DM>
@@ -116,6 +119,9 @@ namespace xf
         const data_type& data() const noexcept;
 
         named_axis_type operator[](const key_type& key) const;
+
+        template <class LT>
+        xnamed_axis<key_type, typename axis_type::mapped_type, hash_map_tag, DEFAULT_LABEL_LIST, LT> axis(const key_type& key) const;
 
         template <class... Args>
         reference operator()(Args... args);
@@ -227,6 +233,9 @@ namespace xf
 
         derived_type& derived_cast() noexcept;
         const derived_type& derived_cast() const noexcept;
+
+        template <class CTV, class CTAX>
+        friend class xvariable_masked_view;
     };
 
     /*********************************
@@ -312,6 +321,13 @@ namespace xf
     inline auto xvariable_base<D>::operator[](const key_type& key) const -> named_axis_type
     {
         return named_axis_type(key, coordinates()[key]);
+    }
+
+    template <class D>
+    template <class LT>
+    inline auto xvariable_base<D>::axis(const key_type& key) const -> xnamed_axis<key_type, typename axis_type::mapped_type, hash_map_tag, DEFAULT_LABEL_LIST, LT>
+    {
+        return xnamed_axis<key_type, typename axis_type::mapped_type, hash_map_tag, DEFAULT_LABEL_LIST, LT>(key, coordinates()[key]);
     }
 
     template <class D>

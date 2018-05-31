@@ -78,7 +78,7 @@ namespace xf
                 return m_named_axis.label(sel.second);
             }
         }
-        throw std::runtime_error(std::string("Missing label for axis ") + m_named_axis.name());
+        throw std::runtime_error(std::string("Missing label for axis ") + std::string(m_named_axis.name()));
     }
 }
 
