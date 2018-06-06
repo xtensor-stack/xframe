@@ -49,6 +49,7 @@ namespace xf
         derived_type derived_cast() && noexcept;
 
         const label_list& labels() const noexcept;
+        key_type label(size_type i) const;
 
         bool empty() const noexcept;
         size_type size() const noexcept;
@@ -172,6 +173,12 @@ namespace xf
     inline auto xaxis_base<D>::labels() const noexcept -> const label_list&
     {
         return m_labels;
+    }
+
+    template <class D>
+    inline auto xaxis_base<D>::label(size_type i) const -> key_type
+    {
+        return m_labels[i];
     }
 
     template <class D>

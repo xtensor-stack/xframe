@@ -54,6 +54,7 @@ namespace xf
         bool broadcast(const Args&... dims);
 
         using base_type::labels;
+        using base_type::label;
         using base_type::empty;
         using base_type::size;
         using base_type::contains;
