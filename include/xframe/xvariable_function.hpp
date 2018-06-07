@@ -281,7 +281,7 @@ namespace xf
     template <std::size_t... I, class... Args>
     inline auto xvariable_function<F, R, CT...>::access_impl(std::index_sequence<I...>, Args... args) const -> const_reference
     {
-        return m_f(xt::detail::get_element(std::get<I>(m_e), args...)...);
+        return m_f(std::get<I>(m_e)(args...)...);
     }
 
     template <class F, class R, class... CT>
