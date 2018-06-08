@@ -13,6 +13,7 @@
 #include "xtl/xbasic_fixed_string.hpp"
 #include "xframe/xvariable.hpp"
 #include "xframe/xnamed_axis.hpp"
+#include "xframe/xmasked_view.hpp"
 
 namespace xf
 {
@@ -233,6 +234,22 @@ namespace xf
         d(0, 2).has_value() = false;
         d(1, 0).has_value() = false;
         return d;
+    }
+
+    // masked_data = {{ 1. ,  2., N/A },
+    //                { N/A, N/A, N/A },
+    //                { 7. ,  8.,  9. }}
+    inline auto make_masked_data(data_type& data)
+    {
+        auto axis1 = named_axis(fstring("abs"), axis({'x', 'y', 'z'}));
+
+        auto func = axis_function_mask(
+            not_equal(std::move(axis1), 'y'),
+            dimension_type({"abs", "ord"}),
+            std::array<int, 2>({3, 3})
+        );
+
+        return masked_view(data, std::move(func));
     }
 
     // abscissa: { "a", "c", "d" }
