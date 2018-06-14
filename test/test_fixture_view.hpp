@@ -124,6 +124,31 @@ namespace xf
         return val;
     }
 
+    //                              ordinate
+    //                 1,   2,   4,   5,   6,   8,  12,  13
+    //           a {{N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    //           c  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    //           d  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    // abscissa  f  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    //           g  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    //           h  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    //           m  {N/A, N/A, N/A, N/A, N/A, N/A, N/A, N/A},
+    //           n  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2}
+    inline variable_type make_masked_variable_view3()
+    {
+        variable_type val = make_test_view_variable();
+        val.data().fill(5.2);
+        for (std::size_t o = 0; o < val.shape()[1]; ++o)
+        {
+            val(6, o) = xtl::missing<double>();
+        }
+        for (std::size_t a = 0; a < val.shape()[0]; ++a)
+        {
+            val(a, 0) = xtl::missing<double>();
+        }
+        return val;
+    }
+
     // abscissa: { "f", "g", "h", "m", "n" }
     // ordinate: { 1, 4, 6 }
     inline coordinate_view_type build_coordinate_view(const coordinate_type& c)

@@ -208,12 +208,27 @@ namespace xf
     TEST(xvariable_masked_view, data)
     {
         variable_type var = make_test_view_variable();
+        variable_type test_var = make_test_view_variable();
+        variable_type expected = make_masked_variable_view2();
+        variable_type expected2 = make_masked_variable_view3();
+
         auto masked_var = where(
             var,
             not_equal(var.axis<fstring>("abscissa"), fstring("m")) &&
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
+        // Check that the data didn't change
+        ASSERT_EQ(var.data(), test_var.data());
+        ASSERT_EQ(var.data().storage(), test_var.data().storage());
+
         ASSERT_NE(var.data(), masked_var.data());
+        ASSERT_NE(var.data().storage(), masked_var.data().storage());
+
+        ASSERT_EQ(expected.data(), masked_var.data());
+
+        masked_var.data().fill(5.2);
+
+        ASSERT_EQ(expected2.data(), masked_var.data());
     }
 }

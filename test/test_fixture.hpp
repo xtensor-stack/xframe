@@ -249,7 +249,7 @@ namespace xf
             std::array<int, 2>({3, 3})
         );
 
-        return masked_view(data, std::move(func));
+        return xt::masked_view(data, std::move(func));
     }
 
     // abscissa: { "a", "c", "d" }
