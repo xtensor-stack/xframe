@@ -9,6 +9,9 @@
 
 #include "gtest/gtest.h"
 
+#include "xtensor/xarray.hpp"
+#include "xtensor/xfunction.hpp"
+
 #include "xframe/xnamed_axis.hpp"
 
 #include "test_fixture.hpp"
@@ -75,19 +78,56 @@ namespace xf
         EXPECT_EQ(func2({{"abs", 10}, {"ord", 5}}), 29);
     }
 
-    TEST(xaxis_function, wrapper)
+    TEST(xaxis_function, mask)
     {
-        auto axis1 = named_axis(fstring("abs"), axis(15));
-        auto axis2 = named_axis(fstring("ord"), axis(10, 20, 1));
-        auto axis3 = named_axis(fstring("alt"), axis('b', 'j'));
+        auto axis1 = named_axis(fstring("abs"), axis({0, 2, 5}));
+        auto axis2 = named_axis(fstring("ord"), axis({'a', 'c', 'i'}));
 
-        auto wrapper = axis_function_wrapper(
-            equal(axis3, 'b') || axis3 >= 'g' && not_equal(axis3, 'i'),
-            dimension_type({"abs", "alt", "ord"})
+        auto array = xt::xarray<bool>({
+            {true, true, true},
+            {true, true, true},
+            {true, true, true}
+        });
+
+        auto mask = axis_function_mask(
+            equal(axis2, 'c') || equal(axis1, 0),
+            dimension_type({"abs", "ord"}),
+            array.shape()
         );
 
-        EXPECT_EQ(wrapper({{"ord", 5}, {"abs", 6}, {"alt", 0}}), wrapper(6, 0, 5));
-        EXPECT_EQ(wrapper({{"alt", 0}, {"abs", 6}, {"ord", 5}}), wrapper(6, 0, 5));
-        EXPECT_EQ(wrapper({{"alt", 1}, {"abs", 6}, {"ord", 0}}), wrapper(6, 1, 0));
+        auto expected = xt::xarray<bool>({
+            { true,  true,  true},
+            {false,  true, false},
+            {false,  true, false}
+        });
+
+        EXPECT_EQ(mask, expected);
+    }
+
+    TEST(xaxis_function, mask_op)
+    {
+        auto axis1 = named_axis(fstring("abs"), axis({0, 2, 5}));
+        auto axis2 = named_axis(fstring("ord"), axis({'a', 'c', 'i'}));
+
+        auto array = xt::xarray<bool>({
+            { true,  true, false},
+            { true,  true,  true},
+            { true,  true,  true}
+        });
+
+        auto mask = axis_function_mask(
+            equal(axis2, 'i') || equal(axis1, 0),
+            dimension_type({"abs", "ord"}),
+            array.shape()
+        );
+
+        auto expected = xt::xarray<bool>({
+            { true,  true, false},
+            {false, false,  true},
+            {false, false,  true}
+        });
+
+        xt::xarray<bool> val = array && mask;
+        EXPECT_EQ(val, expected);
     }
 }
