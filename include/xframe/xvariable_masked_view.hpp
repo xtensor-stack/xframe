@@ -10,10 +10,13 @@
 #ifndef XFRAME_XWHERE_VIEW_HPP
 #define XFRAME_XWHERE_VIEW_HPP
 
+#include "xtensor/xgenerator.hpp"
+
 #include "xframe_utils.hpp"
 #include "xselecting.hpp"
 #include "xframe_config.hpp"
 #include "xcoordinate_system.hpp"
+#include "xmasked_view.hpp"
 
 namespace xf
 {
@@ -73,7 +76,14 @@ namespace xf
         using inner_types = xt::xcontainer_inner_types<self_type>;
         using xvariable_expression_type = typename inner_types::xvariable_expression_type;
         using xaxis_expression_type = typename inner_types::xaxis_expression_type;
-        using data_type = typename xvariable_expression_type::data_type;
+
+        using coordinate_type = typename coordinate_base::coordinate_type;
+        using dimension_type = typename coordinate_base::dimension_type;
+
+        using inner_data_type = typename xvariable_expression_type::data_type;
+        using axis_func_impl = detail::axis_function_mask_impl<xaxis_expression_type&, const dimension_type&>;
+        using mask_type = xt::xgenerator<axis_func_impl, typename axis_func_impl::value_type, typename xvariable_expression_type::shape_type>;
+        using data_type = xt::xmasked_view<inner_data_type&, mask_type>;
 
         static constexpr bool is_const = std::is_const<std::remove_reference_t<CTV>>::value;
         using value_type = typename xvariable_expression_type::value_type;
@@ -89,8 +99,6 @@ namespace xf
         using size_type = typename xvariable_expression_type::size_type;
         using difference_type = typename xvariable_expression_type::difference_type;
 
-        using coordinate_type = typename coordinate_base::coordinate_type;
-        using dimension_type = typename coordinate_base::dimension_type;
         using dimension_list = typename dimension_type::label_list;
         using shape_type = typename data_type::shape_type;
         using squeeze_map = std::map<typename dimension_type::mapped_type, typename coordinate_type::index_type>;
@@ -114,7 +122,8 @@ namespace xf
         template <std::size_t N = dynamic()>
         using locator_sequence_type = typename selector_traits<N>::locator_sequence_type;
 
-        xvariable_masked_view(CTV&& variable_expr, CTAX&& axis_expr);
+        template <class V, class AX>
+        xvariable_masked_view(V&& variable_expr, AX&& axis_expr);
 
         const_reference missing() const;
         reference missing();
@@ -129,9 +138,8 @@ namespace xf
 
         const shape_type& shape() const;
 
-        // TODO
-        // data_type& data() noexcept;
-        // const data_type& data() const noexcept;
+        data_type& data() noexcept;
+        const data_type& data() const noexcept;
 
         template <class... Args>
         reference operator()(Args... args);
@@ -195,15 +203,6 @@ namespace xf
 
     private:
 
-        template <class T, class... Args, std::size_t... I>
-        T call_operator_impl(T&& missing_val, std::index_sequence<I...> idx_seq, Args... args) const;
-
-        template <std::size_t N = dynamic()>
-        reference element_impl(const index_type<N>& index);
-
-        template <std::size_t N = dynamic()>
-        const_reference element_impl(const index_type<N>& index) const;
-
         template <class... Args, std::size_t... I>
         reference locate_impl(std::index_sequence<I...>, Args&&... args);
 
@@ -234,17 +233,12 @@ namespace xf
         template <std::size_t N = dynamic()>
         iselector_sequence_type<N> to_iselector(const locator_sequence_type<N>& locator) const;
 
-        template <std::size_t N = dynamic()>
-        iselector_sequence_type<N> to_iselector(const index_type<N>& index) const;
-
-        template <class... Args, std::size_t... I>
-        iselector_sequence_type<sizeof...(Args)> indices_to_iselector(std::index_sequence<I...>, Args&&... args) const;
-
         template <class... Args, std::size_t... I>
         iselector_sequence_type<sizeof...(Args)> labels_to_iselector(std::index_sequence<I...>, Args&&... args) const;
 
         CTV m_expr;
         CTAX m_axis_expr;
+        data_type m_data;
         thread_local static value_type m_missing_ref;
 
         // friend class xt::xview_semantic<xvariable_masked_view<CTV, CTAX>>;
@@ -258,9 +252,16 @@ namespace xf
     thread_local typename xvariable_masked_view<CTV, CTAX>::value_type xvariable_masked_view<CTV, CTAX>::m_missing_ref = value_type(inner_value_type(0), false);
 
     template <class CTV, class CTAX>
-    inline xvariable_masked_view<CTV, CTAX>::xvariable_masked_view(CTV&& variable_expr, CTAX&& axis_expr)
+    template <class V, class AX>
+    inline xvariable_masked_view<CTV, CTAX>::xvariable_masked_view(V&& variable_expr, AX&& axis_expr)
         : coordinate_base(variable_expr.coordinates(), variable_expr.dimension_mapping()),
-          m_expr(std::forward<CTV>(variable_expr)), m_axis_expr(std::forward<CTAX>(axis_expr))
+          m_expr(std::forward<V>(variable_expr)),
+          m_axis_expr(std::forward<AX>(axis_expr)),
+          m_data(m_expr.data(), axis_function_mask(
+              m_axis_expr,
+              m_expr.dimension_mapping(),
+              m_expr.shape()
+          ))
     {
     }
 
@@ -284,78 +285,57 @@ namespace xf
     }
 
     template <class CTV, class CTAX>
+    inline auto xvariable_masked_view<CTV, CTAX>::data() noexcept -> data_type&
+    {
+        return m_data;
+    }
+
+    template <class CTV, class CTAX>
+    inline auto xvariable_masked_view<CTV, CTAX>::data() const noexcept -> const data_type&
+    {
+        return m_data;
+    }
+
+    template <class CTV, class CTAX>
     template <class... Args>
     inline auto xvariable_masked_view<CTV, CTAX>::operator()(Args... args) -> reference
     {
-        return call_operator_impl(missing(), std::make_index_sequence<sizeof...(Args)>(), args...);
+        return m_data(args...);
     }
 
     template <class CTV, class CTAX>
     template <class... Args>
     inline auto xvariable_masked_view<CTV, CTAX>::operator()(Args... args) const -> const_reference
     {
-        return call_operator_impl(missing(), std::make_index_sequence<sizeof...(Args)>(), args...);
-    }
-
-    template <class CTV, class CTAX>
-    template <class T, class... Args, std::size_t... I>
-    inline auto xvariable_masked_view<CTV, CTAX>::call_operator_impl(T&& missing_val, std::index_sequence<I...> idx_seq, Args... args) const -> T
-    {
-        auto iselector = indices_to_iselector(idx_seq, args...);
-
-#ifdef _MSC_VER
-        bool res = m_axis_expr.operator()<sizeof...(Args)>(iselector);
-#else
-        bool res = m_axis_expr.template operator()<sizeof...(Args)>(iselector);
-#endif
-        if (!res)
-        {
-            return missing_val;
-        }
-
-        return m_expr(args...);
+        return m_data(args...);
     }
 
     template <class CTV, class CTAX>
     template <std::size_t N>
     inline auto xvariable_masked_view<CTV, CTAX>::element(const index_type<N>& index) -> reference
     {
-        return element_impl<N>(index);
+        return m_data.element(index.cbegin(), index.cend());
     }
 
     template <class CTV, class CTAX>
     template <std::size_t N>
     inline auto xvariable_masked_view<CTV, CTAX>::element(const index_type<N>& index) const -> const_reference
     {
-        return element_impl<N>(index);
+        return m_data.element(index.cbegin(), index.cend());
     }
 
     template <class CTV, class CTAX>
     template <std::size_t N>
     inline auto xvariable_masked_view<CTV, CTAX>::element(index_type<N>&& index) -> reference
     {
-        return element_impl<N>(std::move(index));
+        return m_data.element(index.cbegin(), index.cend());
     }
 
     template <class CTV, class CTAX>
     template <std::size_t N>
     inline auto xvariable_masked_view<CTV, CTAX>::element(index_type<N>&& index) const -> const_reference
     {
-        return element_impl<N>(std::move(index));
-    }
-
-    template <class CTV, class CTAX>
-    template <std::size_t N>
-    inline auto xvariable_masked_view<CTV, CTAX>::element_impl(const index_type<N>& index) -> reference
-    {
-        return iselect_impl<N>(missing(), to_iselector<N>(index));
-    }
-
-    template <class CTV, class CTAX>
-    template <std::size_t N>
-    inline auto xvariable_masked_view<CTV, CTAX>::element_impl(const index_type<N>& index) const -> const_reference
-    {
-        return iselect_impl<N>(missing(), to_iselector<N>(index));
+        return m_data.element(index.cbegin(), index.cend());
     }
 
     template <class CTV, class CTAX>
@@ -589,19 +569,6 @@ namespace xf
     }
 
     template <class CTV, class CTAX>
-    template <std::size_t N>
-    inline auto xvariable_masked_view<CTV, CTAX>::to_iselector(const index_type<N>& index) const -> iselector_sequence_type<N>
-    {
-        auto iselector = xtl::make_sequence<iselector_sequence_type<N>>(index.size());
-        for (std::size_t idx = 0; idx < index.size(); ++idx)
-        {
-            iselector[idx] = std::make_pair(m_expr.dimension_mapping().label(idx), index[idx]);
-        }
-
-        return iselector;
-    }
-
-    template <class CTV, class CTAX>
     template <class... Args, std::size_t... I>
     inline auto xvariable_masked_view<CTV, CTAX>::labels_to_iselector(std::index_sequence<I...>, Args&&... args) const -> iselector_sequence_type<sizeof...(Args)>
     {
@@ -613,19 +580,16 @@ namespace xf
         };
     }
 
-    template <class CTV, class CTAX>
-    template <class... Args, std::size_t... I>
-    inline auto xvariable_masked_view<CTV, CTAX>::indices_to_iselector(std::index_sequence<I...>, Args&&... args) const -> iselector_sequence_type<sizeof...(Args)>
-    {
-        return {
-            std::make_pair(m_expr.dimension_mapping().label(I), static_cast<size_type>(args))...
-        };
-    }
-
     template <class EV, class EAX>
     inline auto where(EV&& variable_expr, EAX&& axis_expr)
     {
         return xvariable_masked_view<EV, EAX>(std::forward<EV>(variable_expr), std::forward<EAX>(axis_expr));
+    }
+
+    template <class EV, class EAX>
+    inline std::ostream& operator<<(std::ostream& out, const xvariable_masked_view<EV, EAX>& v)
+    {
+        return print_variable_expression(out, v);
     }
 }
 

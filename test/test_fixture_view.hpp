@@ -77,6 +77,78 @@ namespace xf
         return variable_type(std::move(d), std::move(c), dimension_type({ "abscissa", "ordinate" }));
     }
 
+    //                              ordinate
+    //                 1,   2,   4,   5,   6,   8,  12,  13
+    //           a {{  0,   1,   2,   3, N/A, N/A, N/A, N/A},
+    //           c  {  8,   9,  10,  11, N/A, N/A, N/A, N/A},
+    //           d  { 16,  17,  18, N/A, N/A, N/A, N/A, N/A},
+    // abscissa  f  { 24,  25,  26,  27, N/A, N/A, N/A, N/A},
+    //           g  { 32,  33,  34,  35, N/A, N/A, N/A, N/A},
+    //           h  { 40,  41,  42,  43, N/A, N/A, N/A, N/A},
+    //           m  { 48,  49,  50,  51, N/A, N/A, N/A, N/A},
+    //           n  { 56,  57,  58,  59, N/A, N/A, N/A, N/A}
+    inline variable_type make_masked_variable_view()
+    {
+        variable_type val = make_test_view_variable();
+        for (std::size_t a = 0; a < val.shape()[0]; ++a)
+        {
+            for (std::size_t o = 4; o < val.shape()[1]; ++o)
+            {
+                val(a, o) = xtl::missing<double>();
+            }
+        }
+        return val;
+    }
+
+    //                              ordinate
+    //                 1,   2,   4,   5,   6,   8,  12,  13
+    //           a {{N/A,   1,   2,   3,   4,   5,   6,   7},
+    //           c  {N/A,   9,  10,  11,  12,  13,  14,  15},
+    //           d  {N/A,  17,  18, N/A, N/A,  21,  22,  23},
+    // abscissa  f  {N/A,  25,  26,  27,  28,  29,  30,  31},
+    //           g  {N/A,  33,  34,  35,  36,  37,  38,  39},
+    //           h  {N/A,  41,  42,  43,  44,  45,  46,  47},
+    //           m  {N/A, N/A, N/A, N/A, N/A, N/A, N/A, N/A},
+    //           n  {N/A,  57,  58,  59,  60,  61,  62,  63}
+    inline variable_type make_masked_variable_view2()
+    {
+        variable_type val = make_test_view_variable();
+        for (std::size_t o = 0; o < val.shape()[1]; ++o)
+        {
+            val(6, o) = xtl::missing<double>();
+        }
+        for (std::size_t a = 0; a < val.shape()[0]; ++a)
+        {
+            val(a, 0) = xtl::missing<double>();
+        }
+        return val;
+    }
+
+    //                              ordinate
+    //                 1,   2,   4,   5,   6,   8,  12,  13
+    //           a {{N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    //           c  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    //           d  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    // abscissa  f  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    //           g  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    //           h  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
+    //           m  {N/A, N/A, N/A, N/A, N/A, N/A, N/A, N/A},
+    //           n  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2}
+    inline variable_type make_masked_variable_view3()
+    {
+        variable_type val = make_test_view_variable();
+        val.data().fill(5.2);
+        for (std::size_t o = 0; o < val.shape()[1]; ++o)
+        {
+            val(6, o) = xtl::missing<double>();
+        }
+        for (std::size_t a = 0; a < val.shape()[0]; ++a)
+        {
+            val(a, 0) = xtl::missing<double>();
+        }
+        return val;
+    }
+
     // abscissa: { "f", "g", "h", "m", "n" }
     // ordinate: { 1, 4, 6 }
     inline coordinate_view_type build_coordinate_view(const coordinate_type& c)

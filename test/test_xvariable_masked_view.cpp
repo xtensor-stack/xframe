@@ -20,25 +20,7 @@ namespace xf
         variable_type var = make_test_view_variable();
         auto masked_var = where(var, var.axis<int>("ordinate") < 6);
 
-        // expected =                   ordinate
-        //                 1,   2,   4,   5,   6,   8,  12,  13
-        //           a {{  0,   1,   2,   3, N/A, N/A, N/A, N/A},
-        //           c  {  8,   9,  10,  11, N/A, N/A, N/A, N/A},
-        //           d  { 16,  17,  18, N/A, N/A, N/A, N/A, N/A},
-        // abscissa  f  { 24,  25,  26,  27, N/A, N/A, N/A, N/A},
-        //           g  { 32,  33,  34,  35, N/A, N/A, N/A, N/A},
-        //           h  { 40,  41,  42,  43, N/A, N/A, N/A, N/A},
-        //           m  { 48,  49,  50,  51, N/A, N/A, N/A, N/A},
-        //           n  { 56,  57,  58,  59, N/A, N/A, N/A, N/A}
-        variable_type expected = make_test_view_variable();
-        for (std::size_t a = 0; a < expected.shape()[0]; ++a)
-        {
-            for (std::size_t o = 4; o < expected.shape()[1]; ++o)
-            {
-                expected(a, o) = xtl::missing<double>();
-            }
-        }
-
+        variable_type expected = make_masked_variable_view();
         for (std::size_t a = 0; a < expected.shape()[0]; ++a)
         {
             for (std::size_t o = 0; o < expected.shape()[1]; ++o)
@@ -48,26 +30,7 @@ namespace xf
         }
 
         auto masked_var2 = where(var, not_equal(var.axis<fstring>("abscissa"), fstring("m")) && not_equal(var.axis<int>("ordinate"), 1));
-
-        // expected2 =                  ordinate
-        //                 1,   2,   4,   5,   6,   8,  12,  13
-        //           a {{N/A,   1,   2,   3,   4,   5,   6,   7},
-        //           c  {N/A,   9,  10,  11,  12,  13,  14,  15},
-        //           d  {N/A,  17,  18, N/A, N/A,  21,  22,  23},
-        // abscissa  f  {N/A,  25,  26,  27,  28,  29,  30,  31},
-        //           g  {N/A,  33,  34,  35,  36,  37,  38,  39},
-        //           h  {N/A,  41,  42,  43,  44,  45,  46,  47},
-        //           m  {N/A, N/A, N/A, N/A, N/A, N/A, N/A, N/A},
-        //           n  {N/A,  57,  58,  59,  60,  61,  62,  63}
-        variable_type expected2 = make_test_view_variable();
-        for (std::size_t o = 0; o < expected2.shape()[1]; ++o)
-        {
-            expected2(6, o) = xtl::missing<double>();
-        }
-        for (std::size_t a = 0; a < expected2.shape()[0]; ++a)
-        {
-            expected2(a, 0) = xtl::missing<double>();
-        }
+        variable_type expected2 = make_masked_variable_view2();
 
         using const_masked_var_type = const std::decay_t<decltype(masked_var2)>;
         const_masked_var_type const_masked_var = where(var,
@@ -240,5 +203,32 @@ namespace xf
         EXPECT_EQ(masked_var.locate_element({"m", 5}), masked_var.missing());
         EXPECT_EQ(masked_var.locate_element({"d", 1}), masked_var.missing());
         EXPECT_ANY_THROW(masked_var.locate_element({"e", 4}));
+    }
+
+    TEST(xvariable_masked_view, data)
+    {
+        variable_type var = make_test_view_variable();
+        variable_type test_var = make_test_view_variable();
+        variable_type expected = make_masked_variable_view2();
+        variable_type expected2 = make_masked_variable_view3();
+
+        auto masked_var = where(
+            var,
+            not_equal(var.axis<fstring>("abscissa"), fstring("m")) &&
+            not_equal(var.axis<int>("ordinate"), 1)
+        );
+
+        // Check that the data didn't change
+        ASSERT_EQ(var.data(), test_var.data());
+        ASSERT_EQ(var.data().storage(), test_var.data().storage());
+
+        ASSERT_NE(var.data(), masked_var.data());
+        ASSERT_NE(var.data().storage(), masked_var.data().storage());
+
+        ASSERT_EQ(expected.data(), masked_var.data());
+
+        masked_var.data().fill(5.2);
+
+        ASSERT_EQ(expected2.data(), masked_var.data());
     }
 }
