@@ -20,7 +20,7 @@ namespace xf
         variable_type var = make_test_view_variable();
         auto masked_var = where(var, var.axis<int>("ordinate") < 6);
 
-        variable_type expected = make_masked_variable_view();
+        auto expected = make_masked_data();
         for (std::size_t a = 0; a < expected.shape()[0]; ++a)
         {
             for (std::size_t o = 0; o < expected.shape()[1]; ++o)
@@ -30,7 +30,7 @@ namespace xf
         }
 
         auto masked_var2 = where(var, not_equal(var.axis<fstring>("abscissa"), fstring("m")) && not_equal(var.axis<int>("ordinate"), 1));
-        variable_type expected2 = make_masked_variable_view2();
+        auto expected2 = make_masked_data2();
 
         using const_masked_var_type = const std::decay_t<decltype(masked_var2)>;
         const_masked_var_type const_masked_var = where(var,
@@ -62,17 +62,14 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
+        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
+
         auto expected = masked_var.select<join::inner, 2>({{{"abscissa", "a"}, {"ordinate", 12}}});
         EXPECT_EQ(expected, 6);
         EXPECT_EQ(masked_var.select({{"abscissa", "g"}, {"ordinate", 5}}), 35);
 
-        EXPECT_EQ(masked_var.select({{"abscissa", "d"}, {"ordinate", 1}}), masked_var.missing());
-        EXPECT_EQ(masked_var.select({{"abscissa", "m"}, {"ordinate", 5}}), masked_var.missing());
-
-        auto val = std::is_same<typename decltype(var)::reference, decltype(masked_var.select({{"abscissa", "g"}, {"ordinate", 5}}))>::value;
-        EXPECT_TRUE(val);
-        val = std::is_same<typename decltype(var)::const_reference, decltype(const_masked_var.select({{"abscissa", "g"}, {"ordinate", 5}}))>::value;
-        EXPECT_TRUE(val);
+        EXPECT_EQ(masked_var.select({{"abscissa", "d"}, {"ordinate", 1}}), masked_value);
+        EXPECT_EQ(masked_var.select({{"abscissa", "m"}, {"ordinate", 5}}), masked_value);
 
         var.select({{"abscissa", "g"}, {"ordinate", 5}}) = 123;
         EXPECT_EQ(masked_var.select({{"abscissa", "g"}, {"ordinate", 5}}), 123);
@@ -91,14 +88,16 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
+        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
+
         auto expected = masked_var.select<join::outer, 2>({{{"abscissa", "a"}, {"ordinate", 12}}});
         EXPECT_EQ(expected, 6);
         EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "g"}, {"ordinate", 5}}), 35);
-        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "m"}, {"ordinate", 5}}), masked_var.missing());
-        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "d"}, {"ordinate", 1}}), masked_var.missing());
+        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "m"}, {"ordinate", 5}}), masked_value);
+        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "d"}, {"ordinate", 1}}), masked_value);
 
-        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "e"}, {"ordinate", 4}}), masked_var.missing());
-        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "a"}, {"ordinate", 3}}), masked_var.missing());
+        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "e"}, {"ordinate", 4}}), masked_value);
+        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "a"}, {"ordinate", 3}}), masked_value);
     }
 
     TEST(xvariable_masked_view, shape)
@@ -123,10 +122,7 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
-        auto val = std::is_same<typename decltype(var)::reference, decltype(masked_var(0, 6))>::value;
-        EXPECT_TRUE(val);
-        val = std::is_same<typename decltype(var)::const_reference, decltype(const_masked_var(0, 6))>::value;
-        EXPECT_TRUE(val);
+        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
 
         EXPECT_EQ(masked_var(0, 6), 6);
         masked_var(0, 6) = 7;
@@ -134,8 +130,8 @@ namespace xf
 
         EXPECT_EQ(masked_var(4, 3), 35);
         EXPECT_EQ(const_masked_var(4, 3), 35);
-        EXPECT_EQ(masked_var(6, 3), masked_var.missing());
-        EXPECT_EQ(masked_var(2, 0), masked_var.missing());
+        EXPECT_EQ(masked_var(6, 3), masked_value);
+        EXPECT_EQ(masked_var(2, 0), masked_value);
     }
 
     TEST(xvariable_masked_view, element)
@@ -152,15 +148,11 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
-        auto val = std::is_same<typename decltype(var)::reference, decltype(masked_var.element({6, 3}))>::value;
-        EXPECT_TRUE(val);
-        val = std::is_same<typename decltype(var)::const_reference, decltype(const_masked_var.element({6, 3}))>::value;
-        EXPECT_TRUE(val);
-
+        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
         EXPECT_EQ(masked_var.element<2>({0, 6}), 6);
         EXPECT_EQ(const_masked_var.element({4, 3}), 35);
-        EXPECT_EQ(masked_var.element({6, 3}), masked_var.missing());
-        EXPECT_EQ(masked_var.element({2, 0}), masked_var.missing());
+        EXPECT_EQ(masked_var.element({6, 3}), masked_value);
+        EXPECT_EQ(masked_var.element({2, 0}), masked_value);
     }
 
     TEST(xvariable_masked_view, locate)
@@ -177,10 +169,11 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
+        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
         EXPECT_EQ(masked_var.locate("a", 12), 6);
         EXPECT_EQ(const_masked_var.locate("g", 5), 35);
-        EXPECT_EQ(masked_var.locate("m", 5), masked_var.missing());
-        EXPECT_EQ(masked_var.locate("d", 1), masked_var.missing());
+        EXPECT_EQ(masked_var.locate("m", 5), masked_value);
+        EXPECT_EQ(masked_var.locate("d", 1), masked_value);
         EXPECT_ANY_THROW(masked_var.locate("e", 4));
     }
 
@@ -198,10 +191,11 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
+        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
         EXPECT_EQ(masked_var.locate_element({"a", 12}), 6);
         EXPECT_EQ(const_masked_var.locate_element({"g", 5}), 35);
-        EXPECT_EQ(masked_var.locate_element({"m", 5}), masked_var.missing());
-        EXPECT_EQ(masked_var.locate_element({"d", 1}), masked_var.missing());
+        EXPECT_EQ(masked_var.locate_element({"m", 5}), masked_value);
+        EXPECT_EQ(masked_var.locate_element({"d", 1}), masked_value);
         EXPECT_ANY_THROW(masked_var.locate_element({"e", 4}));
     }
 
@@ -209,8 +203,8 @@ namespace xf
     {
         variable_type var = make_test_view_variable();
         variable_type test_var = make_test_view_variable();
-        variable_type expected = make_masked_variable_view2();
-        variable_type expected2 = make_masked_variable_view3();
+        auto expected = make_masked_data2();
+        auto expected2 = make_masked_data3();
 
         auto masked_var = where(
             var,
@@ -220,15 +214,13 @@ namespace xf
 
         // Check that the data didn't change
         ASSERT_EQ(var.data(), test_var.data());
-        ASSERT_EQ(var.data().storage(), test_var.data().storage());
 
         ASSERT_NE(var.data(), masked_var.data());
-        ASSERT_NE(var.data().storage(), masked_var.data().storage());
 
-        ASSERT_EQ(expected.data(), masked_var.data());
+        ASSERT_EQ(expected, masked_var.data());
 
         masked_var.data().fill(5.2);
 
-        ASSERT_EQ(expected2.data(), masked_var.data());
+        ASSERT_EQ(expected2, masked_var.data());
     }
 }
