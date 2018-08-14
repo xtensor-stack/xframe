@@ -60,7 +60,6 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_expression.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_trace.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_utils.hpp
-    ${XFRAME_INCLUDE_DIR}/xframe/xmasked_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xnamed_axis.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xselecting.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xsequence_view.hpp
