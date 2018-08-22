@@ -10,10 +10,10 @@
 #define XFRAME_TEST_FIXTURE_HPP
 
 #include <cstddef>
+#include "xtensor/xmasked_view.hpp"
 #include "xtl/xbasic_fixed_string.hpp"
 #include "xframe/xvariable.hpp"
 #include "xframe/xnamed_axis.hpp"
-#include "xframe/xmasked_view.hpp"
 
 namespace xf
 {
