@@ -23,6 +23,19 @@ namespace xf
      * xvariable_function *
      **********************/
 
+    namespace detail
+    {
+        template <class CT>
+        struct xvariable_data_closure
+        {
+            using data_type = decltype(std::declval<xvariable_closure_t<CT>>().data());
+            using type = xt::const_xclosure_t<data_type>;
+        };
+
+        template <class CT>
+        using xvariable_data_closure_t = typename xvariable_data_closure<CT>::type;
+    }
+
     template <class F, class R, class... CT>
     class xvariable_function : public xt::xexpression<xvariable_function<F, R, CT...>>
     {
@@ -30,7 +43,7 @@ namespace xf
 
         using self_type = xvariable_function<F, R, CT...>;
         using functor_type = std::remove_reference_t<F>;
-        using data_type = xt::xoptional_function<F, R, decltype(std::declval<xvariable_closure_t<CT>>().data())...>;
+        using data_type = xt::xoptional_function<F, R, detail::xvariable_data_closure_t<CT>...>;
         using value_type = R;
         using reference = value_type;
         using const_reference = value_type;
@@ -190,7 +203,7 @@ namespace xf
         {
             using elem_type = std::tuple_element_t<I, T>;
 
-            static elem_type& get(const T& t) noexcept
+            static const elem_type& get(const T& t) noexcept
             {
                 return std::get<I>(t);
             }
