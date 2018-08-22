@@ -113,7 +113,7 @@ namespace xf
         auto a = make_variant_view_saxis();
 
         auto r = range("c", "f");
-        axis_view_type vr = axis_view_type(a, r.build_islice(a));
+        axis_view_type vr = axis_view_type(a, r.build_index_slice(a));
         auto vrit = vr.cbegin();
         EXPECT_EQ(xtl::xget<const fstring&>(vrit->first), "c");
         ++vrit;
@@ -124,7 +124,7 @@ namespace xf
         EXPECT_EQ(vrit, vr.cend());
 
         auto sr = range("c", "h", 2);
-        axis_view_type vsr = axis_view_type(a, sr.build_islice(a));
+        axis_view_type vsr = axis_view_type(a, sr.build_index_slice(a));
         auto vsrit = vsr.cbegin();
         EXPECT_EQ(xtl::xget<const fstring&>(vsrit->first), "c");
         ++vsrit;
@@ -135,10 +135,10 @@ namespace xf
         EXPECT_EQ(vsrit, vsr.cend());
     }
 
-    TEST(xaxis_view, slice_conversion)
+    /*TEST(xaxis_view, slice_conversion)
     {
-        using saxis_slice_type = xt::xslice_variant<std::size_t>;
-        using iaxis_slice_type = xt::xslice_variant<int>;
+        using saxis_slice_type = xt::xaxis_index_slice<std::size_t>;
+        using iaxis_slice_type = xt::xaxis_index_slice<int>;
 
         iaxis_slice_type is1 = xt::xall<int>(4);
         saxis_slice_type ss1(is1);
@@ -165,7 +165,7 @@ namespace xf
         sextended_type ss5 = is5;
         sextended_type res2 = std::size_t(2);
         EXPECT_EQ(*(is5.get_squeeze()), *(ss5.get_squeeze()));
-    }
+    }*/
 
     TEST(xaxis_view, conversion)
     {

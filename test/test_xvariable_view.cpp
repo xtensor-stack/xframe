@@ -496,12 +496,12 @@ namespace xf
     {
         variable_type var = make_test_view_variable();
         variable_view_type view = build_view(var);
-        variable_view_type view2 = iselect(var, { {"abscissa", xt::variant_range(3, 8)},
-                                                  {"ordinate", xt::variant_range(0, 5, 2)} });
+        variable_view_type view2 = iselect(var, { {"abscissa", xt::range(3, 8)},
+                                                  {"ordinate", xt::range(0, 5, 2)} });
         EXPECT_EQ(view, view2);
 
         variable_view_type view3 = select(var, { { "abscissa", "f" },{ "ordinate", range(1, 6, 2) } });
-        variable_view_type view4 = iselect(var, { { "abscissa", 3 },{ "ordinate", xt::variant_range(0, 5, 2) } });
+        variable_view_type view4 = iselect(var, { { "abscissa", 3 },{ "ordinate", xt::range(0, 5, 2) } });
         EXPECT_EQ(view3, view4);
 
         variable_view_type view5 = select(var, { { "abscissa", "f" } });
@@ -513,11 +513,11 @@ namespace xf
     {
         variable_type var = make_test_view_variable();
         variable_view_type view = build_view(var);
-        variable_view_type view2 = ilocate(var, xt::variant_range(3, 8), xt::variant_range(0, 5, 2));
+        variable_view_type view2 = ilocate(var, xt::range(3, 8), xt::range(0, 5, 2));
         EXPECT_EQ(view, view2);
 
         variable_view_type view3 = select(var, { { "abscissa", "f" },{ "ordinate", range(1, 6, 2) } });
-        variable_view_type view4 = ilocate(var, 3, xt::variant_range(0, 5, 2));
+        variable_view_type view4 = ilocate(var, 3, xt::range(0, 5, 2));
         EXPECT_EQ(view3, view4);
 
         variable_view_type view5 = select(var, { { "abscissa", "f" } });

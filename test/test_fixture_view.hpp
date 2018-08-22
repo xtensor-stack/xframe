@@ -162,8 +162,8 @@ namespace xf
         const auto& abscissa = c["abscissa"];
         const auto& ordinate = c["ordinate"];
 
-        nmap.emplace(std::make_pair("abscissa", axis_view_type(abscissa, r.build_islice(abscissa))));
-        nmap.emplace(std::make_pair("ordinate", axis_view_type(ordinate, sr.build_islice(ordinate))));
+        nmap.emplace(std::make_pair("abscissa", axis_view_type(abscissa, r.build_index_slice(abscissa))));
+        nmap.emplace(std::make_pair("ordinate", axis_view_type(ordinate, sr.build_index_slice(ordinate))));
 
         return coordinate_view(std::move(nmap));
     }

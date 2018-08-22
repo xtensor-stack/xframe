@@ -46,7 +46,6 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_math.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_meta.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_scalar.hpp
-    ${XFRAME_INCLUDE_DIR}/xframe/xaxis_slice.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_variant.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate.hpp
@@ -64,7 +63,6 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xnamed_axis.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xselecting.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xsequence_view.hpp
-    ${XFRAME_INCLUDE_DIR}/xframe/xtensor_xslice.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_assign.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_base.hpp

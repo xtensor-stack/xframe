@@ -6,43 +6,42 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XFRAME_XAXIS_SLICE_HPP
-#define XFRAME_XAXIS_SLICE_HPP
+#ifndef XFRAME_XAXIS_LABEL_SLICE_HPP
+#define XFRAME_XAXIS_LABEL_SLICE_HPP
 
 #include <cmath>
 #include <xtl/xvariant.hpp>
-#include "xtensor_xslice.hpp"
+#include "xaxis_index_slice.hpp"
 #include "xframe_config.hpp"
 
 namespace xf
 {
-
-    /*******************
-     * slice_variant_t *
-     *******************/
+    /**************************
+     * xlabel_slice_variant_t *
+     **************************/
 
     template <class L>
-    using slice_variant_t = xtl::mpl::cast_t<L, xtl::variant>;
+    using xlabel_variant_t = xtl::mpl::cast_t<L, xtl::variant>;
 
     /***************
      * xaxis_range *
      ***************/
-    
+
     template <class L>
     class xaxis_range
     {
     public:
 
-        using value_type = slice_variant_t<L>;
+        using value_type = xlabel_variant_t<L>;
 
         xaxis_range(const value_type& first, const value_type& last) noexcept;
         xaxis_range(value_type&& first, value_type&& last) noexcept;
 
         template <class A>
-        using slice_type = xt::xrange<typename A::mapped_type>;
+        using index_slice_type = xt::xrange<typename A::mapped_type>;
 
         template <class A>
-        slice_type<A> build_islice(const A& axis) const;
+        index_slice_type<A> build_index_slice(const A& axis) const;
 
     private:
 
@@ -59,17 +58,17 @@ namespace xf
     {
     public:
 
-        using value_type = slice_variant_t<L>;
+        using value_type = xlabel_variant_t<L>;
         using size_type = std::size_t;
 
         xaxis_stepped_range(const value_type& first, const value_type& last, size_type step) noexcept;
         xaxis_stepped_range(value_type&& first, value_type&& last, size_type step) noexcept;
 
         template <class A>
-        using slice_type = xt::xstepped_range<typename A::mapped_type>;
+        using index_slice_type = xt::xstepped_range<typename A::mapped_type>;
 
         template <class A>
-        slice_type<A> build_islice(const A& axis) const;
+        index_slice_type<A> build_index_slice(const A& axis) const;
 
     private:
 
@@ -87,22 +86,22 @@ namespace xf
     public:
 
         template <class A>
-        using slice_type = xt::xall<typename A::mapped_type>;
+        using index_slice_type = xt::xall<typename A::mapped_type>;
 
         template <class A>
-        slice_type<A> build_islice(const A& axis) const;
+        index_slice_type<A> build_index_slice(const A& axis) const;
     };
 
     /***************
-     * xaxis_slice *
-     ***************/
+    * xaxis_slice *
+    ***************/
 
     template <class L = DEFAULT_LABEL_LIST>
     class xaxis_slice
     {
     public:
 
-        using squeeze_type = slice_variant_t<L>;
+        using squeeze_type = xlabel_variant_t<L>;
         using storage_type = xtl::variant<xaxis_range<L>, xaxis_stepped_range<L>, xaxis_all, squeeze_type>;
 
         xaxis_slice() = default;
@@ -112,10 +111,10 @@ namespace xf
         xaxis_slice(V&& slice);
 
         template <class A>
-        using slice_type = xt::xslice_variant<typename A::mapped_type>;
+        using index_slice_type = xaxis_index_slice<typename A::mapped_type>;
 
         template <class A>
-        slice_type<A> build_islice(const A& axis) const;
+        index_slice_type<A> build_index_slice(const A& axis) const;
 
         const squeeze_type* get_squeeze() const noexcept;
 
@@ -125,16 +124,16 @@ namespace xf
     };
 
     template <class L = DEFAULT_LABEL_LIST>
-    xaxis_slice<L> range(const slice_variant_t<L>& first, const slice_variant_t<L>& last);
+    xaxis_slice<L> range(const xlabel_variant_t<L>& first, const xlabel_variant_t<L>& last);
 
     template <class L = DEFAULT_LABEL_LIST>
-    xaxis_slice<L> range(slice_variant_t<L>&& first, slice_variant_t<L>&& last);
+    xaxis_slice<L> range(xlabel_variant_t<L>&& first, xlabel_variant_t<L>&& last);
 
     template <class S, class L = DEFAULT_LABEL_LIST>
-    xaxis_slice<L> range(const slice_variant_t<L>& first, const slice_variant_t<L>& last, S step);
+    xaxis_slice<L> range(const xlabel_variant_t<L>& first, const xlabel_variant_t<L>& last, S step);
 
     template <class S, class L = DEFAULT_LABEL_LIST>
-    xaxis_slice<L> range(slice_variant_t<L>&& first, slice_variant_t<L>&& last, S step);
+    xaxis_slice<L> range(xlabel_variant_t<L>&& first, xlabel_variant_t<L>&& last, S step);
 
     /******************************
      * xaxis_range implementation *
@@ -154,9 +153,9 @@ namespace xf
 
     template <class V>
     template <class A>
-    inline auto xaxis_range<V>::build_islice(const A& axis) const -> slice_type<A>
+    inline auto xaxis_range<V>::build_index_slice(const A& axis) const -> index_slice_type<A>
     {
-        return slice_type<A>(axis[m_first], axis[m_last] + 1);
+        return index_slice_type<A>(axis[m_first], axis[m_last] + 1);
     }
 
     /**************************************
@@ -177,9 +176,9 @@ namespace xf
 
     template <class V>
     template <class A>
-    inline auto xaxis_stepped_range<V>::build_islice(const A& axis) const -> slice_type<A>
+    inline auto xaxis_stepped_range<V>::build_index_slice(const A& axis) const -> index_slice_type<A>
     {
-        return slice_type<A>(axis[m_first], axis[m_last] + 1, m_step);
+        return index_slice_type<A>(axis[m_first], axis[m_last] + 1, m_step);
     }
 
     /****************************
@@ -187,9 +186,9 @@ namespace xf
      ****************************/
 
     template <class A>
-    inline auto xaxis_all::build_islice(const A& axis) const -> slice_type<A>
+    inline auto xaxis_all::build_index_slice(const A& axis) const -> index_slice_type<A>
     {
-        return slice_type<A>(axis.size());
+        return index_slice_type<A>(axis.size());
     }
 
     /******************************
@@ -212,11 +211,11 @@ namespace xf
 
     template <class L>
     template <class A>
-    inline auto xaxis_slice<L>::build_islice(const A& axis) const -> slice_type<A>
+    inline auto xaxis_slice<L>::build_index_slice(const A& axis) const -> index_slice_type<A>
     {
         return xtl::visit(
-            xtl::make_overload([&axis](const auto& arg) { return slice_type<A>(arg.build_islice(axis)); },
-                               [&axis](const squeeze_type&) -> slice_type<A> { throw std::runtime_error("build_islice forbidden for squeeze"); }),
+            xtl::make_overload([&axis](const auto& arg) { return index_slice_type<A>(arg.build_index_slice(axis)); },
+                [&axis](const squeeze_type&) -> index_slice_type<A> { throw std::runtime_error("build_islice forbidden for squeeze"); }),
             m_data);
     }
 
@@ -231,29 +230,28 @@ namespace xf
      ***********************************/
 
     template <class L>
-    inline xaxis_slice<L> range(const slice_variant_t<L>& first, const slice_variant_t<L>& last)
+    inline xaxis_slice<L> range(const xlabel_variant_t<L>& first, const xlabel_variant_t<L>& last)
     {
         return xaxis_slice<L>(xaxis_range<L>(first, last));
     }
 
     template <class L>
-    inline xaxis_slice<L> range(slice_variant_t<L>&& first, slice_variant_t<L>&& last)
+    inline xaxis_slice<L> range(xlabel_variant_t<L>&& first, xlabel_variant_t<L>&& last)
     {
         return xaxis_slice<L>(xaxis_range<L>(std::move(first), std::move(last)));
     }
 
     template <class S, class L>
-    inline xaxis_slice<L> range(const slice_variant_t<L>& first, const slice_variant_t<L>& last, S step)
+    inline xaxis_slice<L> range(const xlabel_variant_t<L>& first, const xlabel_variant_t<L>& last, S step)
     {
         return xaxis_slice<L>(xaxis_stepped_range<L>(first, last, step));
     }
 
     template <class S, class L>
-    inline xaxis_slice<L> range(slice_variant_t<L>&& first, slice_variant_t<L>&& last, S step)
+    inline xaxis_slice<L> range(xlabel_variant_t<L>&& first, xlabel_variant_t<L>&& last, S step)
     {
         return xaxis_slice<L>(xaxis_stepped_range<L>(std::move(first), std::move(last), step));
     }
-
 }
 
 #endif

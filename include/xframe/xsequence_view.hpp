@@ -100,7 +100,7 @@ namespace xf
     };
 
     /***************************
-     * xseuqence_view_iterator *
+     * xsequence_view_iterator *
      ***************************/
 
     template <class C, class S, bool is_const>
