@@ -90,7 +90,6 @@ set(XFRAME_TESTS
     test_xdimension.cpp
     test_xdynamic_variable.cpp
     test_xframe_utils.cpp
-    test_xmasked_view.cpp
     test_xnamed_axis.cpp
     test_xsequence_view.cpp
     test_xvariable.cpp

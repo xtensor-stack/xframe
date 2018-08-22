@@ -16,7 +16,7 @@
 #include "xselecting.hpp"
 #include "xframe_config.hpp"
 #include "xcoordinate_system.hpp"
-#include "xmasked_view.hpp"
+#include "xtensor/xmasked_view.hpp"
 
 namespace xf
 {
