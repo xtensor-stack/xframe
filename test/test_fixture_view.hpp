@@ -10,7 +10,11 @@
 #define XFRAME_TEST_FIXTURE_VIEW_HPP
 
 #include <cstddef>
+
 #include "xtl/xbasic_fixed_string.hpp"
+
+#include "xtensor/xmasked_value.hpp"
+
 #include "xframe/xvariable_view.hpp"
 
 namespace xf
@@ -25,6 +29,7 @@ namespace xf
     using coordinate_view_type = xcoordinate_view<fstring, size_type>;
     using dimension_type = xdimension<fstring, std::size_t>;
     using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
+    using masked_data_type = xt::xarray<xt::xmasked_value<xtl::xoptional<double, bool>>>;
     using variable_type = xvariable<coordinate_type, data_type>;
     using variable_view_type = xvariable_view<variable_type&>;
 
@@ -78,23 +83,27 @@ namespace xf
     }
 
     //                              ordinate
-    //                 1,   2,   4,   5,   6,   8,  12,  13
-    //           a {{  0,   1,   2,   3, N/A, N/A, N/A, N/A},
-    //           c  {  8,   9,  10,  11, N/A, N/A, N/A, N/A},
-    //           d  { 16,  17,  18, N/A, N/A, N/A, N/A, N/A},
-    // abscissa  f  { 24,  25,  26,  27, N/A, N/A, N/A, N/A},
-    //           g  { 32,  33,  34,  35, N/A, N/A, N/A, N/A},
-    //           h  { 40,  41,  42,  43, N/A, N/A, N/A, N/A},
-    //           m  { 48,  49,  50,  51, N/A, N/A, N/A, N/A},
-    //           n  { 56,  57,  58,  59, N/A, N/A, N/A, N/A}
-    inline variable_type make_masked_variable_view()
+    //                 1,   2,   4,   5,      6,      8,     12,     13
+    //           a {{  0,   1,   2,   3, masked, masked, masked, masked},
+    //           c  {  8,   9,  10,  11, masked, masked, masked, masked},
+    //           d  { 16,  17,  18, N/A, masked, masked, masked, masked},
+    // abscissa  f  { 24,  25,  26,  27, masked, masked, masked, masked},
+    //           g  { 32,  33,  34,  35, masked, masked, masked, masked},
+    //           h  { 40,  41,  42,  43, masked, masked, masked, masked},
+    //           m  { 48,  49,  50,  51, masked, masked, masked, masked},
+    //           n  { 56,  57,  58,  59, masked, masked, masked, masked}
+    inline auto make_masked_data()
     {
-        variable_type val = make_test_view_variable();
+        masked_data_type val = masked_data_type::from_shape({ 8, 8 });
+        std::iota(val.begin(), val.end(), 0.);
+        val(2, 3).value().has_value() = false;
+        val(2, 4).value().has_value() = false;
+
         for (std::size_t a = 0; a < val.shape()[0]; ++a)
         {
             for (std::size_t o = 4; o < val.shape()[1]; ++o)
             {
-                val(a, o) = xtl::missing<double>();
+                val(a, o) = xt::masked<xtl::xoptional<double, bool>>();
             }
         }
         return val;
@@ -110,16 +119,20 @@ namespace xf
     //           h  {N/A,  41,  42,  43,  44,  45,  46,  47},
     //           m  {N/A, N/A, N/A, N/A, N/A, N/A, N/A, N/A},
     //           n  {N/A,  57,  58,  59,  60,  61,  62,  63}
-    inline variable_type make_masked_variable_view2()
+    inline auto make_masked_data2()
     {
-        variable_type val = make_test_view_variable();
+        masked_data_type val = masked_data_type::from_shape({ 8, 8 });
+        std::iota(val.begin(), val.end(), 0.);
+        val(2, 3).value().has_value() = false;
+        val(2, 4).value().has_value() = false;
+
         for (std::size_t o = 0; o < val.shape()[1]; ++o)
         {
-            val(6, o) = xtl::missing<double>();
+            val(6, o) = xt::masked<xtl::xoptional<double, bool>>();
         }
         for (std::size_t a = 0; a < val.shape()[0]; ++a)
         {
-            val(a, 0) = xtl::missing<double>();
+            val(a, 0) = xt::masked<xtl::xoptional<double, bool>>();
         }
         return val;
     }
@@ -134,17 +147,21 @@ namespace xf
     //           h  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
     //           m  {N/A, N/A, N/A, N/A, N/A, N/A, N/A, N/A},
     //           n  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2}
-    inline variable_type make_masked_variable_view3()
+    inline auto make_masked_data3()
     {
-        variable_type val = make_test_view_variable();
-        val.data().fill(5.2);
+        masked_data_type val = masked_data_type::from_shape({ 8, 8 });
+        std::iota(val.begin(), val.end(), 0.);
+        val(2, 3).value().has_value() = false;
+        val(2, 4).value().has_value() = false;
+
+        val.fill(5.2);
         for (std::size_t o = 0; o < val.shape()[1]; ++o)
         {
-            val(6, o) = xtl::missing<double>();
+            val(6, o) = xt::masked<xtl::xoptional<double, bool>>();
         }
         for (std::size_t a = 0; a < val.shape()[0]; ++a)
         {
-            val(a, 0) = xtl::missing<double>();
+            val(a, 0) = xt::masked<xtl::xoptional<double, bool>>();
         }
         return val;
     }
