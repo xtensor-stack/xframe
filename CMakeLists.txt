@@ -43,6 +43,8 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_default.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_expression_leaf.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_function.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xaxis_index_slice.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xaxis_label_slice.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_math.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_meta.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_scalar.hpp
