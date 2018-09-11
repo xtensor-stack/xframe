@@ -110,15 +110,15 @@ namespace xf
     }
 
     //                              ordinate
-    //                 1,   2,   4,   5,   6,   8,  12,  13
-    //           a {{N/A,   1,   2,   3,   4,   5,   6,   7},
-    //           c  {N/A,   9,  10,  11,  12,  13,  14,  15},
-    //           d  {N/A,  17,  18, N/A, N/A,  21,  22,  23},
-    // abscissa  f  {N/A,  25,  26,  27,  28,  29,  30,  31},
-    //           g  {N/A,  33,  34,  35,  36,  37,  38,  39},
-    //           h  {N/A,  41,  42,  43,  44,  45,  46,  47},
-    //           m  {N/A, N/A, N/A, N/A, N/A, N/A, N/A, N/A},
-    //           n  {N/A,  57,  58,  59,  60,  61,  62,  63}
+    //                    1,      2,      4,      5,      6,      8,     12,     13
+    //           a {{masked,      1,      2,      3,      4,      5,      6,      7},
+    //           c  {masked,      9,     10,     11,     12,     13,     14,     15},
+    //           d  {masked,     17,     18,    N/A,    N/A,     21,     22,     23},
+    // abscissa  f  {masked,     25,     26,     27,     28,     29,     30,     31},
+    //           g  {masked,     33,     34,     35,     36,     37,     38,     39},
+    //           h  {masked,     41,     42,     43,     44,     45,     46,     47},
+    //           m  {masked, masked, masked, masked, masked, masked, masked, masked},
+    //           n  {masked,     57,     58,     59,     60,     61,     62,     63}
     inline auto make_masked_data2()
     {
         masked_data_type val = masked_data_type::from_shape({ 8, 8 });
@@ -138,15 +138,15 @@ namespace xf
     }
 
     //                              ordinate
-    //                 1,   2,   4,   5,   6,   8,  12,  13
-    //           a {{N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
-    //           c  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
-    //           d  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
-    // abscissa  f  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
-    //           g  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
-    //           h  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2},
-    //           m  {N/A, N/A, N/A, N/A, N/A, N/A, N/A, N/A},
-    //           n  {N/A, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2, 5.2}
+    //                 1,         2,      4,      5,      6,      8,     12,     13
+    //           a {{masked,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2},
+    //           c  {masked,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2},
+    //           d  {masked,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2},
+    // abscissa  f  {masked,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2},
+    //           g  {masked,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2},
+    //           h  {masked,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2},
+    //           m  {masked, masked, masked, masked, masked, masked, masked, masked},
+    //           n  {masked,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2,    5.2}
     inline auto make_masked_data3()
     {
         masked_data_type val = masked_data_type::from_shape({ 8, 8 });

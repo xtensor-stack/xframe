@@ -34,6 +34,8 @@ namespace xf
         using xvariable_expression_type = std::remove_reference_t<CTV>;
         using xaxis_expression_type = std::remove_reference_t<CTAX>;
 
+        using data_type = typename xvariable_expression_type::data_type;
+
         using coordinate_type = typename xvariable_expression_type::coordinate_type;
         using coordinate_closure_type = coordinate_type;
         using dimension_type = typename xvariable_expression_type::dimension_type;
@@ -52,7 +54,14 @@ namespace xt
         using base_type = xf::xvariable_inner_types<xf::xvariable_masked_view<CTV, CTAX>>;
 
         using xvariable_expression_type = typename base_type::xvariable_expression_type;
+
+        using data_type = typename base_type::data_type;
+        using optional_type = typename data_type::value_type;
+
         using xaxis_expression_type = typename base_type::xaxis_expression_type;
+        using temporary_coordinate_type = xf::xcoordinate<typename base_type::key_type, typename base_type::size_type>;
+        using temporary_data_type = xt::xmasked_view<xarray<typename optional_type::value_type>, xarray<bool>>;
+        using temporary_type = xf::xvariable<temporary_coordinate_type, temporary_data_type>;
     };
 }
 
@@ -64,18 +73,19 @@ namespace xf
      ************************************/
 
     template <class CTV, class CTAX>
-    class xvariable_masked_view : /*public xt::xview_semantic<xvariable_masked_view<CTV, CTAX>>,*/
+    class xvariable_masked_view : public xt::xview_semantic<xvariable_masked_view<CTV, CTAX>>,
                                   private xcoordinate_system<xvariable_masked_view<CTV, CTAX>>
     {
     public:
 
         using self_type = xvariable_masked_view<CTV, CTAX>;
         using coordinate_base = xcoordinate_system<xvariable_masked_view<CTV, CTAX>>;
-        // using semantic_base = xt::xview_semantic<self_type>;
+        using semantic_base = xt::xview_semantic<self_type>;
 
         using inner_types = xt::xcontainer_inner_types<self_type>;
         using xvariable_expression_type = typename inner_types::xvariable_expression_type;
         using xaxis_expression_type = typename inner_types::xaxis_expression_type;
+        using temporary_type = typename inner_types::temporary_type;
 
         using coordinate_type = typename coordinate_base::coordinate_type;
         using dimension_type = typename coordinate_base::dimension_type;
@@ -118,6 +128,15 @@ namespace xf
 
         template <class V, class AX>
         xvariable_masked_view(V&& variable_expr, AX&& axis_expr);
+
+        xvariable_masked_view(const xvariable_masked_view&) = default;
+        xvariable_masked_view& operator=(const xvariable_masked_view&);
+
+        template <class E>
+        xvariable_masked_view& operator=(const xt::xexpression<E>& e);
+
+        template <class E>
+        xt::disable_xexpression<E, xvariable_masked_view>& operator=(const E& e);
 
         using coordinate_base::size;
         using coordinate_base::dimension;
@@ -233,11 +252,13 @@ namespace xf
         template <class... Args, std::size_t... I>
         iselector_sequence_type<sizeof...(Args)> labels_to_iselector(std::index_sequence<I...>, Args&&... args) const;
 
+        void assign_temporary_impl(temporary_type&& tmp);
+
         CTV m_expr;
         CTAX m_axis_expr;
         data_type m_data;
 
-        // friend class xt::xview_semantic<xvariable_masked_view<CTV, CTAX>>;
+        friend class xt::xview_semantic<xvariable_masked_view<CTV, CTAX>>;
     };
 
     /****************************************
@@ -256,6 +277,29 @@ namespace xf
               m_expr.shape()
           ))
     {
+    }
+
+    template <class CTV, class CTAX>
+    inline xvariable_masked_view<CTV, CTAX>& xvariable_masked_view<CTV, CTAX>::operator=(const xvariable_masked_view& rhs)
+    {
+        temporary_type tmp(rhs);
+        return this->assign_temporary(std::move(tmp));
+    }
+
+    template <class CTV, class CTAX>
+    template <class E>
+    inline xvariable_masked_view<CTV, CTAX>& xvariable_masked_view<CTV, CTAX>::operator=(const xt::xexpression<E>& e)
+    {
+        using root_semantic = typename semantic_base::base_type;
+        return root_semantic::operator=(e);
+    }
+
+    template <class CTV, class CTAX>
+    template <class E>
+    inline xt::disable_xexpression<E, xvariable_masked_view<CTV, CTAX>>& xvariable_masked_view<CTV, CTAX>::operator=(const E& e)
+    {
+        this->data().fill(e);
+        return *this;
     }
 
     template <class CTV, class CTAX>
@@ -578,6 +622,27 @@ namespace xf
                 m_expr.coordinates()[std::make_pair(m_expr.dimension_mapping().label(I), args)]
             )...
         };
+    }
+
+    template <class CTV, class CTAX>
+    inline void xvariable_masked_view<CTV, CTAX>::assign_temporary_impl(temporary_type&& tmp)
+    {
+        // TODO: improve this with iterators when they are available
+        const temporary_type& tmp2 = tmp;
+        const auto& dim_label = dimension_labels();
+        const auto& coords = coordinates();
+        std::vector<size_type> index(dim_label.size(), size_type(0));
+        selector_sequence_type<> selector(index.size());
+        bool end = false;
+        do
+        {
+            for (size_type i = 0; i < index.size(); ++i)
+            {
+                selector[i] = std::make_pair(dim_label[i], coords[dim_label[i]].label(index[i]));
+            }
+            this->select(selector) = tmp2.select(selector);
+            end = xt::detail::increment_index(tmp2.data().shape(), index);
+        } while (!end);
     }
 
     template <class EV, class EAX>

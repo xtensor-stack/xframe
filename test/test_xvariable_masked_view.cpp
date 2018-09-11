@@ -199,7 +199,7 @@ namespace xf
         EXPECT_ANY_THROW(masked_var.locate_element({"e", 4}));
     }
 
-    TEST(xvariable_masked_view, data)
+    TEST(xvariable_masked_view, scalar_assign)
     {
         variable_type var = make_test_view_variable();
         variable_type test_var = make_test_view_variable();
@@ -219,8 +219,25 @@ namespace xf
 
         ASSERT_EQ(expected, masked_var.data());
 
-        masked_var.data().fill(5.2);
+        masked_var = 5.2;
 
         ASSERT_EQ(expected2, masked_var.data());
+    }
+
+    TEST(xvariable_masked_view, variable_assign)
+    {
+        variable_type var = make_test_view_variable();
+        variable_type test_var = make_test_view_variable();
+
+        auto masked_var = where(
+            var,
+            not_equal(var.axis<fstring>("abscissa"), fstring("m")) &&
+            not_equal(var.axis<int>("ordinate"), 1)
+        );
+
+        xt::noalias(masked_var) = test_var + 2;
+
+        ASSERT_NE(masked_var.data(), test_var.data());
+        ASSERT_NE(var.data(), test_var.data());
     }
 }
