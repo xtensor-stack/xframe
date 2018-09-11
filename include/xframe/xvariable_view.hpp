@@ -118,6 +118,9 @@ namespace xf
         template <class E>
         xvariable_view& operator=(const xt::xexpression<E>& e);
 
+        template <class E>
+        xt::disable_xexpression<E, xvariable_view>& operator=(const E& e);
+
         using coordinate_base::size;
         using coordinate_base::dimension;
         using coordinate_base::dimension_labels;
@@ -305,6 +308,14 @@ namespace xf
     {
         using root_semantic = typename semantic_base::base_type;
         return root_semantic::operator=(e);
+    }
+
+    template <class CT>
+    template <class E>
+    xt::disable_xexpression<E, xvariable_view<CT>>& xvariable_view<CT>::operator=(const E& e)
+    {
+        data().fill(e);
+        return *this;
     }
 
     template <class CT>
@@ -746,7 +757,7 @@ namespace xf
     /******************************************
      * xvariable_view builders implementation *
      ******************************************/
-    
+
     namespace detail
     {
         template <class R>
