@@ -867,6 +867,20 @@ namespace xf
                 m_param.dim_label_list.push_back(dim_label);
             }
 
+            inline void operator()(const xt::xrange<T>& slice, const label_type& dim_label)
+            {
+                const auto& axis = m_e.coordinates()[dim_label];
+                m_param.coord_map.emplace(dim_label, axis_type(axis, axis_slice_type(slice)));
+                m_param.dim_label_list.push_back(dim_label);
+            }
+
+            inline void operator()(const xt::xstepped_range<T>& slice, const label_type& dim_label)
+            {
+                const auto& axis = m_e.coordinates()[dim_label];
+                m_param.coord_map.emplace(dim_label, axis_type(axis, axis_slice_type(slice)));
+                m_param.dim_label_list.push_back(dim_label);
+            }
+
         private:
 
             const E& m_e;
