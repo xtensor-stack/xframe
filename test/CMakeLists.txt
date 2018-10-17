@@ -82,8 +82,8 @@ set(XFRAME_TESTS
     test_fixture_view.hpp
     test_xaxis.cpp
     test_xaxis_default.cpp
-    test_xaxis_variant.cpp
     test_xaxis_function.cpp
+    test_xaxis_variant.cpp
     test_xaxis_view.cpp
     test_xcoordinate.cpp
     test_xcoordinate_view.cpp
@@ -99,6 +99,7 @@ set(XFRAME_TESTS
     test_xvariable_noalias.cpp
     test_xvariable_scalar.cpp
     test_xvariable_view.cpp
+    test_xvariable_view_assign.cpp
 )
 
 set(XFRAME_TARGET test_xframe)
