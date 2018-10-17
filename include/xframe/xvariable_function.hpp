@@ -43,7 +43,7 @@ namespace xf
 
         using self_type = xvariable_function<F, R, CT...>;
         using functor_type = std::remove_reference_t<F>;
-        using data_type = xt::xoptional_function<F, R, detail::xvariable_data_closure_t<CT>...>;
+        using data_type = xt::xoptional_function<F, detail::xvariable_data_closure_t<CT>...>;
         using value_type = R;
         using reference = value_type;
         using const_reference = value_type;

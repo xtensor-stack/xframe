@@ -18,16 +18,17 @@ namespace xt
 {
     namespace detail
     {
-        template <template <class...> class F, class... E>
+        template <class F, class... E>
         struct build_functor_type<xf::xvariable_expression_tag, F, E...>
         {
-            using type = F<common_value_type_t<typename std::decay_t<E>...>>;
+            using type = F;
         };
 
         template <class F, class... E>
         struct select_xfunction_expression<xf::xvariable_expression_tag, F, E...>
         {
-            using type = xf::xvariable_function<F, typename F::result_type, E...>;
+            using result_type = decltype(std::declval<F>()(std::declval<xvalue_type_t<std::decay_t<E>>>()...));
+            using type = xf::xvariable_function<F, result_type, E...>;
         };
     }
 
