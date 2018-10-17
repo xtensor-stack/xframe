@@ -23,7 +23,7 @@ install:
   - conda update -q conda
   - conda info -a
   - conda install gtest cmake -c conda-forge
-  - conda install xtl xtensor -c QuantStack
+  - conda install xtl xtensor=0.17.4 -c QuantStack
   - cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -DBUILD_TESTS=ON .
   - nmake test_xframe
   - cd test
