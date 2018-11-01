@@ -45,9 +45,7 @@ namespace xf
         xnamed_axis(name_type&& name, A&& axis);
 
         const name_type& name() const & noexcept;
-
         const axis_variant_type& axis() const & noexcept;
-
         const value_type& label(size_type i) const & noexcept;
 
     private:

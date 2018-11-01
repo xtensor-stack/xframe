@@ -66,7 +66,9 @@ namespace xf
         using coordinate_base = xcoordinate_system<xvariable_view<CT>>;
         using inner_types = xt::xcontainer_inner_types<self_type>;
         using xexpression_type = typename inner_types::xexpression_type;
-        using data_type = typename xexpression_type::data_type;
+        using underlying_data_type = typename xexpression_type::data_type;
+        using data_type = xt::xdynamic_view<xt::apply_cv_t<CT, underlying_data_type>&, typename underlying_data_type::shape_type>;
+        using slice_vector = xt::xdynamic_slice_vector;
 
         static constexpr bool is_const = std::is_const<std::remove_reference_t<CT>>::value;
         using value_type = typename xexpression_type::value_type;
@@ -110,7 +112,7 @@ namespace xf
         static const_reference missing();
 
         template <class E>
-        xvariable_view(E&& e, coordinate_type&& coord, dimension_type&& dim, squeeze_map&& squeeze);
+        xvariable_view(E&& e, coordinate_type&& coord, dimension_type&& dim, squeeze_map&& squeeze, slice_vector&& slices);
 
         xvariable_view(const xvariable_view&) = default;
         xvariable_view& operator=(const xvariable_view&);
@@ -256,9 +258,13 @@ namespace xf
 
         CT m_e;
         squeeze_map m_squeeze;
+        data_type m_data;
 
         friend class xt::xview_semantic<xvariable_view<CT>>;
     };
+
+    template <class CT>
+    std::ostream& operator<<(std::ostream& out, const xvariable_view<CT>& view);
 
     /***************************
      * xvariable_view builders *
@@ -282,10 +288,12 @@ namespace xf
 
     template <class CT>
     template <class E>
-    inline xvariable_view<CT>::xvariable_view(E&& e, coordinate_type&& coord, dimension_type&& dim, squeeze_map&& squeeze)
+    inline xvariable_view<CT>::xvariable_view(E&& e, coordinate_type&& coord, dimension_type&& dim, squeeze_map&& squeeze,
+                                              slice_vector&& slices)
         : coordinate_base(std::move(coord), std::move(dim)),
           m_e(std::forward<E>(e)),
-          m_squeeze(std::move(squeeze))
+          m_squeeze(std::move(squeeze)),
+          m_data(xt::dynamic_view(m_e.data(), slices))
     {
     }
 
@@ -327,13 +335,13 @@ namespace xf
     template <class CT>
     inline auto xvariable_view<CT>::data() noexcept -> data_type&
     {
-        return m_e.data();
+        return m_data;
     }
 
     template <class CT>
     inline auto xvariable_view<CT>::data() const noexcept -> const data_type&
     {
-        return m_e.data();
+        return m_data;
     }
 
     template <class CT>
@@ -754,6 +762,40 @@ namespace xf
         } while (!end);
     }
 
+    template <class CT>
+    inline std::ostream& operator<<(std::ostream& out, const xvariable_view<CT>& v)
+    {
+        const auto& dims = v.dimension_labels();
+        const auto& coords = v.coordinates();
+
+        // TODO: fixe xio.hpp so it can prints expression without strides
+        //out << v.data() << std::endl;
+
+        const auto& data = v.data();
+        for (size_t i = 0; i < data.shape()[0]; ++i)
+        {
+            out << '(';
+            for (size_t j = 0; j < data.shape()[1]; ++j)
+            {
+                out << data(i, j) << ", ";
+            }
+            out << ')' << std::endl;
+        }
+        out << "Coordinates:" << std::endl;
+
+        std::size_t max_length = std::accumulate(dims.cbegin(), dims.cend(), std::size_t(0),
+            [](std::size_t res, const auto& d) { return std::max(res, d.size()); });
+
+        for (const auto& d : dims)
+        {
+            std::size_t nb_spaces = max_length - d.size();
+            std::string spaces(nb_spaces, ' ');
+            out << d << spaces << ": " << coords[d] << std::endl;
+        }
+
+        return out;
+    }
+
     /******************************************
      * xvariable_view builders implementation *
      ******************************************/
@@ -795,10 +837,12 @@ namespace xf
             using coordinate_view_type = typename view_type::coordinate_type;
             using map_type = typename coordinate_view_type::map_type;
             using axis_type = typename coordinate_view_type::axis_type;
+            using slice_vector = xt::xdynamic_slice_vector;
 
             map_type coord_map;
             squeeze_map sq_map;
             dimension_label_list dim_label_list;
+            slice_vector dyn_slices;
         };
 
         template <class T, class E>
@@ -815,6 +859,7 @@ namespace xf
             using axis_type = typename coordinate_view_type::axis_type;
             using axis_slice_type = typename axis_type::slice_type;
             using size_type = typename std::decay_t<E>::size_type;
+            using dynamic_slice = xt::xdynamic_slice<std::ptrdiff_t>;
 
             slice_to_view_param(const E& e, param_type& param)
                 : m_e(e), m_param(param)
@@ -823,7 +868,9 @@ namespace xf
 
             inline void operator()(T slice, const label_type& dim_label)
             {
-                m_param.sq_map[m_e.dimension_mapping()[dim_label]] = slice;
+                auto dim_idx = m_e.dimension_mapping()[dim_label];
+                m_param.sq_map[dim_idx] = slice;
+                m_param.dyn_slices[dim_idx] = static_cast<std::ptrdiff_t>(slice);
             }
 
             inline void operator()(const xt::xkeep_slice<T>& slice, const label_type& dim_label)
@@ -831,6 +878,8 @@ namespace xf
                 const auto& axis = m_e.coordinates()[dim_label];
                 m_param.coord_map.emplace(dim_label, axis_type(axis, axis_slice_type(slice)));
                 m_param.dim_label_list.push_back(dim_label);
+                auto dim_idx = m_e.dimension_mapping()[dim_label];
+                m_param.dyn_slices[dim_idx] = xt::xkeep_slice<std::ptrdiff_t>(slice);
             }
 
             inline void operator()(const xt::xdrop_slice<T>& slice, const label_type& dim_label)
@@ -838,6 +887,8 @@ namespace xf
                 const auto& axis = m_e.coordinates()[dim_label];
                 m_param.coord_map.emplace(dim_label, axis_type(axis, axis_slice_type(slice)));
                 m_param.dim_label_list.push_back(dim_label);
+                auto dim_idx = m_e.dimension_mapping()[dim_label];
+                m_param.dyn_slices[dim_idx] = xt::xdrop_slice<std::ptrdiff_t>(slice);
             }
 
             inline void operator()(xt::xall_tag, const label_type& dim_label)
@@ -845,6 +896,8 @@ namespace xf
                 const auto& axis = m_e.coordinates()[dim_label];
                 m_param.coord_map.emplace(dim_label, axis_type(axis, xt::xall<std::size_t>(axis.size())));
                 m_param.dim_label_list.push_back(dim_label);
+                auto dim_idx = m_e.dimension_mapping()[dim_label];
+                m_param.dyn_slices[dim_idx] = xt::xall_tag();
             }
 
             inline void operator()(xt::xellipsis_tag, const label_type&)
@@ -865,6 +918,8 @@ namespace xf
                 auto ra = rag(slice);
                 m_param.coord_map.emplace(dim_label, axis_type(axis, axis_slice_type(ra)));
                 m_param.dim_label_list.push_back(dim_label);
+                auto dim_idx = m_e.dimension_mapping()[dim_label];
+                m_param.dyn_slices[dim_idx] = slice;
             }
 
             inline void operator()(const xt::xrange<T>& slice, const label_type& dim_label)
@@ -872,6 +927,8 @@ namespace xf
                 const auto& axis = m_e.coordinates()[dim_label];
                 m_param.coord_map.emplace(dim_label, axis_type(axis, axis_slice_type(slice)));
                 m_param.dim_label_list.push_back(dim_label);
+                auto dim_idx = m_e.dimension_mapping()[dim_label];
+                m_param.dyn_slices[dim_idx] = slice;
             }
 
             inline void operator()(const xt::xstepped_range<T>& slice, const label_type& dim_label)
@@ -879,6 +936,8 @@ namespace xf
                 const auto& axis = m_e.coordinates()[dim_label];
                 m_param.coord_map.emplace(dim_label, axis_type(axis, axis_slice_type(slice)));
                 m_param.dim_label_list.push_back(dim_label);
+                auto dim_idx = m_e.dimension_mapping()[dim_label];
+                m_param.dyn_slices[dim_idx] = slice;
             }
 
         private:
@@ -901,15 +960,20 @@ namespace xf
             inline void fill_view_params(param_type& param, const E& e, SL&& sl, S&&... slices)
             {
                 using axis_type = typename view_params<E>::axis_type;
+                using dynamic_slice = xt::xdynamic_slice<std::ptrdiff_t>;
                 const auto& dim_label = e.dimension_labels()[I];
                 const auto& axis = e.coordinates()[dim_label];
                 if (auto* sq = sl.get_squeeze())
                 {
-                    param.sq_map[I] = axis[*sq];
+                    auto idx_sq = axis[*sq];
+                    param.sq_map[I] = idx_sq;
+                    param.dyn_slices[I] = static_cast<std::ptrdiff_t>(idx_sq);
                 }
                 else
                 {
-                    param.coord_map.emplace(dim_label, axis_type(axis, sl.build_index_slice(axis)));
+                    auto idx_slice = sl.build_index_slice(axis);
+                    param.dyn_slices[I] = idx_slice.template convert_storage<dynamic_slice, std::ptrdiff_t>();
+                    param.coord_map.emplace(dim_label, axis_type(axis, std::move(idx_slice)));
                     param.dim_label_list.push_back(dim_label);
                 }
                 fill_view_params<I + 1>(param, e, std::forward<S>(slices)...);
@@ -978,6 +1042,7 @@ namespace xf
         using view_type = typename view_param_type::view_type;
 
         view_param_type params;
+        params.dyn_slices.resize(sizeof...(S));
         builder_type builder;
         builder.template fill_view_params<0>(params, e, xt::xdynamic_slice<std::ptrdiff_t>(std::forward<S>(slices))...);
 
@@ -987,7 +1052,8 @@ namespace xf
         return view_type(std::forward<E>(e),
                          std::move(coordinate_view),
                          std::move(view_dimension),
-                         std::move(params.sq_map));
+                         std::move(params.sq_map),
+                         std::move(params.dyn_slices));
     }
 
     template <class L, class E, class... S>
@@ -1000,6 +1066,7 @@ namespace xf
         using view_type = typename view_param_type::view_type;
 
         view_param_type params;
+        params.dyn_slices.resize(sizeof...(S));
         builder_type builder;
         builder.template fill_view_params<0>(params, e, xaxis_slice<L>(std::forward<S>(slices))...);
 
@@ -1009,7 +1076,8 @@ namespace xf
         return view_type(std::forward<E>(e),
                          std::move(coordinate_view),
                          std::move(view_dimension),
-                         std::move(params.sq_map));
+                         std::move(params.sq_map),
+                         std::move(params.dyn_slices));
     }
 
     template <class E, class L>
@@ -1024,30 +1092,38 @@ namespace xf
         using map_type = typename coordinate_view_type::map_type;
         using axis_type = typename coordinate_view_type::axis_type;
         using size_type = typename std::decay_t<E>::size_type;
+        using dynamic_slice = xt::xdynamic_slice<std::ptrdiff_t>;
 
         const coordinate_type& underlying_coords = e.coordinates();
         map_type coord_map;
         squeeze_map sq_map;
         dimension_label_list dim_label_list;
+        xt::xdynamic_slice_vector dsv(underlying_coords.size());
 
         for(const auto& dim_label: e.dimension_labels())
         {
+            auto dim_index = e.dimension_mapping()[dim_label];
             const auto& axis = underlying_coords[dim_label];
             auto slice_iter = slices.find(dim_label);
             if (slice_iter != slices.end())
             {
                 if (auto* sq = (slice_iter->second).get_squeeze())
                 {
-                    sq_map[e.dimension_mapping()[dim_label]] = axis[*sq];
+                    auto idx_sq = axis[*sq];
+                    dsv[dim_index] = static_cast<std::ptrdiff_t>(idx_sq);
+                    sq_map[dim_index] = idx_sq;
                 }
                 else
                 {
-                    coord_map.emplace(dim_label, axis_type(axis, (slice_iter->second).build_index_slice(axis)));
+                    auto idx_slice = (slice_iter->second).build_index_slice(axis);
+                    dsv[dim_index] = idx_slice.template convert_storage<dynamic_slice, std::ptrdiff_t>();
+                    coord_map.emplace(dim_label, axis_type(axis, std::move(idx_slice)));
                     dim_label_list.push_back(dim_label);
                 }
             }
             else
             {
+                dsv[dim_index] = xt::xall_tag();
                 coord_map.emplace(dim_label, axis_type(axis, xt::xall<size_type>(axis.size())));
                 dim_label_list.push_back(dim_label);
             }
@@ -1059,7 +1135,8 @@ namespace xf
         return view_type(std::forward<E>(e),
                          std::move(coordinate_view),
                          std::move(view_dimension),
-                         std::move(sq_map));
+                         std::move(sq_map),
+                         std::move(dsv));
     }
 
     template <class E, class T>
@@ -1074,6 +1151,7 @@ namespace xf
         using size_type = typename std::decay_t<E>::size_type;
 
         view_param_type param;
+        param.dyn_slices.resize(slices.size());
         visitor_type visitor(e, param);
 
         for (const auto& dim_label : e.dimension_labels())
@@ -1097,7 +1175,8 @@ namespace xf
         return view_type(std::forward<E>(e),
                          std::move(coordinate_view),
                          std::move(view_dimension),
-                         std::move(param.sq_map));
+                         std::move(param.sq_map),
+                         std::move(param.dyn_slices));
     }
 }
 

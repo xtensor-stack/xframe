@@ -97,6 +97,9 @@ namespace xf
         slice_type m_slice;
     };
 
+    template <class OS, class L, class T, class MT>
+    OS& operator<<(OS& out, const xaxis_view<L, T, MT>& axis);
+
     /***********************
      * xaxis_view_iterator *
      ***********************/
@@ -321,6 +324,18 @@ namespace xf
     inline bool xaxis_view<L, T, MT>::operator!=(const self_type& rhs) const noexcept
     {
         return !(*this == rhs);
+    }
+
+    template <class OS, class L, class T, class MT>
+    inline OS& operator<<(OS& out, const xaxis_view<L, T, MT>& axis)
+    {
+        out << '(';
+        for (std::size_t i = 0; i < axis.size(); ++i)
+        {
+            xtl::visit([&out](const auto& v) { out << v << ", "; }, axis.label(i));
+        }
+        out << ')';
+        return out;
     }
 
     /**************************************

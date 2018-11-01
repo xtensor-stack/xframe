@@ -32,6 +32,7 @@ namespace xf
     using masked_data_type = xt::xarray<xt::xmasked_value<xtl::xoptional<double, bool>>>;
     using variable_type = xvariable<coordinate_type, data_type>;
     using variable_view_type = xvariable_view<variable_type&>;
+    using slice_vector = variable_view_type::slice_vector;
 
     // { "a", "c", "d", "f", "g", "h", "m", "n" }
     inline saxis_type make_test_view_saxis()
@@ -185,6 +186,30 @@ namespace xf
         return coordinate_view(std::move(nmap));
     }
 
+    inline coordinate_view_type build_coordinate_view(const coordinate_type& c, const dimension_type& dim,
+        slice_vector& sv)
+    {
+        using map_type = typename coordinate_view_type::map_type;
+        using dynamic_slice = xt::xdynamic_slice<std::ptrdiff_t>;
+        sv.resize(dim.size());
+        map_type nmap;
+
+        auto r = range("f", "n");
+        auto sr = range(1, 6, 2);
+
+        const auto& abscissa = c["abscissa"];
+        const auto& ordinate = c["ordinate"];
+
+        auto rindex = r.build_index_slice(abscissa);
+        sv[dim["abscissa"]] = rindex.convert_storage<dynamic_slice, std::ptrdiff_t>();
+        auto cindex = sr.build_index_slice(ordinate);
+        sv[dim["ordinate"]] = cindex.convert_storage<dynamic_slice, std::ptrdiff_t>();
+
+        nmap.emplace(std::make_pair("abscissa", axis_view_type(abscissa, std::move(rindex))));
+        nmap.emplace(std::make_pair("ordinate", axis_view_type(ordinate, std::move(cindex))));
+
+        return coordinate_view(std::move(nmap));
+    }
     // abscissa: { "f", "g", "h", "m", "n" }
     // ordinate: { 1, 4, 6 }
     // dims: {{ "abscissa", 0 }, { "ordinate", 1 }}
@@ -192,7 +217,9 @@ namespace xf
     {
         const coordinate_type& c = v.coordinates();
         dimension_type dim = v.dimension_mapping();
-        return variable_view_type(v, build_coordinate_view(c), std::move(dim), {});
+        slice_vector sv;
+        auto cv = build_coordinate_view(c, dim, sv);
+        return variable_view_type(v, std::move(cv), std::move(dim), {}, std::move(sv));
     }
 }
 
