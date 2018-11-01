@@ -19,12 +19,6 @@ namespace xt
     namespace detail
     {
         template <class F, class... E>
-        struct build_functor_type<xf::xvariable_expression_tag, F, E...>
-        {
-            using type = F;
-        };
-
-        template <class F, class... E>
         struct select_xfunction_expression<xf::xvariable_expression_tag, F, E...>
         {
             using result_type = decltype(std::declval<F>()(std::declval<xvalue_type_t<std::decay_t<E>>>()...));
