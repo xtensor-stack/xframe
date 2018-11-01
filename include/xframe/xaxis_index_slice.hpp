@@ -66,6 +66,9 @@ namespace xf
 
         size_type revert_index(size_type i) const noexcept;
 
+        template <class V, class U>
+        V convert_storage() const;
+
         bool operator==(const self_type& rhs) const noexcept;
         bool operator!=(const self_type& rhs) const noexcept;
 
@@ -113,6 +116,44 @@ namespace xf
     inline auto xaxis_index_slice<T>::revert_index(size_type i) const noexcept -> size_type
     {
         return xtl::visit([i](auto&& arg) { return arg.revert_index(i); }, m_slice);
+    }
+
+    // TODO: remove this when xrange and xstepped_range has been added
+    // to xdynamic_slice in xtensor
+    namespace detail
+    {
+        template <class U, class T>
+        inline xt::xrange_adaptor<U, U, U> convert_range(const xt::xrange<T>& r)
+        {
+            T start = r(T(0));
+            T stop = start + r.size();
+            return xt::xrange_adaptor<U, U, U>(start, stop, T(1));
+        }
+
+        template <class U, class T>
+        inline xt::xrange_adaptor<U, U, U> convert_range(const xt::xstepped_range<T>& r)
+        {
+            T start = r(T(0));
+            T stop = start + r.size();
+            T step = r.step_size(T(0));
+            return xt::xrange_adaptor<U, U, U>(start, stop, step);
+        }
+    }
+
+    template <class T>
+    template <class V, class U>
+    inline V xaxis_index_slice<T>::convert_storage() const
+    {
+        return xtl::visit(
+            xtl::make_overload(
+                /*[](const xt::xrange<T>& s) -> V { return detail::convert_range<U>(s); },
+                [](const xt::xstepped_range<T>& s) -> V { return detail::convert_range<U>(s); },*/
+                [](const xt::xrange<T>& s) -> V { return xt::xrange<U>(s); },
+                [](const xt::xstepped_range<T>& s) -> V { return xt::xstepped_range<U>(s); },
+                [](const xt::xkeep_slice<T>& s) -> V { return xt::xkeep_slice<U>(s); },
+                [](const xt::xdrop_slice<T>& s) -> V { return xt::xdrop_slice<U>(s); },
+                [](const xt::xall<T>& s) -> V { return xt::xall_tag(); }),
+            m_slice);
     }
 
     template <class T>
