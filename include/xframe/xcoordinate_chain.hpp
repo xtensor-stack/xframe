@@ -11,6 +11,7 @@
 
 #include <type_traits>
 #include "xtl/xiterator_base.hpp"
+#include "xcoordinate_base.hpp"
 
 namespace xf
 {
@@ -54,8 +55,8 @@ namespace xf
         using const_iterator = xmap_chain_iterator<map_type>;
         using key_iterator = xtl::xkey_iterator<detail::map_chain_traits<map_type>>;
 
-        xcoordinate_chain(const coordinate_type& sub_coord, const map_type& axes);
-        xcoordinate_chain(const coordinate_type& sub_coord, map_type&& axes);
+        xcoordinate_chain(const coordinate_type& sub_coord, const map_type& new_coord);
+        xcoordinate_chain(const coordinate_type& sub_coord, map_type&& new_coord);
 
         bool empty() const;
         size_type size() const;
@@ -91,11 +92,23 @@ namespace xf
         map_type m_coordinate;
     };
 
-    template <class C>
-    xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& axes);
+    template <class C, class K, class A>
+    bool operator==(const xcoordinate_chain<C>& lhs, const xcoordinate_base<K, A>& rhs);
+
+    template <class C, class K, class A>
+    bool operator==(const xcoordinate_base<K, A>& lhs, const xcoordinate_chain<C>& rhs);
+
+    template <class C, class K, class A>
+    bool operator!=(const xcoordinate_chain<C>& lhs, const xcoordinate_base<K, A>& rhs);
+
+    template <class C, class K, class A>
+    bool operator!=(const xcoordinate_base<K, A>& lhs, const xcoordinate_chain<C>& rhs);
 
     template <class C>
-    xcoordinate_chain<C> reindex(const C& coordinate, typename C::map_type&& axes);
+    xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& new_coord);
+
+    template <class C>
+    xcoordinate_chain<C> reindex(const C& coordinate, typename C::map_type&& new_coord);
 
     /*******************
      * xiterator_chain *
@@ -144,15 +157,15 @@ namespace xf
      ************************************/
 
     template <class C>
-    inline xcoordinate_chain<C>::xcoordinate_chain(const coordinate_type& sub_coord, const map_type& axes)
-        : m_sub_coordinate(sub_coord), m_coordinate(axes)
+    inline xcoordinate_chain<C>::xcoordinate_chain(const coordinate_type& sub_coord, const map_type& new_coord)
+        : m_sub_coordinate(sub_coord), m_coordinate(new_coord)
     {
         check_consistency();
     }
 
     template <class C>
-    inline xcoordinate_chain<C>::xcoordinate_chain(const coordinate_type& sub_coord, map_type&& axes)
-        : m_sub_coordinate(sub_coord), m_coordinate(std::move(axes))
+    inline xcoordinate_chain<C>::xcoordinate_chain(const coordinate_type& sub_coord, map_type&& new_coord)
+        : m_sub_coordinate(sub_coord), m_coordinate(std::move(new_coord))
     {
         check_consistency();
     }
@@ -262,16 +275,50 @@ namespace xf
         }
     }
 
-    template <class C>
-    inline xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& axes)
+    template <class C, class K, class A>
+    inline bool operator==(const xcoordinate_chain<C>& lhs, const xcoordinate_base<K, A>& rhs)
     {
-        return xcoordinate_chain<C>(coordinate, axes);
+        bool res = lhs.size() == rhs.size();
+        auto iter = lhs.begin();
+        auto end = lhs.end();
+        auto rhs_end = rhs.end();
+        while(res && iter != end)
+        {
+            auto rhs_iter = rhs.find(iter->first);
+            res = (rhs_iter != rhs_end) && (iter->second == rhs_iter->second);
+            ++iter;
+        }
+        return res;
+    }
+
+    template <class C, class K, class A>
+    inline bool operator==(const xcoordinate_base<K, A>& lhs, const xcoordinate_chain<C>& rhs)
+    {
+        return rhs == lhs;
+    }
+
+    template <class C, class K, class A>
+    inline bool operator!=(const xcoordinate_chain<C>& lhs, const xcoordinate_base<K, A>& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template <class C, class K, class A>
+    inline bool operator!=(const xcoordinate_base<K, A>& lhs, const xcoordinate_chain<C>& rhs)
+    {
+        return rhs != lhs;
     }
 
     template <class C>
-    inline xcoordinate_chain<C> reindex(const C& coordinate, typename C::map_type&& axes)
+    inline xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& new_coord)
     {
-        return xcoordinate_chain<C>(coordinate, std::move(axes));
+        return xcoordinate_chain<C>(coordinate, new_coord);
+    }
+
+    template <class C>
+    inline xcoordinate_chain<C> reindex(const C& coordinate, typename C::map_type&& new_coord)
+    {
+        return xcoordinate_chain<C>(coordinate, std::move(new_coord));
     }
 
     /**************************************

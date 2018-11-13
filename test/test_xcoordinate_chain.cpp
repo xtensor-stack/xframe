@@ -123,5 +123,17 @@ namespace xf
         EXPECT_FALSE(cc == cc2);
         EXPECT_TRUE(cc != cc2);
     }
+
+    TEST(xcoordinate_chain, mixed_comparison)
+    {
+        auto c = make_test_coordinate();
+        auto cc = make_coordinate_chain(c);
+        coordinate_type c2 = {{"abscissa", make_test_saxis3()}, {"ordinate", make_test_iaxis()}};
+
+        EXPECT_FALSE(cc == c);
+        EXPECT_TRUE(cc != c);
+        EXPECT_TRUE(cc == c2);
+        EXPECT_FALSE(cc != c2);
+    }
 }
 

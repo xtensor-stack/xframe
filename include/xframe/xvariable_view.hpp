@@ -270,8 +270,8 @@ namespace xf
      * xvariable_view builders *
      ***************************/
 
-    /*template <class E, class... S>
-    auto ilocate(E&& e, S&&... slices);*/
+    template <class E, class... S>
+    auto ilocate(E&& e, S&&... slices);
 
     template <class L = DEFAULT_LABEL_LIST, class E, class... S>
     auto locate(E&& e, S&&... slices);
