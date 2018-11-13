@@ -84,6 +84,15 @@ namespace xf
         EXPECT_EQ(iter, c.end());
     }
 
+    TEST(xcoordinate, find)
+    {
+        auto c = make_test_coordinate();
+        auto iter = c.find("abscissa");
+        EXPECT_EQ((iter->second)["d"], 2);
+        auto iter2 = c.find("not_here");
+        EXPECT_EQ(iter2, c.end());
+    }
+
     TEST(xcoordinate, key_iterator)
     {
         auto c = make_test_coordinate();

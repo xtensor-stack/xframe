@@ -30,6 +30,7 @@ namespace xf
         using coordinate_type = typename inner_types::coordinate_type;
         using coordinate_closure_type = typename inner_types::coordinate_closure_type;
         using dimension_type = typename inner_types::dimension_type;
+        using dimension_closure_type = typename inner_types::dimension_closure_type;
         using dimension_list = typename dimension_type::label_list;
         using size_type = typename coordinate_type::size_type;
 
@@ -62,7 +63,60 @@ namespace xf
     private:
 
         coordinate_closure_type m_coordinate;
-        dimension_type m_dimension_mapping;
+        dimension_closure_type m_dimension_mapping;
+    };
+
+    /***************************
+     * xcoordinate_system_impl *
+     ***************************/
+
+    template <class CCT, class DCT>
+    class xcoordinate_system_impl;
+
+    template <class E>
+    struct xvariable_inner_types;
+
+    template <class CCT, class DCT>
+    struct xvariable_inner_types<xcoordinate_system_impl<CCT, DCT>>
+    {
+        using coordinate_closure_type = CCT;
+        using coordinate_type = std::decay_t<CCT>;
+        using dimension_closure_type = DCT;
+        using dimension_type = std::decay_t<DCT>;
+    };
+}
+
+namespace xt
+{
+    template <class CCT, class DCT>
+    struct xcontainer_inner_types<xf::xcoordinate_system_impl<CCT, DCT>>
+        : xf::xvariable_inner_types<xf::xcoordinate_system_impl<CCT, DCT>>
+    {
+    };
+}
+
+namespace xf
+{
+
+    template <class CCT, class DCT>
+    class xcoordinate_system_impl
+        : public xcoordinate_system<xcoordinate_system_impl<CCT, DCT>>
+    {
+    public:
+
+        using self_type = xcoordinate_system_impl<CCT, DCT>;
+        using base_type = xcoordinate_system<self_type>;
+
+        xcoordinate_system_impl() = default;
+        template <class C, class DM>
+        xcoordinate_system_impl(C&& coords, DM&& dims);
+        ~xcoordinate_system_impl() = default;
+
+        xcoordinate_system_impl(const xcoordinate_system_impl&) = default;
+        xcoordinate_system_impl& operator=(const xcoordinate_system_impl&) = default;
+
+        xcoordinate_system_impl(xcoordinate_system_impl&&) = default;
+        xcoordinate_system_impl& operator=(xcoordinate_system_impl&&) = default;
     };
 
     /*************************************
@@ -138,6 +192,16 @@ namespace xf
         return ret;
     }
 
+    /******************************************
+     * xcoordinate_system_impl implementation *
+     ******************************************/
+
+    template <class CCT, class DCT>
+    template <class C, class DM>
+    inline xcoordinate_system_impl<CCT, DCT>::xcoordinate_system_impl(C&& coords, DM&& dims)
+        : base_type(std::forward<C>(coords), std::forward<DM>(dims))
+    {
+    }
 }
 
 #endif

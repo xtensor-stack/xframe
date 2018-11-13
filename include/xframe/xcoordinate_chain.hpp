@@ -211,7 +211,7 @@ namespace xf
         {
             iter = m_sub_coordinate.find(key);
         }
-        return const_iterator(m_coordinate, m_sub_coordinate, iter);
+        return const_iterator(iter, &m_coordinate);
     }
 
     template <class C>

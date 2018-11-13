@@ -16,11 +16,6 @@ namespace xf
     using slabel_type = std::vector<fstring>;
     using ilabel_type = std::vector<int>;
 
-    inline saxis_type make_test_saxis3()
-    {
-        return saxis_type({"a", "b", "c", "d"});
-    }
-
     TEST(xcoordinate_chain, constructor)
     {
         auto c = make_test_coordinate();
@@ -93,6 +88,17 @@ namespace xf
         EXPECT_EQ((iter->second)[2], 1);
         ++iter;
         EXPECT_EQ(iter, cc.end());
+    }
+
+    TEST(xcoordinate_chain, find)
+    {
+        auto c = make_test_coordinate();
+        auto cc = make_coordinate_chain(c);
+
+        auto iter = cc.find("abscissa");
+        EXPECT_EQ((iter->second)["a"], 0);
+        auto iter2 = cc.find("not_here");
+        EXPECT_EQ(iter2, cc.end());
     }
 
     TEST(xcoordinate_chain, key_iterator)

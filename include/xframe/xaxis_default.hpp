@@ -273,7 +273,7 @@ namespace xf
     template <class L, class T>
     inline auto xaxis_default_iterator<L, T>::operator+=(difference_type n) -> self_type&
     {
-        m_value.first += static_cast<key_type>(n);
+        m_value.first = static_cast<key_type>(m_value.first + n);
         m_value.second += static_cast<mapped_type>(n);
         return *this;
     }
@@ -281,7 +281,7 @@ namespace xf
     template <class L, class T>
     inline auto xaxis_default_iterator<L, T>::operator-=(difference_type n) -> self_type&
     {
-        m_value.first -= static_cast<key_type>(n);
+        m_value.first = static_cast<key_type>(m_value.first - n);
         m_value.second -= static_cast<mapped_type>(n);
         return *this;
     }

@@ -46,6 +46,12 @@ namespace xf
         return saxis_type({"a", "d", "e"});
     }
 
+    // { "a", "b", "c", "d" }
+    inline saxis_type make_test_saxis3()
+    {
+        return saxis_type({"a", "b", "c", "d"});
+    }
+
     // { 1, 2, 4 }
     inline iaxis_type make_test_iaxis()
     {

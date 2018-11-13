@@ -152,7 +152,7 @@ namespace xf
                 [](const xt::xstepped_range<T>& s) -> V { return xt::xstepped_range<U>(s); },
                 [](const xt::xkeep_slice<T>& s) -> V { return xt::xkeep_slice<U>(s); },
                 [](const xt::xdrop_slice<T>& s) -> V { return xt::xdrop_slice<U>(s); },
-                [](const xt::xall<T>& s) -> V { return xt::xall_tag(); }),
+                [](const xt::xall<T>&) -> V { return xt::xall_tag(); }),
             m_slice);
     }
 
