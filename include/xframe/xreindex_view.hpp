@@ -44,7 +44,6 @@ namespace xf
         using subcoordinate_type = typename xexpression_type::coordinate_type;
         using coordinate_type = xcoordinate_chain<subcoordinate_type>;
         using dimension_type = typename xexpression_type::dimension_type;
-        using coordinate_system = xcoordinate_system_impl<coordinate_type, const dimension_type&>;
         using dimension_list = typename dimension_type::label_list;
         using coordinate_map = typename coordinate_type::map_type;
 
@@ -122,7 +121,8 @@ namespace xf
         void init_shape();
 
         CT m_e;
-        coordinate_system m_coordinate_system;
+        coordinate_type m_coordinate;
+        const dimension_type& m_dimension_mapping;
         shape_type m_shape;
     };
 
@@ -150,7 +150,8 @@ namespace xf
     template <class E>
     inline xreindex_view<CT>::xreindex_view(E&& e, const coordinate_map& new_coord)
         : m_e(std::forward<E>(e)),
-          m_coordinate_system(reindex(m_e.cordinates(), new_coord), m_e.dimension_mapping())
+          m_coordinate(reindex(m_e.cordinates(), new_coord)),
+          m_dimension_mapping(m_e.dimension_mapping())
     {
         init_shape();
     }
@@ -159,7 +160,8 @@ namespace xf
     template <class E>
     inline xreindex_view<CT>::xreindex_view(E&& e, coordinate_map&& new_coord)
         : m_e(std::forward<E>(e)),
-          m_coordinate_system(reindex(m_e.coordinates(), std::move(new_coord)), m_e.dimension_mapping())
+          m_coordinate(reindex(m_e.coordinates(), std::move(new_coord))),
+          m_dimension_mapping(m_e.dimension_mapping())
     {
         init_shape();
     }
@@ -173,44 +175,54 @@ namespace xf
     template <class CT>
     inline auto xreindex_view<CT>::size() const noexcept -> size_type
     {
-        return m_coordinate_system.size();
+        return std::accumulate(m_coordinate.cbegin(), m_coordinate.cend(), size_type(1),
+            [](size_type val, auto&& entry) { return val * entry.second.size(); });
     }
 
     template <class CT>
     inline auto xreindex_view<CT>::dimension() const noexcept -> size_type
     {
-        return m_coordinate_system.dimension();
+        return m_dimension_mapping.size();
     }
 
     template <class CT>
     inline auto xreindex_view<CT>::dimension_labels() const noexcept -> const dimension_list&
     {
-        return m_coordinate_system.dimension_labels();
+        return m_dimension_mapping.labels();
     }
 
     template <class CT>
     inline auto xreindex_view<CT>::coordinates() const noexcept -> const coordinate_type&
     {
-        return m_coordinate_system.coordinates();
+        return m_coordinate;
     }
 
     template <class CT>
     inline auto xreindex_view<CT>::dimension_mapping() const noexcept -> const dimension_type&
     {
-        return m_coordinate_system.dimension_mapping();
+        return m_dimension_mapping;
     }
 
     template <class CT>
     template <class Join, class C>
     inline xtrivial_broadcast xreindex_view<CT>::broadcast_coordinates(C& coords) const
     {
-        return m_coordinate_system.broadcast_coordinates(coords);
+        return xf::broadcast_coordinates<Join>(coords, this->coordinates());
     }
 
     template <class CT>
     inline bool xreindex_view<CT>::broadcast_dimensions(dimension_type& dims, bool trivial_bc) const
     {
-        return m_coordinate_system.broadcast_dimensions(dims, trivial_bc);
+        bool ret = true;
+        if (trivial_bc)
+        {
+            dims = this->dimension_mapping();
+        }
+        else
+        {
+            ret = xf::broadcast_dimensions(dims, this->dimension_mapping());
+        }
+        return ret;
     }
 
     template <class CT>
