@@ -120,6 +120,12 @@ namespace xf
 
         void init_shape();
 
+        template <class S>
+        const_reference select_impl(S&& selector) const;
+
+        template <class Join, class S>
+        const_reference select_join(S&& selector) const;
+
         CT m_e;
         coordinate_type m_coordinate;
         const dimension_type& m_dimension_mapping;
@@ -229,6 +235,49 @@ namespace xf
     inline auto xreindex_view<CT>::shape() const noexcept -> const shape_type&
     {
         return m_shape;
+    }
+
+    template <class CT>
+    template <class Join, std::size_t N>
+    inline auto xreindex_view<CT>::select(const selector_sequence_type<N>& selector) const -> const_reference
+    {
+        return select_join<Join>(selector);
+    }
+
+    template <class CT>
+    template <class Join, std::size_t N>
+    inline auto xreindex_view<CT>::select(selector_sequence_type<N>&& selector) const -> const_reference
+    {
+        return select_join<Join>(std::move(selector));
+    }
+
+    template <class CT>
+    template <class S>
+    inline auto xreindex_view<CT>::select_impl(S&& selector) const -> const_reference
+    {
+        for(const auto& c: selector)
+        {
+            bool contained = m_coordinate.is_reindex(c.first, c.second);
+            bool sub_contained = m_e.coordinates().contains(c.first, c.second);
+            if(contained && !sub_contained)
+            {
+                return missing();
+            }
+        }
+        return m_e.select(std::forward<S>(selector));
+    }
+
+    template <class CT>
+    template <class Join, class S>
+    inline auto xreindex_view<CT>::select_join(S&& selector) const -> const_reference
+    {
+        return xtl::mpl::static_if<Join::id() == join::inner::id()>([&](auto self)
+        {
+            return self(*this).select_impl(std::forward<S>(selector));
+        }, /*else*/ [&](auto self)
+        {
+            return self(*this).m_e.template select<join::outer>(std::forward<S>(selector));
+        });
     }
 
     template <class CT>

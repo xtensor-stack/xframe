@@ -37,7 +37,111 @@ namespace xf
         auto var = make_test_variable();
         coordinate_map new_coord = make_new_coordinate();
         auto view = reindex(var, new_coord);
-
         EXPECT_EQ(12u, view.size());
+    }
+
+    TEST(xreindex_view, dimension)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+        EXPECT_EQ(2u, view.dimension());
+    }
+
+    TEST(xreindex_view, dimension_labels)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+        saxis_type s = { "abscissa", "ordinate" };
+        EXPECT_EQ(view.dimension_labels(), s.labels());
+    }
+
+    TEST(xreindex_view, shape)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+        auto shape = view.shape();
+        std::decay_t<decltype(view.shape())> expected = { 4, 3 };
+        EXPECT_EQ(shape, expected);
+    }
+
+    TEST(xreindex_view, select_inner)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+
+        auto t00 = view.select({{"abscissa", "a"},{"ordinate", 1}});
+        auto t01 = view.select({{"abscissa", "a"},{"ordinate", 2}});
+        auto t02 = view.select({{"abscissa", "a"},{"ordinate", 4}});
+        auto t10 = view.select({{"abscissa", "b"},{"ordinate", 1}});
+        auto t11 = view.select({{"abscissa", "b"},{"ordinate", 2}});
+        auto t12 = view.select({{"abscissa", "b"},{"ordinate", 4}});
+        auto t20 = view.select({{"abscissa", "c"},{"ordinate", 1}});
+        auto t21 = view.select({{"abscissa", "c"},{"ordinate", 2}});
+        auto t22 = view.select({{"abscissa", "c"},{"ordinate", 4}});
+        auto t30 = view.select({{"abscissa", "d"},{"ordinate", 1}});
+        auto t31 = view.select({{"abscissa", "d"},{"ordinate", 2}});
+        auto t32 = view.select({{"abscissa", "d"},{"ordinate", 4}});
+
+        EXPECT_EQ(t00, 1.);
+        EXPECT_EQ(t01, 2);
+        EXPECT_EQ(t02, view.missing());
+        EXPECT_EQ(t10, view.missing());
+        EXPECT_EQ(t11, view.missing());
+        EXPECT_EQ(t12, view.missing());
+        EXPECT_EQ(t20, view.missing());
+        EXPECT_EQ(t21, 5);
+        EXPECT_EQ(t22, 6);
+        EXPECT_EQ(t30, 7);
+        EXPECT_EQ(t31, 8);
+        EXPECT_EQ(t32, 9);
+
+        auto t100 = view.select({{"abscissa", "a"}, {"ordinate", 1}, {"altitude", 1}});
+        EXPECT_EQ(t100, t00);
+
+        EXPECT_ANY_THROW(view.select({{"abscissa", "e"}, {"ordinate", 1}}));
+    }
+
+    TEST(xreindex_view, select_outer)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+
+        auto t00 = view.select<join::outer>({{"abscissa", "a"},{"ordinate", 1}});
+        auto t01 = view.select<join::outer>({{"abscissa", "a"},{"ordinate", 2}});
+        auto t02 = view.select<join::outer>({{"abscissa", "a"},{"ordinate", 4}});
+        auto t10 = view.select<join::outer>({{"abscissa", "b"},{"ordinate", 1}});
+        auto t11 = view.select<join::outer>({{"abscissa", "b"},{"ordinate", 2}});
+        auto t12 = view.select<join::outer>({{"abscissa", "b"},{"ordinate", 4}});
+        auto t20 = view.select<join::outer>({{"abscissa", "c"},{"ordinate", 1}});
+        auto t21 = view.select<join::outer>({{"abscissa", "c"},{"ordinate", 2}});
+        auto t22 = view.select<join::outer>({{"abscissa", "c"},{"ordinate", 4}});
+        auto t30 = view.select<join::outer>({{"abscissa", "d"},{"ordinate", 1}});
+        auto t31 = view.select<join::outer>({{"abscissa", "d"},{"ordinate", 2}});
+        auto t32 = view.select<join::outer>({{"abscissa", "d"},{"ordinate", 4}});
+
+        EXPECT_EQ(t00, 1.);
+        EXPECT_EQ(t01, 2);
+        EXPECT_EQ(t02, view.missing());
+        EXPECT_EQ(t10, view.missing());
+        EXPECT_EQ(t11, view.missing());
+        EXPECT_EQ(t12, view.missing());
+        EXPECT_EQ(t20, view.missing());
+        EXPECT_EQ(t21, 5);
+        EXPECT_EQ(t22, 6);
+        EXPECT_EQ(t30, 7);
+        EXPECT_EQ(t31, 8);
+        EXPECT_EQ(t32, 9);
+
+        auto t100 = view.select<join::outer>({{"abscissa", "a"}, {"ordinate", 1}, {"altitude", 1}});
+        EXPECT_EQ(t100, t00);
+
+        auto mis = view.select<join::outer>({{"abscissa", "e"}, {"ordinate", 1}});
+        EXPECT_EQ(mis, view.missing());
+
     }
 }

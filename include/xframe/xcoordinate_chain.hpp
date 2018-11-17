@@ -11,7 +11,7 @@
 
 #include <type_traits>
 #include "xtl/xiterator_base.hpp"
-#include "xcoordinate_base.hpp"
+#include "xcoordinate.hpp"
 
 namespace xf
 {
@@ -42,6 +42,7 @@ namespace xf
         using label_list = typename coordinate_type::label_list;
         using key_type = typename coordinate_type::key_type;
         using axis_type = typename coordinate_type::axis_type;
+        using label_type = typename axis_type::key_type;
         using map_type = typename coordinate_type::map_type;
         using mapped_type = typename coordinate_type::mapped_type;
         using index_type = typename coordinate_type::index_type;
@@ -69,6 +70,8 @@ namespace xf
 
         // TODO: check if that's required and why
         //const map_type& data() const noexcept;
+
+        bool is_reindex(const key_type& key, const label_type& label) const;
 
         const_iterator find(const key_type& key) const;
 
@@ -203,6 +206,13 @@ namespace xf
         return iter != m_coordinate.end() ? (iter->second)[key.second] : m_sub_coordinate[key.first][key.second];
     }
     
+    template <class C>
+    bool xcoordinate_chain<C>::is_reindex(const key_type& key, const label_type& label) const
+    {
+        auto iter = m_coordinate.find(key);
+        return iter != m_coordinate.end() ? (iter->second).contains(label) : false;
+    }
+
     template <class C>
     inline auto xcoordinate_chain<C>::find(const key_type& key) const -> const_iterator
     {

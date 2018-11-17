@@ -124,8 +124,8 @@ namespace xf
      * coordinate metafunctions *
      ****************************/
 
-    template <class K, class S, class MT, class L>
-    class xcoordinate_view;
+    template <class C>
+    class xcoordinate_chain;
 
     namespace detail
     {
@@ -141,6 +141,11 @@ namespace xf
 
         template <class K, class S, class MT, class L>
         struct is_coordinate_impl<xcoordinate_view<K, S, MT, L>> : std::true_type
+        {
+        };
+
+        template <class C>
+        struct is_coordinate_impl<xcoordinate_chain<C>> : std::true_type
         {
         };
 
