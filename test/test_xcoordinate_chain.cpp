@@ -136,10 +136,9 @@ namespace xf
         auto cc = make_coordinate_chain(c);
         coordinate_type c2 = {{"abscissa", make_test_saxis3()}, {"ordinate", make_test_iaxis()}};
 
-        EXPECT_FALSE(cc == c);
-        EXPECT_TRUE(cc != c);
-        EXPECT_TRUE(cc == c2);
-        EXPECT_FALSE(cc != c2);
+        using xf::operator<<;
+        EXPECT_NE(cc, c);
+        EXPECT_EQ(cc, c2);
     }
 }
 

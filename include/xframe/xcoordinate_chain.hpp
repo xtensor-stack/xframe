@@ -107,6 +107,9 @@ namespace xf
     template <class C, class K, class A>
     bool operator!=(const xcoordinate_base<K, A>& lhs, const xcoordinate_chain<C>& rhs);
 
+    template <class OS, class C>
+    std::ostream& operator<<(std::ostream& out, const xcoordinate_chain<C>& c);
+    
     template <class C>
     xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& new_coord);
 
@@ -317,6 +320,16 @@ namespace xf
     inline bool operator!=(const xcoordinate_base<K, A>& lhs, const xcoordinate_chain<C>& rhs)
     {
         return rhs != lhs;
+    }
+
+    template <class C>
+    inline std::ostream& operator<<(std::ostream& out, const xcoordinate_chain<C>& c)
+    {
+        for (auto& v : c)
+        {
+            out << v.first << ": " << v.second << std::endl;
+        }
+        return out;
     }
 
     template <class C>

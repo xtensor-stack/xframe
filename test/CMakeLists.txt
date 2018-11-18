@@ -98,6 +98,7 @@ set(XFRAME_TESTS
     test_xvariable_assign.cpp
     test_xvariable_function.cpp
     test_xvariable_masked_view.cpp
+    test_xvariable_math.cpp
     test_xvariable_noalias.cpp
     test_xvariable_scalar.cpp
     test_xvariable_view.cpp
