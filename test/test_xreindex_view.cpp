@@ -142,6 +142,38 @@ namespace xf
 
         auto mis = view.select<join::outer>({{"abscissa", "e"}, {"ordinate", 1}});
         EXPECT_EQ(mis, view.missing());
+    }
 
+    TEST(xreindex_view, iselect)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+
+        auto t00 = view.iselect({{"abscissa", 0},{"ordinate", 0}});
+        auto t01 = view.iselect({{"abscissa", 0},{"ordinate", 1}});
+        auto t02 = view.iselect({{"abscissa", 0},{"ordinate", 2}});
+        auto t10 = view.iselect({{"abscissa", 1},{"ordinate", 0}});
+        auto t11 = view.iselect({{"abscissa", 1},{"ordinate", 1}});
+        auto t12 = view.iselect({{"abscissa", 1},{"ordinate", 2}});
+        auto t20 = view.iselect({{"abscissa", 2},{"ordinate", 0}});
+        auto t21 = view.iselect({{"abscissa", 2},{"ordinate", 1}});
+        auto t22 = view.iselect({{"abscissa", 2},{"ordinate", 2}});
+        auto t30 = view.iselect({{"abscissa", 3},{"ordinate", 0}});
+        auto t31 = view.iselect({{"abscissa", 3},{"ordinate", 1}});
+        auto t32 = view.iselect({{"abscissa", 3},{"ordinate", 2}});
+
+        EXPECT_EQ(t00, 1.);
+        EXPECT_EQ(t01, 2);
+        EXPECT_EQ(t02, view.missing());
+        EXPECT_EQ(t10, view.missing());
+        EXPECT_EQ(t11, view.missing());
+        EXPECT_EQ(t12, view.missing());
+        EXPECT_EQ(t20, view.missing());
+        EXPECT_EQ(t21, 5);
+        EXPECT_EQ(t22, 6);
+        EXPECT_EQ(t30, 7);
+        EXPECT_EQ(t31, 8);
+        EXPECT_EQ(t32, 9);
     }
 }

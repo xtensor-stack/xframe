@@ -126,6 +126,12 @@ namespace xf
         template <class Join, class S>
         const_reference select_join(S&& selector) const;
 
+        template <std::size_t N, class S>
+        const_reference iselect_impl(S&& selector) const;
+
+        template <std::size_t N, class S>
+        std::pair<index_type<N>, bool> build_iselect_index(S&& selector) const;
+
         CT m_e;
         coordinate_type m_coordinate;
         const dimension_type& m_dimension_mapping;
@@ -252,12 +258,37 @@ namespace xf
     }
 
     template <class CT>
+    template <std::size_t N>
+    inline auto xreindex_view<CT>::iselect(const iselector_sequence_type<N>& selector) const -> const_reference
+    {
+        return iselect_impl<N>(selector);
+    }
+
+    template <class CT>
+    template <std::size_t N>
+    inline auto xreindex_view<CT>::iselect(iselector_sequence_type<N>&& selector) const -> const_reference
+    {
+        return iselect_impl<N>(std::move(selector));
+    }
+    
+    template <class CT>
+    inline void xreindex_view<CT>::init_shape()
+    {
+        size_type dim = dimension();
+        m_shape.resize(dim);
+        for(size_type i = 0; i < dim; ++i)
+        {
+            m_shape[i] = coordinates().find(dimension_labels()[i])->second.size();
+        }
+    }
+
+    template <class CT>
     template <class S>
     inline auto xreindex_view<CT>::select_impl(S&& selector) const -> const_reference
     {
         for(const auto& c: selector)
         {
-            bool contained = m_coordinate.is_reindex(c.first, c.second);
+            bool contained = m_coordinate.is_reindexed(c.first, c.second);
             bool sub_contained = m_e.coordinates().contains(c.first, c.second);
             if(contained && !sub_contained)
             {
@@ -281,14 +312,43 @@ namespace xf
     }
 
     template <class CT>
-    inline void xreindex_view<CT>::init_shape()
+    template <std::size_t N, class S>
+    inline auto xreindex_view<CT>::iselect_impl(S&& iselector) const -> const_reference
     {
-        size_type dim = dimension();
-        m_shape.resize(dim);
-        for(size_type i = 0; i < dim; ++i)
+        auto outer_index = build_iselect_index<N>(std::forward<S>(iselector));
+        return outer_index.second ? m_e.element(outer_index.first) : missing();
+    }
+
+    template <class CT>
+    template <std::size_t N, class S>
+    inline auto xreindex_view<CT>::build_iselect_index(S&& selector) const -> std::pair<index_type<N>, bool>
+    {
+        auto res = std::make_pair(xtl::make_sequence<index_type<N>>(dimension(), size_type(0)), true);
+        auto reindex_end = m_coordinate.reindex_map().end();
+        for(const auto& c: selector)
         {
-            m_shape[i] = coordinates().find(dimension_labels()[i])->second.size();
+            auto iter = m_coordinate.reindex_map().find(c.first);
+            if(iter != reindex_end)
+            {
+                auto label = (iter->second).label(c.second);
+                auto subiter = m_coordinate.initial_coordinates().find(c.first);
+                auto subindex = (subiter->second).find(label);
+                if(subindex == (subiter->second).end())
+                {
+                    res.second = false;
+                    break;
+                }
+                else
+                {
+                    res.first[m_dimension_mapping[c.first]] = subindex->second;
+                }
+            }
+            else
+            {
+                res.first[m_dimension_mapping[c.first]] = c.second;
+            }
         }
+        return res;
     }
 
     /****************************************
