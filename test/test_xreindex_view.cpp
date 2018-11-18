@@ -67,6 +67,26 @@ namespace xf
         EXPECT_EQ(shape, expected);
     }
 
+    TEST(xreindex_view, access)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+
+        EXPECT_EQ(view(0, 0), 1.);
+        EXPECT_EQ(view(0, 1), 2);
+        EXPECT_EQ(view(0, 2), view.missing());
+        EXPECT_EQ(view(1, 0), view.missing());
+        EXPECT_EQ(view(1, 1), view.missing());
+        EXPECT_EQ(view(1, 2), view.missing());
+        EXPECT_EQ(view(2, 0), view.missing());
+        EXPECT_EQ(view(2, 1), 5);
+        EXPECT_EQ(view(2, 2), 6);
+        EXPECT_EQ(view(3, 0), 7);
+        EXPECT_EQ(view(3, 1), 8);
+        EXPECT_EQ(view(3, 2), 9);
+    }
+
     TEST(xreindex_view, select_inner)
     {
         auto var = make_test_variable();
@@ -86,18 +106,18 @@ namespace xf
         auto t31 = view.select({{"abscissa", "d"},{"ordinate", 2}});
         auto t32 = view.select({{"abscissa", "d"},{"ordinate", 4}});
 
-        EXPECT_EQ(t00, 1.);
-        EXPECT_EQ(t01, 2);
-        EXPECT_EQ(t02, view.missing());
-        EXPECT_EQ(t10, view.missing());
-        EXPECT_EQ(t11, view.missing());
-        EXPECT_EQ(t12, view.missing());
-        EXPECT_EQ(t20, view.missing());
-        EXPECT_EQ(t21, 5);
-        EXPECT_EQ(t22, 6);
-        EXPECT_EQ(t30, 7);
-        EXPECT_EQ(t31, 8);
-        EXPECT_EQ(t32, 9);
+        EXPECT_EQ(t00, view(0, 0));
+        EXPECT_EQ(t01, view(0, 1));
+        EXPECT_EQ(t02, view(0, 2));
+        EXPECT_EQ(t10, view(1, 0));
+        EXPECT_EQ(t11, view(1, 1));
+        EXPECT_EQ(t12, view(1, 2));
+        EXPECT_EQ(t20, view(2, 0));
+        EXPECT_EQ(t21, view(2, 1));
+        EXPECT_EQ(t22, view(2, 2));
+        EXPECT_EQ(t30, view(3, 0));
+        EXPECT_EQ(t31, view(3, 1));
+        EXPECT_EQ(t32, view(3, 2));
 
         auto t100 = view.select({{"abscissa", "a"}, {"ordinate", 1}, {"altitude", 1}});
         EXPECT_EQ(t100, t00);
@@ -124,18 +144,18 @@ namespace xf
         auto t31 = view.select<join::outer>({{"abscissa", "d"},{"ordinate", 2}});
         auto t32 = view.select<join::outer>({{"abscissa", "d"},{"ordinate", 4}});
 
-        EXPECT_EQ(t00, 1.);
-        EXPECT_EQ(t01, 2);
-        EXPECT_EQ(t02, view.missing());
-        EXPECT_EQ(t10, view.missing());
-        EXPECT_EQ(t11, view.missing());
-        EXPECT_EQ(t12, view.missing());
-        EXPECT_EQ(t20, view.missing());
-        EXPECT_EQ(t21, 5);
-        EXPECT_EQ(t22, 6);
-        EXPECT_EQ(t30, 7);
-        EXPECT_EQ(t31, 8);
-        EXPECT_EQ(t32, 9);
+        EXPECT_EQ(t00, view(0, 0));
+        EXPECT_EQ(t01, view(0, 1));
+        EXPECT_EQ(t02, view(0, 2));
+        EXPECT_EQ(t10, view(1, 0));
+        EXPECT_EQ(t11, view(1, 1));
+        EXPECT_EQ(t12, view(1, 2));
+        EXPECT_EQ(t20, view(2, 0));
+        EXPECT_EQ(t21, view(2, 1));
+        EXPECT_EQ(t22, view(2, 2));
+        EXPECT_EQ(t30, view(3, 0));
+        EXPECT_EQ(t31, view(3, 1));
+        EXPECT_EQ(t32, view(3, 2));
 
         auto t100 = view.select<join::outer>({{"abscissa", "a"}, {"ordinate", 1}, {"altitude", 1}});
         EXPECT_EQ(t100, t00);
@@ -163,17 +183,17 @@ namespace xf
         auto t31 = view.iselect({{"abscissa", 3},{"ordinate", 1}});
         auto t32 = view.iselect({{"abscissa", 3},{"ordinate", 2}});
 
-        EXPECT_EQ(t00, 1.);
-        EXPECT_EQ(t01, 2);
-        EXPECT_EQ(t02, view.missing());
-        EXPECT_EQ(t10, view.missing());
-        EXPECT_EQ(t11, view.missing());
-        EXPECT_EQ(t12, view.missing());
-        EXPECT_EQ(t20, view.missing());
-        EXPECT_EQ(t21, 5);
-        EXPECT_EQ(t22, 6);
-        EXPECT_EQ(t30, 7);
-        EXPECT_EQ(t31, 8);
-        EXPECT_EQ(t32, 9);
+        EXPECT_EQ(t00, view(0, 0));
+        EXPECT_EQ(t01, view(0, 1));
+        EXPECT_EQ(t02, view(0, 2));
+        EXPECT_EQ(t10, view(1, 0));
+        EXPECT_EQ(t11, view(1, 1));
+        EXPECT_EQ(t12, view(1, 2));
+        EXPECT_EQ(t20, view(2, 0));
+        EXPECT_EQ(t21, view(2, 1));
+        EXPECT_EQ(t22, view(2, 2));
+        EXPECT_EQ(t30, view(3, 0));
+        EXPECT_EQ(t31, view(3, 1));
+        EXPECT_EQ(t32, view(3, 2));
     }
 }
