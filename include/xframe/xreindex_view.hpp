@@ -120,11 +120,8 @@ namespace xf
 
         void init_shape();
 
-        template <std::size_t I, std::size_t N, class T, class... Args>
-        bool build_access_index(index_type<N>& idx, T t, Args... args) const;
-
-        template <std::size_t I, std::size_t N>
-        bool build_access_index(index_type<N>& idx) const;
+        template <std::size_t N, class IDX>
+        const_reference element_impl(IDX&& index) const;
 
         template <class S>
         const_reference select_impl(S&& selector) const;
@@ -254,11 +251,25 @@ namespace xf
     inline auto xreindex_view<CT>::operator()(Args... args) const -> const_reference
     {
         constexpr std::size_t N = sizeof...(Args);
-        index_type<N> idx = xtl::make_sequence<index_type<N>>(N, size_type(0));
-        bool inner = build_access_index<0, N>(idx, args...);
-        return inner ? m_e.template element<N>(idx) : missing();
+        using index_value_type = typename index_type<N>::value_type;
+        index_type<N> idx {static_cast<index_value_type>(args)...};
+        return element_impl<N>(std::move(idx));
     }
 
+    template <class CT>
+    template <std::size_t N>
+    inline auto xreindex_view<CT>::element(const index_type<N>& index) const -> const_reference
+    {
+        return element_impl<N>(index);
+    }
+
+    template <class CT>
+    template <std::size_t N>
+    inline auto xreindex_view<CT>::element(index_type<N>&& index) const -> const_reference
+    {
+        return element_impl<N>(std::move(index));
+    }
+    
     template <class CT>
     template <class Join, std::size_t N>
     inline auto xreindex_view<CT>::select(const selector_sequence_type<N>& selector) const -> const_reference
@@ -297,41 +308,35 @@ namespace xf
             m_shape[i] = coordinates().find(dimension_labels()[i])->second.size();
         }
     }
+   
+    template <class CT>
+    template <std::size_t N, class IDX>
+    inline auto xreindex_view<CT>::element_impl(IDX&& index) const -> const_reference
+    {
+        bool contained = true;
+        for(std::size_t i = 0; i < index.size(); ++i)
+        {
+            auto dim_name = m_dimension_mapping.label(i);
+            auto iter = m_coordinate.reindex_map().find(dim_name);
+            if(iter != m_coordinate.reindex_map().end())
+            {
+                auto label = (iter->second).label(index[i]);
+                auto subiter = m_coordinate.initial_coordinates().find(dim_name);
+                auto subindex = (subiter->second).find(label);
+                if(subindex == (subiter->second).end())
+                {
+                    contained = false;
+                    break;
+                }
+                else
+                {
+                    index[i] = subindex->second;
+                }
+            }
+        }
+        return contained ? m_e.template element<N>(std::forward<IDX>(index)) : missing();
+    }
 
-    template <class CT>
-    template <std::size_t I, std::size_t N, class T, class... Args>
-    inline bool xreindex_view<CT>::build_access_index(index_type<N>& idx, T t, Args... args) const
-    {
-        auto dim_name = m_dimension_mapping.label(I);
-        auto iter = m_coordinate.reindex_map().find(dim_name);
-        if(iter != m_coordinate.reindex_map().end())
-        {
-            auto label = (iter->second).label(t);
-            auto subiter = m_coordinate.initial_coordinates().find(dim_name);
-            auto subindex = (subiter->second).find(label);
-            if(subindex == (subiter->second).end())
-            {
-                return false;
-            }
-            else
-            {
-                idx[I] = subindex->second;
-            }
-        }
-        else
-        {
-            idx[I] = t;
-        }
-        return build_access_index<I+1, N>(idx, args...);
-    }
-    
-    template <class CT>
-    template <std::size_t I, std::size_t N>
-    inline bool xreindex_view<CT>::build_access_index(index_type<N>&) const
-    {
-        return true;
-    }
-    
     template <class CT>
     template <class S>
     inline auto xreindex_view<CT>::select_impl(S&& selector) const -> const_reference

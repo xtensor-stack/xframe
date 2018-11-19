@@ -87,6 +87,26 @@ namespace xf
         EXPECT_EQ(view(3, 2), 9);
     }
 
+    TEST(xreindex_view, element)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+
+        EXPECT_EQ(view.element({0, 0}), 1.);
+        EXPECT_EQ(view.element({0, 1}), 2);
+        EXPECT_EQ(view.element({0, 2}), view.missing());
+        EXPECT_EQ(view.element({1, 0}), view.missing());
+        EXPECT_EQ(view.element({1, 1}), view.missing());
+        EXPECT_EQ(view.element({1, 2}), view.missing());
+        EXPECT_EQ(view.element({2, 0}), view.missing());
+        EXPECT_EQ(view.element({2, 1}), 5);
+        EXPECT_EQ(view.element({2, 2}), 6);
+        EXPECT_EQ(view.element({3, 0}), 7);
+        EXPECT_EQ(view.element({3, 1}), 8);
+        EXPECT_EQ(view.element({3, 2}), 9);
+    }
+
     TEST(xreindex_view, select_inner)
     {
         auto var = make_test_variable();
