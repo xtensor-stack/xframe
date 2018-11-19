@@ -107,6 +107,72 @@ namespace xf
         EXPECT_EQ(view.element({3, 2}), 9);
     }
 
+    TEST(xreindex_view, locate)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+
+        auto t00 = view.locate("a", 1);
+        auto t01 = view.locate("a", 2);
+        auto t02 = view.locate("a", 4);
+        auto t10 = view.locate("b", 1);
+        auto t11 = view.locate("b", 2);
+        auto t12 = view.locate("b", 4);
+        auto t20 = view.locate("c", 1);
+        auto t21 = view.locate("c", 2);
+        auto t22 = view.locate("c", 4);
+        auto t30 = view.locate("d", 1);
+        auto t31 = view.locate("d", 2);
+        auto t32 = view.locate("d", 4);
+
+        EXPECT_EQ(t00, view(0, 0));
+        EXPECT_EQ(t01, view(0, 1));
+        EXPECT_EQ(t02, view(0, 2));
+        EXPECT_EQ(t10, view(1, 0));
+        EXPECT_EQ(t11, view(1, 1));
+        EXPECT_EQ(t12, view(1, 2));
+        EXPECT_EQ(t20, view(2, 0));
+        EXPECT_EQ(t21, view(2, 1));
+        EXPECT_EQ(t22, view(2, 2));
+        EXPECT_EQ(t30, view(3, 0));
+        EXPECT_EQ(t31, view(3, 1));
+        EXPECT_EQ(t32, view(3, 2));
+    }
+
+    TEST(xreindex_view, locate_element)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+
+        auto t00 = view.locate_element({ "a", 1 });
+        auto t01 = view.locate_element({ "a", 2 });
+        auto t02 = view.locate_element({ "a", 4 });
+        auto t10 = view.locate_element({ "b", 1 });
+        auto t11 = view.locate_element({ "b", 2 });
+        auto t12 = view.locate_element({ "b", 4 });
+        auto t20 = view.locate_element({ "c", 1 });
+        auto t21 = view.locate_element({ "c", 2 });
+        auto t22 = view.locate_element({ "c", 4 });
+        auto t30 = view.locate_element({ "d", 1 });
+        auto t31 = view.locate_element({ "d", 2 });
+        auto t32 = view.locate_element({ "d", 4 });
+
+        EXPECT_EQ(t00, view(0, 0));
+        EXPECT_EQ(t01, view(0, 1));
+        EXPECT_EQ(t02, view(0, 2));
+        EXPECT_EQ(t10, view(1, 0));
+        EXPECT_EQ(t11, view(1, 1));
+        EXPECT_EQ(t12, view(1, 2));
+        EXPECT_EQ(t20, view(2, 0));
+        EXPECT_EQ(t21, view(2, 1));
+        EXPECT_EQ(t22, view(2, 2));
+        EXPECT_EQ(t30, view(3, 0));
+        EXPECT_EQ(t31, view(3, 1));
+        EXPECT_EQ(t32, view(3, 2));
+    }
+
     TEST(xreindex_view, select_inner)
     {
         auto var = make_test_variable();

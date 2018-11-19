@@ -123,6 +123,9 @@ namespace xf
         template <std::size_t N, class IDX>
         const_reference element_impl(IDX&& index) const;
 
+        template <std::size_t N, class L>
+        const_reference locate_element_impl(L&& locator) const;
+
         template <class S>
         const_reference select_impl(S&& selector) const;
 
@@ -252,8 +255,7 @@ namespace xf
     {
         constexpr std::size_t N = sizeof...(Args);
         using index_value_type = typename index_type<N>::value_type;
-        index_type<N> idx {static_cast<index_value_type>(args)...};
-        return element_impl<N>(std::move(idx));
+        return element({static_cast<index_value_type>(args)...});
     }
 
     template <class CT>
@@ -270,6 +272,29 @@ namespace xf
         return element_impl<N>(std::move(index));
     }
     
+    template <class CT>
+    template <class... Args>
+    inline auto xreindex_view<CT>::locate(Args&&... args) const -> const_reference
+    {
+        constexpr std::size_t N = sizeof...(Args);
+        using loc_value_type = typename locator_sequence_type<N>::value_type;
+        return locate_element_impl<N>(locator_sequence_type<N>{loc_value_type(args)...});
+    }
+    
+    template <class CT>
+    template <std::size_t N>
+    inline auto xreindex_view<CT>::locate_element(const locator_sequence_type<N>& locator) const -> const_reference
+    {
+        return locate_element_impl<N>(locator);
+    }
+
+    template <class CT>
+    template <std::size_t N>
+    inline auto xreindex_view<CT>::locate_element(locator_sequence_type<N>&& locator) const -> const_reference
+    {
+        return locate_element_impl<N>(std::move(locator));
+    }
+
     template <class CT>
     template <class Join, std::size_t N>
     inline auto xreindex_view<CT>::select(const selector_sequence_type<N>& selector) const -> const_reference
@@ -337,6 +362,23 @@ namespace xf
         return contained ? m_e.template element<N>(std::forward<IDX>(index)) : missing();
     }
 
+    template <class CT>
+    template <std::size_t N, class L>
+    inline auto xreindex_view<CT>::locate_element_impl(L&& locator) const -> const_reference
+    {
+        for(std::size_t i = 0; i < locator.size(); ++i)
+        {
+            auto dim_name = m_dimension_mapping.label(i);
+            bool contained = m_coordinate.is_reindexed(dim_name, locator[i]);
+            bool sub_contained = m_coordinate.initial_coordinates().contains(dim_name, locator[i]);
+            if(contained && !sub_contained)
+            {
+                return missing();
+            }
+        }
+        return m_e.template locate_element<N>(std::forward<L>(locator));
+    }
+    
     template <class CT>
     template <class S>
     inline auto xreindex_view<CT>::select_impl(S&& selector) const -> const_reference
