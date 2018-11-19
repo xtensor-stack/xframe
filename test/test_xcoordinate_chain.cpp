@@ -16,11 +16,6 @@ namespace xf
     using slabel_type = std::vector<fstring>;
     using ilabel_type = std::vector<int>;
 
-    inline saxis_type make_test_saxis3()
-    {
-        return saxis_type({"a", "b", "c", "d"});
-    }
-
     TEST(xcoordinate_chain, constructor)
     {
         auto c = make_test_coordinate();
@@ -95,6 +90,17 @@ namespace xf
         EXPECT_EQ(iter, cc.end());
     }
 
+    TEST(xcoordinate_chain, find)
+    {
+        auto c = make_test_coordinate();
+        auto cc = make_coordinate_chain(c);
+
+        auto iter = cc.find("abscissa");
+        EXPECT_EQ((iter->second)["a"], 0);
+        auto iter2 = cc.find("not_here");
+        EXPECT_EQ(iter2, cc.end());
+    }
+
     TEST(xcoordinate_chain, key_iterator)
     {
         auto c = make_test_coordinate();
@@ -122,6 +128,17 @@ namespace xf
         auto cc2 = reindex(c, std::move(m));
         EXPECT_FALSE(cc == cc2);
         EXPECT_TRUE(cc != cc2);
+    }
+
+    TEST(xcoordinate_chain, mixed_comparison)
+    {
+        auto c = make_test_coordinate();
+        auto cc = make_coordinate_chain(c);
+        coordinate_type c2 = {{"abscissa", make_test_saxis3()}, {"ordinate", make_test_iaxis()}};
+
+        using xf::operator<<;
+        EXPECT_NE(cc, c);
+        EXPECT_EQ(cc, c2);
     }
 }
 

@@ -32,6 +32,7 @@ namespace xf
         using coordinate_type = xcoordinate_view_type_t<typename xexpression_type::coordinate_type>;
         using coordinate_closure_type = coordinate_type;
         using dimension_type = typename xexpression_type::dimension_type;
+        using dimension_closure_type = dimension_type;
         using key_type = typename coordinate_type::key_type;
         using size_type = typename coordinate_type::size_type;
     };
@@ -85,7 +86,7 @@ namespace xf
 
         using coordinate_type = typename coordinate_base::coordinate_type;
         using dimension_type = typename coordinate_base::dimension_type;
-        using dimension_list = typename dimension_type::label_list;
+        using dimension_list = typename coordinate_base::dimension_list;
         using shape_type = typename data_type::shape_type;
         using squeeze_map = std::map<typename dimension_type::mapped_type, typename coordinate_type::index_type>;
         using temporary_type = typename inner_types::temporary_type;
@@ -270,8 +271,8 @@ namespace xf
      * xvariable_view builders *
      ***************************/
 
-    /*template <class E, class... S>
-    auto ilocate(E&& e, S&&... slices);*/
+    template <class E, class... S>
+    auto ilocate(E&& e, S&&... slices);
 
     template <class L = DEFAULT_LABEL_LIST, class E, class... S>
     auto locate(E&& e, S&&... slices);

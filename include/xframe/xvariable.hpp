@@ -34,6 +34,7 @@ namespace xf
         using key_type = typename coordinate_type::key_type;
         using size_type = typename coordinate_type::size_type;
         using dimension_type = xdimension<key_type, size_type>;
+        using dimension_closure_type = dimension_type;
     };
 }
 

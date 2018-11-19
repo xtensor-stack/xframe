@@ -11,6 +11,7 @@
 
 #include <type_traits>
 #include "xtl/xiterator_base.hpp"
+#include "xcoordinate.hpp"
 
 namespace xf
 {
@@ -41,6 +42,7 @@ namespace xf
         using label_list = typename coordinate_type::label_list;
         using key_type = typename coordinate_type::key_type;
         using axis_type = typename coordinate_type::axis_type;
+        using label_type = typename axis_type::key_type;
         using map_type = typename coordinate_type::map_type;
         using mapped_type = typename coordinate_type::mapped_type;
         using index_type = typename coordinate_type::index_type;
@@ -54,8 +56,8 @@ namespace xf
         using const_iterator = xmap_chain_iterator<map_type>;
         using key_iterator = xtl::xkey_iterator<detail::map_chain_traits<map_type>>;
 
-        xcoordinate_chain(const coordinate_type& sub_coord, const map_type& axes);
-        xcoordinate_chain(const coordinate_type& sub_coord, map_type&& axes);
+        xcoordinate_chain(const coordinate_type& sub_coord, const map_type& new_coord);
+        xcoordinate_chain(const coordinate_type& sub_coord, map_type&& new_coord);
 
         bool empty() const;
         size_type size() const;
@@ -68,6 +70,10 @@ namespace xf
 
         // TODO: check if that's required and why
         //const map_type& data() const noexcept;
+
+        const coordinate_type& initial_coordinates() const;
+        const map_type& reindex_map() const;
+        bool is_reindexed(const key_type& key, const label_type& label) const;
 
         const_iterator find(const key_type& key) const;
 
@@ -88,14 +94,29 @@ namespace xf
         void check_consistency() const;
 
         const coordinate_type& m_sub_coordinate;
-        map_type m_coordinate;
+        map_type m_reindex;
     };
 
+    template <class C, class K, class A>
+    bool operator==(const xcoordinate_chain<C>& lhs, const xcoordinate_base<K, A>& rhs);
+
+    template <class C, class K, class A>
+    bool operator==(const xcoordinate_base<K, A>& lhs, const xcoordinate_chain<C>& rhs);
+
+    template <class C, class K, class A>
+    bool operator!=(const xcoordinate_chain<C>& lhs, const xcoordinate_base<K, A>& rhs);
+
+    template <class C, class K, class A>
+    bool operator!=(const xcoordinate_base<K, A>& lhs, const xcoordinate_chain<C>& rhs);
+
+    template <class OS, class C>
+    std::ostream& operator<<(std::ostream& out, const xcoordinate_chain<C>& c);
+    
     template <class C>
-    xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& axes);
+    xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& new_coord);
 
     template <class C>
-    xcoordinate_chain<C> reindex(const C& coordinate, typename C::map_type&& axes);
+    xcoordinate_chain<C> reindex(const C& coordinate, typename C::map_type&& new_coord);
 
     /*******************
      * xiterator_chain *
@@ -144,15 +165,15 @@ namespace xf
      ************************************/
 
     template <class C>
-    inline xcoordinate_chain<C>::xcoordinate_chain(const coordinate_type& sub_coord, const map_type& axes)
-        : m_sub_coordinate(sub_coord), m_coordinate(axes)
+    inline xcoordinate_chain<C>::xcoordinate_chain(const coordinate_type& sub_coord, const map_type& new_coord)
+        : m_sub_coordinate(sub_coord), m_reindex(new_coord)
     {
         check_consistency();
     }
 
     template <class C>
-    inline xcoordinate_chain<C>::xcoordinate_chain(const coordinate_type& sub_coord, map_type&& axes)
-        : m_sub_coordinate(sub_coord), m_coordinate(std::move(axes))
+    inline xcoordinate_chain<C>::xcoordinate_chain(const coordinate_type& sub_coord, map_type&& new_coord)
+        : m_sub_coordinate(sub_coord), m_reindex(std::move(new_coord))
     {
         check_consistency();
     }
@@ -172,33 +193,52 @@ namespace xf
     template <class C>
     inline bool xcoordinate_chain<C>::contains(const key_type& key) const
     {
-        return (m_coordinate.find(key) != m_coordinate.end()) || m_sub_coordinate.contains(key);
+        return (m_reindex.find(key) != m_reindex.end()) || m_sub_coordinate.contains(key);
     }
 
     template <class C>
     inline auto xcoordinate_chain<C>::operator[](const key_type& key) const -> const mapped_type&
     {
-        auto iter = m_coordinate.find(key);
-        return iter != m_coordinate.end() ? iter->second : m_sub_coordinate[key];
+        auto iter = m_reindex.find(key);
+        return iter != m_reindex.end() ? iter->second : m_sub_coordinate[key];
     }
 
     template <class C>
     template <class KB, class LB>
     inline auto xcoordinate_chain<C>::operator[](const std::pair<KB, LB>& key) const -> index_type
     {
-        auto iter = m_coordinate.find(key.first);
-        return iter != m_coordinate.end() ? (iter->second)[key.second] : m_sub_coordinate[key.first][key.second];
+        auto iter = m_reindex.find(key.first);
+        return iter != m_reindex.end() ? (iter->second)[key.second] : m_sub_coordinate[key.first][key.second];
     }
     
     template <class C>
+    inline auto xcoordinate_chain<C>::initial_coordinates() const -> const coordinate_type&
+    {
+        return m_sub_coordinate;
+    }
+
+    template <class C>
+    inline auto xcoordinate_chain<C>::reindex_map() const -> const map_type&
+    {
+        return m_reindex;
+    }
+
+    template <class C>
+    bool xcoordinate_chain<C>::is_reindexed(const key_type& key, const label_type& label) const
+    {
+        auto iter = m_reindex.find(key);
+        return iter != m_reindex.end() ? (iter->second).contains(label) : false;
+    }
+
+    template <class C>
     inline auto xcoordinate_chain<C>::find(const key_type& key) const -> const_iterator
     {
-        auto iter = m_coordinate.find(key);
-        if(iter == m_coordinate.end())
+        auto iter = m_reindex.find(key);
+        if(iter == m_reindex.end())
         {
             iter = m_sub_coordinate.find(key);
         }
-        return const_iterator(m_coordinate, m_sub_coordinate, iter);
+        return const_iterator(iter, &m_reindex);
     }
 
     template <class C>
@@ -216,13 +256,13 @@ namespace xf
     template <class C>
     inline auto xcoordinate_chain<C>::cbegin() const noexcept -> const_iterator
     {
-        return const_iterator(m_sub_coordinate.cbegin(), &m_coordinate);
+        return const_iterator(m_sub_coordinate.cbegin(), &m_reindex);
     }
 
     template <class C>
     inline auto xcoordinate_chain<C>::cend() const noexcept -> const_iterator
     {
-        return const_iterator(m_sub_coordinate.cend(), &m_coordinate);
+        return const_iterator(m_sub_coordinate.cend(), &m_reindex);
     }
 
     template <class C>
@@ -241,7 +281,7 @@ namespace xf
     inline bool xcoordinate_chain<C>::operator==(const self_type& rhs) const noexcept
     {
         return m_sub_coordinate == rhs.m_sub_coordinate
-            && m_coordinate == rhs.m_coordinate;
+            && m_reindex == rhs.m_reindex;
     }
 
     template <class C>
@@ -253,7 +293,7 @@ namespace xf
     template <class C>
     inline void xcoordinate_chain<C>::check_consistency() const
     {
-        for(const auto& a: m_coordinate)
+        for(const auto& a: m_reindex)
         {
             if(!m_sub_coordinate.contains(a.first))
             {
@@ -262,16 +302,60 @@ namespace xf
         }
     }
 
-    template <class C>
-    inline xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& axes)
+    template <class C, class K, class A>
+    inline bool operator==(const xcoordinate_chain<C>& lhs, const xcoordinate_base<K, A>& rhs)
     {
-        return xcoordinate_chain<C>(coordinate, axes);
+        bool res = lhs.size() == rhs.size();
+        auto iter = lhs.begin();
+        auto end = lhs.end();
+        auto rhs_end = rhs.end();
+        while(res && iter != end)
+        {
+            auto rhs_iter = rhs.find(iter->first);
+            res = (rhs_iter != rhs_end) && (iter->second == rhs_iter->second);
+            ++iter;
+        }
+        return res;
+    }
+
+    template <class C, class K, class A>
+    inline bool operator==(const xcoordinate_base<K, A>& lhs, const xcoordinate_chain<C>& rhs)
+    {
+        return rhs == lhs;
+    }
+
+    template <class C, class K, class A>
+    inline bool operator!=(const xcoordinate_chain<C>& lhs, const xcoordinate_base<K, A>& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template <class C, class K, class A>
+    inline bool operator!=(const xcoordinate_base<K, A>& lhs, const xcoordinate_chain<C>& rhs)
+    {
+        return rhs != lhs;
     }
 
     template <class C>
-    inline xcoordinate_chain<C> reindex(const C& coordinate, typename C::map_type&& axes)
+    inline std::ostream& operator<<(std::ostream& out, const xcoordinate_chain<C>& c)
     {
-        return xcoordinate_chain<C>(coordinate, std::move(axes));
+        for (auto& v : c)
+        {
+            out << v.first << ": " << v.second << std::endl;
+        }
+        return out;
+    }
+
+    template <class C>
+    inline xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& new_coord)
+    {
+        return xcoordinate_chain<C>(coordinate, new_coord);
+    }
+
+    template <class C>
+    inline xcoordinate_chain<C> reindex(const C& coordinate, typename C::map_type&& new_coord)
+    {
+        return xcoordinate_chain<C>(coordinate, std::move(new_coord));
     }
 
     /**************************************

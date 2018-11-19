@@ -32,6 +32,7 @@ namespace xf
         using map_type = std::map<K, axis_type>;
         using key_type = typename map_type::key_type;
         using mapped_type = typename map_type::mapped_type;
+        using label_type = typename axis_type::key_type;
         using index_type = typename axis_type::mapped_type;
         using value_type = typename map_type::value_type;
         using reference = typename map_type::reference;
@@ -48,6 +49,7 @@ namespace xf
         size_type size() const;
 
         bool contains(const key_type& key) const;
+        bool contains(const key_type& key, const label_type& label) const;
         const mapped_type& operator[](const key_type& key) const;
 
         template <class KB, class LB>
@@ -137,6 +139,13 @@ namespace xf
     inline bool xcoordinate_base<K, A>::contains(const key_type& key) const
     {
         return m_coordinate.find(key) != m_coordinate.end();
+    }
+
+    template <class K, class A>
+    inline bool xcoordinate_base<K, A>::contains(const key_type& key, const label_type& label) const
+    {
+        auto iter = m_coordinate.find(key);
+        return iter != m_coordinate.end() ? (iter->second).contains(label) : false;
     }
 
     template <class K, class A>
