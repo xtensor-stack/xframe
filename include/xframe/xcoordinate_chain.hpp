@@ -137,7 +137,7 @@ namespace xf
         using iterator_category = typename map_iterator::iterator_category;
 
         xmap_chain_iterator();
-        xmap_chain_iterator(map_iterator sub_it, const map_type* coordinate);
+        xmap_chain_iterator(map_iterator sub_it, map_iterator sub_end, const map_type* coordinate);
 
         self_type& operator++();
         self_type& operator--();
@@ -156,6 +156,7 @@ namespace xf
         void update_it();
 
         map_iterator m_sub_it;
+        map_iterator m_sub_end;
         map_iterator m_it;
         const map_type* p_coordinate;
     };
@@ -238,7 +239,7 @@ namespace xf
         {
             iter = m_sub_coordinate.find(key);
         }
-        return const_iterator(iter, &m_reindex);
+        return const_iterator(iter, m_sub_coordinate.cend(), &m_reindex);
     }
 
     template <class C>
@@ -256,13 +257,13 @@ namespace xf
     template <class C>
     inline auto xcoordinate_chain<C>::cbegin() const noexcept -> const_iterator
     {
-        return const_iterator(m_sub_coordinate.cbegin(), &m_reindex);
+        return const_iterator(m_sub_coordinate.cbegin(), m_sub_coordinate.cend(), &m_reindex);
     }
 
     template <class C>
     inline auto xcoordinate_chain<C>::cend() const noexcept -> const_iterator
     {
-        return const_iterator(m_sub_coordinate.cend(), &m_reindex);
+        return const_iterator(m_sub_coordinate.cend(), m_sub_coordinate.cend(), &m_reindex);
     }
 
     template <class C>
@@ -369,8 +370,8 @@ namespace xf
     }
 
     template <class M>
-    inline xmap_chain_iterator<M>::xmap_chain_iterator(map_iterator sub_it, const map_type* coordinate)
-        : m_sub_it(sub_it), m_it(), p_coordinate(coordinate)
+    inline xmap_chain_iterator<M>::xmap_chain_iterator(map_iterator sub_it, map_iterator sub_end, const map_type* coordinate)
+        : m_sub_it(sub_it), m_sub_end(sub_end),m_it(), p_coordinate(coordinate)
     {
         update_it();
     }
@@ -386,7 +387,7 @@ namespace xf
     template <class M>
     inline auto xmap_chain_iterator<M>::operator--() -> self_type&
     {
-        --m_it;
+        --m_sub_it;
         update_it();
         return *this;
     }
@@ -434,8 +435,15 @@ namespace xf
     template <class M>
     inline void xmap_chain_iterator<M>::update_it()
     {
-        m_it = p_coordinate->find(m_sub_it->first);
-        if(m_it == p_coordinate->end())
+        if (m_sub_it != m_sub_end)
+        {
+            m_it = p_coordinate->find(m_sub_it->first);
+            if (m_it == p_coordinate->end())
+            {
+                m_it = m_sub_it;
+            }
+        }
+        else
         {
             m_it = m_sub_it;
         }
