@@ -126,6 +126,10 @@ namespace xf
         bool merge_unsorted(bool broadcasting, const Arg& a, const Args&... axes);
         bool merge_unsorted(bool broadcasting);
 
+        template <class Arg, class... Args>
+        bool intersect_unsorted(const Arg& al, const Args&... axes_labels);
+        bool intersect_unsorted();
+
     private:
 
         xaxis(const label_list& labels, bool is_sorted);
@@ -358,8 +362,16 @@ namespace xf
     template <class... Args>
     inline bool xaxis<L, T, MT>::intersect(const Args&... axes)
     {
-        bool res = intersect_to(this->mutable_labels(), axes.labels()...);
-        populate_index();
+        bool res = true;
+        if (all_sorted(*this, axes...))
+        {
+            res = intersect_to(this->mutable_labels(), axes.labels()...);
+            populate_index();
+        }
+        else
+        {
+            res = intersect_unsorted(axes.labels()...);
+        }
         return res;
     }
 
@@ -443,9 +455,9 @@ namespace xf
 
     template <class L, class T, class MT>
     template <class Arg, class... Args>
-    inline bool xaxis<L, T, MT>::merge_unsorted(bool broadcasting, const Arg& a, const Args&... axes)
+    inline bool xaxis<L, T, MT>::merge_unsorted(bool broadcasting, const Arg& a, const Args&... axes_labels)
     {
-        bool res = merge_unsorted(broadcasting, axes...);
+        bool res = merge_unsorted(broadcasting, axes_labels...);
         auto& labels = this->mutable_labels();
         auto output_iter = labels.rbegin();
         auto output_end = labels.rend();
@@ -495,6 +507,37 @@ namespace xf
 
     template <class L, class T, class MT>
     inline bool xaxis<L, T, MT>::merge_unsorted(bool /*broadcasting*/)
+    {
+        return true;
+    }
+
+    template <class L, class T, class MT>
+    template <class Arg, class... Args>
+    inline bool xaxis<L, T, MT>::intersect_unsorted(const Arg& al, const Args&... axes_labels)
+    {
+        bool res = intersect_unsorted(axes_labels...);
+        auto& labels = this->mutable_labels();
+        auto iter = labels.begin();
+        auto iter_end = labels.end();
+        while (iter != iter_end)
+        {
+            auto it = std::find(al.begin(), al.end(), *iter);
+            if (it == al.end())
+            {
+                iter = labels.erase(iter, iter + 1);
+                iter_end = labels.end();
+                res = false;
+            }
+            else
+            {
+                ++iter;
+            }
+        }
+        return res;
+    }
+
+    template <class L, class T, class MT>
+    inline bool xaxis<L, T, MT>::intersect_unsorted()
     {
         return true;
     }
