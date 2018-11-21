@@ -101,12 +101,6 @@ namespace xf
     template <class OS, class D>
     OS& operator<<(OS& out, const xaxis_base<D>& axis);
 
-    template <class D, class... Args>
-    bool merge_axes(xaxis_base<D>& output, const Args&... axes);
-
-    template <class D, class... Args>
-    bool intersect_axes(xaxis_base<D>& output, const Args&... axes);
-
     /************************
      * is_axis metafunction *
      ************************/

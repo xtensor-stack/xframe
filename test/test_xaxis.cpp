@@ -274,6 +274,17 @@ namespace xf
         bool t2 = intersect_axes(tmp, a1);
         EXPECT_TRUE(t2);
         EXPECT_EQ(tmp, a1);
+
+        axis_type a4 = { "a", "b", "c" };
+        axis_type a5 = { "b", "a", "c" };
+        tmp = a4;
+        bool t3 = intersect_axes(tmp, a5);
+        EXPECT_TRUE(t3);
+
+        axis_type a6 = { "a", "c" };
+        tmp = a4;
+        bool t4 = intersect_axes(tmp, a6);
+        EXPECT_FALSE(t4);
     }
 
     TEST(xaxis, filter)
