@@ -34,12 +34,12 @@ namespace xf
 
     template <class P, class T>
     void compute_1d_table(std::stringstream& out, P& printer, const T& expr,
-                          const std::size_t& edgeitems)
+                          const std::size_t& edge_items)
     {
         const auto& dim = expr.shape()[0];
 
         out << "<table style='border-style:solid;border-width:1px;'><tbody>";
-        if (edgeitems == 0 || 2 * edgeitems >= dim)
+        if (edge_items == 0 || 2 * edge_items >= dim)
         {
             for (std::size_t row_idx = 0; row_idx < dim; ++row_idx)
             {
@@ -48,12 +48,12 @@ namespace xf
         }
         else
         {
-            for (std::size_t row_idx = 0; row_idx < edgeitems; ++row_idx)
+            for (std::size_t row_idx = 0; row_idx < edge_items; ++row_idx)
             {
                 compute_1d_row(out, printer, expr, row_idx);
             }
             out << "<tr><th><center>...</center></th><td><center>...</center></td></tr>";
-            for (std::size_t row_idx = dim - edgeitems; row_idx < dim; ++row_idx)
+            for (std::size_t row_idx = dim - edge_items; row_idx < dim; ++row_idx)
             {
                 compute_1d_row(out, printer, expr, row_idx);
             }
@@ -83,27 +83,27 @@ namespace xf
     }
 
     template <class T>
-    std::size_t compute_nb_rows(const std::size_t& dim, const T& expr, const std::size_t& edgeitems)
+    std::size_t compute_nb_rows(const std::size_t& dim, const T& expr, const std::size_t& edge_items)
     {
         if (dim == expr.dimension() - 2)
         {
-            if (edgeitems == 0 || 2 * edgeitems >= expr.shape()[dim])
+            if (edge_items == 0 || 2 * edge_items >= expr.shape()[dim])
             {
                 return expr.shape()[dim];
             }
-            /*else*/ return 2 * edgeitems + 1;
+            /*else*/ return 2 * edge_items + 1;
         }
 
-        if (edgeitems == 0 || 2 * edgeitems >= expr.shape()[dim])
+        if (edge_items == 0 || 2 * edge_items >= expr.shape()[dim])
         {
-            return expr.shape()[dim] * compute_nb_rows(dim + 1, expr, edgeitems);
+            return expr.shape()[dim] * compute_nb_rows(dim + 1, expr, edge_items);
         }
-        /*else*/ return 2 * edgeitems * compute_nb_rows(dim + 1, expr, edgeitems) + 1;
+        /*else*/ return 2 * edge_items * compute_nb_rows(dim + 1, expr, edge_items) + 1;
     }
 
     template <class T, class I>
     void compute_row_head(std::stringstream& out, const T& expr,
-                          const std::size_t& edgeitems,
+                          const std::size_t& edge_items,
                           const std::size_t& row_idx, const std::vector<I>& idx)
     {
         const auto& before_last_dim_name = expr.dimension_mapping().label(expr.dimension() - 2);
@@ -118,7 +118,7 @@ namespace xf
                 {
                     const auto& current_dim_name = expr.dimension_mapping().label(current_dim);
 
-                    std::size_t rowspan = compute_nb_rows(current_dim + 1, expr, edgeitems);
+                    std::size_t rowspan = compute_nb_rows(current_dim + 1, expr, edge_items);
                     xtl::visit([&heads, &current_dim_name, &rowspan](auto&& arg) {
                         heads << "<th title='" << current_dim_name
                         << "' scope='rowgroup' rowspan='" << rowspan
@@ -140,15 +140,15 @@ namespace xf
 
     template <class P, class T, class I>
     void compute_2d_row(std::stringstream& out, P& printer, const T& expr,
-                        const std::size_t& edgeitems, const std::string& titles_str,
+                        const std::size_t& edge_items, const std::string& titles_str,
                         const std::size_t& row_idx, const std::vector<I>& idx)
     {
         const auto& before_last_dim_name = expr.dimension_mapping().label(expr.dimension() - 2);
         const auto& last_dim = expr.shape()[expr.dimension() - 1];
 
         out << "<tr>";
-        compute_row_head(out, expr, edgeitems, row_idx, idx);
-        if (edgeitems == 0 || 2 * edgeitems >= last_dim)
+        compute_row_head(out, expr, edge_items, row_idx, idx);
+        if (edge_items == 0 || 2 * edge_items >= last_dim)
         {
             for (std::size_t column_idx = 0; column_idx < last_dim; ++column_idx)
             {
@@ -157,12 +157,12 @@ namespace xf
         }
         else
         {
-            for (std::size_t column_idx = 0; column_idx < edgeitems; ++column_idx)
+            for (std::size_t column_idx = 0; column_idx < edge_items; ++column_idx)
             {
                 xf::compute_2d_element(out, printer, expr, titles_str, row_idx, column_idx);
             }
             out << "<td><center>...</center></td>";
-            for (std::size_t column_idx = last_dim - edgeitems; column_idx < last_dim; ++column_idx)
+            for (std::size_t column_idx = last_dim - edge_items; column_idx < last_dim; ++column_idx)
             {
                 xf::compute_2d_element(out, printer, expr, titles_str, row_idx, column_idx);
             }
@@ -172,7 +172,7 @@ namespace xf
 
     template <class P, class T, class I>
     void compute_2d_table(std::stringstream& out, P& printer, const T& expr,
-                          const std::size_t& edgeitems, const std::vector<I>& idx)
+                          const std::size_t& edge_items, const std::vector<I>& idx)
     {
         const auto& before_last_dim_name = expr.dimension_mapping().label(expr.dimension() - 2);
         const auto& before_last_dim = expr.shape()[expr.dimension() - 2];
@@ -191,23 +191,23 @@ namespace xf
         });
         std::string titles_str = titles.str();
 
-        if (edgeitems == 0 || 2 * edgeitems >= before_last_dim)
+        if (edge_items == 0 || 2 * edge_items >= before_last_dim)
         {
             for (std::size_t row_idx = 0; row_idx < before_last_dim; ++row_idx)
             {
-                xf::compute_2d_row(out, printer, expr, edgeitems, titles_str, row_idx, idx);
+                xf::compute_2d_row(out, printer, expr, edge_items, titles_str, row_idx, idx);
             }
         }
         else
         {
-            for (std::size_t row_idx = 0; row_idx < edgeitems; ++row_idx)
+            for (std::size_t row_idx = 0; row_idx < edge_items; ++row_idx)
             {
-                xf::compute_2d_row(out, printer, expr, edgeitems, titles_str, row_idx, idx);
+                xf::compute_2d_row(out, printer, expr, edge_items, titles_str, row_idx, idx);
             }
             out << "<tr><th title='" << before_last_dim_name
                 << "' style='border-right-style:solid;border-right-width:1px;'>"
                 << "<center>...</center></th>";
-            if (2 * edgeitems >= last_dim)
+            if (2 * edge_items >= last_dim)
             {
                 for (std::size_t row_idx = 0; row_idx < last_dim; ++row_idx)
                 {
@@ -216,22 +216,22 @@ namespace xf
             }
             else
             {
-                for (std::size_t column_idx = 0; column_idx < 2 * edgeitems + 1; ++column_idx)
+                for (std::size_t column_idx = 0; column_idx < 2 * edge_items + 1; ++column_idx)
                 {
                     out << "<td><center>...</center></td>";
                 }
             }
             out << "</tr>";
-            for (std::size_t row_idx = before_last_dim - edgeitems; row_idx < before_last_dim; ++row_idx)
+            for (std::size_t row_idx = before_last_dim - edge_items; row_idx < before_last_dim; ++row_idx)
             {
-                xf::compute_2d_row(out, printer, expr, edgeitems, titles_str, row_idx, idx);
+                xf::compute_2d_row(out, printer, expr, edge_items, titles_str, row_idx, idx);
             }
         }
     }
 
     template <class P, class T, class I>
     void compute_sub_nd_table(std::stringstream& out, P& printer, const T& expr,
-                              const std::size_t& edgeitems, const std::vector<I>& idx)
+                              const std::size_t& edge_items, const std::vector<I>& idx)
     {
         const auto& dim = expr.dimension();
         const auto& displayed_dim = idx.size();
@@ -240,26 +240,26 @@ namespace xf
 
         if (dim - displayed_dim == 2)
         {
-            return xf::compute_2d_table(out, printer, expr, edgeitems, idx);
+            return xf::compute_2d_table(out, printer, expr, edge_items, idx);
         }
 
         std::vector<I> idx2 = idx;
         idx2.resize(displayed_dim + 1);
 
-        if (edgeitems == 0 || 2 * edgeitems >= displayed_dim_size)
+        if (edge_items == 0 || 2 * edge_items >= displayed_dim_size)
         {
             for (std::size_t i = 0; i < displayed_dim_size; ++i)
             {
                 idx2[displayed_dim] = i;
-                xf::compute_sub_nd_table(out, printer, expr, edgeitems, idx2);
+                xf::compute_sub_nd_table(out, printer, expr, edge_items, idx2);
             }
         }
         else
         {
-            for (std::size_t i = 0; i < edgeitems; ++i)
+            for (std::size_t i = 0; i < edge_items; ++i)
             {
                 idx2[displayed_dim] = i;
-                xf::compute_sub_nd_table(out, printer, expr, edgeitems, idx2);
+                xf::compute_sub_nd_table(out, printer, expr, edge_items, idx2);
             }
             out << "<tr><th title='" << displayed_dim_name << "'><center>...</center></th>";
             for (std::size_t i = displayed_dim + 1; i < dim - 1; ++i)
@@ -268,30 +268,30 @@ namespace xf
                 out << "<th title='" << i_name << "'><center>...</center></th>";
             }
             std::size_t num_ellipsis;
-            if (edgeitems == 0 || 2 * edgeitems >= expr.shape()[expr.dimension() - 1])
+            if (edge_items == 0 || 2 * edge_items >= expr.shape()[expr.dimension() - 1])
             {
                 num_ellipsis = expr.shape()[expr.dimension() - 1];
             }
             else
             {
-                num_ellipsis = 2 * edgeitems + 1;
+                num_ellipsis = 2 * edge_items + 1;
             }
             for (std::size_t i = 0; i < num_ellipsis; ++i)
             {
                 out << "<td><center>...</center></td>";
             }
             out << "</tr>";
-            for (std::size_t i = displayed_dim_size - edgeitems; i < displayed_dim_size; ++i)
+            for (std::size_t i = displayed_dim_size - edge_items; i < displayed_dim_size; ++i)
             {
                 idx2[displayed_dim] = i;
-                xf::compute_sub_nd_table(out, printer, expr, edgeitems, idx2);
+                xf::compute_sub_nd_table(out, printer, expr, edge_items, idx2);
             }
         }
     }
 
     template <class P, class T>
     void compute_nd_table_impl(std::stringstream& out, P& printer, const T& expr,
-                               const std::size_t& edgeitems)
+                               const std::size_t& edge_items)
     {
         const auto& dim = expr.dimension();
 
@@ -306,7 +306,7 @@ namespace xf
 
         const auto& last_dim_name = expr.dimension_mapping().labels()[dim - 1];
         const auto& last_dim_size = expr.shape()[dim - 1];
-        if (edgeitems == 0 || 2 * edgeitems >= last_dim_size)
+        if (edge_items == 0 || 2 * edge_items >= last_dim_size)
         {
             for (std::size_t d = 0; d < last_dim_size; ++d)
             {
@@ -317,14 +317,14 @@ namespace xf
         }
         else
         {
-            for (std::size_t d = 0; d < edgeitems; ++d)
+            for (std::size_t d = 0; d < edge_items; ++d)
             {
                 xtl::visit([&out, &last_dim_name](auto&& arg) {
                     out << "<th title='" << last_dim_name << "'>" << arg << "</th>";
                 }, expr.coordinates()[last_dim_name].label(d));
             }
             out << "<th title='" << last_dim_name << "'><center>...</center></th>";
-            for (std::size_t d = last_dim_size - edgeitems; d < last_dim_size; ++d)
+            for (std::size_t d = last_dim_size - edge_items; d < last_dim_size; ++d)
             {
                 xtl::visit([&out, &last_dim_name](auto&& arg) {
                     out << "<th title='" << last_dim_name << "'>" << arg << "</th>";
@@ -336,22 +336,22 @@ namespace xf
         // Compute body of the table
         out << "<tbody>";
         std::vector<std::size_t> empty_vector;
-        xf::compute_sub_nd_table(out, printer, expr, edgeitems, empty_vector);
+        xf::compute_sub_nd_table(out, printer, expr, edge_items, empty_vector);
         out << "</tbody>";
         out << "</table>";
     }
 
     template <class P, class T>
     void compute_nd_table(std::stringstream& out, P& printer, const T& expr,
-                          const std::size_t& edgeitems)
+                          const std::size_t& edge_items)
     {
         if (expr.dimension() == 1)
         {
-            xf::compute_1d_table(out, printer, expr, edgeitems);
+            xf::compute_1d_table(out, printer, expr, edge_items);
         }
         else
         {
-            xf::compute_nd_table_impl(out, printer, expr, edgeitems);
+            xf::compute_nd_table_impl(out, printer, expr, edge_items);
         }
     }
 
@@ -360,11 +360,11 @@ namespace xf
     {
         std::stringstream out;
 
-        std::size_t edgeitems = 0;
+        std::size_t edge_items = 0;
         std::size_t size = xt::compute_size(expr.shape());
         if (size > xt::print_options::print_options().threshold)
         {
-            edgeitems = xt::print_options::print_options().edgeitems;
+            edge_items = xt::print_options::print_options().edge_items;
         }
 
         if (xt::print_options::print_options().precision != -1)
@@ -375,10 +375,10 @@ namespace xf
         xt::detail::printer<typename T::data_type> printer(out.precision());
 
         xt::xstrided_slice_vector slice_vector;
-        xt::detail::recurser_run(printer, expr.data(), slice_vector, edgeitems);
+        xt::detail::recurser_run(printer, expr.data(), slice_vector, edge_items);
         printer.init();
 
-        xf::compute_nd_table(out, printer, expr, edgeitems);
+        xf::compute_nd_table(out, printer, expr, edge_items);
 
         auto bundle = xeus::xjson::object();
         bundle["text/html"] = out.str();
@@ -400,7 +400,9 @@ namespace xf
     template <class F, class R, class... CT>
     xeus::xjson mime_bundle_repr(const xvariable_function<F, R, CT...>& expr)
     {
-        return xf::mime_bundle_repr_impl(expr);
+        using temporary_type = typename xvariable_function<F, R, CT...>::temporary_type;
+        temporary_type tmp(expr);
+        return xf::mime_bundle_repr_impl(tmp);
     }
 
     template <class CT>

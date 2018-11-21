@@ -52,6 +52,7 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xaxis_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate_base.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate_chain.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate_system.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xdimension.hpp
@@ -63,6 +64,7 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_utils.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xio.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xnamed_axis.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xreindex_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xselecting.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xsequence_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable.hpp
