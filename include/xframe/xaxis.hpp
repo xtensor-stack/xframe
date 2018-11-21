@@ -519,6 +519,7 @@ namespace xf
         auto& labels = this->mutable_labels();
         auto iter = labels.begin();
         auto iter_end = labels.end();
+        bool must_populate = false;
         while (iter != iter_end)
         {
             auto it = std::find(al.begin(), al.end(), *iter);
@@ -527,11 +528,20 @@ namespace xf
                 iter = labels.erase(iter, iter + 1);
                 iter_end = labels.end();
                 res = false;
+                must_populate = true;
             }
             else
             {
+                if (it - al.begin() != iter - labels.begin())
+                {
+                    res = false;
+                }
                 ++iter;
             }
+        }
+        if (must_populate)
+        {
+            populate_index();
         }
         return res;
     }
