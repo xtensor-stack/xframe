@@ -385,5 +385,35 @@ namespace xf
             CHECK_COMPOSED_EQUALITY(res, c, d, sl)
         }
     }
+
+    TEST(xvariable_assign, unsorted_labels)
+    {
+        auto a = variable_type(
+            make_test_data(),
+            {
+                {"day", xf::axis({ "Monday", "Tuesday", "Wednesday" })},
+                {"city", xf::axis({ "London", "Paris", "Bruxel" })}
+            }
+        );
+        
+        auto b = variable_type(
+            make_test_data(),
+            {
+                { "day", xf::axis({ "Monday", "Tuesday", "Wednesday" })},
+                { "city", xf::axis({ "Paris", "London", "Bruxel" })}
+            }
+        );
+
+        variable_type res = a + b;
+        EXPECT_EQ(res.locate("Monday", "Paris"), a.locate("Monday", "Paris") + b.locate("Monday", "Paris"));
+        EXPECT_EQ(res.locate("Monday", "London"), a.locate("Monday", "London") + b.locate("Monday", "London"));
+        EXPECT_EQ(res.locate("Monday", "Bruxel"), a.locate("Monday", "Bruxel") + b.locate("Monday", "Bruxel"));
+        EXPECT_EQ(res.locate("Tuesday", "Paris"), a.locate("Tuesday", "Paris") + b.locate("Tuesday", "Paris"));
+        EXPECT_EQ(res.locate("Tuesday", "London"), a.locate("Tuesday", "London") + b.locate("Tuesday", "London"));
+        EXPECT_EQ(res.locate("Tuesday", "Bruxel"), a.locate("Tuesday", "Bruxel") + b.locate("Tuesday", "Bruxel"));
+        EXPECT_EQ(res.locate("Wednesday", "Paris"), a.locate("Wednesday", "Paris") + b.locate("Wednesday", "Paris"));
+        EXPECT_EQ(res.locate("Wednesday", "London"), a.locate("Wednesday", "London") + b.locate("Wednesday", "London"));
+        EXPECT_EQ(res.locate("Wednesday", "Bruxel"), a.locate("Wednesday", "Bruxel") + b.locate("Wednesday", "Bruxel"));
+    }
 }
 

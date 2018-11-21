@@ -279,7 +279,7 @@ namespace xf
         axis_type a5 = { "b", "a", "c" };
         tmp = a4;
         bool t3 = intersect_axes(tmp, a5);
-        EXPECT_TRUE(t3);
+        EXPECT_FALSE(t3);
 
         axis_type a6 = { "a", "c" };
         tmp = a4;
