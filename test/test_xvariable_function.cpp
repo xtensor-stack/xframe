@@ -195,5 +195,39 @@ namespace xf
             EXPECT_EQ((f.m_a + f.m_b).select<join::outer>({{"abscissa", "e"}, {"ordinate", 4}, {"altitude", 2}}), f.m_a.missing());
         }
     }
+
+    TEST(xvariable_function, print)
+    {
+        auto a = variable_type(
+            make_test_data(),
+            {
+                { "day", xf::axis({ "Monday", "Tuesday", "Wednesday" }) },
+                { "city", xf::axis({ "London", "Paris", "Brussels" }) }
+            }
+        );
+
+        data_type db = { 1., 2., 3. };
+        auto b = variable_type(
+            db,
+            {
+                { "city", xf::axis({ "Paris", "London", "Brussels" }) }
+            }
+        );
+
+        auto f = a + b;
+        std::string expected =
+R"variable({{  3,   3, N/A},
+ {N/A,   6,   9},
+ {  9,   9,  12}}
+Coordinates:
+day : (Monday, Tuesday, Wednesday, )
+city: (London, Paris, Brussels, )
+)variable";
+
+        std::ostringstream oss;
+        oss << f;
+        std::string res = oss.str();
+        EXPECT_EQ(res, expected);
+    }
 }
 
