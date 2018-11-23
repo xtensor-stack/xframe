@@ -92,9 +92,59 @@ namespace xf
         index_slice_type<A> build_index_slice(const A& axis) const;
     };
 
+    /********************
+     * xaxis_keep_slice *
+     *******************/
+
+    template <class L>
+    class xaxis_keep_slice;
+
+    namespace detail
+    {
+        template <class T>
+        struct is_xaxis_keep_slice : std::false_type
+        {
+        };
+
+        template <class L>
+        struct is_xaxis_keep_slice<xaxis_keep_slice<L>>
+            : std::true_type
+        {
+        };
+
+        template <class T>
+        using disable_xaxis_keep_slice_t = std::enable_if_t<!is_xaxis_keep_slice<std::decay_t<T>>::value, void>;
+
+        template <class T>
+        using enable_xaxis_keep_slice_t = std::enable_if_t<is_xaxis_keep_slice<std::decay_t<T>>::value, void>;
+    }
+
+    template <class L>
+    class xaxis_keep_slice
+    {
+    public:
+
+        using value_type = xlabel_variant_t<L>;
+        using container_type = xt::svector<value_type>;
+
+        template <class C, typename = detail::disable_xaxis_keep_slice_t<C>>
+        explicit xaxis_keep_slice(C& cont);
+        explicit xaxis_keep_slice(container_type&& cont);
+
+        template <class A>
+        using index_slice_type = xt::xkeep_slice<typename A::mapped_type>;
+
+        template <class A>
+        index_slice_type<A> build_index_slice(const A& axis) const;
+
+    private:
+
+        container_type m_labels;
+    };
+
     /***************
-    * xaxis_slice *
-    ***************/
+     * xaxis_slice *
+     ***************/
 
     template <class L = DEFAULT_LABEL_LIST>
     class xaxis_slice
@@ -102,7 +152,11 @@ namespace xf
     public:
 
         using squeeze_type = xlabel_variant_t<L>;
-        using storage_type = xtl::variant<xaxis_range<L>, xaxis_stepped_range<L>, xaxis_all, squeeze_type>;
+        using storage_type = xtl::variant<xaxis_range<L>,
+                                          xaxis_stepped_range<L>,
+                                          xaxis_keep_slice<L>,
+                                          xaxis_all,
+                                          squeeze_type>;
 
         xaxis_slice() = default;
         template <class V>
@@ -135,6 +189,35 @@ namespace xf
     template <class S, class L = DEFAULT_LABEL_LIST>
     xaxis_slice<L> range(xlabel_variant_t<L>&& first, xlabel_variant_t<L>&& last, S step);
 
+    namespace detail
+    {
+        template <class T, typename = xt::void_t<>>
+        struct has_size : std::false_type
+        {
+        };
+
+        template <class T>
+        struct has_size<T, xt::void_t<decltype(std::declval<T>().size())>>
+            : std::true_type
+        {
+        };
+
+        template <class T, class R>
+        using enable_container_t = std::enable_if_t<has_size<T>::value, R>;
+
+        template <class T, class R>
+        using disable_container_t = std::enable_if_t<!has_size<T>::value, R>;
+    }
+
+    template <class L = DEFAULT_LABEL_LIST, class T>
+    detail::enable_container_t<T, xaxis_slice<L>> keep(T&& indices);
+  
+    template <class L = DEFAULT_LABEL_LIST, class T>
+    detail::disable_container_t<T, xaxis_slice<L>> keep(T index);
+
+    template <class L = DEFAULT_LABEL_LIST, class T0, class T1, class... Args>
+    xaxis_slice<L> keep(T0 t0, T1 t1, Args... args);
+     
     /******************************
      * xaxis_range implementation *
      ******************************/
@@ -191,6 +274,35 @@ namespace xf
         return index_slice_type<A>(axis.size());
     }
 
+    /*****************************
+     * xaxis_keep_implementation *
+     *****************************/
+
+    template <class L>
+    template <class C, typename>
+    xaxis_keep_slice<L>::xaxis_keep_slice(C& cont)
+        : m_labels(cont.begin(), cont.end())
+    {
+    }
+
+    template <class L>
+    xaxis_keep_slice<L>::xaxis_keep_slice(container_type&& cont)
+        : m_labels(std::move(cont))
+    {
+    }
+
+    template <class L>
+    template <class A>
+    inline auto xaxis_keep_slice<L>::build_index_slice(const A& axis) const -> index_slice_type<A>
+    {
+        using index_container_type = typename index_slice_type<A>::container_type;
+        index_container_type c(m_labels.size());
+        std::transform(m_labels.cbegin(), m_labels.cend(), c.begin(), [&axis](const auto& arg) { return axis[arg]; });
+        index_slice_type<A> res(std::move(c));
+        res.normalize(m_labels.size());
+        return res;
+    }
+    
     /******************************
      * xaxis_slice implementation *
      ******************************/
@@ -214,8 +326,10 @@ namespace xf
     inline auto xaxis_slice<L>::build_index_slice(const A& axis) const -> index_slice_type<A>
     {
         return xtl::visit(
-            xtl::make_overload([&axis](const auto& arg) { return index_slice_type<A>(arg.build_index_slice(axis)); },
-                [&axis](const squeeze_type&) -> index_slice_type<A> { throw std::runtime_error("build_islice forbidden for squeeze"); }),
+            xtl::make_overload(
+                [&axis](const auto& arg) { return index_slice_type<A>(arg.build_index_slice(axis)); },
+                [&axis](const squeeze_type&) -> index_slice_type<A> { throw std::runtime_error("build_islice forbidden for squeeze"); }
+            ),
             m_data);
     }
 
@@ -251,6 +365,33 @@ namespace xf
     inline xaxis_slice<L> range(xlabel_variant_t<L>&& first, xlabel_variant_t<L>&& last, S step)
     {
         return xaxis_slice<L>(xaxis_stepped_range<L>(std::move(first), std::move(last), step));
+    }
+
+    template <class L, class T>
+    inline detail::enable_container_t<T, xaxis_slice<L>> keep(T&& indices)
+    {
+        xaxis_keep_slice<L> slice(std::forward<T>(indices));
+        return xaxis_slice<L>(std::move(slice));
+    }
+  
+    template <class L, class T>
+    inline detail::disable_container_t<T, xaxis_slice<L>> keep(T index)
+    {
+        using slice_type = xaxis_keep_slice<L>;
+        using container_type = typename slice_type::container_type;
+        using value_type = typename slice_type::value_type;
+        container_type tmp = { value_type(index) };
+        return xaxis_slice<L>(slice_type(std::move(tmp)));
+    }
+
+    template <class L, class T0, class T1, class... Args>
+    inline xaxis_slice<L> keep(T0 t0, T1 t1, Args... args)
+    {
+        using slice_type = xaxis_keep_slice<L>;
+        using container_type = typename slice_type::container_type;
+        using value_type = typename slice_type::value_type;
+        container_type tmp = { value_type(t0), value_type(t1), value_type(args)... };
+        return xaxis_slice<L>(slice_type(std::move(tmp)));
     }
 }
 

@@ -145,38 +145,6 @@ namespace xf
         EXPECT_EQ(vsrit, vsr.cend());
     }
 
-    /*TEST(xaxis_view, slice_conversion)
-    {
-        using saxis_slice_type = xt::xaxis_index_slice<std::size_t>;
-        using iaxis_slice_type = xt::xaxis_index_slice<int>;
-
-        iaxis_slice_type is1 = xt::xall<int>(4);
-        saxis_slice_type ss1(is1);
-        EXPECT_EQ(ss1.size(), std::size_t(4));
-
-        iaxis_slice_type is2 = xt::variant_range(2, 4);
-        saxis_slice_type ss2(is2);
-        EXPECT_EQ(ss2.size(), std::size_t(is2.size()));
-
-        iaxis_slice_type is3 = xt::variant_range(2, 9, 2);
-        saxis_slice_type ss3(is3);
-        EXPECT_EQ(ss3.size(), std::size_t(is3.size()));
-        EXPECT_EQ(ss3.step_size(0), std::size_t(is3.step_size(0)));
-
-        using sextended_type = xt::xslice_extended<std::size_t>;
-        using iextended_type = xt::xslice_extended<int>;
-
-        iextended_type is4 = is3;
-        sextended_type ss4 = is4;
-        sextended_type res = ss3;
-        EXPECT_EQ(*(ss4.get_slice()), *(res.get_slice()));
-
-        iextended_type is5 = 2;
-        sextended_type ss5 = is5;
-        sextended_type res2 = std::size_t(2);
-        EXPECT_EQ(*(is5.get_squeeze()), *(ss5.get_squeeze()));
-    }*/
-
     TEST(xaxis_view, conversion)
     {
         auto a = make_variant_view_saxis();

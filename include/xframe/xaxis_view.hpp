@@ -292,8 +292,8 @@ namespace xf
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::cend() const -> const_iterator
     {
-        size_type inc = m_slice(size());
-        return const_iterator(m_axis.cbegin() + m_slice(size()), &m_slice, size());
+        size_type inc = m_slice(0u) + m_slice.step_size(0, m_slice.size());
+        return const_iterator(m_axis.cbegin() + inc, &m_slice, size());
     }
 
     template <class L, class T, class MT>
