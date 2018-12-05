@@ -603,7 +603,7 @@ namespace xf
     template <class V, class T>
     auto xvariable_wrapper_impl<V, T>::shape() const noexcept -> const shape_type&
     {
-        return xtl::forward_sequence<shape_type>(m_variable.shape());
+        return xtl::forward_sequence<shape_type, decltype(m_variable.shape())>(m_variable.shape());
     }
 
     template <class V, class T>
