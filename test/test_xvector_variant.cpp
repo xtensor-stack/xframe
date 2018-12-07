@@ -309,6 +309,56 @@ namespace xf
         EXPECT_EQ(v.size(), 8u);
     }
 
+    TEST(xvector_variant_ref, iterator)
+    {
+        // 1, 3, 4, 6, 7
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+
+        auto iter = vt.begin();
+        xtl::xget<int&>(*iter) = 2;
+        EXPECT_EQ(v[0], 2);
+        ++iter;
+        xtl::xget<int&>(*iter) = 4;
+        EXPECT_EQ(v[1], 4);
+        iter += 2;
+        xtl::xget<int&>(*iter) = 21;
+        EXPECT_EQ(v[3], 21);
+        iter++;
+        iter -= 2;
+        xtl::xget<int&>(*iter) = 35;
+        EXPECT_EQ(v[2], 35);
+        --iter;
+        iter--;
+        iter += 5;
+        EXPECT_EQ(iter, vt.end());
+    }
+
+    TEST(xvector_variant_ref, const_iterator)
+    {
+        // 1, 3, 4, 6, 7
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+
+        auto iter = vt.cbegin();
+        auto d0 = xtl::xget<const int&>(*iter);
+        EXPECT_EQ(d0, 1);
+        ++iter;
+        auto d1 = xtl::xget<const int&>(*iter);
+        EXPECT_EQ(d1, 3);
+        iter += 2;
+        auto d2 = xtl::xget<const int&>(*iter);
+        EXPECT_EQ(d2, 6);
+        iter++;
+        iter -= 2;
+        auto d3 = xtl::xget<const int&>(*iter);
+        EXPECT_EQ(d3, 4);
+        --iter;
+        iter--;
+        iter += 5;
+        EXPECT_EQ(iter, vt.cend());
+    }
+
     /******************************
      * xvector_variant_cref tests *
      ******************************/
