@@ -97,6 +97,9 @@ namespace xf
         bool empty() const;
         size_type size() const;
         size_type max_size() const;
+        void reserve(size_type new_cap);
+        size_type capacity() const;
+        void shrink_to_fit();
 
         // Element access
 
@@ -130,6 +133,11 @@ namespace xf
 
         void clear();
         void resize(size_type size);
+        void swap(self_type& rhs);
+        void pop_back();
+
+        template <class U>
+        void push_back(U&& value);
 
         // Comparison
 
@@ -157,6 +165,14 @@ namespace xf
         self_type& operator=(self_type&& rhs) = default;
 
     private:
+
+        template <class U>
+        std::enable_if_t<std::is_lvalue_reference<U>::value, void>
+        push_back_impl(const_reference value);
+
+        template <class U>
+        std::enable_if_t<!std::is_lvalue_reference<U>::value, void>
+        push_back_impl(value_type&& value);
 
         storage_type m_storage;
     };
@@ -256,6 +272,9 @@ namespace xf
         self_type& operator=(self_type&&) = default;
     };
 
+    template <class... L>
+    void swap(xvector_variant<L...>& lhs, xvector_variant<L...>& rhs);
+
     /************************
      *  xvector_variant_ref *
      ************************/
@@ -280,6 +299,9 @@ namespace xf
         xvector_variant_ref(self_type&&) = default;
         self_type& operator=(self_type&&) = default;
     };
+
+    template <class... L>
+    void swap(xvector_variant_ref<L...>& lhs, xvector_variant_ref<L...>& rhs);
 
     /************************
      * xvector_variant_cref *
@@ -337,21 +359,39 @@ namespace xf
     template <class T>
     inline bool xvector_variant_base<T>::empty() const
     {
-        return xtl::visit([](auto&& arg) { return detail::unwrap(arg).empty(); }, m_storage);
+        return xtl::visit([](const auto& arg) { return detail::unwrap(arg).empty(); }, m_storage);
     }
 
     template <class T>
     inline auto xvector_variant_base<T>::size() const -> size_type
     {
-        return xtl::visit([](auto&& arg) { return detail::unwrap(arg).size(); }, m_storage);
+        return xtl::visit([](const auto& arg) { return detail::unwrap(arg).size(); }, m_storage);
     }
 
     template <class T>
     inline auto xvector_variant_base<T>::max_size() const -> size_type
     {
-        return xtl::visit([](auto&& arg) { return detail::unwrap(arg).max_size(); }, m_storage);
+        return xtl::visit([](const auto& arg) { return detail::unwrap(arg).max_size(); }, m_storage);
     }
 
+    template <class T>
+    inline void xvector_variant_base<T>::reserve(size_type new_cap)
+    {
+        xtl::visit([new_cap](auto& arg) { detail::unwrap(arg).reserve(new_cap); }, m_storage);
+    }
+    
+    template <class T>
+    inline auto xvector_variant_base<T>::capacity() const -> size_type
+    {
+        return xtl::visit([](const auto& arg) { return detail::unwrap(arg).capacity(); }, m_storage);
+    }
+
+    template <class T>
+    inline void xvector_variant_base<T>::shrink_to_fit()
+    {
+        xtl::visit([](auto& arg) { detail::unwrap(arg).shrink_to_fit(); }, m_storage);
+    }
+    
     template <class T>
     inline auto xvector_variant_base<T>::operator[](size_type i) -> reference
     {
@@ -461,6 +501,25 @@ namespace xf
     }
 
     template <class T>
+    inline void xvector_variant_base<T>::swap(self_type& rhs)
+    {
+        m_storage.swap(rhs.m_storage);
+    }
+
+    template <class T>
+    inline void xvector_variant_base<T>::pop_back()
+    {
+        xtl::visit([](auto& arg) { detail::unwrap(arg).pop_back(); }, m_storage);
+    }
+
+    template <class T>
+    template <class U>
+    inline void xvector_variant_base<T>::push_back(U&& value)
+    {
+        push_back_impl<U>(std::forward<U>(value));
+    }
+    
+    template <class T>
     inline bool xvector_variant_base<T>::equal(const self_type& rhs) const
     {
         return m_storage == rhs.m_storage;
@@ -472,6 +531,36 @@ namespace xf
         return m_storage < rhs.m_storage;
     }
     
+    template <class T>
+    template <class U>
+    inline std::enable_if_t<std::is_lvalue_reference<U>::value, void>
+    xvector_variant_base<T>::push_back_impl(const_reference value)
+    {
+        xtl::visit([&value](auto& arg)
+        {
+            using inner_ref = typename std::decay_t<decltype(detail::unwrap(arg))>::const_reference;
+            detail::unwrap(arg).push_back(xtl::xget<inner_ref>(value));
+        }, m_storage);
+    }
+
+    template <class T>
+    template <class U>
+    inline std::enable_if_t<!std::is_lvalue_reference<U>::value, void>
+    xvector_variant_base<T>::push_back_impl(value_type&& value)
+    {
+        xtl::visit([&value](auto& arg)
+        {
+            using inner_value = typename std::decay_t<decltype(detail::unwrap(arg))>::value_type;
+            detail::unwrap(arg).push_back(xtl::xget<inner_value>(std::move(value)));
+        }, m_storage);
+    }
+
+    template <class T>
+    inline void swap(xvector_variant_base<T>& lhs, xvector_variant_base<T>& rhs)
+    {
+        lhs.swap(rhs);
+    }
+
     template <class T>
     inline bool operator==(const xvector_variant_base<T>& lhs, const xvector_variant_base<T>& rhs)
     {
@@ -549,7 +638,7 @@ namespace xf
     template <class T>
     inline auto xvector_variant_iterator<T>::operator-(const self_type& rhs) const -> difference_type
     {
-        return xtl::visit([&rhs](auto& arg) { return arg - xtl::xget<std::decay_t<decltype(arg)>>(rhs); }, m_it);
+        return xtl::visit([&rhs](auto& arg) { return arg - xtl::xget<std::decay_t<decltype(arg)>>(rhs.m_it); }, m_it);
     }
 
     template <class T>
@@ -600,6 +689,12 @@ namespace xf
     {
     }
 
+    template <class... L>
+    inline void swap(xvector_variant<L...>& lhs, xvector_variant<L...>& rhs)
+    {
+        lhs.swap(rhs);
+    }
+
     /**************************************
      * xvector_variant_ref implementation *
      **************************************/
@@ -609,6 +704,12 @@ namespace xf
     inline xvector_variant_ref<L...>::xvector_variant_ref(std::vector<T>& v)
         : base_type(v)
     {
+    }
+
+    template <class... L>
+    inline void swap(xvector_variant_ref<L...>& lhs, xvector_variant_ref<L...>& rhs)
+    {
+        lhs.swap(rhs);
     }
 
     /***************************************

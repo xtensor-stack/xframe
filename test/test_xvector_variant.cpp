@@ -94,6 +94,33 @@ namespace xf
         EXPECT_EQ(vt2.max_size(), v.max_size());
     }
 
+    TEST(xvector_variant, capacity)
+    {
+        auto v = build_test_ivector();
+        variant_type vt(v);
+        variant_type vt2(build_test_ivector());
+
+        EXPECT_EQ(vt.capacity(), v.capacity());
+        EXPECT_EQ(vt2.capacity(), v.capacity());
+    }
+
+    TEST(xvector_variant, reserve)
+    {
+        auto v = build_test_ivector();
+        variant_type vt(v);
+        vt.reserve(20u);
+        EXPECT_EQ(vt.capacity(), 20u);
+    }
+
+    TEST(xvector_variant, shrink_to_fit)
+    {
+        auto v = build_test_ivector();
+        variant_type vt(v);
+        vt.resize(2);
+        vt.shrink_to_fit();
+        EXPECT_EQ(vt.size(), vt.capacity());
+    }
+
     TEST(xvector_variant, access)
     {
         auto v = build_test_ivector();
@@ -165,6 +192,48 @@ namespace xf
         EXPECT_EQ(vt.size(), 8u);
     }
 
+    TEST(xvector_variant, swap)
+    {
+        auto v1 = build_test_ivector();
+        auto v2 = std::vector<int>();
+
+        variant_type vt1(v1);
+        variant_type vt2(v2);
+
+        variant_type vt1_bu(v1);
+        variant_type vt2_bu(v2);
+
+        using std::swap;
+        swap(vt1, vt2);
+
+        EXPECT_EQ(vt1, vt2_bu);
+        EXPECT_EQ(vt2, vt1_bu);
+    }
+
+    TEST(xvector_variant, push_back)
+    {
+        auto v = build_test_ivector();
+        variant_type vt(v);
+
+        int i = 2;
+        vt.push_back(i);
+        int j = 4;
+        vt.push_back(std::move(j));
+        int d0 = xtl::xget<int&>(vt[5]);
+        int d1 = xtl::xget<int&>(vt[6]);
+        EXPECT_EQ(d0, 2);
+        EXPECT_EQ(d1, 4);
+    }
+
+    TEST(xvector_variant, pop_back)
+    {
+        auto v = build_test_ivector();
+        variant_type vt(v);
+        vt.pop_back();
+        int d = xtl::xget<int&>(vt.back());
+        EXPECT_EQ(d, 6);
+    }
+
     /*****************************
      * xvector_variant_ref tests *
      *****************************/
@@ -229,6 +298,30 @@ namespace xf
         variant_ref_type vt(v);
 
         EXPECT_EQ(vt.max_size(), v.max_size());
+    }
+
+    TEST(xvector_variant_ref, capacity)
+    {
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+        EXPECT_EQ(vt.capacity(), v.capacity());
+    }
+
+    TEST(xvector_variant_ref, reserve)
+    {
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+        vt.reserve(20u);
+        EXPECT_EQ(v.capacity(), 20u);
+    }
+
+    TEST(xvector_variant_ref, shrink_to_fit)
+    {
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+        vt.resize(2u);
+        vt.shrink_to_fit();
+        EXPECT_EQ(vt.capacity(), v.capacity());
     }
 
     TEST(xvector_variant_ref, access)
@@ -332,6 +425,9 @@ namespace xf
         iter--;
         iter += 5;
         EXPECT_EQ(iter, vt.end());
+
+        EXPECT_EQ(vt.end() - vt.begin(), 5);
+        EXPECT_TRUE(vt.begin() < vt.end());
     }
 
     TEST(xvector_variant_ref, const_iterator)
@@ -357,6 +453,49 @@ namespace xf
         iter--;
         iter += 5;
         EXPECT_EQ(iter, vt.cend());
+
+        EXPECT_EQ(vt.cend() - vt.cbegin(), 5);
+        EXPECT_TRUE(vt.cbegin() < vt.cend());
+    }
+
+    TEST(xvector_variant_ref, swap)
+    {
+        auto v1 = build_test_ivector();
+        auto v2 = std::vector<int>();
+
+        auto v1_bu = v1;
+        auto v2_bu = v2;
+
+        variant_ref_type vt1(v1);
+        variant_ref_type vt2(v2);
+
+        using std::swap;
+        swap(vt1, vt2);
+        
+        EXPECT_EQ(v1, v2_bu);
+        EXPECT_EQ(v2, v1_bu);
+    }
+
+    TEST(xvector_variant_ref, push_back)
+    {
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+
+        int i = 2;
+        vt.push_back(i);
+        int j = 4;
+        vt.push_back(std::move(j));
+
+        EXPECT_EQ(v[5], 2);
+        EXPECT_EQ(v[6], 4);
+    }
+
+    TEST(xvector_variant_ref, pop_back)
+    {
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+        vt.pop_back();
+        EXPECT_EQ(v.back(), 6);
     }
 
     /******************************
