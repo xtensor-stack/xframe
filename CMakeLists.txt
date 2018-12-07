@@ -74,6 +74,7 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_meta.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_scalar.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable_view.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xvector_variant.hpp
 )
 
 OPTION(BUILD_TESTS "xframe test suite" OFF)
