@@ -174,6 +174,17 @@ namespace xf
         EXPECT_EQ(d, 4);
     }
 
+    TEST(xvector_variant, storage)
+    {
+        auto v = build_test_ivector();
+        variant_type vt(v);
+        const variant_type& vt2 = vt;
+
+        xtl::xget<std::vector<int>>(vt.storage())[0] = 4;
+        int d = xtl::xget<std::vector<int>>(vt2.storage())[0];
+        EXPECT_EQ(d, 4);
+    }
+
     TEST(xvector_variant, clear)
     {
         auto v = build_test_ivector();
@@ -232,6 +243,24 @@ namespace xf
         vt.pop_back();
         int d = xtl::xget<int&>(vt.back());
         EXPECT_EQ(d, 6);
+    }
+
+    TEST(xvector_variant, xget_vector)
+    {
+        auto v = build_test_ivector();
+        variant_type vt(v);
+        const variant_type& vt2(vt);
+
+        auto& vl = xget_vector<int>(vt);
+        vl[0] = 4;
+        const auto& cvl = xget_vector<int>(vt2);
+        EXPECT_EQ(cvl[0], 4);
+
+        std::vector<int>&& rvl = xget_vector<int>(std::move(vt));
+        EXPECT_EQ(rvl[0], 4);
+
+        const std::vector<int>&& crvl = xget_vector<int>(std::move(vt2));
+        EXPECT_EQ(crvl[0], 4);
     }
 
     /*****************************
@@ -382,6 +411,18 @@ namespace xf
         EXPECT_EQ(v[0], 4);
     }
 
+    TEST(xvector_variant_ref, storage)
+    {
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+        const variant_ref_type& vt2 = vt;
+
+        xtl::xget<std::vector<int>&>(vt.storage())[0] = 4;
+        int d = xtl::xget<const std::vector<int>&>(vt2.storage())[0];
+        EXPECT_EQ(d, 4);
+        EXPECT_EQ(v[0], 4);
+    }
+
     TEST(xvector_variant_ref, clear)
     {
         auto v = build_test_ivector();
@@ -498,6 +539,25 @@ namespace xf
         EXPECT_EQ(v.back(), 6);
     }
 
+    TEST(xvector_variant_ref, xget_vector)
+    {
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+        const variant_ref_type& vt2(vt);
+
+        auto& vl = xget_vector<int>(vt);
+        vl[0] = 4;
+        const auto& cvl = xget_vector<int>(vt2);
+        EXPECT_EQ(cvl[0], 4);
+        EXPECT_EQ(v[0], 4);
+
+        auto& rvl = xget_vector<int>(std::move(vt));
+        EXPECT_EQ(rvl[0], 4);
+
+        const auto& crvl = xget_vector<int>(std::move(vt2));
+        EXPECT_EQ(crvl[0], 4);
+    }
+
     /******************************
      * xvector_variant_cref tests *
      ******************************/
@@ -515,6 +575,25 @@ namespace xf
         variant_cref_type vrt3(v);
         variant_cref_type vrt4(std::move(vrt3));
         EXPECT_EQ(vrt, vrt4);
+    }
+
+    TEST(xvector_variant_cref, xget_vector)
+    {
+        auto v = build_test_ivector();
+        variant_cref_type vt(v);
+        const variant_cref_type& vt2(vt);
+
+        auto& vl = xget_vector<int>(vt);
+        EXPECT_EQ(vl, v);
+
+        const auto& cvl = xget_vector<int>(vt2);
+        EXPECT_EQ(cvl, v);
+
+        auto& rvl = xget_vector<int>(std::move(vt));
+        EXPECT_EQ(rvl, v);
+
+        const auto& crvl = xget_vector<int>(std::move(vt2));
+        EXPECT_EQ(crvl, v);
     }
 }
 

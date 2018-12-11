@@ -118,6 +118,9 @@ namespace xf
         pointer data();
         const_pointer data() const;
 
+        storage_type& storage();
+        const storage_type& storage() const;
+
         // Iterators
 
         iterator begin();
@@ -275,6 +278,18 @@ namespace xf
     template <class... L>
     void swap(xvector_variant<L...>& lhs, xvector_variant<L...>& rhs);
 
+    template <class T, class... L> 
+    std::vector<T>& xget_vector(xvector_variant<L...>& v);
+
+    template <class T, class... L>
+    const std::vector<T>& xget_vector(const xvector_variant<L...>& v);
+
+    template <class T, class... L>
+    std::vector<T>&& xget_vector(xvector_variant<L...>&& v);
+
+    template <class T, class... L>
+    const std::vector<T>&& xget_vector(const xvector_variant<L...>&& v);
+
     /************************
      *  xvector_variant_ref *
      ************************/
@@ -303,6 +318,18 @@ namespace xf
     template <class... L>
     void swap(xvector_variant_ref<L...>& lhs, xvector_variant_ref<L...>& rhs);
 
+    template <class T, class... L> 
+    std::vector<T>& xget_vector(xvector_variant_ref<L...>& v);
+
+    template <class T, class... L>
+    const std::vector<T>& xget_vector(const xvector_variant_ref<L...>& v);
+
+    template <class T, class... L>
+    std::vector<T>& xget_vector(xvector_variant_ref<L...>&& v);
+
+    template <class T, class... L>
+    const std::vector<T>& xget_vector(const xvector_variant_ref<L...>&& v);
+
     /************************
      * xvector_variant_cref *
      ************************/
@@ -324,6 +351,18 @@ namespace xf
         xvector_variant_cref(const self_type&) = default;
         xvector_variant_cref(self_type&&) = default;
     };
+
+    template <class T, class... L> 
+    const std::vector<T>& xget_vector(xvector_variant_cref<L...>& v);
+
+    template <class T, class... L>
+    const std::vector<T>& xget_vector(const xvector_variant_cref<L...>& v);
+
+    template <class T, class... L>
+    const std::vector<T>& xget_vector(xvector_variant_cref<L...>&& v);
+
+    template <class T, class... L>
+    const std::vector<T>& xget_vector(const xvector_variant_cref<L...>&& v);
 
     /***************************************
      * xvector_variant_base implementation *
@@ -452,6 +491,18 @@ namespace xf
         return xtl::visit([](const auto& arg) { return const_pointer(detail::unwrap(arg).data()); }, m_storage);
     }
     
+    template <class T>
+    inline auto xvector_variant_base<T>::storage() -> storage_type&
+    {
+        return m_storage;
+    }
+
+    template <class T>
+    inline auto xvector_variant_base<T>::storage() const -> const storage_type&
+    {
+        return m_storage;
+    }
+
     template <class T>
     inline auto xvector_variant_base<T>::begin() -> iterator
     {
@@ -695,6 +746,30 @@ namespace xf
         lhs.swap(rhs);
     }
 
+    template <class T, class... L> 
+    inline std::vector<T>& xget_vector(xvector_variant<L...>& v)
+    {
+        return xtl::xget<std::vector<T>>(v.storage());
+    }
+
+    template <class T, class... L>
+    inline const std::vector<T>& xget_vector(const xvector_variant<L...>& v)
+    {
+        return xtl::xget<std::vector<T>>(v.storage());
+    }
+
+    template <class T, class... L>
+    inline std::vector<T>&& xget_vector(xvector_variant<L...>&& v)
+    {
+        return xtl::xget<std::vector<T>>(std::move(v.storage()));
+    }
+
+    template <class T, class... L>
+    inline const std::vector<T>&& xget_vector(const xvector_variant<L...>&& v)
+    {
+        return xtl::xget<std::vector<T>>(std::move(v.storage()));
+    }
+
     /**************************************
      * xvector_variant_ref implementation *
      **************************************/
@@ -712,6 +787,30 @@ namespace xf
         lhs.swap(rhs);
     }
 
+    template <class T, class... L> 
+    inline std::vector<T>& xget_vector(xvector_variant_ref<L...>& v)
+    {
+        return xtl::xget<std::vector<int>&>(v.storage());
+    }
+
+    template <class T, class... L>
+    inline const std::vector<T>& xget_vector(const xvector_variant_ref<L...>& v)
+    {
+        return xtl::xget<const std::vector<int>&>(v.storage());
+    }
+
+    template <class T, class... L>
+    inline std::vector<T>& xget_vector(xvector_variant_ref<L...>&& v)
+    {
+        return xtl::xget<std::vector<int>&>(std::move(v.storage()));
+    }
+
+    template <class T, class... L>
+    inline const std::vector<T>& xget_vector(const xvector_variant_ref<L...>&& v)
+    {
+        return xtl::xget<const std::vector<int>&>(std::move(v.storage()));
+    }
+
     /***************************************
      * xvector_variant_cref implementation *
      ***************************************/
@@ -721,6 +820,30 @@ namespace xf
     inline xvector_variant_cref<L...>::xvector_variant_cref(const std::vector<T>& v)
         : base_type(v)
     {
+    }
+
+    template <class T, class... L> 
+    const std::vector<T>& xget_vector(xvector_variant_cref<L...>& v)
+    {
+        return xtl::xget<const std::vector<int>&>(v.storage());
+    }
+
+    template <class T, class... L>
+    const std::vector<T>& xget_vector(const xvector_variant_cref<L...>& v)
+    {
+        return xtl::xget<const std::vector<int>&>(v.storage());
+    }
+
+    template <class T, class... L>
+    const std::vector<T>& xget_vector(xvector_variant_cref<L...>&& v)
+    {
+        return xtl::xget<const std::vector<int>&>(std::move(v.storage()));
+    }
+
+    template <class T, class... L>
+    const std::vector<T>& xget_vector(const xvector_variant_cref<L...>&& v)
+    {
+        return xtl::xget<const std::vector<int>&>(std::move(v.storage()));
     }
 }
 
