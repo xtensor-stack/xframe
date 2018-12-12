@@ -47,16 +47,14 @@ namespace xf
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using subiterator = typename axis_type::const_iterator;
 
-        template <class LB>
-        using label_list = xsequence_view<const typename axis_type::template label_list<LB>, slice_type>;
+        using label_list = xsequence_view<const typename axis_type::label_list, slice_type>;
 
         template <class S>
         xaxis_view(const axis_type& axis, S&& slice);
 
         explicit operator axis_type() const;
 
-        template <class LB>
-        label_list<LB> labels() const;
+        label_list labels() const;
         key_type label(size_type i) const;
 
         bool empty() const;
@@ -176,10 +174,9 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    template <class LB>
-    inline auto xaxis_view<L, T, MT>::labels() const -> label_list<LB>
+    inline auto xaxis_view<L, T, MT>::labels() const -> label_list
     {
-        return label_list<LB>(m_axis.template labels<LB>(), m_slice);
+        return label_list(m_axis.labels(), m_slice);
     }
 
     template <class L, class T, class MT>

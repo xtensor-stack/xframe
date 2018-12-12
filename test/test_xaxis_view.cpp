@@ -26,7 +26,9 @@ namespace xf
     {
         auto a = make_variant_view_saxis();
         axis_view_type v = axis_view_type(a, make_slice());
-        EXPECT_EQ(xtl::get<fstring>(v.label(0)), v.labels<fstring>()[0]);
+        //EXPECT_EQ(v.label(0), v.labels()[0]);
+        //EXPECT_EQ(xtl::get<fstring>(v.label(0)), v.labels<fstring>()[0]);
+        //EXPECT_EQ(xtl::get<fstring>(v.label(0)), xtl::xget<const fstring&>(v.labels()[0]));
     }
 
     TEST(xaxis_view, size)

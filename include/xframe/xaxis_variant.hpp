@@ -15,6 +15,7 @@
 #include "xtl/xvariant.hpp"
 #include "xaxis.hpp"
 #include "xaxis_default.hpp"
+#include "xvector_variant.hpp"
 
 namespace xf
 {
@@ -61,8 +62,7 @@ namespace xf
         {
             using tmp_storage_type = xtl::variant<xaxis<L, S, MT>...>;
             using storage_type = add_default_axis_t<tmp_storage_type, S, L...>;
-            // Convenient for defining other types, but do not use it
-            using label_list = std::vector<xtl::variant<L...>>;
+            using label_list = xvector_variant_cref<L...>;
             using key_type = xtl::variant<typename xaxis<L, S, MT>::key_type...>;
             using key_reference = xtl::variant<xtl::xclosure_wrapper<const typename xaxis<L, S, MT>::key_type&>...>;
             using mapped_type = S;
@@ -98,6 +98,7 @@ namespace xf
         using key_type = typename traits_type::key_type;
         using key_reference = typename traits_type::key_reference;
         using mapped_type = T;
+        using label_list = typename traits_type::label_list;
         using value_type = typename traits_type::value_type;
         using reference = typename traits_type::reference;
         using const_reference = typename traits_type::const_reference;
@@ -111,9 +112,6 @@ namespace xf
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using subiterator = typename traits_type::subiterator;
 
-        template <class LB>
-        using label_list = typename xaxis<LB, T, MT>::label_list;
-
         xaxis_variant() = default;
         template <class LB>
         xaxis_variant(const xaxis<LB, T, MT>& axis);
@@ -124,8 +122,7 @@ namespace xf
         template <class LB>
         xaxis_variant(xaxis_default<LB, T>&& axis);
 
-        template <class LB>
-        const label_list<LB>& labels() const;
+        label_list labels() const;
         key_type label(size_type i) const;
 
         bool empty() const;
@@ -168,9 +165,6 @@ namespace xf
         bool operator!=(const self_type& rhs) const;
 
     private:
-
-        template <class LB>
-        const label_list<LB>& labels_impl() const;
 
         storage_type m_data;
 
@@ -269,35 +263,10 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    template <class LB>
-    inline auto xaxis_variant<L, T, MT>::labels() const -> const label_list<LB>&
+    inline auto xaxis_variant<L, T, MT>::labels() const -> label_list
     {
-        return xtl::mpl::static_if<std::is_integral<LB>::value>([&](auto self) -> const label_list<LB>&
-        {
-            return self(*this).template labels_impl<LB>();
-        }, /*else*/ [&](auto /*self*/) -> const label_list<LB>&
-        {
-            return xtl::get<xaxis<LB, T>>(m_data).labels();
-        });
-    }
-
-    template <class L, class T, class MT>
-    template <class LB>
-    inline auto xaxis_variant<L, T, MT>::labels_impl() const -> const label_list<LB>&
-    {
-        if (auto* t = xtl::get_if<xaxis<LB, T>>(&m_data))
-        {
-            return t->labels();
-        }
-        else if (auto* t = xtl::get_if<xaxis_default<LB, T>>(&m_data))
-        {
-            return t->labels();
-        }
-        else
-        {
-            throw std::runtime_error("Error occured while getting the labels");
-        }
-    }
+        return xtl::visit([](auto&& arg) -> label_list { return arg.labels(); }, m_data);
+    };
 
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::label(size_type i) const -> key_type
@@ -423,7 +392,8 @@ namespace xf
     {
         using axis_variant_type = xaxis_variant<L, T, MT>;
         using key_type = K;
-        using label_list = typename axis_variant_type::template label_list<K>;
+        using axis_type =  xaxis<K, T, MT>;
+        using label_list = typename axis_type::label_list;
 
         xaxis_variant_adaptor(const axis_variant_type& axis)
             : m_axis(axis)
@@ -432,7 +402,7 @@ namespace xf
 
         inline const label_list& labels() const
         {
-            return m_axis.template labels<key_type>();
+            return xget_vector<key_type>(m_axis.labels());
         };
 
         inline bool is_sorted() const noexcept
@@ -595,8 +565,7 @@ namespace xf
     auto get_labels(const xaxis_variant<L, T, MT>& axis_variant) -> const typename xaxis<LB, T, MT>::label_list&
     {
         using label_list = typename xaxis<LB, T, MT>::label_list;
-        const label_list& labels = axis_variant.template labels<LB>();
-        return labels;
+        return xtl::xget<const label_list&>(axis_variant.labels().storage());
     }
 }
 
