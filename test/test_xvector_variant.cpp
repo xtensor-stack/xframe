@@ -577,6 +577,124 @@ namespace xf
         EXPECT_EQ(vrt, vrt4);
     }
 
+    TEST(xvector_variant_cref, empty)
+    {
+        auto v = build_test_ivector();
+        variant_cref_type vt(v);
+        EXPECT_FALSE(v.empty());
+
+        std::vector<int> v2;
+        variant_cref_type vt2(v2);
+        EXPECT_TRUE(vt2.empty());
+    }
+
+    TEST(xvector_variant_cref, size)
+    {
+        auto v = build_test_ivector();
+        variant_cref_type vt(v);
+
+        EXPECT_EQ(vt.size(), v.size());
+    }
+
+    TEST(xvector_variant_cref, max_size)
+    {
+        auto v = build_test_ivector();
+        variant_cref_type vt(v);
+
+        EXPECT_EQ(vt.max_size(), v.max_size());
+    }
+
+    TEST(xvector_variant_cref, capacity)
+    {
+        auto v = build_test_ivector();
+        variant_cref_type vt(v);
+        EXPECT_EQ(vt.capacity(), v.capacity());
+    }
+    
+    TEST(xvector_variant_cref, access)
+    {
+        auto v = build_test_ivector();
+        variant_cref_type vt(v);
+
+        int d = xtl::xget<const int&>(vt[0]);
+        EXPECT_EQ(v[0], d);
+    }
+
+    TEST(xvector_variant_cref, at)
+    {
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+
+        int d = xtl::xget<const int&>(vt.at(0));
+        EXPECT_EQ(v[0], d);
+
+        EXPECT_ANY_THROW(vt.at(6));
+    }
+
+    TEST(xvector_variant_cref, front)
+    {
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+
+        int d = xtl::xget<const int&>(vt.front());
+        EXPECT_EQ(v.front(), d);
+    }
+
+    TEST(xvector_variant_cref, back)
+    {
+        auto v = build_test_ivector();
+        variant_ref_type vt(v);
+
+        int d = xtl::xget<const int&>(vt.back());
+        EXPECT_EQ(v.back(), d);
+    }
+
+    TEST(xvector_variant_cref, data)
+    {
+        auto v = build_test_ivector();
+        variant_cref_type vt(v);
+
+        int d = xtl::xget<const int*>(vt.data())[0];
+        EXPECT_EQ(v[0], d);
+    }
+
+    TEST(xvector_variant_cref, storage)
+    {
+        auto v = build_test_ivector();
+        variant_cref_type vt(v);
+
+        int d = xtl::xget<const std::vector<int>&>(vt.storage())[0];
+        EXPECT_EQ(v[0], d);
+    }
+    
+    TEST(xvector_variant_cref, const_iterator)
+    {
+        // 1, 3, 4, 6, 7
+        auto v = build_test_ivector();
+        variant_cref_type vt(v);
+
+        auto iter = vt.cbegin();
+        auto d0 = xtl::xget<const int&>(*iter);
+        EXPECT_EQ(d0, 1);
+        ++iter;
+        auto d1 = xtl::xget<const int&>(*iter);
+        EXPECT_EQ(d1, 3);
+        iter += 2;
+        auto d2 = xtl::xget<const int&>(*iter);
+        EXPECT_EQ(d2, 6);
+        iter++;
+        iter -= 2;
+        auto d3 = xtl::xget<const int&>(*iter);
+        EXPECT_EQ(d3, 4);
+        --iter;
+        iter--;
+        iter += 5;
+        EXPECT_EQ(iter, vt.cend());
+
+        EXPECT_EQ(vt.cend() - vt.cbegin(), 5);
+        EXPECT_TRUE(vt.cbegin() < vt.cend());
+    }
+    
     TEST(xvector_variant_cref, xget_vector)
     {
         auto v = build_test_ivector();
@@ -594,6 +712,6 @@ namespace xf
 
         const auto& crvl = xget_vector<int>(std::move(vt2));
         EXPECT_EQ(crvl, v);
-    }
+    }   
 }
 
