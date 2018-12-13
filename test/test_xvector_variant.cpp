@@ -15,9 +15,9 @@
 
 namespace xf
 {
-    using variant_type = xvector_variant<int, std::string>;
-    using variant_ref_type = xvector_variant_ref<int, std::string>;
-    using variant_cref_type = xvector_variant_cref<int, std::string>;
+    using variant_type = xvector_variant<int, char, std::string>;
+    using variant_ref_type = xvector_variant_ref<int, char, std::string>;
+    using variant_cref_type = xvector_variant_cref<int, char, std::string>;
 
     std::vector<int> build_test_ivector()
     {
@@ -125,20 +125,28 @@ namespace xf
     {
         auto v = build_test_ivector();
         variant_type vt(v);
+        const variant_type& vt2(vt);
 
-        vt[0] = 4;
+        xtl::xget<int&>(vt[0]) = 4;
         int d = xtl::xget<const int&>(vt[0]);
         EXPECT_EQ(d, 4);
+
+        int d2 = xtl::xget<const int&>(vt2[1]);
+        EXPECT_EQ(d2, v[1]);
     }
 
     TEST(xvector_variant, at)
     {
         auto v = build_test_ivector();
         variant_type vt(v);
+        const variant_type& vt2(vt);
 
-        vt.at(0) = 4;
+        xtl::xget<int&>(vt.at(0)) = 4;
         int d = xtl::xget<const int&>(vt.at(0));
         EXPECT_EQ(d, 4);
+
+        int d2 = xtl::xget<const int&>(vt2.at(1));
+        EXPECT_EQ(d2, v[1]);
 
         EXPECT_ANY_THROW(vt.at(6));
     }
@@ -147,20 +155,28 @@ namespace xf
     {
         auto v = build_test_ivector();
         variant_type vt(v);
+        const variant_type& vt2(vt);
 
-        vt.front() = 4;
+        xtl::xget<int&>(vt.front()) = 4;
         int d = xtl::xget<const int&>(vt.front());
         EXPECT_EQ(d, 4);
+
+        int d2 = xtl::xget<const int&>(vt2.front());
+        EXPECT_EQ(d2, 4);
     }
 
     TEST(xvector_variant, back)
     {
         auto v = build_test_ivector();
         variant_type vt(v);
+        const variant_type& vt2(vt);
 
-        vt.back() = 4;
+        xtl::xget<int&>(vt.back()) = 4;
         int d = xtl::xget<const int&>(vt.back());
         EXPECT_EQ(d, 4);
+
+        int d2 = xtl::xget<const int&>(vt2.back());
+        EXPECT_EQ(d2, 4);
     }
 
     TEST(xvector_variant, data)
@@ -219,30 +235,6 @@ namespace xf
 
         EXPECT_EQ(vt1, vt2_bu);
         EXPECT_EQ(vt2, vt1_bu);
-    }
-
-    TEST(xvector_variant, push_back)
-    {
-        auto v = build_test_ivector();
-        variant_type vt(v);
-
-        int i = 2;
-        vt.push_back(i);
-        int j = 4;
-        vt.push_back(std::move(j));
-        int d0 = xtl::xget<int&>(vt[5]);
-        int d1 = xtl::xget<int&>(vt[6]);
-        EXPECT_EQ(d0, 2);
-        EXPECT_EQ(d1, 4);
-    }
-
-    TEST(xvector_variant, pop_back)
-    {
-        auto v = build_test_ivector();
-        variant_type vt(v);
-        vt.pop_back();
-        int d = xtl::xget<int&>(vt.back());
-        EXPECT_EQ(d, 6);
     }
 
     TEST(xvector_variant, xget_vector)
@@ -358,7 +350,7 @@ namespace xf
         auto v = build_test_ivector();
         variant_ref_type vt(v);
 
-        vt[0] = 4;
+        xtl::xget<int&>(vt[0]) = 4;
         int d = xtl::xget<const int&>(vt[0]);
         EXPECT_EQ(d, 4);
         EXPECT_EQ(v[0], 4);
@@ -369,7 +361,7 @@ namespace xf
         auto v = build_test_ivector();
         variant_ref_type vt(v);
 
-        vt.at(0) = 4;
+        xtl::xget<int&>(vt.at(0)) = 4;
         int d = xtl::xget<const int&>(vt.at(0));
         EXPECT_EQ(d, 4);
         EXPECT_EQ(v[0], 4);
@@ -382,7 +374,7 @@ namespace xf
         auto v = build_test_ivector();
         variant_ref_type vt(v);
 
-        vt.front() = 4;
+        xtl::xget<int&>(vt.front()) = 4;
         int d = xtl::xget<const int&>(vt.front());
         EXPECT_EQ(d, 4);
         EXPECT_EQ(v.front(), 4);
@@ -393,7 +385,7 @@ namespace xf
         auto v = build_test_ivector();
         variant_ref_type vt(v);
 
-        vt.back() = 4;
+        xtl::xget<int&>(vt.back()) = 4;
         int d = xtl::xget<const int&>(vt.back());
         EXPECT_EQ(d, 4);
         EXPECT_EQ(v.back(), 4);
@@ -515,28 +507,6 @@ namespace xf
         
         EXPECT_EQ(v1, v2_bu);
         EXPECT_EQ(v2, v1_bu);
-    }
-
-    TEST(xvector_variant_ref, push_back)
-    {
-        auto v = build_test_ivector();
-        variant_ref_type vt(v);
-
-        int i = 2;
-        vt.push_back(i);
-        int j = 4;
-        vt.push_back(std::move(j));
-
-        EXPECT_EQ(v[5], 2);
-        EXPECT_EQ(v[6], 4);
-    }
-
-    TEST(xvector_variant_ref, pop_back)
-    {
-        auto v = build_test_ivector();
-        variant_ref_type vt(v);
-        vt.pop_back();
-        EXPECT_EQ(v.back(), 6);
     }
 
     TEST(xvector_variant_ref, xget_vector)
@@ -712,6 +682,6 @@ namespace xf
 
         const auto& crvl = xget_vector<int>(std::move(vt2));
         EXPECT_EQ(crvl, v);
-    }   
+    }
 }
 
