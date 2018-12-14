@@ -48,7 +48,8 @@ namespace xf
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-        xsequence_view(container_type& data, slice_type slice) noexcept;
+        template <class OC>
+        xsequence_view(OC&& c, slice_type slice) noexcept;
 
         size_type size() const noexcept;
         bool empty() const noexcept;
@@ -85,7 +86,7 @@ namespace xf
 
     private:
 
-        container_type& m_data;
+        container_type m_container;
         slice_type m_slice;
     };
 
@@ -152,8 +153,9 @@ namespace xf
      *********************************/
 
     template <class C, class S>
-    inline xsequence_view<C, S>::xsequence_view(container_type& data, slice_type slice) noexcept
-        : m_data(data), m_slice(std::move(slice))
+    template <class OC>
+    inline xsequence_view<C, S>::xsequence_view(OC&& c, slice_type slice) noexcept
+        : m_container(std::forward<OC>(c)), m_slice(std::move(slice))
     {
     }
 
@@ -172,49 +174,49 @@ namespace xf
     template <class C, class S>
     inline auto xsequence_view<C, S>::operator[](size_type i) -> reference
     {
-        return m_data[m_slice(i)];
+        return m_container[m_slice(i)];
     }
 
     template <class C, class S>
     inline auto xsequence_view<C, S>::operator[](size_type i) const -> const_reference
     {
-        return m_data[m_slice(i)];
+        return m_container[m_slice(i)];
     }
 
     template <class C, class S>
     inline auto xsequence_view<C, S>::at(size_type i) -> reference
     {
-        return m_data.at(m_slice(i));
+        return m_container.at(m_slice(i));
     }
 
     template <class C, class S>
     inline auto xsequence_view<C, S>::at(size_type i) const -> const_reference
     {
-        return m_data.at(m_slice(i));
+        return m_container.at(m_slice(i));
     }
 
     template <class C, class S>
     inline auto xsequence_view<C, S>::front() -> reference
     {
-        return m_data[m_slice(0)];
+        return m_container[m_slice(0)];
     }
 
     template <class C, class S>
     inline auto xsequence_view<C, S>::front() const -> const_reference
     {
-        return m_data[m_slice(0)];
+        return m_container[m_slice(0)];
     }
 
     template <class C, class S>
     inline auto xsequence_view<C, S>::back() -> reference
     {
-        return m_data[m_slice(m_slice.size() - 1)];
+        return m_container[m_slice(m_slice.size() - 1)];
     }
 
     template <class C, class S>
     inline auto xsequence_view<C, S>::back() const -> const_reference
     {
-        return m_data[m_slice(m_slice.size() - 1)];
+        return m_container[m_slice(m_slice.size() - 1)];
     }
 
     template <class C, class S>

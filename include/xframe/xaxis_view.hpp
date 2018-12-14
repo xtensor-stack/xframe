@@ -47,7 +47,7 @@ namespace xf
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using subiterator = typename axis_type::const_iterator;
 
-        using label_list = xsequence_view<const typename axis_type::label_list, slice_type>;
+        using label_list = xsequence_view<typename axis_type::label_list, slice_type>;
 
         template <class S>
         xaxis_view(const axis_type& axis, S&& slice);
