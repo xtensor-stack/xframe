@@ -9,6 +9,7 @@
 #ifndef XFRAME_XSEQUENCE_VIEW_HPP
 #define XFRAME_XSEQUENCE_VIEW_HPP
 
+#include <algorithm>
 #include "xtl/xiterator_base.hpp"
 
 namespace xf
@@ -89,6 +90,12 @@ namespace xf
         container_type m_container;
         slice_type m_slice;
     };
+
+    template <class C, class S>
+    bool operator==(const xsequence_view<C, S>& lhs, const xsequence_view<C, S>& rhs);
+
+    template <class C, class S>
+    bool operator!=(const xsequence_view<C, S>& lhs, const xsequence_view<C, S>& rhs);
 
     template <class C, class S, bool is_const>
     struct xsequence_view_iterator_traits
@@ -289,6 +296,29 @@ namespace xf
     inline auto xsequence_view<C, S>::crend() const noexcept -> const_reverse_iterator
     {
         return const_reverse_iterator(cbegin());
+    }
+
+    template <class C, class S>
+    inline bool operator==(const xsequence_view<C, S>& lhs, const xsequence_view<C, S>& rhs)
+    {
+    // clang complains on OSX that std::equal_to is not defined for mpark::variant
+#ifdef __APPLE__
+        bool res = lhs.size() == rhs.size();
+        auto iter = lhs.cbegin(), iter_end = lhs.cend(), rhs_iter = rhs.cbegin();
+        while(res && iter != iter_end)
+        {
+            res = *iter++ == *rhs_iter++;
+        }
+        return res;
+#else
+        return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+#endif
+    }
+
+    template <class C, class S>
+    inline bool operator!=(const xsequence_view<C, S>& lhs, const xsequence_view<C, S>& rhs)
+    {
+        return !(lhs == rhs);
     }
 
     /******************************************

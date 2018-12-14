@@ -314,7 +314,7 @@ namespace xf
     template <class L, class T, class MT>
     inline bool xaxis_view<L, T, MT>::operator==(const self_type& rhs) const noexcept
     {
-        return m_axis == rhs.m_axis && m_slice == rhs.m_slice;
+        return labels() == rhs.labels();
     }
 
     template <class L, class T, class MT>
