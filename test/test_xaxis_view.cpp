@@ -186,4 +186,21 @@ namespace xf
         EXPECT_EQ(vf["f"], 1u);
         EXPECT_EQ(vf["h"], 2u);
     }
+
+    TEST(xaxis_view, comparison)
+    {
+        // { "a", "c", "d", "f", "g", "h", "m", "n" }
+        auto a = make_variant_view_saxis();
+        auto r = range("c", "f");
+        axis_view_type vr = axis_view_type(a, r.build_index_slice(a));
+
+        axis_variant b(saxis_type({"c", "d", "f"}));
+        axis_variant c(saxis_type({"c", "e", "f"}));
+
+        EXPECT_TRUE(vr == b);
+        EXPECT_TRUE(b == vr);
+
+        EXPECT_TRUE(vr != c);
+        EXPECT_TRUE(c != vr);
+    }
 }
