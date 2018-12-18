@@ -91,6 +91,12 @@ namespace xf
         map_type m_coordinate;
     };
 
+    template <class K, class A1, class A2>
+    bool operator==(const xcoordinate_base<K, A1>& lhs, const xcoordinate_base<K, A2>& rhs);
+
+    template <class K, class A1, class A2>
+    bool operator!=(const xcoordinate_base<K, A1>& lhs, const xcoordinate_base<K, A2>& rhs);
+
     template <class OS, class K, class A>
     OS& operator<<(OS& out, const xcoordinate_base<K, A>& c);
 
@@ -213,6 +219,29 @@ namespace xf
     inline auto xcoordinate_base<K, A>::coordinate() noexcept -> map_type&
     {
         return m_coordinate;
+    }
+
+    template <class K, class A1, class A2>
+    inline bool operator==(const xcoordinate_base<K, A1>& lhs, const xcoordinate_base<K, A2>& rhs)
+    {
+        bool res = lhs.size() == rhs.size();
+        
+        auto liter = lhs.cbegin();
+        auto lend = lhs.cend();
+        auto riter = rhs.cbegin();
+        while(res && liter != lend)
+        {
+            res = (liter->second == riter->second);
+            ++liter;
+            ++riter;
+        }
+        return res;
+    }
+
+    template <class K, class A1, class A2>
+    inline bool operator!=(const xcoordinate_base<K, A1>& lhs, const xcoordinate_base<K, A2>& rhs)
+    {
+        return !(lhs == rhs);
     }
 
     template <class OS, class K, class A>

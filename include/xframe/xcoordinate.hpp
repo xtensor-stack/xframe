@@ -82,9 +82,6 @@ namespace xf
         template <class Join, class... Args>
         xtrivial_broadcast broadcast(const Args&... coordinates);
 
-        bool operator==(const self_type& rhs) const noexcept;
-        bool operator!=(const self_type& rhs) const noexcept;
-
     private:
 
         using coordinate_view_type = xcoordinate_view < K, S, MT, L>;
@@ -251,18 +248,6 @@ namespace xf
     inline xtrivial_broadcast xcoordinate<K, S, MT, L>::broadcast(const Args&... coordinates)
     {
         return this->empty() ? broadcast_empty<Join>(coordinates...) : broadcast_impl<Join>(coordinates...);
-    }
-
-    template <class K, class S, class MT, class L>
-    inline bool xcoordinate<K, S, MT, L>::operator==(const self_type& rhs) const noexcept
-    {
-        return this->data() == rhs.data();
-    }
-
-    template <class K, class S, class MT, class L>
-    inline bool xcoordinate<K, S, MT, L>::operator!=(const self_type& rhs) const noexcept
-    {
-        return !(*this == rhs);
     }
 
     namespace detail

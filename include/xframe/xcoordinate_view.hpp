@@ -45,9 +45,6 @@ namespace xf
 
         explicit xcoordinate_view(const map_type& axes);
         explicit xcoordinate_view(map_type&& axes);
-
-        bool operator==(const self_type& rhs) const noexcept;
-        bool operator!=(const self_type& rhs) const noexcept;
     };
 
     template <class K, class S, class MT, class L>
@@ -89,18 +86,6 @@ namespace xf
     inline xcoordinate_view<K, S, MT, L>::xcoordinate_view(map_type&& axes)
         : base_type(std::move(axes))
     {
-    }
-
-    template <class K, class S, class MT, class L>
-    inline bool xcoordinate_view<K, S, MT, L>::operator==(const self_type& rhs) const noexcept
-    {
-        return this->data() == rhs.data();
-    }
-
-    template <class K, class S, class MT, class L>
-    inline bool xcoordinate_view<K, S, MT, L>::operator!=(const self_type& rhs) const noexcept
-    {
-        return !(*this == rhs);
     }
 
     template <class K, class S, class MT, class L>
