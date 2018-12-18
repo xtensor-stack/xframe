@@ -108,4 +108,24 @@ namespace xf
         EXPECT_EQ(c3abscissa, vcabscissa);
         EXPECT_EQ(c3ordinate, vcordinate);
     }
+
+    TEST(xcoordinate_view, comparison)
+    {
+        // abscissa: { "f", "g", "h", "m", "n" }
+        // ordinate: { 1, 4, 6 }
+        auto c = make_test_view_coordinate();
+        auto vc = build_coordinate_view(c);
+
+        coordinate_type co =
+        {
+            { "abscissa", xf::axis({ "f", "g", "h", "m", "n" }) },
+            { "ordinate", xf::axis({ 1, 4, 6}) }
+        };
+
+        EXPECT_TRUE(vc == co);
+        EXPECT_TRUE(co == vc);
+
+        EXPECT_TRUE(vc != c);
+        EXPECT_TRUE(c != vc);
+    }
 }
