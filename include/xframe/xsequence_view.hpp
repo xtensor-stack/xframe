@@ -95,7 +95,19 @@ namespace xf
     bool operator==(const xsequence_view<C, S>& lhs, const xsequence_view<C, S>& rhs);
 
     template <class C, class S>
+    bool operator==(const xsequence_view<C, S>& lhs, const C& rhs);
+
+    template <class C, class S>
+    bool operator==(const C& lhs, const xsequence_view<C, S>& rhs);
+
+    template <class C, class S>
     bool operator!=(const xsequence_view<C, S>& lhs, const xsequence_view<C, S>& rhs);
+
+    template <class C, class S>
+    bool operator!=(const xsequence_view<C, S>& lhs, const C& rhs);
+
+    template <class C, class S>
+    bool operator!=(const C& lhs, const xsequence_view<C, S>& rhs);
 
     template <class C, class S, bool is_const>
     struct xsequence_view_iterator_traits
@@ -298,25 +310,67 @@ namespace xf
         return const_reverse_iterator(cbegin());
     }
 
+    namespace detail
+    {
+        // clang complains on OSX that std::equal_to is not defined for mpark::variant
+#ifdef __APPLE__
+        template <class InputIt1, class InputIt2>
+        inline bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+        {
+            for(; first1 != last1; ++first1, ++first2)
+            {
+                if(!(*first1 == *first2))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+#endif
+        template <class C1, class C2>
+        inline bool compare_sequence_view(const C1& lhs, const C2& rhs)
+        {
+            // clang complains on OSX that std::equal_to is not defined for mpark::variant
+#ifdef __APPLE__
+            return lhs.size() == rhs.size() && detail::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+#else
+            return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+#endif
+        }
+    }
+
     template <class C, class S>
     inline bool operator==(const xsequence_view<C, S>& lhs, const xsequence_view<C, S>& rhs)
     {
-    // clang complains on OSX that std::equal_to is not defined for mpark::variant
-#ifdef __APPLE__
-        bool res = lhs.size() == rhs.size();
-        auto iter = lhs.cbegin(), iter_end = lhs.cend(), rhs_iter = rhs.cbegin();
-        while(res && iter != iter_end)
-        {
-            res = *iter++ == *rhs_iter++;
-        }
-        return res;
-#else
-        return lhs.size() == rhs.size() && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
-#endif
+        return detail::compare_sequence_view(lhs, rhs);
+    }
+
+    template <class C, class S>
+    inline bool operator==(const xsequence_view<C, S>& lhs, const C& rhs)
+    {
+        return detail::compare_sequence_view(lhs, rhs);
+    }
+
+    template <class C, class S>
+    inline bool operator==(const C& lhs, const xsequence_view<C, S>& rhs)
+    {
+        return detail::compare_sequence_view(lhs, rhs);
     }
 
     template <class C, class S>
     inline bool operator!=(const xsequence_view<C, S>& lhs, const xsequence_view<C, S>& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template <class C, class S>
+    inline bool operator!=(const xsequence_view<C, S>& lhs, const C& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template <class C, class S>
+    inline bool operator!=(const C& lhs, const xsequence_view<C, S>& rhs)
     {
         return !(lhs == rhs);
     }

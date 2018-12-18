@@ -86,14 +86,29 @@ namespace xf
 
         axis_type as_xaxis() const;
 
-        bool operator==(const self_type& rhs) const noexcept;
-        bool operator!=(const self_type& rhs) const noexcept;
-
     private:
 
         const axis_type& m_axis;
         slice_type m_slice;
     };
+
+    template <class L, class T, class MT>
+    bool operator==(const xaxis_view<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept;
+
+    template <class L, class T, class MT>
+    bool operator!=(const xaxis_view<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept;
+
+    template <class L, class T, class MT>
+    bool operator==(const xaxis_view<L, T, MT>& lhs, const xaxis_variant<L, T, MT>& rhs) noexcept;
+
+    template <class L, class T, class MT>
+    bool operator==(const xaxis_variant<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept;
+
+    template <class L, class T, class MT>
+    bool operator!=(const xaxis_view<L, T, MT>& lhs, const xaxis_variant<L, T, MT>& rhs) noexcept;
+
+    template <class L, class T, class MT>
+    bool operator!=(const xaxis_variant<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept;
 
     template <class OS, class L, class T, class MT>
     OS& operator<<(OS& out, const xaxis_view<L, T, MT>& axis);
@@ -312,15 +327,39 @@ namespace xf
     }
 
     template <class L, class T, class MT>
-    inline bool xaxis_view<L, T, MT>::operator==(const self_type& rhs) const noexcept
+    inline bool operator==(const xaxis_view<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
     {
-        return labels() == rhs.labels();
+        return lhs.labels() == rhs.labels();
     }
 
     template <class L, class T, class MT>
-    inline bool xaxis_view<L, T, MT>::operator!=(const self_type& rhs) const noexcept
+    inline bool operator!=(const xaxis_view<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
     {
-        return !(*this == rhs);
+        return !(lhs == rhs);
+    }
+
+    template <class L, class T, class MT>
+    inline bool operator==(const xaxis_view<L, T, MT>& lhs, const xaxis_variant<L, T, MT>& rhs) noexcept
+    {
+        return lhs.labels() == rhs.labels();
+    }
+
+    template <class L, class T, class MT>
+    inline bool operator==(const xaxis_variant<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
+    {
+        return rhs == lhs;
+    }
+
+    template <class L, class T, class MT>
+    inline bool operator!=(const xaxis_view<L, T, MT>& lhs, const xaxis_variant<L, T, MT>& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+
+    template <class L, class T, class MT>
+    inline bool operator!=(const xaxis_variant<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
+    {
+        return !(lhs == rhs);
     }
 
     template <class OS, class L, class T, class MT>

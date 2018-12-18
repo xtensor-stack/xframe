@@ -107,4 +107,17 @@ namespace xf
         EXPECT_EQ(m_feature.m_view.end() - iter, 3);
         EXPECT_EQ(m_feature.m_view.cend() - citer, 3);
     }
+
+    TEST(xsequence_view, comparison)
+    {
+        xsequence_view_feature m_feature;
+        xsequence_view_feature::data_type data = { 0, 2, 4, 6, 8 };
+        xsequence_view_feature::data_type data2 = { 0, 2, 5, 6, 8 };
+
+        EXPECT_TRUE(m_feature.m_view == data);
+        EXPECT_TRUE(m_feature.m_view != data2);
+
+        EXPECT_TRUE(data == m_feature.m_view);
+        EXPECT_TRUE(data2 != m_feature.m_view);
+    }
 }
