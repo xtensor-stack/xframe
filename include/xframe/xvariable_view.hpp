@@ -877,7 +877,9 @@ namespace xf
             inline void operator()(const xt::xkeep_slice<T>& slice, const label_type& dim_label)
             {
                 const auto& axis = m_e.coordinates()[dim_label];
-                m_param.coord_map.emplace(dim_label, axis_type(axis, axis_slice_type(slice)));
+                xt::xkeep_slice<T> coord_slice(slice);
+                coord_slice.normalize(axis.size());
+                m_param.coord_map.emplace(dim_label, axis_type(axis, axis_slice_type(std::move(coord_slice))));
                 m_param.dim_label_list.push_back(dim_label);
                 auto dim_idx = m_e.dimension_mapping()[dim_label];
                 m_param.dyn_slices[dim_idx] = xt::xkeep_slice<std::ptrdiff_t>(slice);

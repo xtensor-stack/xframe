@@ -509,7 +509,7 @@ namespace xf
         EXPECT_EQ(view5, view6);
     }
 
-    TEST(variable_view, view_builder)
+    TEST(xvariable_view, view_builder)
     {
         variable_type var = make_test_view_variable();
         variable_view_type view = build_view(var);
@@ -523,5 +523,22 @@ namespace xf
         variable_view_type view5 = select(var, { { "abscissa", "f" } });
         variable_view_type view6 = ilocate(var, 3, xt::all());
         EXPECT_EQ(view5, view6);
+    }
+
+    TEST(xvariable_view, keep_slice)
+    {
+        variable_type var = make_test_view_variable();
+        variable_view_type view = locate(var, range("f", "n"), range(1, 6, 2));
+        variable_view_type view2 = locate(var, xf::keep("f", "g", "h", "m", "n"), range(1, 6, 2));
+        variable_view_type view3 = ilocate(var, xt::keep(3, 4, 5, 6, 7), xt::range(0, 5, 2));
+        variable_view_type view4 = select(var, { { "abscissa", xf::keep("f", "g", "h", "m", "n") },
+                                                 { "ordinate", range(1, 6, 2)} });
+        variable_view_type view5 = iselect(var, { { "abscissa", xt::keep(3, 4, 5, 6, 7) },
+                                                  { "ordinate", xt::range(0, 5, 2) } });
+        
+        EXPECT_EQ(view, view2);
+        EXPECT_EQ(view, view3);
+        EXPECT_EQ(view, view4);
+        EXPECT_EQ(view, view5);
     }
 }
