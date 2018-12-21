@@ -142,6 +142,56 @@ namespace xf
         container_type m_labels;
     };
 
+    /********************
+     * xaxis_drop_slice *
+     ********************/
+
+    template <class L>
+    class xaxis_drop_slice;
+
+    namespace detail
+    {
+        template <class T>
+        struct is_axis_drop_slice : std::false_type
+        {
+        };
+
+        template <class L>
+        struct is_axis_drop_slice<xaxis_drop_slice<L>>
+            : std::true_type
+        {
+        };
+
+        template <class T>
+        using disable_xaxis_drop_slice_t = std::enable_if_t<!is_axis_drop_slice<std::decay_t<T>>::value, void>;
+
+        template <class T>
+        using enable_xaxis_drop_slice_t = std::enable_if_t<is_axis_drop_slice<std::decay_t<T>>::value, void>;
+    }
+
+    template <class L>
+    class xaxis_drop_slice
+    {
+    public:
+
+        using value_type = xlabel_variant_t<L>;
+        using container_type = xt::svector<value_type>;
+
+        template <class C, typename = detail::disable_xaxis_drop_slice_t<C>>
+        explicit xaxis_drop_slice(C& cont);
+        explicit xaxis_drop_slice(container_type&& cont);
+
+        template <class A>
+        using index_slice_type = xt::xdrop_slice<typename A::mapped_type>;
+
+        template <class A>
+        index_slice_type<A> build_index_slice(const A& axis) const;
+
+    private:
+
+        container_type m_labels;
+    };
+
     /***************
      * xaxis_slice *
      ***************/
@@ -155,6 +205,7 @@ namespace xf
         using storage_type = xtl::variant<xaxis_range<L>,
                                           xaxis_stepped_range<L>,
                                           xaxis_keep_slice<L>,
+                                          xaxis_drop_slice<L>,
                                           xaxis_all,
                                           squeeze_type>;
 
@@ -218,6 +269,15 @@ namespace xf
     template <class L = DEFAULT_LABEL_LIST, class T0, class T1, class... Args>
     xaxis_slice<L> keep(T0 t0, T1 t1, Args... args);
      
+    template <class L = DEFAULT_LABEL_LIST, class T>
+    detail::enable_container_t<T, xaxis_slice<L>> drop(T&& indices);
+
+    template <class L = DEFAULT_LABEL_LIST, class T>
+    detail::disable_container_t<T, xaxis_slice<L>> drop(T index);
+
+    template <class L = DEFAULT_LABEL_LIST, class T0, class T1, class... Args>
+    xaxis_slice<L> drop(T0 t0, T1 t1, Args... args);
+
     /******************************
      * xaxis_range implementation *
      ******************************/
@@ -280,13 +340,13 @@ namespace xf
 
     template <class L>
     template <class C, typename>
-    xaxis_keep_slice<L>::xaxis_keep_slice(C& cont)
+    inline xaxis_keep_slice<L>::xaxis_keep_slice(C& cont)
         : m_labels(cont.begin(), cont.end())
     {
     }
 
     template <class L>
-    xaxis_keep_slice<L>::xaxis_keep_slice(container_type&& cont)
+    inline xaxis_keep_slice<L>::xaxis_keep_slice(container_type&& cont)
         : m_labels(std::move(cont))
     {
     }
@@ -299,10 +359,39 @@ namespace xf
         index_container_type c(m_labels.size());
         std::transform(m_labels.cbegin(), m_labels.cend(), c.begin(), [&axis](const auto& arg) { return axis[arg]; });
         index_slice_type<A> res(std::move(c));
-        res.normalize(m_labels.size());
+        res.normalize(axis.size());
         return res;
     }
     
+    /****************************
+     * xaxis_drop_implemenation *
+     ****************************/
+
+    template <class L>
+    template <class C, typename>
+    inline xaxis_drop_slice<L>::xaxis_drop_slice(C& cont)
+        : m_labels(cont.begin(), cont.end())
+    {
+    }
+
+    template <class L>
+    inline xaxis_drop_slice<L>::xaxis_drop_slice(container_type&& cont)
+        : m_labels(std::move(cont))
+    {
+    }
+
+    template <class L>
+    template <class A>
+    inline auto xaxis_drop_slice<L>::build_index_slice(const A& axis) const -> index_slice_type<A>
+    {
+        using index_container_type = typename index_slice_type<A>::container_type;
+        index_container_type c(m_labels.size());
+        std::transform(m_labels.cbegin(), m_labels.cend(), c.begin(), [&axis](const auto& arg) { return axis[arg]; });
+        index_slice_type<A> res(std::move(c));
+        res.normalize(axis.size());
+        return res;
+    }
+
     /******************************
      * xaxis_slice implementation *
      ******************************/
@@ -367,31 +456,73 @@ namespace xf
         return xaxis_slice<L>(xaxis_stepped_range<L>(std::move(first), std::move(last), step));
     }
 
+    namespace detail
+    {
+        template <template <class> class R, class L, class T>
+        inline detail::enable_container_t<T, xaxis_slice<L>>
+        common_drop_keep(T&& indices)
+        {
+            R<L> slice(std::forward<T>(indices));
+            return xaxis_slice<L>(std::move(slice));
+        }
+
+        template <template <class> class R, class L, class T>
+        inline detail::disable_container_t<T, xaxis_slice<L>>
+        common_drop_keep(T index)
+        {
+            using slice_type = R<L>;
+            using container_type = typename slice_type::container_type;
+            using value_type = typename slice_type::value_type;
+            container_type tmp = { value_type(index) };
+            return xaxis_slice<L>(slice_type(std::move(tmp)));
+        }
+
+        template <template <class> class R, class L, class T0, class T1, class... Args>
+        inline xaxis_slice<L>
+        common_drop_keep(T0 t0, T1 t1, Args... args)
+        {
+            using slice_type = R<L>;
+            using container_type = typename slice_type::container_type;
+            using value_type = typename slice_type::value_type;
+            container_type tmp = { value_type(t0), value_type(t1), value_type(args)... };
+            return xaxis_slice<L>(slice_type(std::move(tmp)));
+        }
+    }
+
     template <class L, class T>
     inline detail::enable_container_t<T, xaxis_slice<L>> keep(T&& indices)
     {
-        xaxis_keep_slice<L> slice(std::forward<T>(indices));
-        return xaxis_slice<L>(std::move(slice));
+        return detail::common_drop_keep<xaxis_keep_slice, L>(std::forward<T>(indices));
     }
   
     template <class L, class T>
     inline detail::disable_container_t<T, xaxis_slice<L>> keep(T index)
     {
-        using slice_type = xaxis_keep_slice<L>;
-        using container_type = typename slice_type::container_type;
-        using value_type = typename slice_type::value_type;
-        container_type tmp = { value_type(index) };
-        return xaxis_slice<L>(slice_type(std::move(tmp)));
+        return detail::common_drop_keep<xaxis_keep_slice, L>(index);
     }
 
     template <class L, class T0, class T1, class... Args>
     inline xaxis_slice<L> keep(T0 t0, T1 t1, Args... args)
     {
-        using slice_type = xaxis_keep_slice<L>;
-        using container_type = typename slice_type::container_type;
-        using value_type = typename slice_type::value_type;
-        container_type tmp = { value_type(t0), value_type(t1), value_type(args)... };
-        return xaxis_slice<L>(slice_type(std::move(tmp)));
+        return detail::common_drop_keep<xaxis_keep_slice, L>(t0, t1, args...);
+    }
+
+    template <class L, class T>
+    inline detail::enable_container_t<T, xaxis_slice<L>> drop(T&& indices)
+    {
+        return detail::common_drop_keep<xaxis_drop_slice, L>(std::forward<T>(indices));
+    }
+  
+    template <class L, class T>
+    inline detail::disable_container_t<T, xaxis_slice<L>> drop(T index)
+    {
+        return detail::common_drop_keep<xaxis_drop_slice, L>(index);
+    }
+
+    template <class L, class T0, class T1, class... Args>
+    inline xaxis_slice<L> drop(T0 t0, T1 t1, Args... args)
+    {
+        return detail::common_drop_keep<xaxis_drop_slice, L>(t0, t1, args...);
     }
 }
 
