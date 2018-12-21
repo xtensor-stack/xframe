@@ -77,6 +77,27 @@ namespace xf
         storage_type m_slice;
     };
 
+    /*********************
+     * Builder functions *
+     *********************/
+    
+    template <class A>
+    auto irange(A start_val);
+
+    template <class A, class B>
+    auto irange(A start_val, B stop_val);
+
+    template <class A, class B, class C>
+    auto irange(A start_val, B stop_val, C step);
+
+    template <class... T>
+    auto ikeep(T&&... t);
+
+    template <class... T>
+    auto idrop(T&&... t);
+
+    using xt::all;
+
     /************************************
      * xaxis_index_slice implementation *
      ************************************/
@@ -166,6 +187,39 @@ namespace xf
     inline bool xaxis_index_slice<T>::operator!=(const self_type& rhs) const noexcept
     {
         return !(*this == rhs);
+    }
+
+    /************************************
+     * Builder functions implementation *
+     ************************************/
+    template <class A>
+    inline auto irange(A start_val)
+    {
+        return xt::range(start_val);
+    }
+
+    template <class A, class B>
+    inline auto irange(A start_val, B stop_val)
+    {
+        return xt::range(start_val, stop_val);
+    }
+
+    template <class A, class B, class C>
+    inline auto irange(A start_val, B stop_val, C step)
+    {
+        return xt::range(start_val, stop_val, step);
+    }
+
+    template <class... T>
+    inline auto ikeep(T&&... t)
+    {
+        return xt::keep(std::forward<T>(t)...);
+    }
+
+    template <class... T>
+    inline auto idrop(T&&... t)
+    {
+        return xt::drop(std::forward<T>(t)...);
     }
 }
 
