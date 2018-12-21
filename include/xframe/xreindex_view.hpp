@@ -151,11 +151,11 @@ namespace xf
      * reindex_view builders *
      *************************/
 
-    template <class E, class M>
-    auto reindex(E&& e, const M& new_coord);
+    template <class E>
+    auto reindex(E&& e, const typename std::decay_t<E>::coordinate_map& new_coord);
 
-    template <class E, class M>
-    auto reindex(E&& e, M&& new_coord);
+    template <class E>
+    auto reindex(E&& e, typename std::decay_t<E>::coordinate_map&& new_coord);
 
     template <class E1, class E2>
     auto reindex_like(E1&& e1, const E2& e2);
@@ -168,7 +168,7 @@ namespace xf
     template <class E>
     inline xreindex_view<CT>::xreindex_view(E&& e, const coordinate_map& new_coord)
         : m_e(std::forward<E>(e)),
-          m_coordinate(reindex(m_e.cordinates(), new_coord)),
+          m_coordinate(reindex(m_e.coordinates(), new_coord)),
           m_dimension_mapping(m_e.dimension_mapping())
     {
         init_shape();
@@ -452,22 +452,22 @@ namespace xf
      * reindex_view builders implementation *
      ****************************************/
 
-    template <class E, class M>
-    auto reindex(E&& e, const M& new_coord)
+    template <class E>
+    inline auto reindex(E&& e, const typename std::decay_t<E>::coordinate_map& new_coord)
     {
         using view_type = xreindex_view<xtl::closure_type_t<E>>;
         return view_type(std::forward<E>(e), new_coord);
     }
 
-    template <class E, class M>
-    auto reindex(E&& e, M&& new_coord)
+    template <class E>
+    inline auto reindex(E&& e, typename std::decay_t<E>::coordinate_map&& new_coord)
     {
         using view_type = xreindex_view<xtl::closure_type_t<E>>;
         return view_type(std::forward<E>(e), std::move(new_coord));
     }
 
     template <class E1, class E2>
-    auto reindex_like(E1&& e1, const E2& e2)
+    inline auto reindex_like(E1&& e1, const E2& e2)
     {
         using view_type = xreindex_view<xtl::closure_type_t<E1>>;
         using coordinate_map = typename view_type::coordinate_map;

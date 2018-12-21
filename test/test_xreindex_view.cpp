@@ -30,6 +30,10 @@ namespace xf
         auto view = reindex(var, new_coord);
         EXPECT_TRUE(view.coordinates() == coordinate_res);
         EXPECT_EQ(view.dimension_mapping(), var.dimension_mapping());
+
+        auto view2 = reindex(var, {{ "abscissa", xf::axis({"a", "b", "c", "d"})}});
+        EXPECT_TRUE(view2.coordinates() == coordinate_res);
+        EXPECT_EQ(view2.dimension_mapping(), var.dimension_mapping());
     }
 
     TEST(xreindex_view, size)
