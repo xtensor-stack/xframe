@@ -1,0 +1,8 @@
+name: xframe
+channels:
+  - QuantStack
+  - conda-forge
+dependencies:
+  - xframe=0.0.1
+  - xeus-cling=0.4.10
+  - notebook
