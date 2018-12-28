@@ -1,0 +1,7 @@
+name: xframe-docs
+
+channels:
+  - conda-forge
+
+dependencies:
+  - breathe
