@@ -286,4 +286,17 @@ namespace xf
         EXPECT_EQ(t31, view(3, 1));
         EXPECT_EQ(t32, view(3, 2));
     }
+
+    TEST(xreindex_view, data)
+    {
+        auto var = make_test_variable();
+        coordinate_map new_coord = make_new_coordinate();
+        auto view = reindex(var, new_coord);
+
+        const auto& d = view.data();
+        EXPECT_EQ(d.shape(), view.shape());
+        EXPECT_EQ(d(0, 0), view(0, 0));
+        std::array<size_t, 2> idx = {0u, 1u};
+        EXPECT_EQ(d[idx], view(0, 1));
+    }
 }
