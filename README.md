@@ -13,7 +13,7 @@
 
 ## Dependencies
 
-`xframe` depends on the [xtensor](https://github/QuantStack/xtensor) library:
+`xframe` depends on the [xtensor](https://github.com/QuantStack/xtensor) library:
 
 |  xframe  |  xtensor  |
 |----------|-----------|
