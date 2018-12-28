@@ -65,6 +65,7 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xio.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xnamed_axis.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xreindex_view.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xreindex_data.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xselecting.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xsequence_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xvariable.hpp

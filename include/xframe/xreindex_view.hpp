@@ -12,6 +12,7 @@
 #include "xtensor/xexpression.hpp"
 
 #include "xcoordinate_chain.hpp"
+#include "xreindex_data.hpp"
 #include "xvariable.hpp"
 
 namespace xf
@@ -40,6 +41,7 @@ namespace xf
         using difference_type = typename xexpression_type::difference_type;
         
         using shape_type = typename xexpression_type::shape_type;
+        using data_type = xreindex_data<self_type>;
 
         using subcoordinate_type = typename xexpression_type::coordinate_type;
         using coordinate_type = xcoordinate_chain<subcoordinate_type>;
@@ -85,6 +87,7 @@ namespace xf
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
         const shape_type& shape() const noexcept;
+        const data_type& data() const noexcept;
 
         template <class... Args>
         const_reference operator()(Args... args) const;
@@ -142,6 +145,7 @@ namespace xf
         coordinate_type m_coordinate;
         const dimension_type& m_dimension_mapping;
         shape_type m_shape;
+        data_type m_data;
     };
 
     template <class CT>
@@ -169,7 +173,8 @@ namespace xf
     inline xreindex_view<CT>::xreindex_view(E&& e, const coordinate_map& new_coord)
         : m_e(std::forward<E>(e)),
           m_coordinate(reindex(m_e.coordinates(), new_coord)),
-          m_dimension_mapping(m_e.dimension_mapping())
+          m_dimension_mapping(m_e.dimension_mapping()),
+          m_data(*this)
     {
         init_shape();
     }
@@ -179,7 +184,8 @@ namespace xf
     inline xreindex_view<CT>::xreindex_view(E&& e, coordinate_map&& new_coord)
         : m_e(std::forward<E>(e)),
           m_coordinate(reindex(m_e.coordinates(), std::move(new_coord))),
-          m_dimension_mapping(m_e.dimension_mapping())
+          m_dimension_mapping(m_e.dimension_mapping()),
+          m_data(*this)
     {
         init_shape();
     }
@@ -247,6 +253,12 @@ namespace xf
     inline auto xreindex_view<CT>::shape() const noexcept -> const shape_type&
     {
         return m_shape;
+    }
+
+    template <class CT>
+    inline auto xreindex_view<CT>::data() const noexcept -> const data_type&
+    {
+        return m_data;
     }
 
     template <class CT>
@@ -482,6 +494,12 @@ namespace xf
             }
         }
         return view_type(std::forward<E1>(e1), std::move(new_coord));
+    }
+
+    template <class CT>
+    inline std::ostream& operator<<(std::ostream& out, const xreindex_view<CT>& view)
+    {
+        return print_variable_expression(out, view);
     }
 }
 
