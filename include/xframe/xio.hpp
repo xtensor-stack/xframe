@@ -422,6 +422,15 @@ namespace xf
     {
         return xf::mime_bundle_repr_impl(expr);
     }
+
+    template <class E>
+    class xreindex_view;
+
+    template <class E>
+    xeus::xjson mime_bundle_repr(const xreindex_view<E>& expr)
+    {
+        return xf::mime_bundle_repr_impl(expr);
+    }
 }
 #endif
 
