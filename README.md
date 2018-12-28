@@ -11,6 +11,16 @@
 
 `xframe` is a dataframe for C++, based on [xtensor](https://github.com/QuantStack/xtensor) and [xtl](https://github.com/QuantStack/xtl).
 
+## Dependencies
+
+`xframe` depends on the [xtensor](https://github/QuantStack/xtensor) library:
+
+|  xframe  |  xtensor  |
+|----------|-----------|
+|  master  |  ^0.19.1  |
+|   0.0.1  |  ^0.19.1  |
+|   0.0.2  |  ^0.19.1  |
+
 ## License
 
 We use a shared copyright model that enables all contributors to maintain the

@@ -11,7 +11,7 @@
 
 #define XFRAME_VERSION_MAJOR 0
 #define XFRAME_VERSION_MINOR 0
-#define XFRAME_VERSION_PATCH 1
+#define XFRAME_VERSION_PATCH 2
 
 #ifndef DEFAULT_LABEL_LIST
 #include <cstddef>
