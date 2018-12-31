@@ -650,6 +650,10 @@ namespace xf
         return lhs.less_than(rhs);
     }
 
+    /********************************
+     * axis builders implementation *
+     ********************************/
+
     template <class T = std::size_t, class L>
     inline auto axis(L start, L stop, L step = 1) noexcept
     {
@@ -663,10 +667,10 @@ namespace xf
         return xaxis<L, T>(init);
     }
 
-    template <class T = std::size_t>
+    template <class L = xtl::xfixed_string<55>, class T = std::size_t>
     inline auto axis(std::initializer_list<const char*> init) noexcept
     {
-        return xaxis<xtl::xfixed_string<55>, T>(init.begin(), init.end());
+        return xaxis<L, T>(init.begin(), init.end());
     }
 }
 

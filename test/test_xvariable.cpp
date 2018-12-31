@@ -67,6 +67,9 @@ namespace xf
 
         auto v7 = variable_type(std::move(m2), std::move(dim_map2));
         EXPECT_EQ(v7.data().shape(), data_type::shape_type({ 3, 3 }));
+
+        auto v8 = variable_type(make_test_data(), make_test_coordinate(), dimension({"abscissa", "ordinate"}));
+        EXPECT_EQ(v1, v8);
     }
 
     TEST(xvariable, size)
