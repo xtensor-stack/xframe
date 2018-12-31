@@ -54,5 +54,13 @@ namespace xf
         EXPECT_EQ(res3["d"], 4);
         EXPECT_EQ(res3["e"], 5);
     }
+
+    TEST(xdimension, builder)
+    {
+        dimension_type d1 = { "a", "b", "c" };
+        auto d2 = dimension({ "a", "b", "c" });
+
+        EXPECT_EQ(d1, d2);
+    }
 }
 
