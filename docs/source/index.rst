@@ -50,6 +50,8 @@ for details.
    :caption: USAGE
    :maxdepth: 2
 
+   getting_started
+
 .. toctree::
    :caption: API REFERENCE
    :maxdepth: 2
