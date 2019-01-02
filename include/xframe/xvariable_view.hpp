@@ -35,6 +35,7 @@ namespace xf
         using dimension_closure_type = dimension_type;
         using key_type = typename coordinate_type::key_type;
         using size_type = typename coordinate_type::size_type;
+        using label_list = typename coordinate_type::label_list;
     };
 }
 
@@ -47,7 +48,9 @@ namespace xt
         using base_type = xf::xvariable_inner_types<xf::xvariable_view<CT>>;
         using xexpression_type = typename base_type::xexpression_type;
         using optional_type = typename xexpression_type::value_type;
-        using temporary_coordinate_type = xf::xcoordinate<typename base_type::key_type, typename base_type::size_type>;
+        using temporary_coordinate_type = xf::xcoordinate<typename base_type::key_type,
+                                                          typename base_type::label_list,
+                                                          typename base_type::size_type>;
         using temporary_data_type = xoptional_assembly<xarray<typename optional_type::value_type>, xarray<bool>>;
         using temporary_type = xf::xvariable<temporary_coordinate_type, temporary_data_type>;
     };

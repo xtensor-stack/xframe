@@ -19,12 +19,12 @@ namespace xf
      * xcoordinate_view *
      ********************/
 
-    template <class K, class S, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
+    template <class K, class L = DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
     class xcoordinate_view : public xcoordinate_base<K, xaxis_view<L, S, MT>>
     {
     public:
 
-        using self_type = xcoordinate_view<K, S, MT, L>;
+        using self_type = xcoordinate_view<K, L, S, MT>;
         using base_type = xcoordinate_base<K, xaxis_view<L, S, MT>>;
         using label_list = L;
         using axis_type = typename base_type::axis_type;
@@ -47,26 +47,26 @@ namespace xf
         explicit xcoordinate_view(map_type&& axes);
     };
 
-    template <class K, class S, class MT, class L>
-    xcoordinate_view<K, S, MT, L> coordinate_view(const std::map<K, xaxis_view<L, S, MT>>& axes);
+    template <class K, class L, class S, class MT>
+    xcoordinate_view<K, L, S, MT> coordinate_view(const std::map<K, xaxis_view<L, S, MT>>& axes);
 
-    template <class K, class S, class MT, class L>
-    xcoordinate_view<K, S, MT, L> coordinate_view(std::map<K, xaxis_view<L, S, MT>>&& axes);
+    template <class K, class L, class S, class MT>
+    xcoordinate_view<K, L, S, MT> coordinate_view(std::map<K, xaxis_view<L, S, MT>>&& axes);
 
     /*************************
      * xcoordinate_view_type *
      *************************/
 
-    template <class K, class S, class MT, class L>
+    template <class K, class L, class S, class MT>
     class xcoordinate;
 
     template <class C>
     struct xcoordinate_view_type;
 
-    template <class K, class S, class MT, class L>
-    struct xcoordinate_view_type<xcoordinate<K, S, MT, L>>
+    template <class K, class L, class S, class MT>
+    struct xcoordinate_view_type<xcoordinate<K, L, S, MT>>
     {
-        using type = xcoordinate_view<K, S, MT, L>;
+        using type = xcoordinate_view<K, L, S, MT>;
     };
 
     template <class C>
@@ -76,28 +76,28 @@ namespace xf
      * xcoordinate_view implementation *
      ***********************************/
 
-    template <class K, class S, class MT, class L>
-    inline xcoordinate_view<K, S, MT, L>::xcoordinate_view(const map_type& axes)
+    template <class K, class L, class S, class MT>
+    inline xcoordinate_view<K, L, S, MT>::xcoordinate_view(const map_type& axes)
         : base_type(axes)
     {
     }
 
-    template <class K, class S, class MT, class L>
-    inline xcoordinate_view<K, S, MT, L>::xcoordinate_view(map_type&& axes)
+    template <class K, class L, class S, class MT>
+    inline xcoordinate_view<K, L, S, MT>::xcoordinate_view(map_type&& axes)
         : base_type(std::move(axes))
     {
     }
 
-    template <class K, class S, class MT, class L>
-    inline xcoordinate_view<K, S, MT, L> coordinate_view(const std::map<K, xaxis_view<L, S, MT>>& axes)
+    template <class K, class L, class S, class MT>
+    inline xcoordinate_view<K, L, S, MT> coordinate_view(const std::map<K, xaxis_view<L, S, MT>>& axes)
     {
-        return xcoordinate_view<K, S, MT, L>(axes);
+        return xcoordinate_view<K, L, S, MT>(axes);
     }
 
-    template <class K, class S, class MT, class L>
-    inline xcoordinate_view<K, S, MT, L> coordinate_view(std::map<K, xaxis_view<L, S, MT>>&& axes)
+    template <class K, class L, class S, class MT>
+    inline xcoordinate_view<K, L, S, MT> coordinate_view(std::map<K, xaxis_view<L, S, MT>>&& axes)
     {
-        return xcoordinate_view<K, S, MT, L>(std::move(axes));
+        return xcoordinate_view<K, L, S, MT>(std::move(axes));
     }
 }
 
