@@ -51,6 +51,7 @@ for details.
    :maxdepth: 2
 
    getting_started
+   data_structure
 
 .. toctree::
    :caption: API REFERENCE
