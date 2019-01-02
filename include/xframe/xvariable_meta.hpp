@@ -54,49 +54,48 @@ namespace xf
 
     namespace detail
     {
-        template <class... D>
-        struct xcommon_coordinate_dimension;
+        template <class... C>
+        struct xcommon_coordinate_type_impl;
 
-        template <class D1, class D2>
-        struct xcommon_coordinate_dimension<D1, D2>
+        template <class C1, class C2>
+        struct xcommon_coordinate_type_impl<C1, C2>
         {
-            using key_type = std::common_type_t<typename D1::key_type, typename D2::key_type>;
-            using mapped_type = std::common_type_t<typename D1::mapped_type, typename D2::mapped_type>;
-            using coordinate_type = xcoordinate<key_type, mapped_type>;
-            using dimension_type = xdimension<key_type, mapped_type>;
+            using key_type = std::common_type_t<typename C1::key_type, typename C2::key_type>;
+            using label_list = xtl::mpl::merge_set_t<typename C1::label_list, typename C2::label_list>;
+            using index_type = std::common_type_t<typename C1::index_type, typename C2::index_type>;
+            using type = xcoordinate<key_type, label_list, index_type>;
         };
 
-        template <class D>
-        struct xcommon_coordinate_dimension<D, xfull_coordinate>
+        template <class C>
+        struct xcommon_coordinate_type_impl<C, xfull_coordinate>
         {
-            using key_type = typename D::key_type;
-            using mapped_type = typename D::mapped_type;
-            using coordinate_type = xcoordinate<key_type, mapped_type>;
-            using dimension_type = xdimension<key_type, mapped_type>;
+            using key_type = typename C::key_type;
+            using label_list = typename C::label_list;
+            using index_type = typename C::index_type;
+            using type = xcoordinate<key_type, label_list, index_type>;
         };
 
-        template <class D>
-        struct xcommon_coordinate_dimension<xfull_coordinate, D>
-            : xcommon_coordinate_dimension<D, xfull_coordinate>
+        template <class C>
+        struct xcommon_coordinate_type_impl<xfull_coordinate, C>
+            : xcommon_coordinate_type_impl<C, xfull_coordinate>
         {
         };
 
         template <>
-        struct xcommon_coordinate_dimension<xfull_coordinate, xfull_coordinate>
+        struct xcommon_coordinate_type_impl<xfull_coordinate, xfull_coordinate>
         {
-            using coordinate_type = xfull_coordinate;
-            using dimension_type = xfull_coordinate;
+            using type = xfull_coordinate;
         };
 
-        template <class D>
-        struct xcommon_coordinate_dimension<D>
-            : xcommon_coordinate_dimension<D, xfull_coordinate>
+        template <class C>
+        struct xcommon_coordinate_type_impl<C>
+            : xcommon_coordinate_type_impl<C, xfull_coordinate>
         {
         };
 
-        template <class D1, class D2, class... D>
-        struct xcommon_coordinate_dimension<D1, D2, D...>
-            : xcommon_coordinate_dimension<D1, typename xcommon_coordinate_dimension<D2, D...>::dimension_type>
+        template <class C1, class C2, class... C>
+        struct xcommon_coordinate_type_impl<C1, C2, C...>
+            : xcommon_coordinate_type_impl<C1, typename xcommon_coordinate_type_impl<C2, C...>::type>
         {
         };
     }
@@ -104,16 +103,66 @@ namespace xf
     template <class... CT>
     struct xcommon_coordinate_type
     {
-        using type = typename detail::xcommon_coordinate_dimension<typename xdecay_variable_closure_t<CT>::dimension_type...>::coordinate_type;
+        using type = typename detail::xcommon_coordinate_type_impl<typename xdecay_variable_closure_t<CT>::coordinate_type...>::type;
     };
 
     template <class... CT>
     using xcommon_coordinate_type_t = typename xcommon_coordinate_type<CT...>::type;
 
+    /**************************
+     * xcommon_dimension_type *
+     **************************/
+
+    namespace detail
+    {
+        template <class... D>
+        struct xcommon_dimension_type_impl;
+
+        template <class D1, class D2>
+        struct xcommon_dimension_type_impl<D1, D2>
+        {
+            using key_type = std::common_type_t<typename D1::key_type, typename D2::key_type>;
+            using mapped_type = std::common_type_t<typename D1::mapped_type, typename D2::mapped_type>;
+            using type = xdimension<key_type, mapped_type>;
+        };
+
+        template <class D>
+        struct xcommon_dimension_type_impl<D, xfull_coordinate>
+        {
+            using key_type = typename D::key_type;
+            using mapped_type = typename D::mapped_type;
+            using type = xdimension<key_type, mapped_type>;
+        };
+
+        template <class D>
+        struct xcommon_dimension_type_impl<xfull_coordinate, D>
+            : xcommon_dimension_type_impl<D, xfull_coordinate>
+        {
+        };
+
+        template <>
+        struct xcommon_dimension_type_impl<xfull_coordinate, xfull_coordinate>
+        {
+            using type = xfull_coordinate;
+        };
+
+        template <class D>
+        struct xcommon_dimension_type_impl<D>
+            : xcommon_dimension_type_impl<D, xfull_coordinate>
+        {
+        };
+
+        template <class D1, class D2, class... D>
+        struct xcommon_dimension_type_impl<D1, D2, D...>
+            : xcommon_dimension_type_impl<D1, typename xcommon_dimension_type_impl<D2, D...>::type>
+        {
+        };
+    }
+
     template <class... CT>
     struct xcommon_dimension_type
     {
-        using type = typename detail::xcommon_coordinate_dimension<typename xdecay_variable_closure_t<CT>::dimension_type...>::dimension_type;
+        using type = typename detail::xcommon_dimension_type_impl<typename xdecay_variable_closure_t<CT>::dimension_type...>::type;
     };
 
     template <class... CT>

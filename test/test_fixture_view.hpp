@@ -25,8 +25,8 @@ namespace xf
     using size_type = std::size_t;
     using axis_variant = xaxis_variant<DEFAULT_LABEL_LIST, size_type>;
     using axis_view_type = xaxis_view<DEFAULT_LABEL_LIST, size_type, typename axis_variant::map_container_tag>;
-    using coordinate_type = xcoordinate<fstring, size_type>;
-    using coordinate_view_type = xcoordinate_view<fstring, size_type>;
+    using coordinate_type = xcoordinate<fstring>;
+    using coordinate_view_type = xcoordinate_view<fstring>;
     using dimension_type = xdimension<fstring, std::size_t>;
     using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
     using masked_data_type = xt::xarray<xt::xmasked_value<xtl::xoptional<double, bool>>>;

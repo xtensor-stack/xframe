@@ -25,7 +25,7 @@ namespace xf
     using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
     using int_data_type = xt::xoptional_assembly<xt::xarray<int>, xt::xarray<bool>>;
     using bool_data_type = xt::xoptional_assembly<xt::xarray<bool>, xt::xarray<bool>>;
-    using coordinate_type = xcoordinate<fstring, data_type::size_type>;
+    using coordinate_type = xcoordinate<fstring>;
     using variable_type = xvariable<coordinate_type, data_type>;
     using int_variable_type = xvariable<coordinate_type, int_data_type>;
     using bool_variable_type = xvariable<coordinate_type, bool_data_type>;
