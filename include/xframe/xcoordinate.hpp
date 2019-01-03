@@ -40,9 +40,9 @@ namespace xf
     struct xtrivial_broadcast
     {
         xtrivial_broadcast() = default;
-        xtrivial_broadcast(bool xtensor_trivial, bool xframe_trivial);
-        bool m_xtensor_trivial;
-        bool m_xframe_trivial;
+        xtrivial_broadcast(bool same_dimensions, bool same_labels);
+        bool m_same_dimensions;
+        bool m_same_labels;
     };
 
     xtrivial_broadcast operator&&(const xtrivial_broadcast& lhs, const xtrivial_broadcast& rhs) noexcept;
@@ -203,12 +203,12 @@ namespace xf
 
     inline xtrivial_broadcast operator&&(const xtrivial_broadcast& lhs, const xtrivial_broadcast& rhs) noexcept
     {
-        return xtrivial_broadcast(lhs.m_xtensor_trivial && rhs.m_xtensor_trivial,
-                                  lhs.m_xframe_trivial && rhs.m_xframe_trivial);
+        return xtrivial_broadcast(lhs.m_same_dimensions && rhs.m_same_dimensions,
+                                  lhs.m_same_labels && rhs.m_same_labels);
     }
 
-    inline xtrivial_broadcast::xtrivial_broadcast(bool xtensor_trivial, bool xframe_trivial)
-        : m_xtensor_trivial(xtensor_trivial), m_xframe_trivial(xframe_trivial)
+    inline xtrivial_broadcast::xtrivial_broadcast(bool same_dimensions, bool same_labels)
+        : m_same_dimensions(same_dimensions), m_same_labels(same_labels)
     {
     }
 
@@ -287,14 +287,15 @@ namespace xf
             auto inserted = this->coordinate().insert(*iter);
             if(inserted.second)
             {
-                res.m_xtensor_trivial = false;
+                res.m_same_dimensions = false;
             }
             else
             {
                 auto& axis = inserted.first->second;
-                res.m_xframe_trivial &= detail::axis_broadcast<Join>::apply(axis, iter->second);
+                res.m_same_labels &= detail::axis_broadcast<Join>::apply(axis, iter->second);
             }
         }
+        res.m_same_dimensions &= (this->size() == c.size());
         XFRAME_TRACE_COORDINATES_RESULT(*this, res);
         return res;
     }
@@ -312,13 +313,14 @@ namespace xf
             if (it == this->coordinate().end())
             {
                 this->coordinate().insert(std::make_pair(iter->first, std::move(axis)));
-                res.m_xtensor_trivial = false;
+                res.m_same_dimensions = false;
             }
             else
             {
-                res.m_xframe_trivial &= detail::axis_broadcast<Join>::apply(it->second, axis);
+                res.m_same_labels &= detail::axis_broadcast<Join>::apply(it->second, axis);
             }
         }
+        res.m_same_dimensions &= (this->size() == c.size());
         XFRAME_TRACE_COORDINATES_RESULT(*this, res);
         return res;
     }

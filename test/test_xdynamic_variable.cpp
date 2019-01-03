@@ -66,16 +66,16 @@ namespace xf
         auto c = make_test_coordinate();
         auto res = dv.template broadcast_coordinates<join::outer>(c);
 
-        EXPECT_FALSE(res.m_xtensor_trivial);
-        EXPECT_FALSE(res.m_xframe_trivial);
+        EXPECT_FALSE(res.m_same_dimensions);
+        EXPECT_FALSE(res.m_same_labels);
         EXPECT_EQ(c, coord_res);
 
         auto coord_res2 = make_intersect_coordinate();
         auto c2 = make_test_coordinate();
         auto res2 = dv.template broadcast_coordinates<join::inner>(c2);
 
-        EXPECT_FALSE(res2.m_xtensor_trivial);
-        EXPECT_FALSE(res2.m_xframe_trivial);
+        EXPECT_FALSE(res2.m_same_dimensions);
+        EXPECT_FALSE(res2.m_same_labels);
         EXPECT_EQ(c2, coord_res2);
     }
 

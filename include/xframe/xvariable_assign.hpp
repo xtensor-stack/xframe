@@ -121,9 +121,9 @@ namespace xt
         coordinate_type c;
         dimension_type d;
         xf::xtrivial_broadcast trivial = e2.derived_cast().broadcast_coordinates(c);
-        bool dim_trivial = e2.derived_cast().broadcast_dimensions(d, trivial.m_xtensor_trivial);
-        trivial.m_xframe_trivial &= dim_trivial;
-        if (d.size() > e1.derived_cast().dimension_mapping().size() || !trivial.m_xframe_trivial)
+        bool dim_trivial = e2.derived_cast().broadcast_dimensions(d, trivial.m_same_dimensions);
+        trivial.m_same_labels &= dim_trivial;
+        if (d.size() > e1.derived_cast().dimension_mapping().size() || !trivial.m_same_labels)
         {
             typename E1::temporary_type tmp(std::move(c), std::move(d));
             assign_resized_xexpression(tmp, e2, trivial);
@@ -168,8 +168,8 @@ namespace xt
         coordinate_type c;
         dimension_type d;
         xf::xtrivial_broadcast res = e2.derived_cast().broadcast_coordinates(c);
-        bool dim_trivial = e2.derived_cast().broadcast_dimensions(d, res.m_xtensor_trivial);
-        res.m_xframe_trivial &= dim_trivial;
+        bool dim_trivial = e2.derived_cast().broadcast_dimensions(d, res.m_same_dimensions);
+        res.m_same_labels &= dim_trivial;
         e1.derived_cast().resize(c, d);
         return res;
     }
@@ -189,9 +189,9 @@ namespace xt
                                                                                            const xexpression<E2>& e2,
                                                                                            xf::xtrivial_broadcast trivial)
     {
-        if (trivial.m_xframe_trivial)
+        if (trivial.m_same_labels)
         {
-            assign_optional_tensor(e1, e2, trivial.m_xtensor_trivial);
+            assign_optional_tensor(e1, e2, trivial.m_same_dimensions);
         }
         else
         {

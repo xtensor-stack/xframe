@@ -88,8 +88,8 @@ namespace xf
 
         auto c2 = coordinate<fstring>({{fstring("altitude"), make_test_view_saxis()}});
         xtrivial_broadcast res = c2.broadcast<join::inner>(vc);
-        EXPECT_TRUE(res.m_xframe_trivial);
-        EXPECT_FALSE(res.m_xtensor_trivial);
+        EXPECT_TRUE(res.m_same_labels);
+        EXPECT_FALSE(res.m_same_dimensions);
 
         const axis_variant& c2abscissa = c2["abscissa"];
         axis_variant vcabscissa = axis_variant(vc["abscissa"]);
@@ -101,8 +101,8 @@ namespace xf
 
         auto c3 = c;
         xtrivial_broadcast res2 = c3.broadcast<join::inner>(vc);
-        EXPECT_FALSE(res2.m_xframe_trivial);
-        EXPECT_TRUE(res2.m_xtensor_trivial);
+        EXPECT_FALSE(res2.m_same_labels);
+        EXPECT_TRUE(res2.m_same_dimensions);
         const axis_variant& c3abscissa = c3["abscissa"];
         const axis_variant& c3ordinate = c3["ordinate"];
         EXPECT_EQ(c3abscissa, vcabscissa);

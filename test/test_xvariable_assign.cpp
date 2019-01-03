@@ -445,5 +445,24 @@ namespace xf
         EXPECT_EQ(res.locate("Wednesday", "London"), a.locate("Wednesday", "London") + b.locate("London"));
         EXPECT_EQ(res.locate("Wednesday", "Brussels"), a.locate("Wednesday", "Brussels") + b.locate("Brussels"));
     }
+
+    TEST(xvariable_assign, broadcast)
+    {
+        data_type d1 = {1., 2.};
+        auto v1 = variable_type(d1, {{"x", xf::axis({1, 3})}});
+
+        // TODO: investigate why data_type d2 = {{1., 3.}, {5., 7.}} is ambiguous
+        xt::xarray<double> a2 = {{1., 3.}, {5., 7.}};
+        data_type d2 = a2;
+        auto v2 = variable_type(d2, {{"y", xf::axis({2, 5})}, {"x", xf::axis({1, 3})}});
+
+        variable_type res = v2 + v1;
+        EXPECT_EQ(res.dimension_labels()[0], "y");
+        EXPECT_EQ(res.dimension_labels()[1], "x");
+        EXPECT_EQ(res(0, 0), 2.);
+        EXPECT_EQ(res(0, 1), 5.);
+        EXPECT_EQ(res(1, 0), 6.);
+        EXPECT_EQ(res(1, 1), 9.);
+    }
 }
 
