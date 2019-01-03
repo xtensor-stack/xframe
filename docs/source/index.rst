@@ -53,6 +53,7 @@ for details.
    getting_started
    data_structure
    indexing
+   computation
 
 .. toctree::
    :caption: API REFERENCE
