@@ -28,10 +28,6 @@ In this section, we consider the following variable:
 `xframe` provides flexible indexing methods for data selection, similar to the
 ones of `xarray`_. These methods are summarized in the following table:
 
-.. |br| raw:: html
-
-   <br />
-
 +------------------+--------------+---------------------------------------------------+
 | Dimension lookup | Index lookup | ``xvariable`` syntax                              |
 +==================+==============+===================================================+
@@ -165,17 +161,77 @@ Masking views are created with the ``where`` function:
         }
     );
 
-    auto masked_pressure = xf::where(
+    auto view6 = xf::where(
         v3,
         not_equal(v3.axis<int>("x"), 2) && v3.axis<int>("z") < 2
     );
-    std::cout << v3 << std::endl;
+    std::cout << view6 << std::endl;
 
 This code prints the whole variable, with values not selected printed as "masked".
 When assigning to a masked view, masked values are not changed. Like other views,
 a masking view is a proxy on its underlying variable, no copy is made, so changing
 an unmasked value actually changes the corresponding value in the undnerlying variable.
 
+Assigning values with indexing
+------------------------------
 
+Data selection in variables return either references or views; therefore, contrary to
+`xarray`_, it is *possible* to assign values to a subset of a variable with any of the
+indexing method:
+
+.. code::
+
+    data_type d3 = {{0.  1.}
+                    {2.  3.}
+                    {4.  5.}};
+
+    auto v4 = variable_type(
+        d3,
+        {
+            {"group", xf::axis({"a", "d", "g"})},
+            {"city", xf::axis({"Paris", "Brussels"})}
+        }
+    );
+
+    // The next four lines are equivalent, they change a subset of v
+    xf::ilocate(v, xf::irange(0, 5, 2), xf::irange(1, 3)) = v4;
+    xf::locate(v, xf::range("a", "h", 2), xf::range("Paris", "Brussels")) = v4;
+    xf::iselect(v, {{"city", xf::irange(1, 3)}, {"group", xf::irange(0, 5, 2)}}) = v4;
+    xf::select(v, {{"city", xr::range("Paris", "Brussels")}, {"group", xf::range("a", "h", 2)}}) = v4;
+
+    // The next four lines are equivalent, they change a single value of v:
+    v(2, 1) = 2.5;
+    v.locate("d", "Paris") = 2.5;
+    v.iselect({{"city", 1}, {"group", 2}}) = 2.5;
+    v.select({{"city", "Paris"}, {"group", "d"}}) = 2.5;
+
+Reindexing views
+----------------
+
+Reindexing views give variables new set of coordinates to corresponding dimensions. Like other views,
+no copy is involved. Asking for values corresponding to new labels not found in the original set of
+coordinates returns missing values. In the next example, we reindex the ``city`` dimension:
+
+.. code::
+
+    auto view7 = xf::reindex(v, {{"city", xf::axis({"London", "New York", "Brussels"})}});
+
+Like `xarray`_, `xframe` provides the useful ``reindex_like`` shortcut which allows to reindex a
+variable given the set of coordinates of another variable:
+
+.. code::
+
+    auto v5 = variable_type(
+        d,
+        {
+            {"group", xf::axis({"a", "b", "d", "e", "g", "h"})},
+            {"city", xf::axis({"London", "New York", "Brussels"})}
+        }
+    );
+
+    auto view8 = xf::reindex_like(v, v5);
+
+Like other views, assigning values to a reindexing view actually assigns the values to the underlying
+variable.
 
 .. _xarray: https://xarray.pydata.org
