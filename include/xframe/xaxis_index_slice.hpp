@@ -96,7 +96,7 @@ namespace xf
     template <class... T>
     auto idrop(T&&... t);
 
-    using xt::all;
+    auto iall() noexcept;
 
     /************************************
      * xaxis_index_slice implementation *
@@ -220,6 +220,11 @@ namespace xf
     inline auto idrop(T&&... t)
     {
         return xt::drop(std::forward<T>(t)...);
+    }
+
+    inline auto iall() noexcept
+    {
+        return xt::all();
     }
 }
 
