@@ -52,6 +52,7 @@ for details.
 
    getting_started
    data_structure
+   selecting
 
 .. toctree::
    :caption: API REFERENCE
