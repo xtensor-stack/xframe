@@ -62,6 +62,8 @@ for details.
 .. toctree::
    :caption: MISCELLANEOUS
 
+   xarray
+
 .. _xtensor: https://github.com/QuantStack/xtensor
 .. _pandas: https://pandas.pydata.org
 .. _xarray: https://xarray.pydata.org
