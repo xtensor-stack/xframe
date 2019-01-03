@@ -289,7 +289,7 @@ namespace xf
         {
             m_coordinate.clear();
             m_trivial_broadcast = broadcast_coordinates<Join>(m_coordinate);
-            broadcast_dimensions(m_dimension_mapping, m_trivial_broadcast.m_xtensor_trivial);
+            broadcast_dimensions(m_dimension_mapping, m_trivial_broadcast.m_same_dimensions);
             m_coordinate_computed = true;
             m_join_id = Join::id();
         }

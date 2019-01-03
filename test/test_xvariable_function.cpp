@@ -128,26 +128,26 @@ namespace xf
         coordinate_type c1;
         xtrivial_broadcast res1 = (f.m_a + f.m_a).broadcast_coordinates(c1);
         EXPECT_EQ(c1, f.m_a.coordinates());
-        EXPECT_TRUE(res1.m_xtensor_trivial);
-        EXPECT_TRUE(res1.m_xframe_trivial);
+        EXPECT_TRUE(res1.m_same_dimensions);
+        EXPECT_TRUE(res1.m_same_labels);
 
         coordinate_type c2;
         xtrivial_broadcast res2 = (f.m_a + f.m_a).broadcast_coordinates<join::outer>(c2);
         EXPECT_EQ(c2, f.m_a.coordinates());
-        EXPECT_TRUE(res2.m_xtensor_trivial);
-        EXPECT_TRUE(res2.m_xframe_trivial);
+        EXPECT_TRUE(res2.m_same_dimensions);
+        EXPECT_TRUE(res2.m_same_labels);
 
         coordinate_type c3;
         xtrivial_broadcast res3 = (f.m_a + f.m_b).broadcast_coordinates(c3);
         EXPECT_EQ(c3, make_intersect_coordinate());
-        EXPECT_FALSE(res3.m_xtensor_trivial);
-        EXPECT_FALSE(res3.m_xframe_trivial);
+        EXPECT_FALSE(res3.m_same_dimensions);
+        EXPECT_FALSE(res3.m_same_labels);
 
         coordinate_type c4;
         xtrivial_broadcast res4 = (f.m_a + f.m_b).broadcast_coordinates<join::outer>(c4);
         EXPECT_EQ(c4, make_merge_coordinate());
-        EXPECT_FALSE(res4.m_xtensor_trivial);
-        EXPECT_FALSE(res4.m_xframe_trivial);
+        EXPECT_FALSE(res4.m_same_dimensions);
+        EXPECT_FALSE(res4.m_same_labels);
     }
 
     TEST(xvariable_function, select_inner)

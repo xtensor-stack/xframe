@@ -110,15 +110,15 @@ namespace xf
         auto c1 = make_test_coordinate();
         decltype(c1) cres1;
         auto res1 = broadcast_coordinates<join::outer>(cres1, c1, c1);
-        EXPECT_TRUE(res1.m_xtensor_trivial);
-        EXPECT_TRUE(res1.m_xframe_trivial);
+        EXPECT_TRUE(res1.m_same_dimensions);
+        EXPECT_TRUE(res1.m_same_labels);
         EXPECT_EQ(c1, cres1);
 
         auto c2 = make_test_coordinate3();
         decltype(c2) cres2;
         auto res2 = broadcast_coordinates<join::outer>(cres2, c1, c2);
-        EXPECT_FALSE(res2.m_xtensor_trivial);
-        EXPECT_FALSE(res2.m_xframe_trivial);
+        EXPECT_FALSE(res2.m_same_dimensions);
+        EXPECT_FALSE(res2.m_same_labels);
         EXPECT_EQ(cres2, coord_res);
     }
 
@@ -145,8 +145,8 @@ namespace xf
 
         auto cres = c1;
         auto res = broadcast_coordinates<join::inner>(cres, c2);
-        EXPECT_FALSE(res.m_xtensor_trivial);
-        EXPECT_FALSE(res.m_xframe_trivial);
+        EXPECT_FALSE(res.m_same_dimensions);
+        EXPECT_FALSE(res.m_same_labels);
         EXPECT_EQ(cres, coord_res);
     }
 
