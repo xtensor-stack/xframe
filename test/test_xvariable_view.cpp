@@ -488,7 +488,7 @@ namespace xf
         EXPECT_EQ(view3, view4);
 
         variable_view_type view5 = select(var, { {"abscissa", "f"} });
-        variable_view_type view6 = locate(var, "f", xaxis_all());
+        variable_view_type view6 = locate(var, "f", all());
         EXPECT_EQ(view5, view6);
     }
 
@@ -521,7 +521,7 @@ namespace xf
         EXPECT_EQ(view3, view4);
 
         variable_view_type view5 = select(var, { { "abscissa", "f" } });
-        variable_view_type view6 = ilocate(var, 3, all());
+        variable_view_type view6 = ilocate(var, 3, iall());
         EXPECT_EQ(view5, view6);
     }
 

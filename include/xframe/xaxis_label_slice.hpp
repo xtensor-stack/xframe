@@ -240,6 +240,8 @@ namespace xf
     template <class S, class L = DEFAULT_LABEL_LIST>
     xaxis_slice<L> range(xlabel_variant_t<L>&& first, xlabel_variant_t<L>&& last, S step);
 
+    xaxis_all all() noexcept;
+
     namespace detail
     {
         template <class T, typename = xt::void_t<>>
@@ -523,6 +525,11 @@ namespace xf
     inline xaxis_slice<L> drop(T0 t0, T1 t1, Args... args)
     {
         return detail::common_drop_keep<xaxis_drop_slice, L>(t0, t1, args...);
+    }
+
+    inline xaxis_all all() noexcept
+    {
+        return xaxis_all();
     }
 }
 
