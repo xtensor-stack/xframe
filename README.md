@@ -2,6 +2,7 @@
 
 [![Travis](https://travis-ci.org/QuantStack/xframe.svg?branch=master)](https://travis-ci.org/QuantStack/xframe)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/ob700oy60ee23r3q/branch/master?svg=true)](https://ci.appveyor.com/project/QuantStack/xframe/branch/master)
+[![Documentation](http://readthedocs.org/projects/xframe/badge/?version=latest)](https://xframe.readthedocs.io/en/latest/?badge=latest)
 [![Binder](https://img.shields.io/badge/launch-binder-brightgreen.svg)](https://mybinder.org/v2/gh/QuantStack/xframe/stable?filepath=notebooks/xframe.ipynb)
 [![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
