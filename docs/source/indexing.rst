@@ -12,11 +12,9 @@ In this section, we consider the following variable:
 
 .. code::
 
-    using fstring = xtl::xfixed_string<55>;
-    using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
-    using coordinate_type = xf::xcoordinate<fstring>;
-    using dimension_type = xf::xdimension<fstring>;
-    using variable_type = xvariable<coordinate_type, data_type>;
+    using coordinate_type = xf::xcoordinate<xf::fstring>;
+    using dimension_type = xf::xdimension<xf::fstring>;
+    using variable_type = xvariable<double, coordinate_type>;
 
     data_type d = xt::eval(xt::random::rand({6, 3}, 15., 25.));
     variable_type v(std::move(d),

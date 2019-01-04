@@ -19,7 +19,6 @@
 
 namespace xf
 {
-    using fstring = xtl::xfixed_string<55>;
     using saxis_type = xaxis<fstring, std::size_t>;
     using iaxis_type = xaxis<int, std::size_t>;
     using size_type = std::size_t;

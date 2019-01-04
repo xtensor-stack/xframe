@@ -107,7 +107,7 @@ namespace xf
     template <class T = std::size_t, class L>
     xdimension<L, T> dimension(std::initializer_list<L> init) noexcept;
 
-    template <class L = xtl::xfixed_string<55>, class T = std::size_t>
+    template <class L = fstring, class T = std::size_t>
     xdimension<L, T> dimension(std::initializer_list<const char*> init) noexcept;
     
     /*****************************

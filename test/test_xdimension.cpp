@@ -12,7 +12,6 @@
 
 namespace xf
 {
-    using fstring = xtl::xfixed_string<55>;
     using label_type = std::vector<fstring>;
     using dimension_type = xdimension<fstring, std::size_t>;
     
