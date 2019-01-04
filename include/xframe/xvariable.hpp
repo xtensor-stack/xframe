@@ -17,15 +17,15 @@
 
 namespace xf
 {
-    /*************
-     * xvariable *
-     *************/
+    /***********************
+     * xvariable_container *
+     ***********************/
 
     template <class CCT, class ECT>
-    class xvariable;
+    class xvariable_container;
 
     template <class CCT, class ECT>
-    struct xvariable_inner_types<xvariable<CCT, ECT>>
+    struct xvariable_inner_types<xvariable_container<CCT, ECT>>
     {
         using data_closure_type = ECT;
         using coordinate_closure_type = CCT;
@@ -41,22 +41,22 @@ namespace xf
 namespace xt
 {
     template <class CCT, class ECT>
-    struct xcontainer_inner_types<xf::xvariable<CCT, ECT>>
-        : xf::xvariable_inner_types<xf::xvariable<CCT, ECT>>
+    struct xcontainer_inner_types<xf::xvariable_container<CCT, ECT>>
+        : xf::xvariable_inner_types<xf::xvariable_container<CCT, ECT>>
     {
-        using temporary_type = xf::xvariable<std::decay_t<CCT>, std::decay_t<ECT>>;
+        using temporary_type = xf::xvariable_container<std::decay_t<CCT>, std::decay_t<ECT>>;
     };
 }
 
 namespace xf
 {
     template <class CCT, class ECT>
-    class xvariable : public xvariable_base<xvariable<CCT, ECT>>,
-                      public xt::xcontainer_semantic<xvariable<CCT, ECT>>
+    class xvariable_container : public xvariable_base<xvariable_container<CCT, ECT>>,
+                                public xt::xcontainer_semantic<xvariable_container<CCT, ECT>>
     {
     public:
 
-        using self_type = xvariable<CCT, ECT>;
+        using self_type = xvariable_container<CCT, ECT>;
         using base_type = xvariable_base<self_type>;
         using semantic_base = xt::xcontainer_semantic<self_type>;
 
@@ -69,37 +69,37 @@ namespace xf
 
         using expression_tag = xvariable_expression_tag;
 
-        xvariable() = default;
+        xvariable_container() = default;
 
         template <class C, class DM, class = enable_xvariable<C, DM>>
-        explicit xvariable(C&& coords, DM&& dims);
-        explicit xvariable(const coordinate_map& coords, const dimension_list& dims);
-        explicit xvariable(coordinate_map&& coords, dimension_list&& dims);
-        explicit xvariable(coordinate_initializer coords);
+        explicit xvariable_container(C&& coords, DM&& dims);
+        explicit xvariable_container(const coordinate_map& coords, const dimension_list& dims);
+        explicit xvariable_container(coordinate_map&& coords, dimension_list&& dims);
+        explicit xvariable_container(coordinate_initializer coords);
 
         template <class D, class C, class DM, class = enable_xvariable_t<C, DM>>
-        explicit xvariable(D&& data, C&& coords, DM&& dims);
+        explicit xvariable_container(D&& data, C&& coords, DM&& dims);
 
         template <class D>
-        explicit xvariable(D&& data, const coordinate_map& coords, const dimension_list& dims);
+        explicit xvariable_container(D&& data, const coordinate_map& coords, const dimension_list& dims);
 
         template <class D>
-        explicit xvariable(D&& data, coordinate_map&& coords, dimension_list&& dims);
+        explicit xvariable_container(D&& data, coordinate_map&& coords, dimension_list&& dims);
 
         template <class D>
-        explicit xvariable(D&& data, coordinate_initializer coords);
+        explicit xvariable_container(D&& data, coordinate_initializer coords);
 
-        xvariable(const xvariable&) = default;
-        xvariable& operator=(const xvariable&) = default;
+        xvariable_container(const xvariable_container&) = default;
+        xvariable_container& operator=(const xvariable_container&) = default;
 
-        xvariable(xvariable&&) = default;
-        xvariable& operator=(xvariable&&) = default;
+        xvariable_container(xvariable_container&&) = default;
+        xvariable_container& operator=(xvariable_container&&) = default;
 
         template <class E>
-        xvariable(const xt::xexpression<E>& e);
+        xvariable_container(const xt::xexpression<E>& e);
 
         template <class E>
-        xvariable& operator=(const xt::xexpression<E>& e);
+        xvariable_container& operator=(const xt::xexpression<E>& e);
 
     private:
 
@@ -108,11 +108,14 @@ namespace xf
         data_type& data_impl() noexcept;
         const data_type& data_impl() const noexcept;
 
-        friend class xvariable_base<xvariable<CCT, ECT>>;
+        friend class xvariable_base<xvariable_container<CCT, ECT>>;
     };
 
     template <class CCT, class ECT>
-    std::ostream& operator<<(std::ostream& out, const xvariable<CCT, ECT>& v);
+    std::ostream& operator<<(std::ostream& out, const xvariable_container<CCT, ECT>& v);
+
+    template <class T, class CCT>
+    using xvariable = xvariable_container<CCT, XFRAME_DEFAULT_DATA_CONTAINER(T)>;
 
     /********************************
      * variable generator functions *
@@ -120,18 +123,9 @@ namespace xf
 
     namespace detail
     {
-        template <class T>
-        struct variable_data_type
-        {
-            using type = xt::xoptional_assembly<xt::xarray<T>, xt::xarray<bool>>;
-        };
-
-        template <class T>
-        using variable_data_type_t = typename variable_data_type<T>::type;
-
         template <class D, class C, class DM>
         struct xvariable_type1 : std::enable_if<is_coordinate_system<C, DM>::value,
-            xvariable<xtl::closure_type_t<C>, xtl::closure_type_t<D>>>
+            xvariable_container<xtl::closure_type_t<C>, xtl::closure_type_t<D>>>
         {
         };
 
@@ -140,7 +134,7 @@ namespace xf
 
         template <class D, class C, class L>
         struct xvariable_type2 : std::enable_if<is_coordinate_map<C>::value && is_dimension_list<L>::value,
-            xvariable<get_coordinate_type_t<C>, xtl::closure_type_t<D>>>
+            xvariable_container<get_coordinate_type_t<C>, xtl::closure_type_t<D>>>
         {
         };
 
@@ -149,7 +143,7 @@ namespace xf
 
         template <class T, class C, class DM>
         struct xvariable_type3 : std::enable_if<is_coordinate_system<C, DM>::value,
-            xvariable<xtl::closure_type_t<C>, variable_data_type_t<T>>>
+            xvariable<T, xtl::closure_type_t<C>>>
         {
         };
 
@@ -158,7 +152,7 @@ namespace xf
 
         template <class T, class C, class L>
         struct xvariable_type4 : std::enable_if<is_coordinate_map<C>::value && is_dimension_list<L>::value,
-            xvariable<get_coordinate_type_t<C>, variable_data_type_t<T>>>
+            xvariable<T, get_coordinate_type_t<C>>>
         {
         };
 
@@ -178,34 +172,34 @@ namespace xf
     template <class T, class C, class L>
     detail::xvariable_type4_t<T, C, L> variable(C&& coord_map, L&& dim_list);
 
-    /****************************
-     * xvariable implementation *
-     ****************************/
+    /**************************************
+     * xvariable_container implementation *
+     **************************************/
 
     template <class CCT, class ECT>
     template <class C, class DM, class>
-    inline xvariable<CCT, ECT>::xvariable(C&& coords, DM&& dims)
+    inline xvariable_container<CCT, ECT>::xvariable_container(C&& coords, DM&& dims)
         : base_type(std::forward<C>(coords), std::forward<DM>(dims)),
           m_data(base_type::compute_shape())
     {
     }
 
     template <class CCT, class ECT>
-    inline xvariable<CCT, ECT>::xvariable(const coordinate_map& coords, const dimension_list& dims)
+    inline xvariable_container<CCT, ECT>::xvariable_container(const coordinate_map& coords, const dimension_list& dims)
         : base_type(coords, dims),
           m_data(base_type::compute_shape())
     {
     }
 
     template <class CCT, class ECT>
-    inline xvariable<CCT, ECT>::xvariable(coordinate_map&& coords, dimension_list&& dims)
+    inline xvariable_container<CCT, ECT>::xvariable_container(coordinate_map&& coords, dimension_list&& dims)
         : base_type(std::move(coords), std::move(dims)),
           m_data(base_type::compute_shape())
     {
     }
 
     template <class CCT, class ECT>
-    inline xvariable<CCT, ECT>::xvariable(coordinate_initializer coords)
+    inline xvariable_container<CCT, ECT>::xvariable_container(coordinate_initializer coords)
         : base_type(coords),
           m_data(base_type::compute_shape())
     {
@@ -213,7 +207,7 @@ namespace xf
 
     template <class CCT, class ECT>
     template <class D, class C, class DM, class>
-    inline xvariable<CCT, ECT>::xvariable(D&& data, C&& coords, DM&& dims)
+    inline xvariable_container<CCT, ECT>::xvariable_container(D&& data, C&& coords, DM&& dims)
         : base_type(std::forward<C>(coords), std::forward<DM>(dims)),
           m_data(std::forward<D>(data))
     {
@@ -221,7 +215,7 @@ namespace xf
 
     template <class CCT, class ECT>
     template <class D>
-    inline xvariable<CCT, ECT>::xvariable(D&& data, const coordinate_map& coords, const dimension_list& dims)
+    inline xvariable_container<CCT, ECT>::xvariable_container(D&& data, const coordinate_map& coords, const dimension_list& dims)
         : base_type(coords, dims),
           m_data(std::forward<D>(data))
     {
@@ -229,7 +223,7 @@ namespace xf
 
     template <class CCT, class ECT>
     template <class D>
-    inline xvariable<CCT, ECT>::xvariable(D&& data, coordinate_map&& coords, dimension_list&& dims)
+    inline xvariable_container<CCT, ECT>::xvariable_container(D&& data, coordinate_map&& coords, dimension_list&& dims)
         : base_type(std::move(coords), std::move(dims)),
           m_data(std::forward<D>(data))
     {
@@ -237,7 +231,7 @@ namespace xf
 
     template <class CCT, class ECT>
     template <class D>
-    inline xvariable<CCT, ECT>::xvariable(D&& data, coordinate_initializer coords)
+    inline xvariable_container<CCT, ECT>::xvariable_container(D&& data, coordinate_initializer coords)
         : base_type(coords),
           m_data(std::forward<D>(data))
     {
@@ -245,7 +239,7 @@ namespace xf
 
     template <class CCT, class ECT>
     template <class E>
-    inline xvariable<CCT, ECT>::xvariable(const xt::xexpression<E>& e)
+    inline xvariable_container<CCT, ECT>::xvariable_container(const xt::xexpression<E>& e)
         : base_type()
     {
         semantic_base::assign(e);
@@ -253,19 +247,19 @@ namespace xf
 
     template <class CCT, class ECT>
     template <class E>
-    inline auto xvariable<CCT, ECT>::operator=(const xt::xexpression<E>& e) -> self_type&
+    inline auto xvariable_container<CCT, ECT>::operator=(const xt::xexpression<E>& e) -> self_type&
     {
         return semantic_base::assign(e);
     }
 
     template <class CCT, class ECT>
-    inline auto xvariable<CCT, ECT>::data_impl() noexcept -> data_type&
+    inline auto xvariable_container<CCT, ECT>::data_impl() noexcept -> data_type&
     {
         return m_data;
     }
 
     template <class CCT, class ECT>
-    inline auto xvariable<CCT, ECT>::data_impl() const noexcept -> const data_type&
+    inline auto xvariable_container<CCT, ECT>::data_impl() const noexcept -> const data_type&
     {
         return m_data;
     }
@@ -312,7 +306,7 @@ namespace xf
     }
 
     template <class CCT, class ECT>
-    inline std::ostream& operator<<(std::ostream& out, const xvariable<CCT, ECT>& v)
+    inline std::ostream& operator<<(std::ostream& out, const xvariable_container<CCT, ECT>& v)
     {
         return print_variable_expression(out, v);
     }
