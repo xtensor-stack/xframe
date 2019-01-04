@@ -13,15 +13,15 @@
 #define XFRAME_VERSION_MINOR 0
 #define XFRAME_VERSION_PATCH 2
 
-#ifndef DEFAULT_LABEL_LIST
+#ifndef XFRAME_DEFAULT_LABEL_LIST
 #include <cstddef>
 #include "xtl/xbasic_fixed_string.hpp"
 #include "xtl/xmeta_utils.hpp"
-#define DEFAULT_LABEL_LIST xtl::mpl::vector<int, std::size_t, char, xtl::xfixed_string<55>>
+#define XFRAME_DEFAULT_LABEL_LIST xtl::mpl::vector<int, std::size_t, char, xtl::xfixed_string<55>>
 #endif
 
-#ifndef DEFAULT_JOIN
-#define DEFAULT_JOIN join::inner
+#ifndef XFRAME_DEFAULT_JOIN
+#define XFRAME_DEFAULT_JOIN join::inner
 #endif
 
 #ifndef XFRAME_DEFAULT_DATA_CONTAINER
@@ -31,8 +31,8 @@
 #endif
 
 // A higher number leads to an ICE on VS 2015
-#ifndef STATIC_DIMENSION_LIMIT
-#define STATIC_DIMENSION_LIMIT 4
+#ifndef XFRAME_STATIC_DIMENSION_LIMIT
+#define XFRAME_STATIC_DIMENSION_LIMIT 4
 #endif
 
 #ifndef XFRAME_ENABLE_TRACE

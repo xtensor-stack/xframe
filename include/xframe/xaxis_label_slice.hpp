@@ -196,7 +196,7 @@ namespace xf
      * xaxis_slice *
      ***************/
 
-    template <class L = DEFAULT_LABEL_LIST>
+    template <class L = XFRAME_DEFAULT_LABEL_LIST>
     class xaxis_slice
     {
     public:
@@ -228,16 +228,16 @@ namespace xf
         storage_type m_data;
     };
 
-    template <class L = DEFAULT_LABEL_LIST>
+    template <class L = XFRAME_DEFAULT_LABEL_LIST>
     xaxis_slice<L> range(const xlabel_variant_t<L>& first, const xlabel_variant_t<L>& last);
 
-    template <class L = DEFAULT_LABEL_LIST>
+    template <class L = XFRAME_DEFAULT_LABEL_LIST>
     xaxis_slice<L> range(xlabel_variant_t<L>&& first, xlabel_variant_t<L>&& last);
 
-    template <class S, class L = DEFAULT_LABEL_LIST>
+    template <class S, class L = XFRAME_DEFAULT_LABEL_LIST>
     xaxis_slice<L> range(const xlabel_variant_t<L>& first, const xlabel_variant_t<L>& last, S step);
 
-    template <class S, class L = DEFAULT_LABEL_LIST>
+    template <class S, class L = XFRAME_DEFAULT_LABEL_LIST>
     xaxis_slice<L> range(xlabel_variant_t<L>&& first, xlabel_variant_t<L>&& last, S step);
 
     xaxis_all all() noexcept;
@@ -262,22 +262,22 @@ namespace xf
         using disable_container_t = std::enable_if_t<!has_size<T>::value, R>;
     }
 
-    template <class L = DEFAULT_LABEL_LIST, class T>
+    template <class L = XFRAME_DEFAULT_LABEL_LIST, class T>
     detail::enable_container_t<T, xaxis_slice<L>> keep(T&& indices);
   
-    template <class L = DEFAULT_LABEL_LIST, class T>
+    template <class L = XFRAME_DEFAULT_LABEL_LIST, class T>
     detail::disable_container_t<T, xaxis_slice<L>> keep(T index);
 
-    template <class L = DEFAULT_LABEL_LIST, class T0, class T1, class... Args>
+    template <class L = XFRAME_DEFAULT_LABEL_LIST, class T0, class T1, class... Args>
     xaxis_slice<L> keep(T0 t0, T1 t1, Args... args);
      
-    template <class L = DEFAULT_LABEL_LIST, class T>
+    template <class L = XFRAME_DEFAULT_LABEL_LIST, class T>
     detail::enable_container_t<T, xaxis_slice<L>> drop(T&& indices);
 
-    template <class L = DEFAULT_LABEL_LIST, class T>
+    template <class L = XFRAME_DEFAULT_LABEL_LIST, class T>
     detail::disable_container_t<T, xaxis_slice<L>> drop(T index);
 
-    template <class L = DEFAULT_LABEL_LIST, class T0, class T1, class... Args>
+    template <class L = XFRAME_DEFAULT_LABEL_LIST, class T0, class T1, class... Args>
     xaxis_slice<L> drop(T0 t0, T1 t1, Args... args);
 
     /******************************

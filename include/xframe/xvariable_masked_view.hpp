@@ -191,13 +191,13 @@ namespace xf
         template <std::size_t N = dynamic()>
         reference select(const selector_sequence_type<N>& selector);
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = dynamic()>
         const_reference select(const selector_sequence_type<N>& selector) const;
 
         template <std::size_t N = dynamic()>
         reference select(selector_sequence_type<N>&& selector);
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = dynamic()>
         const_reference select(selector_sequence_type<N>&& selector) const;
 
         template <std::size_t N = dynamic()>

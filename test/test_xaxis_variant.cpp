@@ -15,7 +15,7 @@
 
 namespace xf
 {
-    using axis_variant_type = xaxis_variant<DEFAULT_LABEL_LIST, std::size_t>;
+    using axis_variant_type = xaxis_variant<XFRAME_DEFAULT_LABEL_LIST, std::size_t>;
 
     TEST(xaxis_variant, get_labels)
     {

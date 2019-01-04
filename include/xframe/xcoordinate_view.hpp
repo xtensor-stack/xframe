@@ -19,7 +19,7 @@ namespace xf
      * xcoordinate_view *
      ********************/
 
-    template <class K, class L = DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
+    template <class K, class L = XFRAME_DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
     class xcoordinate_view : public xcoordinate_base<K, xaxis_view<L, S, MT>>
     {
     public:

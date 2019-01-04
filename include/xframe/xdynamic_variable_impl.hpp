@@ -135,7 +135,7 @@ namespace xf
      *********************/
 
     template <class C, class DM, class T>
-    class xvariable_wrapper : public xtl::xscatter_hierarchy_generator<xdynamic_traits_list<C, DM, T, STATIC_DIMENSION_LIMIT>, xdynamic_base>
+    class xvariable_wrapper : public xtl::xscatter_hierarchy_generator<xdynamic_traits_list<C, DM, T, XFRAME_STATIC_DIMENSION_LIMIT>, xdynamic_base>
     {
     public:
 
@@ -363,7 +363,7 @@ namespace xf
             xdynamic_traits_list<typename V::coordinate_type,
             typename V::dimension_type,
             T,
-            STATIC_DIMENSION_LIMIT>,
+            XFRAME_STATIC_DIMENSION_LIMIT>,
             xdynamic_implementation,
             xvariable_wrapper_impl<V, T>>;
     }

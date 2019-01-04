@@ -82,7 +82,7 @@ namespace xf
         const coordinate_type& coordinates() const noexcept;
         const dimension_type& dimension_mapping() const noexcept;
 
-        template <class Join = DEFAULT_JOIN, class C = coordinate_type>
+        template <class Join = XFRAME_DEFAULT_JOIN, class C = coordinate_type>
         xtrivial_broadcast broadcast_coordinates(C& coords) const;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
@@ -107,10 +107,10 @@ namespace xf
         template <std::size_t N = dynamic()>
         const_reference locate_element(locator_sequence_type<N>&& locator) const;
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
         const_reference select(const selector_sequence_type<N>& selector) const;
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = dynamic()>
         const_reference select(selector_sequence_type<N>&& selector) const;
 
         template <std::size_t N = dynamic()>
