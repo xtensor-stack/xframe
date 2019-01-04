@@ -35,6 +35,9 @@ namespace xf
 
         decltype(c1) c5 = {{"abscissa", make_test_saxis()}, {"ordinate", make_test_iaxis()}};
         EXPECT_EQ(c1, c5);
+
+        auto c6 = coordinate({{"abscissa", make_test_saxis()}, {"ordinate", make_test_iaxis() }});
+        EXPECT_EQ(c1, c6);
     }
 
     TEST(xcoordinate, size)
