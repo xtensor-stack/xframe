@@ -43,7 +43,7 @@ namespace xf
     {
         auto a = make_variant_view_saxis();
         axis_view_type v = axis_view_type(a, make_slice());
-        EXPECT_EQ(v.size(), 3);
+        EXPECT_EQ(v.size(), 3u);
         EXPECT_FALSE(v.empty());
 
         axis_view_type v2 = axis_view_type(a, slice_type(size_type(1), size_type(1), size_type(2)));

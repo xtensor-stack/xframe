@@ -47,6 +47,16 @@ asked a missing key:
 axes. However a user rarely needs to manipulate the axes directly, the most common operation
 is to create them and then store them in a coordinate system.
 
+.. note::
+
+   When calling the builder function ``xf::axis`` with a list of ``const char*`` elements
+   (such as ``xf::axis({"a", "b", "c"})`` these elements are converted to ``fstring`` and
+   the function returns an object of type ``xaxis<fstring, std::size_t>``.
+
+   You can change that behavior by specifying the label type of the axis as the first
+   template parameter of the ``axis`` function:
+   ``auto a = xf::axis<std::string>({"a", "b", "c"});``
+
 Coordinates
 -----------
 
@@ -60,9 +70,17 @@ to easily create them:
 
     coordinate_type c1({{"group", xf::axis({"a", "b", "d", "e"})},
                         {"city",  xf::axis({"London", "Paris", "Brussels"})}});
-    auto c2 = xf::coordinate<fstring>({{"group", xf::axis({"a", "b", "d", "e"})},
-                                       {"city",  xf::axis({"London", "Paris", "Brussels"})}});
+    auto c2 = xf::coordinate({{"group", xf::axis({"a", "b", "d", "e"})},
+                              {"city",  xf::axis({"London", "Paris", "Brussels"})}});
     // c1 and c2 are similar coordinates
+
+.. note::
+
+   Like ``xf::axis``, the builder function ``xf::coordinate`` converts the ``const char*``
+   arguments to ``fstring`` and returns a ``xcoordinate<fstring>`` object. You can modify
+   this behavior by specifying the key type of the coordinate as the first template parameter
+   of the ``coordinate`` function:
+   ``auto c2 = xf::coordinate<std::string>({{"group", xf::axis({"a", "b", "d", "e"})}, ...});``
 
 ``xnamed_axis`` allows to store a dimension name - axis pair that you can reuse in different
 coordinates objects; if you want to create a coordinate object from a named axis, all the
@@ -107,6 +125,14 @@ data tensor. Creating a ``xdimension`` is as simple as creating an ``xcoordinate
 ``xdimension`` provides an API similar to ``xaxis`` and therefore can be considered as a
 special axis. Together a dimension object and a coordinate object form a coordinate system
 which maps labels and dimension names to indexes in the data tensor.
+
+.. note::
+
+   Like ``xf::axis``, the builder function ``xf::dimension`` converts the ``const char*``
+   arguments to ``fstring`` and returns a ``xdimension<fstring>`` object. You can modify
+   this behavior by specifying the label type of the dimension as the first template parameter
+   of the ``dimension`` function:
+   ``auto d = xf::dimension<std::string>({"city", "group"});``
 
 Variables
 ---------

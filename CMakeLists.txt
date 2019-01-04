@@ -100,7 +100,7 @@ include(CMakePackageConfigHelpers)
 install(FILES ${XFRAME_HEADERS}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/xframe)
 
-    set(XFRAME_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE
+set(XFRAME_CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}" CACHE
     STRING "install path for xframeConfig.cmake")
 
 configure_package_config_file(${PROJECT_NAME}Config.cmake.in

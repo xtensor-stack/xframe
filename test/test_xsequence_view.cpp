@@ -53,7 +53,7 @@ namespace xf
     TEST(xsequence_view, size)
     {
         xsequence_view_feature m_feature;
-        EXPECT_EQ(m_feature.m_view.size(), 5);
+        EXPECT_EQ(m_feature.m_view.size(), 5u);
     }
 
     TEST(xsequence_view, empty)

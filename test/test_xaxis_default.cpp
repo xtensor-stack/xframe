@@ -24,10 +24,10 @@ namespace xf
         auto a = axis(4);
         auto labels = a.labels();
 
-        EXPECT_EQ(0u, labels[0]);
-        EXPECT_EQ(1u, labels[1]);
-        EXPECT_EQ(2u, labels[2]);
-        EXPECT_EQ(3u, labels[3]);
+        EXPECT_EQ(0, labels[0]);
+        EXPECT_EQ(1, labels[1]);
+        EXPECT_EQ(2, labels[2]);
+        EXPECT_EQ(3, labels[3]);
         EXPECT_EQ(4u, labels.size());
     }
 
@@ -36,10 +36,10 @@ namespace xf
         axis_default_type a(4);
         label_type labels = a.labels();
 
-        EXPECT_EQ(0u, labels[0]);
-        EXPECT_EQ(1u, labels[1]);
-        EXPECT_EQ(2u, labels[2]);
-        EXPECT_EQ(3u, labels[3]);
+        EXPECT_EQ(0, labels[0]);
+        EXPECT_EQ(1, labels[1]);
+        EXPECT_EQ(2, labels[2]);
+        EXPECT_EQ(3, labels[3]);
         EXPECT_EQ(4u, labels.size());
     }
 
@@ -139,13 +139,13 @@ namespace xf
         axis_type res;
         bool t1 = merge_axes(res, a1, a2, a3);
         EXPECT_FALSE(t1);
-        EXPECT_EQ(res[0], 0);
-        EXPECT_EQ(res[1], 1);
-        EXPECT_EQ(res[2], 2);
-        EXPECT_EQ(res[3], 3);
-        EXPECT_EQ(res[4], 4);
-        EXPECT_EQ(res[5], 5);
-        EXPECT_EQ(res[6], 6);
+        EXPECT_EQ(res[0], 0u);
+        EXPECT_EQ(res[1], 1u);
+        EXPECT_EQ(res[2], 2u);
+        EXPECT_EQ(res[3], 3u);
+        EXPECT_EQ(res[4], 4u);
+        EXPECT_EQ(res[5], 5u);
+        EXPECT_EQ(res[6], 6u);
 
         // Merging and xaxis_default with an xaxis
         axis_type a4;
@@ -167,10 +167,10 @@ namespace xf
         axis_default_type a(36);
         axis_type res = a.filter([](const auto& arg) { return arg >= 16; });
         EXPECT_TRUE(res.is_sorted());
-        EXPECT_EQ(res.size(), 20);
+        EXPECT_EQ(res.size(), 20u);
         EXPECT_EQ(res.labels()[0], 16);
-        EXPECT_EQ(res[16], 0);
-        EXPECT_EQ(res[35], 19);
+        EXPECT_EQ(res[16], 0u);
+        EXPECT_EQ(res[35], 19u);
     }
 
     TEST(xaxis_default, filter_size)
@@ -178,9 +178,9 @@ namespace xf
         axis_default_type a(36);
         axis_type res = a.filter([](const auto& arg) { return arg >= 26; }, std::size_t(10));
         EXPECT_TRUE(res.is_sorted());
-        EXPECT_EQ(res.size(), 10);
+        EXPECT_EQ(res.size(), 10u);
         EXPECT_EQ(res.labels()[0], 26);
-        EXPECT_EQ(res[26], 0);
-        EXPECT_EQ(res[35], 9);
+        EXPECT_EQ(res[26], 0u);
+        EXPECT_EQ(res[35], 9u);
     }
 }

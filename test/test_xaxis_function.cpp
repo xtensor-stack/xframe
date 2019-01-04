@@ -46,7 +46,7 @@ namespace xf
         auto axis2 = named_axis("ord", axis(10, 20, 1));
         auto axis3 = named_axis("alt", axis('b', 'j'));
 
-        auto func1 = axis1 < 13u;
+        auto func1 = axis1 < 13;
         EXPECT_EQ(func1({{"abs", 10}}), true);
         EXPECT_EQ(func1({{"abs", 14}}), false);
 
@@ -70,11 +70,11 @@ namespace xf
         auto axis1 = named_axis("abs", axis(15));
         auto axis2 = named_axis("ord", axis(10, 20, 1));
 
-        auto func1 = axis1 < 13u;
+        auto func1 = axis1 < 13;
         EXPECT_EQ(func1({{"abs", 10}}), true);
         EXPECT_EQ(func1({{"abs", 14}}), false);
 
-        auto func2 = axis1 + axis2 + 4u;
+        auto func2 = axis1 + axis2 + 4;
         EXPECT_EQ(func2({{"abs", 10}, {"ord", 5}}), 29);
     }
 

@@ -85,7 +85,7 @@ namespace xf
     {
         auto v1 = make_test_variable();
         auto a = v1["ordinate"].axis();
-        EXPECT_EQ(a.size(), 3);
+        EXPECT_EQ(a.size(), 3u);
     }
 
     TEST(xvariable, dimension)

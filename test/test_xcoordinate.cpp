@@ -35,6 +35,9 @@ namespace xf
 
         decltype(c1) c5 = {{"abscissa", make_test_saxis()}, {"ordinate", make_test_iaxis()}};
         EXPECT_EQ(c1, c5);
+
+        auto c6 = coordinate({{"abscissa", make_test_saxis()}, {"ordinate", make_test_iaxis() }});
+        EXPECT_EQ(c1, c6);
     }
 
     TEST(xcoordinate, size)
@@ -58,28 +61,28 @@ namespace xf
     TEST(xcoordinate, access)
     {
         auto c = make_test_coordinate();
-        EXPECT_EQ(c["abscissa"]["a"], 0);
-        EXPECT_EQ(c["abscissa"]["c"], 1);
-        EXPECT_EQ(c["abscissa"]["d"], 2);
-        EXPECT_EQ(c["ordinate"][1], 0);
-        EXPECT_EQ(c["ordinate"][2], 1);
-        EXPECT_EQ(c["ordinate"][4], 2);
+        EXPECT_EQ(c["abscissa"]["a"], 0u);
+        EXPECT_EQ(c["abscissa"]["c"], 1u);
+        EXPECT_EQ(c["abscissa"]["d"], 2u);
+        EXPECT_EQ(c["ordinate"][1], 0u);
+        EXPECT_EQ(c["ordinate"][2], 1u);
+        EXPECT_EQ(c["ordinate"][4], 2u);
 
-        EXPECT_EQ(c[std::make_pair("abscissa", fstring("a"))], 0);
-        EXPECT_EQ(c[std::make_pair("abscissa", fstring("c"))], 1);
-        EXPECT_EQ(c[std::make_pair("abscissa", fstring("d"))], 2);
-        EXPECT_EQ(c[std::make_pair("ordinate", 1)], 0);
-        EXPECT_EQ(c[std::make_pair("ordinate", 2)], 1);
-        EXPECT_EQ(c[std::make_pair("ordinate", 4)], 2);
+        EXPECT_EQ(c[std::make_pair("abscissa", fstring("a"))], 0u);
+        EXPECT_EQ(c[std::make_pair("abscissa", fstring("c"))], 1u);
+        EXPECT_EQ(c[std::make_pair("abscissa", fstring("d"))], 2u);
+        EXPECT_EQ(c[std::make_pair("ordinate", 1)], 0u);
+        EXPECT_EQ(c[std::make_pair("ordinate", 2)], 1u);
+        EXPECT_EQ(c[std::make_pair("ordinate", 4)], 2u);
     }
 
     TEST(xcoordinate, iterator)
     {
         auto c = make_test_coordinate();
         auto iter = c.begin();
-        EXPECT_EQ((iter->second)["d"], 2);
+        EXPECT_EQ((iter->second)["d"], 2u);
         ++iter;
-        EXPECT_EQ((iter->second)[2], 1);
+        EXPECT_EQ((iter->second)[2], 1u);
         ++iter;
         EXPECT_EQ(iter, c.end());
     }
@@ -88,7 +91,7 @@ namespace xf
     {
         auto c = make_test_coordinate();
         auto iter = c.find("abscissa");
-        EXPECT_EQ((iter->second)["d"], 2);
+        EXPECT_EQ((iter->second)["d"], 2u);
         auto iter2 = c.find("not_here");
         EXPECT_EQ(iter2, c.end());
     }

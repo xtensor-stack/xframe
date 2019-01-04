@@ -22,7 +22,7 @@ namespace xf
         auto a = axis_variant_type(axis(56));
         auto labels = get_labels<int>(a);
 
-        EXPECT_EQ(0u, labels[0]);
+        EXPECT_EQ(0, labels[0]);
         EXPECT_EQ(56u, labels.size());
     }
 
