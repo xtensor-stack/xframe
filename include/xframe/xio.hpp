@@ -386,10 +386,10 @@ namespace xf
     }
 
     template <class CCT, class ECT>
-    class xvariable;
+    class xvariable_container;
 
     template <class CCT, class ECT>
-    xeus::xjson mime_bundle_repr(const xvariable<CCT, ECT>& expr)
+    xeus::xjson mime_bundle_repr(const xvariable_container<CCT, ECT>& expr)
     {
         return xf::mime_bundle_repr_impl(expr);
     }
