@@ -14,10 +14,13 @@
 #define XFRAME_VERSION_PATCH 2
 
 #include "xtl/xbasic_fixed_string.hpp"
-using fstring = xtl::xfixed_string<55>;
+namespace xf
+{
+    using fstring = xtl::xfixed_string<55>;
+}
 
 #ifndef XFRAME_STRING_LABEL
-#define XFRAME_STRING_LABEL fstring
+#define XFRAME_STRING_LABEL xf::fstring
 #endif
 
 #ifndef XFRAME_DEFAULT_LABEL_LIST
