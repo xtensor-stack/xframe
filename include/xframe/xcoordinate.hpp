@@ -47,6 +47,10 @@ namespace xf
 
     xtrivial_broadcast operator&&(const xtrivial_broadcast& lhs, const xtrivial_broadcast& rhs) noexcept;
 
+    /***************
+     * xcoordinate *
+     ***************/
+
     template <class K, class L = DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
     class xcoordinate : public xcoordinate_base<K, xaxis_variant<L, S, MT>>
     {
@@ -104,6 +108,10 @@ namespace xf
         template <class Join>
         xtrivial_broadcast broadcast_empty();
     };
+
+    /************************
+     * xcoordinate builders *
+     ************************/
 
     template <class K, class L = DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
     xcoordinate<K, L, S, MT> coordinate(const std::map<K, xaxis_variant<L, S, MT>>& axes);
@@ -376,6 +384,10 @@ namespace xf
     {
         return broadcast_impl<Join>();
     }
+
+    /***************************************
+     * xcoordinate builders implementation *
+     ***************************************/
 
     template <class K, class L, class S, class MT>
     xcoordinate<K, L, S, MT> coordinate(const std::map<K, xaxis_variant<L, S, MT>>& axes)

@@ -100,6 +100,16 @@ namespace xf
     template <class L, class T, class... Args>
     bool broadcast_dimensions(xdimension<L, T>& output, const Args&... dims);
 
+    /**********************
+     * xdimension builder *
+     **********************/
+
+    template <class T = std::size_t, class L>
+    xdimension<L, T> dimension(std::initializer_list<L> init) noexcept;
+
+    template <class L = xtl::xfixed_string<55>, class T = std::size_t>
+    xdimension<L, T> dimension(std::initializer_list<const char*> init) noexcept;
+    
     /*****************************
      * is_dimension metafunction *
      *****************************/
@@ -254,18 +264,18 @@ namespace xf
         return output.broadcast(dims...);
     }
 
-    /*************************************
-     * dimension builders implementation *
-     *************************************/
+    /**************************************
+     * xdimension builders implementation *
+     **************************************/
 
-    template <class T = std::size_t, class L>
-    inline auto dimension(std::initializer_list<L> init) noexcept
+    template <class T, class L>
+    inline xdimension<L, T> dimension(std::initializer_list<L> init) noexcept
     {
         return xdimension<L, T>(init);
     }
 
-    template <class L = xtl::xfixed_string<55>, class T = std::size_t>
-    inline auto dimension(std::initializer_list<const char*> init) noexcept
+    template <class L, class T>
+    inline xdimension<L, T> dimension(std::initializer_list<const char*> init) noexcept
     {
         return xdimension<L, T>(init.begin(), init.end());
     }

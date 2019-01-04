@@ -165,6 +165,19 @@ namespace xf
     template <class L, class T, class MT, class... Args>
     bool intersect_axes(xaxis<L, T, MT>& output, const Args&... axes);
 
+    /******************
+     * xaxis builders *
+     ******************/
+
+    template <class T = std::size_t, class L>
+    xaxis<L, T> axis(L start, L stop, L step = 1) noexcept;
+
+    template <class T = std::size_t, class L>
+    xaxis<L, T> axis(std::initializer_list<L> init) noexcept;
+
+    template <class L = xtl::xfixed_string<55>, class T = std::size_t>
+    xaxis<L, T> axis(std::initializer_list<const char*> init) noexcept;
+
     /********************
     * xaxis_inner_types *
     *********************/
@@ -654,21 +667,21 @@ namespace xf
      * axis builders implementation *
      ********************************/
 
-    template <class T = std::size_t, class L>
-    inline auto axis(L start, L stop, L step = 1) noexcept
+    template <class T, class L>
+    inline xaxis<L, T> axis(L start, L stop, L step) noexcept
     {
         auto range = xt::arange(start, stop, step);
         return xaxis<L, T>(range.begin(), range.end());
     }
 
-    template <class T = std::size_t, class L>
-    inline auto axis(std::initializer_list<L> init) noexcept
+    template <class T, class L>
+    inline xaxis<L, T> axis(std::initializer_list<L> init) noexcept
     {
         return xaxis<L, T>(init);
     }
 
-    template <class L = xtl::xfixed_string<55>, class T = std::size_t>
-    inline auto axis(std::initializer_list<const char*> init) noexcept
+    template <class L, class T>
+    inline xaxis<L, T> axis(std::initializer_list<const char*> init) noexcept
     {
         return xaxis<L, T>(init.begin(), init.end());
     }
