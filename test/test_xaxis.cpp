@@ -54,23 +54,23 @@ namespace xf
     TEST(xaxis, axis)
     {
         caxis_type a = axis('a', 'd');
-        EXPECT_EQ(a.size(), 3);
-        EXPECT_EQ(a['a'], 0);
-        EXPECT_EQ(a['b'], 1);
-        EXPECT_EQ(a['c'], 2);
+        EXPECT_EQ(a.size(), 3u);
+        EXPECT_EQ(a['a'], 0u);
+        EXPECT_EQ(a['b'], 1u);
+        EXPECT_EQ(a['c'], 2u);
 
         caxis_type b = axis({'b', 'e', 'f', 'g'});
-        EXPECT_EQ(b.size(), 4);
-        EXPECT_EQ(b['b'], 0);
-        EXPECT_EQ(b['e'], 1);
-        EXPECT_EQ(b['f'], 2);
-        EXPECT_EQ(b['g'], 3);
+        EXPECT_EQ(b.size(), 4u);
+        EXPECT_EQ(b['b'], 0u);
+        EXPECT_EQ(b['e'], 1u);
+        EXPECT_EQ(b['f'], 2u);
+        EXPECT_EQ(b['g'], 3u);
 
         daxis_type c = axis(0., 1., 0.1);
-        EXPECT_EQ(c.size(), 10);
-        EXPECT_EQ(c[0.], 0);
-        EXPECT_EQ(c[0.1], 1);
-        EXPECT_EQ(c[0.9], 9);
+        EXPECT_EQ(c.size(), 10u);
+        EXPECT_EQ(c[0.], 0u);
+        EXPECT_EQ(c[0.1], 1u);
+        EXPECT_EQ(c[0.9], 9u);
     }
 
     TEST(xaxis, size)
@@ -170,12 +170,12 @@ namespace xf
         axis_type res;
         bool t1 = merge_axes(res, a1, a2, a3);
         EXPECT_FALSE(t1);
-        EXPECT_EQ(res["a"], 0);
-        EXPECT_EQ(res["b"], 1);
-        EXPECT_EQ(res["c"], 2);
-        EXPECT_EQ(res["d"], 3);
-        EXPECT_EQ(res["e"], 4);
-        EXPECT_EQ(res["g"], 5);
+        EXPECT_EQ(res["a"], 0u);
+        EXPECT_EQ(res["b"], 1u);
+        EXPECT_EQ(res["c"], 2u);
+        EXPECT_EQ(res["d"], 3u);
+        EXPECT_EQ(res["e"], 4u);
+        EXPECT_EQ(res["g"], 5u);
 
         axis_type a4;
         axis_type res2;
@@ -193,22 +193,22 @@ namespace xf
         axis_type a8 = { "a", "b", "c", "d" };
         axis_type res4;
         merge_axes(res4, a7, a8);
-        EXPECT_EQ(res4["a"], 0);
-        EXPECT_EQ(res4["b"], 1);
-        EXPECT_EQ(res4["c"], 2);
-        EXPECT_EQ(res4["d"], 3);
-        EXPECT_EQ(res4["e"], 4);
-        EXPECT_EQ(res4["f"], 5);
+        EXPECT_EQ(res4["a"], 0u);
+        EXPECT_EQ(res4["b"], 1u);
+        EXPECT_EQ(res4["c"], 2u);
+        EXPECT_EQ(res4["d"], 3u);
+        EXPECT_EQ(res4["e"], 4u);
+        EXPECT_EQ(res4["f"], 5u);
 
         xaxis<int, std::size_t> ia1 = { 1, 2, 4};
         xaxis<int, std::size_t> ia2 = { 1, 4, 5};
         xaxis<int, std::size_t> iares;
         bool t4 = merge_axes(iares, ia1, ia2);
         EXPECT_FALSE(t4);
-        EXPECT_EQ(iares[1], 0);
-        EXPECT_EQ(iares[2], 1);
-        EXPECT_EQ(iares[4], 2);
-        EXPECT_EQ(iares[5], 3);
+        EXPECT_EQ(iares[1], 0u);
+        EXPECT_EQ(iares[2], 1u);
+        EXPECT_EQ(iares[4], 2u);
+        EXPECT_EQ(iares[5], 3u);
     }
 
     TEST(xaxis, merge_unsorted)
@@ -225,10 +225,10 @@ namespace xf
         EXPECT_TRUE(a2.is_sorted());
         EXPECT_TRUE(res1.is_sorted());
         EXPECT_EQ(res1.size(), 4u);
-        EXPECT_EQ(res1["a"], 0);
-        EXPECT_EQ(res1["b"], 1);
-        EXPECT_EQ(res1["d"], 2);
-        EXPECT_EQ(res1["e"], 3);
+        EXPECT_EQ(res1["a"], 0u);
+        EXPECT_EQ(res1["b"], 1u);
+        EXPECT_EQ(res1["d"], 2u);
+        EXPECT_EQ(res1["e"], 3u);
 
         axis_type res2;
         bool t2 = merge_axes(res2, a1, a3);
@@ -237,12 +237,12 @@ namespace xf
         EXPECT_FALSE(a3.is_sorted());
         EXPECT_FALSE(res2.is_sorted());
         EXPECT_EQ(res2.size(), 6u);
-        EXPECT_EQ(res2["h"], 0);
-        EXPECT_EQ(res2["c"], 1);
-        EXPECT_EQ(res2["a"], 2);
-        EXPECT_EQ(res2["b"], 3);
-        EXPECT_EQ(res2["d"], 4);
-        EXPECT_EQ(res2["e"], 5);
+        EXPECT_EQ(res2["h"], 0u);
+        EXPECT_EQ(res2["c"], 1u);
+        EXPECT_EQ(res2["a"], 2u);
+        EXPECT_EQ(res2["b"], 3u);
+        EXPECT_EQ(res2["d"], 4u);
+        EXPECT_EQ(res2["e"], 5u);
 
         axis_type res3;
         bool t3 = merge_axes(res3, a1, a4);
@@ -251,12 +251,12 @@ namespace xf
         EXPECT_FALSE(a4.is_sorted());
         EXPECT_FALSE(res3.is_sorted());
         EXPECT_EQ(res3.size(), 6u);
-        EXPECT_EQ(res3["h"], 0);
-        EXPECT_EQ(res3["c"], 1);
-        EXPECT_EQ(res3["a"], 2);
-        EXPECT_EQ(res3["b"], 3);
-        EXPECT_EQ(res3["d"], 4);
-        EXPECT_EQ(res3["e"], 5);
+        EXPECT_EQ(res3["h"], 0u);
+        EXPECT_EQ(res3["c"], 1u);
+        EXPECT_EQ(res3["a"], 2u);
+        EXPECT_EQ(res3["b"], 3u);
+        EXPECT_EQ(res3["d"], 4u);
+        EXPECT_EQ(res3["e"], 5u);
     }
 
     TEST(xaxis, intersect)
@@ -291,8 +291,8 @@ namespace xf
     {
         axis_type a = { "a", "b", "d", "e" };
         axis_type filtered_a = a.filter([](const auto& arg) { return arg < "d"; });
-        EXPECT_EQ(filtered_a.size(), 2);
-        EXPECT_EQ(a["a"], 0);
-        EXPECT_EQ(a["b"], 1);
+        EXPECT_EQ(filtered_a.size(), 2u);
+        EXPECT_EQ(a["a"], 0u);
+        EXPECT_EQ(a["b"], 1u);
     }
 }

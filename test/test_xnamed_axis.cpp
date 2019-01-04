@@ -20,7 +20,7 @@ namespace xf
         auto labels = get_labels<int>(n_a);
 
         EXPECT_EQ(labels, a.labels());
-        EXPECT_EQ(0u, labels[0]);
+        EXPECT_EQ(0, labels[0]);
         EXPECT_EQ(56u, labels.size());
     }
 
