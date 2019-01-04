@@ -175,7 +175,7 @@ namespace xf
     template <class T = std::size_t, class L>
     xaxis<L, T> axis(std::initializer_list<L> init) noexcept;
 
-    template <class L = xtl::xfixed_string<55>, class T = std::size_t>
+    template <class L = fstring, class T = std::size_t>
     xaxis<L, T> axis(std::initializer_list<const char*> init) noexcept;
 
     /********************

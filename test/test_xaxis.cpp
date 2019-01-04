@@ -15,7 +15,6 @@
 
 namespace xf
 {
-    using fstring = xtl::xfixed_string<55>;
     using label_type = std::vector<fstring>;
     using axis_type = xaxis<fstring>;
     using caxis_type = xaxis<char>;
