@@ -16,10 +16,14 @@
 #include "xtl/xbasic_fixed_string.hpp"
 using fstring = xtl::xfixed_string<55>;
 
+#ifndef XFRAME_STRING_LABEL
+#define XFRAME_STRING_LABEL fstring
+#endif
+
 #ifndef XFRAME_DEFAULT_LABEL_LIST
 #include <cstddef>
 #include "xtl/xmeta_utils.hpp"
-#define XFRAME_DEFAULT_LABEL_LIST xtl::mpl::vector<int, std::size_t, char, fstring>
+#define XFRAME_DEFAULT_LABEL_LIST xtl::mpl::vector<int, std::size_t, char, XFRAME_STRING_LABEL>
 #endif
 
 #ifndef XFRAME_DEFAULT_JOIN

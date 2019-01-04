@@ -19,8 +19,7 @@ the two main ways of creating an axis:
 
 .. code::
 
-    using fstring = xtl::xfixed_string<55>;
-    using saxis_type = xf::xaxis<fstring, std::size_t>;
+    using saxis_type = xf::xaxis<xf::fstring, std::size_t>;
 
     saxis_type s1({ "a", "b", "d", "e" });
     auto s2 = xf::axis({ "a", "b", "d", "e" });
@@ -65,8 +64,7 @@ to easily create them:
 
 .. code::
 
-    using fstring = xtl::xfixed_string<55>;
-    using coordinate_type = xf::xcoordinate<fstring>;
+    using coordinate_type = xf::xcoordinate<xf::fstring>;
 
     coordinate_type c1({{"group", xf::axis({"a", "b", "d", "e"})},
                         {"city",  xf::axis({"London", "Paris", "Brussels"})}});
@@ -92,16 +90,16 @@ shown below:
     // This object will be used in different coordinates objects
     auto a1 = xf::named_axis("igroup", xf::axis({1, 2, 4, 5})});
 
-    auto c1 = xf::coordinate<fstring>(a1, xf::named_axis("city", xf::axis({"London", "Parid", "Brussels"})));
-    auto c2 = xf::coordinate<fstring>(a1, xf::named_axis("country", xf::axis({"USA", "Japan"})));
+    auto c1 = xf::coordinate<xf::fstring>(a1, xf::named_axis("city", xf::axis({"London", "Parid", "Brussels"})));
+    auto c2 = xf::coordinate<xf::fstring>(a1, xf::named_axis("country", xf::axis({"USA", "Japan"})));
 
 As you can notice, coordinates objects can store axes with different label types. By default,
-these types are ``int``, ``std::size_t``, ``char`` and ``xtl::xfixed_string<55>``, you can
+these types are ``int``, ``std::size_t``, ``char`` and ``xf::fstring``, you can
 specify a different type list: 
 
 .. code::
 
-    using coordinate_type = xf::xcoordinate<fstring, xtl::mpl::vector<int, std::string>>;
+    using coordinate_type = xf::xcoordinate<xf::fstring, xtl::mpl::vector<int, std::string>>;
 
     coordinate_type c({{"group", xf::axis({"a", "b", "d", "e"})},
                        {"city",  xf::axis({"London", "Paris", "Brussels"})}});
@@ -115,8 +113,7 @@ data tensor. Creating a ``xdimension`` is as simple as creating an ``xcoordinate
 
 .. code::
 
-    using fstring = xtl::xfixed_string<55>;
-    using dimension_type = xf::xdimension<fstring>;
+    using dimension_type = xf::xdimension<xf::fstring>;
 
     dimension_type dim1({"city", "group"});
     auto dim2 = xf::dimension({"city", "group"});
@@ -143,22 +140,20 @@ an ``xdimension`` object. It is the C++ equivalent of the ``xarray.DataArray`` P
 
 .. code::
 
-    using fstring = xtl::xfixed_string<55>;
-    using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
-    using coordinate_type = xf::xcoordinate<fstring>;
-    using dimension_type = xf::xdimension<fstring>;
-    using variable_type = xvariable<coordinate_type, data_type>;
+    using coordinate_type = xf::xcoordinate<xf::fstring>;
+    using dimension_type = xf::xdimension<xf::fstring>;
+    using variable_type = xvariable<double, coordinate_type>;
 
     data_type d = xt::eval(xt::random::rand({3, 4}));
-    auto c = xf::coordinate<fstring>({{"group", xf::axis({"a", "b", "d", "e"})},
-                                      {"city",  xf::axis({"London", "Paris", "Brussels"})}});
+    auto c = xf::coordinate({{"group", xf::axis({"a", "b", "d", "e"})},
+                             {"city",  xf::axis({"London", "Paris", "Brussels"})}});
     auto dim = xf::dimension({"city", "group"});
 
     variable_type v1(d, c, dim);
     
     // Coordinates and dimension can be built in place
-    variable_type v2(d, xf::coordinate<fstring>({{"group", xf::axis({"a", "b", "d", "e"})},
-                                                 {"city",  xf::axis({"London", "Paris", "Brussels"})}}),
+    variable_type v2(d, xf::coordinate({{"group", xf::axis({"a", "b", "d", "e"})},
+                                        {"city",  xf::axis({"London", "Paris", "Brussels"})}}),
                         xf::dimension({"city", "group"}));
 
 The data parameter can be omitted, in that case the variable creates an uninitialized data tensor:
@@ -167,8 +162,8 @@ The data parameter can be omitted, in that case the variable creates an uninitia
 
     variable_type v3(c, dim);
 
-    variable_type v4(xf::coordinate<fstring>({{"group", xf::axis({"a", "b", "d", "e"})},
-                                              {"city",  xf::axis({"London", "Paris", "Brussels"})}}),
+    variable_type v4(xf::coordinate({{"group", xf::axis({"a", "b", "d", "e"})},
+                                     {"city",  xf::axis({"London", "Paris", "Brussels"})}}),
                      xf::dimension({"city", "group"}));
 
 A variable can also be created from a map of axes and a list of dimension names:
@@ -201,13 +196,13 @@ object. In the code below, the mapping is different from the previous defined va
 .. code::
 
     auto v10 = variable(d, c, dim);
-    auto v11 = variable(d, xf::coordinate<fstring>({{"group", xf::axis({"a", "b", "d", "e"})},
-                                                 {"city",  xf::axis({"London", "Paris", "Brussels"})}}),
+    auto v11 = variable(d, xf::coordinate({{"group", xf::axis({"a", "b", "d", "e"})},
+                                           {"city",  xf::axis({"London", "Paris", "Brussels"})}}),
                            xf::dimension({"city", "group"}));
 
     auto v12 = variable(c, dim);
-    auto v13 = variable(xf::coordinate<fstring>({{"group", xf::axis({"a", "b", "d", "e"})},
-                                                 {"city",  xf::axis({"London", "Paris", "Brussels"})}}),
+    auto v13 = variable(xf::coordinate({{"group", xf::axis({"a", "b", "d", "e"})},
+                                        {"city",  xf::axis({"London", "Paris", "Brussels"})}}),
                         xf::dimension({"city", "group"}));
 
 .. _pandas: https://pandas.pydata.org

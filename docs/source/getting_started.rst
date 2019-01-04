@@ -16,18 +16,15 @@ First example
 
 .. code::
 
-    #include <string>
     #include <iostream>
-    #include "xtl/xbasic_fixed_string.hpp"
     #include "xtensor/xrandom.hpp"
     #include "xframe/xio.hpp"
     #include "xframe/xvariable.hpp"
 
     int main(int argc, char* argv)
     {
-        using fstring = xtl::xfixed_string<55>;
-        using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
-        using variable_type = xf::xvariable<coordinate_type, data_type>;
+        using coordinate_type = xf::xcoordinate<xf::fstring>;
+        using variable_type = xf::xvariable<double, coordinate_type>;
 
         // Creation of the data
         data_type data = xt::eval(xt::random::rand({6, 3}, 15., 25.));
@@ -37,8 +34,8 @@ First example
         // Creation of coordinates and dimensions
         auto time_axis = xf::axis({"2018-01-01", "2018-01-02", "2018-01-03", "2018-01-04", "2018-01-05", "2018-01-06"});
         auto city_axis = xf::axis({"London", "Paris", "Brussels"});
-        auto coord = xf::coordinate<fstring>({{"date", time_axis}, {"city", city_axis}});
-        auto dim = xf::dimension<fstring>({"date", "city"});
+        auto coord = xf::coordinate({{"date", time_axis}, {"city", city_axis}});
+        auto dim = xf::dimension({"date", "city"});
 
         // Creation of the variable
         auto var = variable_type(data, coord, dim);
@@ -127,18 +124,15 @@ The following example creates the same variable as the previous one:
 
 .. code::
 
-    #include <string>
     #include <iostream>
-    #include "xtl/xbasic_fixed_string.hpp"
     #include "xtensor/xrandom.hpp"
     #include "xframe/xio.hpp"
     #include "xframe/xvariable.hpp"
 
     int main(int argc, char* argv[])
     {
-        using fstring = xtl::xfixed_string<55>;
-        using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
-        using variable_type = xf::xvariable<coordinate_type, data_type>;
+        using coordinate_type = xf::xcoordinate<xf::fstring>;
+        using variable_type = xf::xvariable<double, coordinate_type>;
 
         // Creation of the data
         data_type data = xt::eval(xt::random::rand({6, 3}, 15., 25.));
@@ -168,18 +162,16 @@ Third example: data access
 
 .. code::
 
-    #include <string>
     #include <iostream>
-    #include "xtl/xbasic_fixed_string.hpp"
     #include "xtensor/xrandom.hpp"
     #include "xframe/xio.hpp"
     #include "xframe/xvariable.hpp"
 
     int main(int argc, char* argv[])
     {
-        using fstring = xtl::xfixed_string<55>;
-        using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
-        using variable_type = xf::xvariable<coordinate_type, data_type>;
+
+        using coordinate_type = xf::xcoordinate<xf::fstring>;
+        using variable_type = xf::xvariable<double, coordinate_type>;
 
         // Creation of the data
         data_type data = xt::eval(xt::random::rand({6, 3}, 15., 25.));

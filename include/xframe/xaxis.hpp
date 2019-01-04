@@ -175,8 +175,8 @@ namespace xf
     template <class T = std::size_t, class L>
     xaxis<L, T> axis(std::initializer_list<L> init) noexcept;
 
-    template <class L = fstring, class T = std::size_t>
-    xaxis<L, T> axis(std::initializer_list<const char*> init) noexcept;
+    template <class T = std::size_t>
+    xaxis<XFRAME_STRING_LABEL, T> axis(std::initializer_list<const char*> init) noexcept;
 
     /********************
     * xaxis_inner_types *
@@ -680,10 +680,10 @@ namespace xf
         return xaxis<L, T>(init);
     }
 
-    template <class L, class T>
-    inline xaxis<L, T> axis(std::initializer_list<const char*> init) noexcept
+    template <class T>
+    inline xaxis<XFRAME_STRING_LABEL, T> axis(std::initializer_list<const char*> init) noexcept
     {
-        return xaxis<L, T>(init.begin(), init.end());
+        return xaxis<XFRAME_STRING_LABEL, T>(init.begin(), init.end());
     }
 }
 
