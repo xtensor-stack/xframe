@@ -37,7 +37,7 @@ namespace xf
     }
 
     template <class CCT, class ECT>
-    class xvariable;
+    class xvariable_container;
 
     template <class F, class R, class... CT>
     class xvariable_function : public xt::xexpression<xvariable_function<F, R, CT...>>
@@ -61,7 +61,7 @@ namespace xf
         using dimension_type = xcommon_dimension_type_t<CT...>;
         using dimension_list = typename dimension_type::label_list;
 
-        using temporary_type = xvariable<coordinate_type, xt::xoptional_assembly<xt::xarray<value_type>, xt::xarray<bool>>>;
+        using temporary_type = xvariable_container<coordinate_type, XFRAME_DEFAULT_DATA_CONTAINER(value_type)>;
 
         template <std::size_t N = dynamic()>
         using selector_type = xselector<coordinate_type, dimension_type, N>;

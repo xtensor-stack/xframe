@@ -24,6 +24,12 @@
 #define DEFAULT_JOIN join::inner
 #endif
 
+#ifndef XFRAME_DEFAULT_DATA_CONTAINER
+#include "xtensor/xarray.hpp"
+#include "xtensor/xoptional_assembly.hpp"
+#define XFRAME_DEFAULT_DATA_CONTAINER(T) xt::xoptional_assembly<xt::xarray<T>, xt::xarray<bool>>
+#endif
+
 // A higher number leads to an ICE on VS 2015
 #ifndef STATIC_DIMENSION_LIMIT
 #define STATIC_DIMENSION_LIMIT 4

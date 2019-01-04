@@ -30,7 +30,7 @@ namespace xf
     using dimension_type = xdimension<fstring, std::size_t>;
     using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
     using masked_data_type = xt::xarray<xt::xmasked_value<xtl::xoptional<double, bool>>>;
-    using variable_type = xvariable<coordinate_type, data_type>;
+    using variable_type = xvariable_container<coordinate_type, data_type>;
     using variable_view_type = xvariable_view<variable_type&>;
     using slice_vector = variable_view_type::slice_vector;
 

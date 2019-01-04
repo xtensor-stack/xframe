@@ -52,7 +52,7 @@ namespace xt
                                                           typename base_type::label_list,
                                                           typename base_type::size_type>;
         using temporary_data_type = xoptional_assembly<xarray<typename optional_type::value_type>, xarray<bool>>;
-        using temporary_type = xf::xvariable<temporary_coordinate_type, temporary_data_type>;
+        using temporary_type = xf::xvariable_container<temporary_coordinate_type, temporary_data_type>;
     };
 }
 
