@@ -22,7 +22,7 @@ namespace xf
      * xnamed_axis *
      ***************/
 
-    template <class K, class T, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST, class LT = xtl::mpl::cast_t<L, xtl::variant>>
+    template <class K, class T, class MT = hash_map_tag, class L = XFRAME_DEFAULT_LABEL_LIST, class LT = xtl::mpl::cast_t<L, xtl::variant>>
     class xnamed_axis : public xt::xexpression<xnamed_axis<K, T, MT, L, LT>>
     {
     public:
@@ -98,7 +98,7 @@ namespace xf
         using key_type = typename std::decay_t<A>::key_type;
         using mapped_type = typename std::decay_t<A>::mapped_type;
 
-        return xnamed_axis<K, mapped_type, hash_map_tag, DEFAULT_LABEL_LIST, key_type>(name, axis);
+        return xnamed_axis<K, mapped_type, hash_map_tag, XFRAME_DEFAULT_LABEL_LIST, key_type>(name, axis);
     }
 
     template <class A>
@@ -109,10 +109,10 @@ namespace xf
         using key_type = typename std::decay_t<A>::key_type;
         using mapped_type = typename std::decay_t<A>::mapped_type;
 
-        return xnamed_axis<const char*, mapped_type, hash_map_tag, DEFAULT_LABEL_LIST, key_type>(name, axis);
+        return xnamed_axis<const char*, mapped_type, hash_map_tag, XFRAME_DEFAULT_LABEL_LIST, key_type>(name, axis);
     }
 
-    template <class LB, class K, class T, class MT = hash_map_tag, class L = DEFAULT_LABEL_LIST>
+    template <class LB, class K, class T, class MT = hash_map_tag, class L = XFRAME_DEFAULT_LABEL_LIST>
     auto get_labels(const xnamed_axis<K, T, MT, L, LB>& n_axis) -> const typename xaxis<LB, T, MT>::label_list&
     {
         return get_labels<LB>(n_axis.axis());

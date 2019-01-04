@@ -23,8 +23,8 @@ namespace xf
     using saxis_type = xaxis<fstring, std::size_t>;
     using iaxis_type = xaxis<int, std::size_t>;
     using size_type = std::size_t;
-    using axis_variant = xaxis_variant<DEFAULT_LABEL_LIST, size_type>;
-    using axis_view_type = xaxis_view<DEFAULT_LABEL_LIST, size_type, typename axis_variant::map_container_tag>;
+    using axis_variant = xaxis_variant<XFRAME_DEFAULT_LABEL_LIST, size_type>;
+    using axis_view_type = xaxis_view<XFRAME_DEFAULT_LABEL_LIST, size_type, typename axis_variant::map_container_tag>;
     using coordinate_type = xcoordinate<fstring>;
     using coordinate_view_type = xcoordinate_view<fstring>;
     using dimension_type = xdimension<fstring, std::size_t>;

@@ -51,7 +51,7 @@ namespace xf
      * xcoordinate *
      ***************/
 
-    template <class K, class L = DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
+    template <class K, class L = XFRAME_DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
     class xcoordinate : public xcoordinate_base<K, xaxis_variant<L, S, MT>>
     {
     public:
@@ -113,10 +113,10 @@ namespace xf
      * xcoordinate builders *
      ************************/
 
-    template <class K = xtl::xfixed_string<55>, class L = DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
+    template <class K = xtl::xfixed_string<55>, class L = XFRAME_DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
     xcoordinate<K, L, S, MT> coordinate(const std::map<K, xaxis_variant<L, S, MT>>& axes);
 
-    template <class K = xtl::xfixed_string<55>, class L = DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
+    template <class K = xtl::xfixed_string<55>, class L = XFRAME_DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
     xcoordinate<K, L, S, MT> coordinate(std::map<K, xaxis_variant<L, S, MT>>&& axes);
 
     template <class K, class... K1, class S, class MT, class L, class LT, class... LT1>

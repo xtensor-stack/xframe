@@ -46,7 +46,7 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const noexcept;
 
-        template <class Join = DEFAULT_JOIN, class C>
+        template <class Join = XFRAME_DEFAULT_JOIN, class C>
         xtrivial_broadcast broadcast_coordinates(C& coords) const noexcept;
 
         template <class D>
@@ -54,7 +54,7 @@ namespace xf
 
         data_type data() const noexcept;
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = dynamic(), class S = std::size_t>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = dynamic(), class S = std::size_t>
         const_reference select(const S&) const noexcept;
 
     private:

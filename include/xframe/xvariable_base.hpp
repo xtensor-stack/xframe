@@ -121,7 +121,7 @@ namespace xf
         named_axis_type operator[](const key_type& key) const;
 
         template <class LT>
-        xnamed_axis<key_type, typename axis_type::mapped_type, hash_map_tag, DEFAULT_LABEL_LIST, LT> axis(const key_type& key) const;
+        xnamed_axis<key_type, typename axis_type::mapped_type, hash_map_tag, XFRAME_DEFAULT_LABEL_LIST, LT> axis(const key_type& key) const;
 
         template <class... Args>
         reference operator()(Args... args);
@@ -162,13 +162,13 @@ namespace xf
         template <std::size_t N = dynamic()>
         reference select(const selector_sequence_type<N>& selector);
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = dynamic()>
         const_reference select(const selector_sequence_type<N>& selector) const;
 
         template <std::size_t N = dynamic()>
         reference select(selector_sequence_type<N>&& selector);
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = dynamic()>
         const_reference select(selector_sequence_type<N>&& selector) const;
 
         template <std::size_t N = dynamic()>
@@ -325,9 +325,9 @@ namespace xf
 
     template <class D>
     template <class LT>
-    inline auto xvariable_base<D>::axis(const key_type& key) const -> xnamed_axis<key_type, typename axis_type::mapped_type, hash_map_tag, DEFAULT_LABEL_LIST, LT>
+    inline auto xvariable_base<D>::axis(const key_type& key) const -> xnamed_axis<key_type, typename axis_type::mapped_type, hash_map_tag, XFRAME_DEFAULT_LABEL_LIST, LT>
     {
-        return xnamed_axis<key_type, typename axis_type::mapped_type, hash_map_tag, DEFAULT_LABEL_LIST, LT>(key, coordinates()[key]);
+        return xnamed_axis<key_type, typename axis_type::mapped_type, hash_map_tag, XFRAME_DEFAULT_LABEL_LIST, LT>(key, coordinates()[key]);
     }
 
     template <class D>

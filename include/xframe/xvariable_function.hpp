@@ -73,22 +73,22 @@ namespace xf
         template <class Func, class U = std::enable_if<!std::is_base_of<Func, self_type>::value>>
         xvariable_function(Func&& f, CT... e) noexcept;
 
-        template <class Join = DEFAULT_JOIN>
+        template <class Join = XFRAME_DEFAULT_JOIN>
         size_type size() const noexcept;
 
-        template <class Join = DEFAULT_JOIN>
+        template <class Join = XFRAME_DEFAULT_JOIN>
         size_type dimension() const noexcept;
 
-        template <class Join = DEFAULT_JOIN>
+        template <class Join = XFRAME_DEFAULT_JOIN>
         const dimension_list& dimension_labels() const;
 
-        template <class Join = DEFAULT_JOIN>
+        template <class Join = XFRAME_DEFAULT_JOIN>
         const coordinate_type& coordinates() const;
 
-        template <class Join = DEFAULT_JOIN>
+        template <class Join = XFRAME_DEFAULT_JOIN>
         const dimension_type& dimension_mapping() const;
 
-        template <class Join = DEFAULT_JOIN>
+        template <class Join = XFRAME_DEFAULT_JOIN>
         xtrivial_broadcast broadcast_coordinates(coordinate_type& coords) const;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 
@@ -98,10 +98,10 @@ namespace xf
         template <class... Args>
         const_reference operator()(Args... args) const;
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
         const_reference select(const selector_sequence_type<N>& selector) const;
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = dynamic()>
         const_reference select(selector_sequence_type<N>&& selector) const;
 
         const std::tuple<xvariable_closure_t<CT>...>& arguments() const { return m_e; }

@@ -39,7 +39,7 @@ namespace xf
         const coordinate_type& coordinates() const noexcept;
         const dimension_type& dimension_mapping() const noexcept;
 
-        template <class Join = DEFAULT_JOIN, class C = coordinate_type>
+        template <class Join = XFRAME_DEFAULT_JOIN, class C = coordinate_type>
         xtrivial_broadcast broadcast_coordinates(C& coords) const;
         bool broadcast_dimensions(dimension_type& dims, bool trivial_bc = false) const;
 

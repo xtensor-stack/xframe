@@ -179,13 +179,13 @@ namespace xf
         template <std::size_t N = dynamic()>
         reference select(const selector_sequence_type<N>& selector);
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = std::numeric_limits<size_type>::max()>
         const_reference select(const selector_sequence_type<N>& selector) const;
 
         template <std::size_t N = dynamic()>
         reference select(selector_sequence_type<N>&& selector);
 
-        template <class Join = DEFAULT_JOIN, std::size_t N = dynamic()>
+        template <class Join = XFRAME_DEFAULT_JOIN, std::size_t N = dynamic()>
         const_reference select(selector_sequence_type<N>&& selector) const;
 
         template <std::size_t N = dynamic()>
@@ -277,10 +277,10 @@ namespace xf
     template <class E, class... S>
     auto ilocate(E&& e, S&&... slices);
 
-    template <class L = DEFAULT_LABEL_LIST, class E, class... S>
+    template <class L = XFRAME_DEFAULT_LABEL_LIST, class E, class... S>
     auto locate(E&& e, S&&... slices);
 
-    template <class E, class L = DEFAULT_LABEL_LIST>
+    template <class E, class L = XFRAME_DEFAULT_LABEL_LIST>
     auto select(E&& e, std::map<typename std::decay_t<E>::key_type, xaxis_slice<L>>&& slices);
 
     template <class E, class T = typename std::decay_t<E>::difference_type>
