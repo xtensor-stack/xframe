@@ -21,10 +21,11 @@ First example
     #include "xframe/xio.hpp"
     #include "xframe/xvariable.hpp"
 
-    int main(int argc, char* argv)
+    int main(int argc, char* argv[])
     {
         using coordinate_type = xf::xcoordinate<xf::fstring>;
         using variable_type = xf::xvariable<double, coordinate_type>;
+        using data_type = variable_type::data_type;
 
         // Creation of the data
         data_type data = xt::eval(xt::random::rand({6, 3}, 15., 25.));
@@ -133,6 +134,7 @@ The following example creates the same variable as the previous one:
     {
         using coordinate_type = xf::xcoordinate<xf::fstring>;
         using variable_type = xf::xvariable<double, coordinate_type>;
+        using data_type = variable_type::data_type;
 
         // Creation of the data
         data_type data = xt::eval(xt::random::rand({6, 3}, 15., 25.));
@@ -172,6 +174,7 @@ Third example: data access
 
         using coordinate_type = xf::xcoordinate<xf::fstring>;
         using variable_type = xf::xvariable<double, coordinate_type>;
+        using data_type = variable_type::data_type;
 
         // Creation of the data
         data_type data = xt::eval(xt::random::rand({6, 3}, 15., 25.));
