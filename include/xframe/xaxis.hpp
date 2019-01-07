@@ -61,6 +61,21 @@ namespace xf
      * xaxis *
      *********/
 
+    /**
+     * @class xaxis
+     * @brief Class modeling an axis in a coordinate system.
+     *
+     * The xaxis class is used for modeling general axes; an axis is a mapping
+     * of positions in a given dimension with labels. It is the equivalent of
+     * the \c Index object from <a href="pandas.pydata.org">pandas</a>.
+     *
+     * @tparam L the type of labels.
+     * @tparam T the integer type used to represent positions. Default value is
+     *           \c std::size_t.
+     * @tparam MT the tag used for choosing the map type which holds the label-
+     *            position pairs. Possible values are \c map_tag and \c hash_map_tag.
+     *            Default value is \c hash_map_tag.
+     */
     template <class L, class T = std::size_t, class MT = hash_map_tag>
     class xaxis : public xaxis_base<xaxis<L, T, MT>>
     {
@@ -250,12 +265,25 @@ namespace xf
      * xaxis implementation *
      ************************/
 
+    /**
+     * @name Constructors
+     */
+    //@{
+    /**
+     * Constructs an empty axis.
+     */
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis()
         : base_type(), m_index(), m_is_sorted(true)
     {
     }
 
+    /**
+     * Constructs an axis with the given list of labels. This list
+     * is copied and the constructor internally checks whether it
+     * is sorted.
+     * @param labels the list of labels.
+     */
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(const label_list& labels)
         : base_type(labels), m_index(), m_is_sorted()
@@ -264,6 +292,12 @@ namespace xf
         populate_index();
     }
 
+    /**
+     * Constructs an axis with the given list of labels. The list is
+     * moved and therefors invalid after the axis has been constructed.
+     * The constructor internally checks whether the list is sorted.
+     * @param labels the list of labels.
+     */
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(label_list&& labels)
         : base_type(std::move(labels)), m_index(), m_is_sorted()
@@ -272,12 +306,31 @@ namespace xf
         populate_index();
     }
 
+    /**
+     * Constructs an axis with the given list of labels, and a boolean
+     * specifying if the labels list is sorted. This is an optimization
+     * that prevents the constructor to check if the labels list is sorted.
+     * The list is copied.
+     * @param labesl th list of labels.
+     * @param is_sorted a boolean parameter indicating if the labels list
+     *                  is sorted.
+     */
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(const label_list& labels, bool is_sorted)
         : base_type(labels), m_index(), m_is_sorted(is_sorted)
     {
         populate_index();
     }
+    /**
+     * Constructs an axis with the given list of labels, and a boolean
+     * specifying if the labels list is sorted. This is an optimization
+     * that prevents the constructor to check if the labels list is sorted.
+     * The list is moved and therefore invalid after the axis has been
+     * constructed.
+     * @param labesl th list of labels.
+     * @param is_sorted a boolean parameter indicating if the labels list
+     *                  is sorted.
+     */
 
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(label_list&& labels, bool is_sorted)
@@ -286,6 +339,10 @@ namespace xf
         populate_index();
     }
 
+    /**
+     * Constructs an axis from the given initializer list of labels. The
+     * constructor internally checks whether the list is sorted.
+     */
     template <class L, class T, class MT>
     inline xaxis<L, T, MT>::xaxis(std::initializer_list<key_type> init)
         : base_type(init), m_index(), m_is_sorted()
@@ -294,6 +351,10 @@ namespace xf
         populate_index();
     }
 
+    /**
+     * Constructs an axis from a \c default_axis.
+     * @sa default_axis
+     */
     template <class L, class T, class MT>
     template <class L1>
     inline xaxis<L, T, MT>::xaxis(xaxis_default<L1, T> axis)
@@ -304,6 +365,11 @@ namespace xf
         populate_index();
     }
 
+    /**
+     * Constructs an axis from the content of the range [first, last)
+     * @param first An iterator to the first label.
+     * @param last An iterator the the element following the last label.
+     */
     template <class L, class T, class MT>
     template <class InputIt>
     inline xaxis<L, T, MT>::xaxis(InputIt first, InputIt last)
@@ -312,25 +378,51 @@ namespace xf
         m_is_sorted = init_is_sorted();
         populate_index();
     }
+    //@}
 
+    /**
+     * Returns true if the labels list is sorted.
+     */
     template <class L, class T, class MT>
     inline bool xaxis<L, T, MT>::is_sorted() const noexcept
     {
         return m_is_sorted;
     }
 
+    /**
+      * @name Data
+     */
+    //@{
+    /**
+     * Returns true if the axis contains the speficied label.
+     * @param key the label to search for.
+     */
     template <class L, class T, class MT>
     inline bool xaxis<L, T, MT>::contains(const key_type& key) const
     {
         return m_index.count(key) != typename map_type::size_type(0);
     }
 
+    /**
+     * Returns the position of the specified label. If this last one is
+     * not found, an exception is thrown.
+     * @param key the label to search for.
+     */
     template <class L, class T, class MT>
     inline auto xaxis<L, T, MT>::operator[](const key_type& key) const -> mapped_type
     {
         return m_index.at(key);
     }
+    //@}
 
+    /**
+     * @name Filters
+     */
+    //@{
+    /**
+     * Builds an return a new axis by applying the given filter to the axis.
+     * @param f the filter used to select the labels to keep in the new axis.
+     */
     template <class L, class T, class MT>
     template <class F>
     inline auto xaxis<L, T, MT>::filter(const F& f) const noexcept -> self_type
@@ -338,13 +430,30 @@ namespace xf
         return self_type(base_type::filter_labels(f), m_is_sorted);
     }
 
+    /**
+     * Builds an return a new axis by applying the given filter to the axis. When
+     * the size of the new list of labels is known, this method allows some
+     * optimizations compared to the previous one.
+     * @param f the filter used to select the labels to keep in the new axis.
+     * @param size the size of the new label list.
+     */
     template <class L, class T, class MT>
     template <class F>
     inline auto xaxis<L, T, MT>::filter(const F& f, size_type size) const noexcept -> self_type
     {
         return self_type(base_type::filter_labels(f, size), m_is_sorted);
     }
+    //@}
 
+    /**
+     * @name Iterator
+     */
+    //@{
+    /**
+     * Returns a constant iterator to the element with label equivalent to \c key. If
+     * no such element is found, past-the-end iterator is returned.
+     * @param key the label to search for.
+     */
     template <class L, class T, class MT>
     inline auto xaxis<L, T, MT>::find(const key_type& key) const -> const_iterator
     {
@@ -352,18 +461,31 @@ namespace xf
         return map_iter != m_index.end() ? cbegin() + map_iter->second : cend();
     }
 
+    /**
+     * Returns a constant iterator to the first element of the axis.
+     * This element is a pair label - position.
+     */
     template <class L, class T, class MT>
     inline auto xaxis<L, T, MT>::cbegin() const noexcept -> const_iterator
     {
         return const_iterator(this, this->labels().begin());
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element
+     * of the axis.
+     */
     template <class L, class T, class MT>
     inline auto xaxis<L, T, MT>::cend() const noexcept -> const_iterator
     {
         return const_iterator(this, this->labels().end());
     }
+    //@}
 
+    /**
+     * @name Set operations
+     */
+    //@{
     template <class L, class T, class MT>
     template <class... Args>
     inline bool xaxis<L, T, MT>::merge(const Args&... axes)
@@ -387,6 +509,7 @@ namespace xf
         }
         return res;
     }
+    //@}
 
     template <class L, class T, class MT>
     inline void xaxis<L, T, MT>::populate_index()
@@ -667,6 +790,15 @@ namespace xf
      * axis builders implementation *
      ********************************/
 
+    /**
+     * Returns an axis containing a range of integral labels.
+     * @param start the first value of the range.
+     * @param stop the end of the range. The range doe snot contain
+     *             this value.
+     * @param step Spacing between values. Default step is \c 1.
+     * @tparam T the integral type used for positions. Defualt value
+     * @tparam L the type of the labels.
+     */
     template <class T, class L>
     inline xaxis<L, T> axis(L start, L stop, L step) noexcept
     {
@@ -674,6 +806,13 @@ namespace xf
         return xaxis<L, T>(range.begin(), range.end());
     }
 
+    /**
+     * Builds an return an axis from the specified list of labels.
+     * @param init the list of labels.
+     * @tparam T the integral type used for positions. Default value
+     *           is \c std::size_t
+     * @tparam L The type of the labels.
+     */
     template <class T, class L>
     inline xaxis<L, T> axis(std::initializer_list<L> init) noexcept
     {

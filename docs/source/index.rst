@@ -59,6 +59,8 @@ for details.
    :caption: API REFERENCE
    :maxdepth: 2
 
+   api/axis_index
+
 .. toctree::
    :caption: MISCELLANEOUS
 
