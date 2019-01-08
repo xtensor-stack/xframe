@@ -796,7 +796,7 @@ namespace xf
      * @param stop the end of the range. The range doe snot contain
      *             this value.
      * @param step Spacing between values. Default step is \c 1.
-     * @tparam T the integral type used for positions. Defualt value
+     * @tparam T the integral type used for positions. Default value
      * @tparam L the type of the labels.
      */
     template <class T, class L>
@@ -810,8 +810,8 @@ namespace xf
      * Builds an return an axis from the specified list of labels.
      * @param init the list of labels.
      * @tparam T the integral type used for positions. Default value
-     *           is \c std::size_t
-     * @tparam L The type of the labels.
+     *           is \c std::size_t.
+     * @tparam L the type of the labels.
      */
     template <class T, class L>
     inline xaxis<L, T> axis(std::initializer_list<L> init) noexcept
