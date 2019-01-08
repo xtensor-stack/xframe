@@ -5,11 +5,15 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Axes
-====
+xaxis_default
+=============
 
-.. toctree::
+Defined in ``xframe/xaxis_default.hpp``
 
-   xaxis_base
-   xaxis
-   xaxis_default
+.. doxygenclass:: xf::xaxis_default
+   :project: xframe
+   :members:
+
+.. doxygenfunction:: xf::axis(L)
+   :project: xframe
+

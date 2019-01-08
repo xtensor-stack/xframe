@@ -32,6 +32,17 @@ namespace xf
      * xaxis_default *
      *****************/
 
+    /**
+     * @class xaxis_default
+     * @brief Default axis with integral labels.
+     *
+     * The xaxis_default class is used for modeling a default axis
+     * that holds a contiguous sequence of integral labels starting at 0.
+     *
+     * @tparam L the type of labels. This must be an integral type.
+     * @tparam T the integer type used to represent positions. Default value is
+     *           \c std::size_t.
+     */
     template <class L, class T = std::size_t>
     class xaxis_default : public xaxis_base<xaxis_default<L, T>>
     {
@@ -57,7 +68,7 @@ namespace xf
 
         static_assert(std::is_integral<key_type>::value, "key_type L must be an integral type");
 
-        explicit xaxis_default(const size_type& size = 0);
+        explicit xaxis_default(size_type size = 0);
 
         bool is_sorted() const noexcept;
 
@@ -90,6 +101,13 @@ namespace xf
         template <class L1, class T1, class MT1>
         friend class xaxis_variant;
     };
+
+    /*************************
+     * xaxis_default builder *
+     *************************/
+
+    template <class T = std::size_t, class L>
+    xaxis_default<L, T> axis(L size) noexcept;
 
     /********************
     * xaxis_inner_types *
@@ -163,31 +181,51 @@ namespace xf
      * xaxis_default implementation *
      ********************************/
 
+    /**
+     * Constructs a default axis holding \c size integral elements.
+     * The labels sequence is [0, 1, ..... size - 1)
+     */
     template <class L, class T>
-    inline xaxis_default<L, T>::xaxis_default(const size_type& size)
+    inline xaxis_default<L, T>::xaxis_default(size_type size)
         : base_type()
     {
         populate_labels(size);
     }
 
+    /**
+     * Returns true if the labels list is sorted.
+     */
     template <class L, class T>
     inline bool xaxis_default<L, T>::is_sorted() const noexcept
     {
         return true;
     }
 
+    /**
+     * Returns true if the axis contains the speficied label.
+     * @param key the label to search for.
+     */
     template <class L, class T>
     inline bool xaxis_default<L, T>::contains(const key_type& key) const
     {
         return key_type(0) <= key && key < key_type(this->size());
     }
 
+    /**
+     * Returns the position of the specified label. If this last one is
+     * not found, an exception is thrown.
+     * @param key the label to search for.
+     */
     template <class L, class T>
     inline auto xaxis_default<L, T>::operator[](const key_type& key) const -> mapped_type
     {
         return mapped_type(this->labels().at(key));
     }
 
+    /**
+     * Builds an return a new axis by applying the given filter to the axis.
+     * @param f the filter used to select the labels to keep in the new axis.
+     */
     template <class L, class T>
     template <class F>
     inline auto xaxis_default<L, T>::filter(const F& f) const noexcept -> axis_type
@@ -195,6 +233,13 @@ namespace xf
         return axis_type(base_type::filter_labels(f), true);
     }
 
+    /**
+     * Builds an return a new axis by applying the given filter to the axis. When
+     * the size of the new list of labels is known, this method allows some
+     * optimizations compared to the previous one.
+     * @param f the filter used to select the labels to keep in the new axis.
+     * @param size the size of the new label list.
+     */
     template <class L, class T>
     template <class F>
     inline auto xaxis_default<L, T>::filter(const F& f, size_type size) const noexcept -> axis_type
@@ -202,18 +247,31 @@ namespace xf
         return axis_type(base_type::filter_labels(f, size), true);
     }
 
+    /**
+     * Returns a constant iterator to the element with label equivalent to \c key. If
+     * no such element is found, past-the-end iterator is returned.
+     * @param key the label to search for.
+     */
     template <class L, class T>
     inline auto xaxis_default<L, T>::find(const key_type& key) const -> const_iterator
     {
         return contains(key) ? const_iterator(mapped_type(key)) : cend();
     }
 
+    /**
+     * Returns a constant iterator to the first element of the axis.
+     * This element is a pair label - position.
+     */
     template <class L, class T>
     inline auto xaxis_default<L, T>::cbegin() const noexcept -> const_iterator
     {
         return const_iterator(mapped_type(0));
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element
+     * of the axis.
+     */
     template <class L, class T>
     inline auto xaxis_default<L, T>::cend() const noexcept -> const_iterator
     {
@@ -242,6 +300,24 @@ namespace xf
     inline bool xaxis_default<L, T>::intersect(const Args&... /*axes*/)
     {
         throw std::runtime_error("intersect forbidden for xaxis_default");
+    }
+
+    /****************************************
+     * xaxis_default builder implementation *
+     ****************************************/
+
+    /**
+     * Returns a default axis that holds \c size integral
+     * labels.
+     * @param size the number of labels.
+     * @tparam T the integral type used for positions. Default value
+     *           is \c std::size_t.
+     * @tparam L the type of the labels. This must be an integral type.
+     */
+    template <class T, class L>
+    inline xaxis_default<L, T> axis(L size) noexcept
+    {
+        return xaxis_default<L, T>(size);
     }
 
     /*****************************************
@@ -333,12 +409,6 @@ namespace xf
     inline bool operator<(const xaxis_default_iterator<L, T>& lhs, const xaxis_default_iterator<L, T>& rhs) noexcept
     {
         return lhs.less_than(rhs);
-    }
-
-    template <class T = std::size_t, class L>
-    inline auto axis(L size) noexcept
-    {
-        return xaxis_default<L, T>(size);
     }
 }
 
