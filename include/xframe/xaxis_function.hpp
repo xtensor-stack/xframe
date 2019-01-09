@@ -24,6 +24,17 @@ namespace xf
      * xaxis_function *
      ******************/
 
+    /**
+     * @class xaxis_function
+     * @brief View of an axis
+     *
+     * The xaxis_function class is used for creating an expression on axis, e.g.
+     * `auto expr = not_equal(axis1, 2) && axis2 < 2`.
+     *
+     * @tparam F the function type.
+     * @tparam R the result type.
+     * @tparam CT the function argument types.
+     */
     template <class F, class R, class... CT>
     class xaxis_function : public xt::xexpression<xaxis_function<F, R, CT...>>
     {
@@ -64,6 +75,11 @@ namespace xf
      * xaxis_function implementation *
      *********************************/
 
+    /**
+     * Builds an axis function.
+     * @param f the function to apply.
+     * @param e the xaxis_expression_leaf arguments.
+     */
     template <class F, class R, class... CT>
     template <class Func, class>
     inline xaxis_function<F, R, CT...>::xaxis_function(Func&& f, CT... e) noexcept
@@ -72,6 +88,11 @@ namespace xf
     {
     }
 
+    /**
+     * Returns an evaluation of the element at the specified position in the function.
+     * @param selector a selector_sequence_type for selecting the position
+     * where you want to evaluate the function.
+     */
     template <class F, class R, class... CT>
     template <std::size_t N>
     inline auto xaxis_function<F, R, CT...>::operator()(const selector_sequence_type<N>& selector) const -> const_reference
