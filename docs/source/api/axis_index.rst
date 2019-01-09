@@ -13,3 +13,4 @@ Axes
    xaxis_base
    xaxis
    xaxis_default
+   xaxis_view
