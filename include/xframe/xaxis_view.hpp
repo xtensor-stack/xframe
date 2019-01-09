@@ -23,6 +23,23 @@ namespace xf
      * xaxis_view *
      **************/
 
+    /**
+     * @class xaxis_view
+     * @brief View of an axis
+     *
+     * The xaxis_view class is used for modeling a view on an existing axis, i.e.
+     * a subset of this axis. This is done by filtering the labels of the axis.
+     * No copy is involved. This class is used as a building block for view on
+     * coordinates. This class is intended to be used with \c xaxis_variant, so the
+     * label template parameter is a type list rather than a simple type.
+     * 
+     * @tparam L the type list of labels.
+     * @tparam T the integer type used to represent positions.
+     * @tparam MT the tag used for choosing the map type which holds the label-
+     *            position pairs. Possible values are \c map_tag and \c hash_map_tag.
+     *            Default value is \c hash_map_tag.
+     * @sa xaxis_variant
+     */
     template <class L, class T, class MT = hash_map_tag>
     class xaxis_view
     {
@@ -175,6 +192,11 @@ namespace xf
      * xaxis_view implementation *
      *****************************/
 
+    /**
+     * Builds a sliced view of the specified axis.
+     * @param axis the axis on which the view is built.
+     * @param slice the slice used for filtering labels.
+     */
     template <class L, class T, class MT>
     template <class S>
     inline xaxis_view<L, T, MT>::xaxis_view(const axis_type& axis, S&& slice)
@@ -182,36 +204,62 @@ namespace xf
     {
     }
 
+    /**
+     * Converts this view into a real axis. The view itself is not modified,
+     * a new axis is created from the filtered labels. This conversion operator
+     * allows to pass a view to methods that accept regular axes, however it
+     * might not be convenient for explicit conversion. Prefer \as_xaxis in this
+     * case.
+     * @sa as_xaxis
+     */
     template <class L, class T, class MT>
     inline xaxis_view<L, T, MT>::operator axis_type() const
     {
         return m_axis.filter([this](const auto& arg) { return this->contains(arg); }, size());
     }
 
+    /**
+     * Returns the list of labels in the view. Since the view does not hold
+     * any data, this list is created upon demand. The filtered labels are
+     * copied into it.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::labels() const -> label_list
     {
         return label_list(m_axis.labels(), m_slice);
     }
 
+    /**
+     * Return the \c i-th label of the view.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::label(size_type i) const -> key_type
     {
         return m_axis.label(m_slice(i));
     }
 
+    /**
+     * Checks if the view has no labels.
+     */
     template <class L, class T, class MT>
     inline bool xaxis_view<L, T, MT>::empty() const
     {
         return size() == 0;
     }
 
+    /**
+     * Returns the number of labels in the axis.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::size() const -> size_type
     {
         return m_slice.size();
     }
 
+    /**
+     * Returns true if the view contains the speficied label.
+     * @param key the label to search for.
+     */
     template <class L, class T, class MT>
     inline bool xaxis_view<L, T, MT>::contains(const key_type& key) const
     {
@@ -223,6 +271,11 @@ namespace xf
         return false;
     }
 
+    /**
+     * Returns the position of the specified label in the underlying axis.
+     * If this last one is not found, an exception is thrown.
+     * @param key the label to search for.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::operator[](const key_type& key) const -> mapped_type
     {
@@ -237,12 +290,21 @@ namespace xf
         }
     }
 
+    /**
+     * Get the label mapped to the specified position in the view, and returns
+     * it position in the underlying axis.
+     * @param label_index the index of the label in the view.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::index(size_type label_index) const -> mapped_type
     {
         return this->operator[](label(label_index));
     }
 
+    /**
+     * Builds an return a new axis by applying the given filter to the view.
+     * @param f the filter used to select the labels to keep in the new axis.
+     */
     template <class L, class T, class MT>
     template <class F>
     inline auto xaxis_view<L, T, MT>::filter(const F& f) const -> axis_type
@@ -250,6 +312,13 @@ namespace xf
         return m_axis.filter([&f, this](const auto& arg) { return f(arg) && this->contains(arg); });
     }
 
+    /**
+     * Builds an return a new axis by applying the given filter to the view. When
+     * the size of the new list of labels is known, this method allows some
+     * optimizations compared to the previous one.
+     * @param f the filter used to select the labels to keep in the new axis.
+     * @param size the size of the new label list.
+     */
     template <class L, class T, class MT>
     template <class F>
     inline auto xaxis_view<L, T, MT>::filter(const F& f, size_type size) const -> axis_type
@@ -257,6 +326,11 @@ namespace xf
         return m_axis.filter([&f, this](const auto& arg) { return f(arg) && this->contains(arg); }, size);
     }
 
+    /**
+     * Returns a constant iterator to the element with label equivalent to \c key. If
+     * no such element is found, past-the-end iterator is returned.
+     * @param key the label to search for.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::find(const key_type& key) const -> const_iterator
     {
@@ -271,24 +345,40 @@ namespace xf
         }
     }
 
+    /**
+     * Returns a constant iterator to the first element of the view.
+     * This element is a pair label - position.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::begin() const -> const_iterator
     {
         return cbegin();
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element
+     * of the view.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::end() const -> const_iterator
     {
         return cend();
     }
 
+    /**
+     * Returns a constant iterator to the first element of the view.
+     * This element is a pair label - position.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::cbegin() const -> const_iterator
     {
         return const_iterator(m_axis.cbegin() + m_slice(0u), &m_slice, 0u);
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element
+     * of the view.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::cend() const -> const_iterator
     {
@@ -296,66 +386,122 @@ namespace xf
         return const_iterator(m_axis.cbegin() + inc, &m_slice, size());
     }
 
+    /**
+     * Returns a constant iterator to the first element of the reverse view.
+     * This element is a pair labal - position.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::rbegin() const -> const_reverse_iterator
     {
         return const_reverse_iterator(end());
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element
+     * of the reversed view.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::rend() const -> const_reverse_iterator
     {
         return const_reverse_iterator(begin());
     }
 
+    /**
+     * Returns a constant iterator to the first element of the reverse view.
+     * This element is a pair labal - position.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::crbegin() const -> const_reverse_iterator
     {
         return const_reverse_iterator(cend());
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element
+     * of the reversed view.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::crend() const -> const_reverse_iterator
     {
         return const_reverse_iterator(cbegin());
     }
 
+    /**
+     * Converts this view into a real axis. The view itself is not modified,
+     * a new axis is created from the filtered labels. 
+     */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::as_xaxis() const -> axis_type
     {
         return m_axis.as_xaxis();
     }
 
+    /**
+     * Returns true is \c lhs and \d rhs are equivalent axes, i.e. they contain the same
+     * label - position pairs.
+     * @lhs an axis.
+     * @rhs an axis.
+     */
     template <class L, class T, class MT>
     inline bool operator==(const xaxis_view<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
     {
         return lhs.labels() == rhs.labels();
     }
 
+    /**
+     * Returns true is \c lhs and \d rhs are not equivalent axes, i.e. they contain different
+     * label - position pairs.
+     * @lhs an axis.
+     * @rhs an axis.
+     */
     template <class L, class T, class MT>
     inline bool operator!=(const xaxis_view<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
     {
         return !(lhs == rhs);
     }
 
+    /**
+     * Returns true is \c lhs and \d rhs are equivalent axes, i.e. they contain the same
+     * label - position pairs.
+     * @lhs an axis.
+     * @rhs an axis.
+     */
     template <class L, class T, class MT>
     inline bool operator==(const xaxis_view<L, T, MT>& lhs, const xaxis_variant<L, T, MT>& rhs) noexcept
     {
         return lhs.labels() == rhs.labels();
     }
 
+    /**
+     * Returns true is \c lhs and \d rhs are equivalent axes, i.e. they contain the same
+     * label - position pairs.
+     * @lhs an axis.
+     * @rhs an axis.
+     */
     template <class L, class T, class MT>
     inline bool operator==(const xaxis_variant<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
     {
         return rhs == lhs;
     }
 
+    /**
+     * Returns true is \c lhs and \d rhs are not equivalent axes, i.e. they contain different
+     * label - position pairs.
+     * @lhs an axis.
+     * @rhs an axis.
+     */
     template <class L, class T, class MT>
     inline bool operator!=(const xaxis_view<L, T, MT>& lhs, const xaxis_variant<L, T, MT>& rhs) noexcept
     {
         return !(lhs == rhs);
     }
 
+    /**
+     * Returns true is \c lhs and \d rhs are not equivalent axes, i.e. they contain different
+     * label - position pairs.
+     * @lhs an axis.
+     * @rhs an axis.
+     */
     template <class L, class T, class MT>
     inline bool operator!=(const xaxis_variant<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
     {

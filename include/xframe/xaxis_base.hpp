@@ -225,7 +225,6 @@ namespace xf
 
     /**
      * Returns the number of labels in the axis.
-     * @return the number of labels
      */
     template <class D>
     inline auto xaxis_base<D>::size() const noexcept -> size_type
