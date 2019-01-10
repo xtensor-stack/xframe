@@ -486,6 +486,12 @@ namespace xf
      * @name Set operations
      */
     //@{
+    /**
+     * Merges all the axes arguments into this ones. After this function call,
+     * the axis contains all the labels from all the arguments.
+     * @param axes the axes to merge.
+     * @return true is the axis already contained all the labels.
+     */
     template <class L, class T, class MT>
     template <class... Args>
     inline bool xaxis<L, T, MT>::merge(const Args&... axes)
@@ -493,6 +499,12 @@ namespace xf
         return this->empty() ? merge_empty(axes...) : merge_impl(axes...);
     }
 
+    /**
+     * Replaces the labels with the intersection of the labels of
+     * the axes arguments and the labels of this axis.
+     * @param axes the axes to intersect.
+     * @return true if the intersection is equivalent to this axis.
+     */
     template <class L, class T, class MT>
     template <class... Args>
     inline bool xaxis<L, T, MT>::intersect(const Args&... axes)
