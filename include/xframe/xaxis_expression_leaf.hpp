@@ -25,6 +25,18 @@ namespace xf
      * xaxis_expression_leaf *
      *************************/
 
+    /**
+     * @class xaxis_expression_leaf
+     * @brief An subset of an expression on axis
+     *
+     * The xaxis_expression_leaf class is used with xaxis_function for creating
+     * an expression on xnamed_axis, e.g. `auto expr = not_equal(axis1, 2) && axis2 < 3`.
+     * In the example above, `axis1`, `axis2` are xnamed_axis which will be converted to
+     * xaxis expression leaves before stored in the xaxis_function object.
+     *
+     * @tparam CTA the named axis type.
+     * @sa xaxis_function
+     */
     template <class CTA>
     class xaxis_expression_leaf : public xt::xexpression<xaxis_expression_leaf<CTA>>
     {
@@ -60,6 +72,10 @@ namespace xf
      * xaxis_expression_leaf implementation *
      ****************************************/
 
+    /**
+     * Builds an xaxis_expression_leaf.
+     * @param n_axis the xnamed_axis.
+     */
     template <class CTA>
     template <class AX>
     inline xaxis_expression_leaf<CTA>::xaxis_expression_leaf(AX&& n_axis) noexcept
@@ -67,6 +83,10 @@ namespace xf
     {
     }
 
+    /**
+     * Returns the label from the xnamed_axis, given a selector.
+     * @param selector a selector_sequence_type.
+     */
     template <class CTA>
     template <std::size_t N>
     auto xaxis_expression_leaf<CTA>::operator()(const selector_sequence_type<N>& selector) const -> const_reference

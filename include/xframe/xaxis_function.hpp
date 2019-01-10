@@ -26,14 +26,15 @@ namespace xf
 
     /**
      * @class xaxis_function
-     * @brief View of an axis
+     * @brief An expression of xaxis
      *
-     * The xaxis_function class is used for creating an expression on axis, e.g.
+     * The xaxis_function class is used for creating an expression on named axis, e.g.
      * `auto expr = not_equal(axis1, 2) && axis2 < 2`.
      *
      * @tparam F the function type.
      * @tparam R the result type.
      * @tparam CT the function argument types.
+     * @sa xaxis_expression_leaf
      */
     template <class F, class R, class... CT>
     class xaxis_function : public xt::xexpression<xaxis_function<F, R, CT...>>
@@ -78,7 +79,7 @@ namespace xf
     /**
      * Builds an axis function.
      * @param f the function to apply.
-     * @param e the xaxis_expression_leaf arguments.
+     * @param e the function arguments.
      */
     template <class F, class R, class... CT>
     template <class Func, class>
@@ -89,7 +90,18 @@ namespace xf
     }
 
     /**
-     * Returns an evaluation of the element at the specified position in the function.
+     * Returns an evaluation of the xaxis_function.
+     * Example:
+     * \code{.cpp}
+     * auto axis1 = named_axis("abs", axis(16));
+     * auto axis2 = named_axis("ord", axis({'a', 'c', 'i'}));
+     *
+     * auto func1 = axis1 < 5 && not_equal(axis2, 'i');
+     *
+     * // This will evaluate the xaxis_function for `axis1.label(10) == 9` and `axis2.label(1) == 'c'``
+     * func1({{"abs", 10}, {"ord", 1}});
+     * \endcode
+     *
      * @param selector a selector_sequence_type for selecting the position
      * where you want to evaluate the function.
      */
