@@ -84,6 +84,21 @@ namespace xf
      * xaxis_variant *
      *****************/
 
+    /**
+     * @class xaxis_variant
+     * @brief Axis whose label type is a variant
+     *
+     * The xaxis_variant holds a variant of axes with different label types. It
+     * provides the same API as a regular axis, wrapping the visitor mechanism
+     * required to access the underlying axis. This allows to store axes with
+     * different label types in a coordinate system.
+     *
+     * @tparam L the type list of labels
+     * @tparam T the integer type used to represent positions.
+     * @tparam MT the tag used for choosing the map type which holds the label-
+     *            position pairs. Possible values are \c map_tag and \c hash_map_tag.
+     *            Default value is \c hash_map_tag.
+     */
     template <class L, class T, class MT = hash_map_tag>
     class xaxis_variant
     {
@@ -234,6 +249,16 @@ namespace xf
      * xaxis_variant implementation *
      ********************************/
 
+    /**
+     * @name Constructors
+     */
+    //@{
+    /**
+     * Constructs an xaxis_variant from the specified xaxis. This latter is copied
+     * in the variant.
+     * @tparam LB the label type of the axis argument.
+     * @param axis the axis to copy in the variant.
+     */
     template <class L, class T, class MT>
     template <class LB>
     inline xaxis_variant<L, T, MT>::xaxis_variant(const xaxis<LB, T, MT>& axis)
@@ -241,6 +266,12 @@ namespace xf
     {
     }
 
+    /**
+     * Constructs an xaxis_variant from the specified xaxis. This latter is moved in
+     * the variant.
+     * @tparam LB the label type of the axis argument.
+     * @param axis the axis to move in the variant.
+     */
     template <class L, class T, class MT>
     template <class LB>
     inline xaxis_variant<L, T, MT>::xaxis_variant(xaxis<LB, T, MT>&& axis)
@@ -248,6 +279,12 @@ namespace xf
     {
     }
 
+    /**
+     * Constructs an xaxis_variant from the specified xaxis_default. This latter is
+     * copied in the variant.
+     * @tparam LB the label type of the axis argument.
+     * @param axis the axis to copy in the variant.
+     */
     template <class L, class T, class MT>
     template <class LB>
     inline xaxis_variant<L, T, MT>::xaxis_variant(const xaxis_default<LB, T>& axis)
@@ -255,6 +292,12 @@ namespace xf
     {
     }
 
+    /**
+     * Constructs an xaxis_variant from the specified xaxis_default. This latter
+     * is moved in the variant.
+     * @tparam LB the label type of the axis argument.
+     * @param axis the axis to move in the variant.
+     */
     template <class L, class T, class MT>
     template <class LB>
     inline xaxis_variant<L, T, MT>::xaxis_variant(xaxis_default<LB, T>&& axis)
@@ -262,36 +305,67 @@ namespace xf
     {
     }
 
+    //@}
+
+    /**
+     * @name Labels
+     */
+    //@{
+    /**
+     * Returns the list of labels contained in the axis.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::labels() const -> label_list
     {
         return xtl::visit([](auto&& arg) -> label_list { return arg.labels(); }, m_data);
     };
 
+    /**
+     * Return the i-th label of the axis.
+     * @param i the position of the label.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::label(size_type i) const -> key_type
     {
         return xtl::visit([i](auto&& arg) -> key_type { return arg.labels()[i]; }, m_data);
     }
 
+    /**
+     * Checks if the axis has no labels.
+     */
     template <class L, class T, class MT>
     inline bool xaxis_variant<L, T, MT>::empty() const
     {
         return xtl::visit([](auto&& arg) { return arg.empty(); }, m_data);
     }
 
+    /**
+     * Returns the number of labels in the axis.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::size() const -> size_type
     {
         return xtl::visit([](auto&& arg) { return arg.size(); }, m_data);
     }
 
+    /**
+     * Returns true if the labels list is sorted.
+     */
     template <class L, class T, class MT>
     inline bool xaxis_variant<L, T, MT>::is_sorted() const noexcept
     {
         return xtl::visit([](auto&& arg) { return arg.is_sorted(); }, m_data);
     }
+    //@}
 
+    /**
+      * @name Data
+     */
+    //@{
+    /**
+     * Returns true if the axis contains the speficied label.
+     * @param key the label to search for.
+     */
     template <class L, class T, class MT>
     inline bool xaxis_variant<L, T, MT>::contains(const key_type& key) const
     {
@@ -303,6 +377,11 @@ namespace xf
         return xtl::visit(lambda, m_data);
     }
 
+    /**
+     * Returns the position of the specified label. If this last one is
+     * not found, an exception is thrown.
+     * @param key the label to search for.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::operator[](const key_type& key) const -> mapped_type
     {
@@ -313,7 +392,16 @@ namespace xf
         };
         return xtl::visit(lambda, m_data);
     }
+    //@}
 
+    /**
+     * @name Filters
+     */
+    //@{
+    /**
+     * Builds an return a new axis by applying the given filter to the axis.
+     * @param f the filter used to select the labels to keep in the new axis.
+     */
     template <class L, class T, class MT>
     template <class F>
     inline auto xaxis_variant<L, T, MT>::filter(const F& f) const -> self_type
@@ -321,13 +409,30 @@ namespace xf
         return xtl::visit([&f](const auto& arg) { return self_type(arg.filter(f)); }, m_data);
     }
 
+    /**
+     * Builds an return a new axis by applying the given filter to the axis. When
+     * the size of the new list of labels is known, this method allows some
+     * optimizations compared to the previous one.
+     * @param f the filter used to select the labels to keep in the new axis.
+     * @param size the size of the new label list.
+     */
     template <class L, class T, class MT>
     template <class F>
     inline auto xaxis_variant<L, T, MT>::filter(const F& f, size_type size) const -> self_type
     {
         return xtl::visit([&f, size](const auto& arg) { return self_type(arg.filter(f, size)); }, m_data);
     }
+    //@}
 
+    /**
+     * @name Iterators
+     */
+    //@{
+    /**
+     * Returns a constant iterator to the element with label equivalent to \c key. If
+     * no such element is found, past-the-end iterator is returned.
+     * @param key the label to search for.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::find(const key_type& key) const -> const_iterator
     {
@@ -339,53 +444,86 @@ namespace xf
         return xtl::visit(lambda, m_data);
     }
 
+    /**
+     * Returns a constant iterator to the first element of the axis.
+     * This element is a pair label - position.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::begin() const -> const_iterator
     {
         return cbegin();
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element
+     * of the axis.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::end() const -> const_iterator
     {
         return cend();
     }
 
+    /**
+     * Returns a constant iterator to the first element of the axis.
+     * This element is a pair label - position.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::cbegin() const -> const_iterator
     {
         return xtl::visit([](auto&& arg) { return subiterator(arg.cbegin()); }, m_data);
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element
+     * of the axis.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::cend() const -> const_iterator
     {
         return xtl::visit([](auto&& arg) { return subiterator(arg.cend()); }, m_data);
     }
 
+    /**
+     * Returns a constant iterator to the first element of the reverse axis.
+     * This element is a pair labal - position.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::rbegin() const -> const_reverse_iterator
     {
         return crbegin();
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element
+     * of the reversed axis.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::rend() const -> const_reverse_iterator
     {
         return crend();
     }
 
+    /**
+     * Returns a constant iterator to the first element of the reverse axis.
+     * This element is a pair labal - position.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::crbegin() const -> const_reverse_iterator
     {
         return xtl::visit([](auto&& arg) { return subiterator(arg.cend()); }, m_data);
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element
+     * of the reversed axis.
+     */
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::crend() const -> const_reverse_iterator
     {
         return xtl::visit([](auto&& arg) { return subiterator(arg.cbegin()); }, m_data);
     }
+    //@}
 
     template <class L, class T, class MT, class K>
     struct xaxis_variant_adaptor
@@ -415,6 +553,16 @@ namespace xf
         const axis_variant_type& m_axis;
     };
 
+    /**
+     * @name Set operations
+     */
+    //@{
+    /**
+     * Merges all the axes arguments into this ones. After this function call,
+     * the axis contains all the labels from all the arguments.
+     * @param axes the axes to merge.
+     * @return true is the axis already contained all the labels.
+     */
     template <class L, class T, class MT>
     template <class... Args>
     inline bool xaxis_variant<L, T, MT>::merge(const Args&... axes)
@@ -427,6 +575,12 @@ namespace xf
         return xtl::visit(lambda, m_data);
     }
 
+    /**
+     * Replaces the labels with the intersection of the labels of
+     * the axes arguments and the labels of this axis.
+     * @param axes the axes to intersect.
+     * @return true if the intersection is equivalent to this axis.
+     */
     template <class L, class T, class MT>
     template <class... Args>
     inline bool xaxis_variant<L, T, MT>::intersect(const Args&... axes)
@@ -438,6 +592,7 @@ namespace xf
         };
         return xtl::visit(lambda, m_data);
     }
+    //@}
 
     template <class L, class T, class MT>
     inline auto xaxis_variant<L, T, MT>::as_xaxis() const -> self_type
@@ -445,12 +600,22 @@ namespace xf
         return xtl::visit([](auto&& arg) { return self_type(xaxis<typename std::decay_t<decltype(arg)>::key_type, T, MT>(arg)); }, m_data);
     }
 
+    /**
+     * Returns true is this axis and \d rhs are equivalent axes, i.e. they contain the same
+     * label - position pairs.
+     * @rhs an axis.
+     */
     template <class L, class T, class MT>
     inline bool xaxis_variant<L, T, MT>::operator==(const self_type& rhs) const
     {
         return m_data == rhs.m_data;
     }
 
+    /**
+     * Returns true is this axis and \d rhs are not equivalent axes, i.e. they contain different
+     * label - position pairs.
+     * @rhs an axis.
+     */
     template <class L, class T, class MT>
     inline bool xaxis_variant<L, T, MT>::operator!=(const self_type& rhs) const
     {
