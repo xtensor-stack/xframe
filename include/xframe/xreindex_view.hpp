@@ -23,9 +23,6 @@ namespace xf
      *****************/
 
     template <class CT>
-    class xreindex_view;
-
-    template <class CT>
     class xreindex_view : public xt::xexpression<xreindex_view<CT>>
     {
     public:
