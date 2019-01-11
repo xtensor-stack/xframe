@@ -45,7 +45,7 @@ namespace xf
 #define XFRAME_TRACE_BROADCAST_DIMENSIONS(lhs, rhs)
 #define XFRAME_TRACE_DIMENSIONS_RESULT(res, trivial)
 #define XFRAME_TRACE_BROADCAST_COORDINATES(lhs, rhs)
-#define XFRAME_TRACE_COORDINATES_RESULT(res, trivial) 
+#define XFRAME_TRACE_COORDINATES_RESULT(res, trivial)
 #endif
 
 }

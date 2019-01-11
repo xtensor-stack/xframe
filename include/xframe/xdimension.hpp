@@ -109,7 +109,7 @@ namespace xf
 
     template <class L = fstring, class T = std::size_t>
     xdimension<L, T> dimension(std::initializer_list<const char*> init) noexcept;
-    
+
     /*****************************
      * is_dimension metafunction *
      *****************************/

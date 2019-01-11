@@ -49,7 +49,7 @@ namespace xf
         using pointer = typename xexpression_type::pointer;
         using const_pointer = typename xexpression_type::const_pointer;
         using size_type = typename xexpression_type::size_type;
-        using difference_type = typename xexpression_type::difference_type; 
+        using difference_type = typename xexpression_type::difference_type;
 
         using iterable_base = xt::xconst_iterable<self_type>;
         using inner_shape_type = typename iterable_base::inner_shape_type;
@@ -160,7 +160,7 @@ namespace xf
 
     template <class RV>
     template <class S>
-    inline auto xreindex_data<RV>::operator[](const S& index) const -> xt::disable_integral_t<S, const_reference> 
+    inline auto xreindex_data<RV>::operator[](const S& index) const -> xt::disable_integral_t<S, const_reference>
     {
         index_type idx = xtl::forward_sequence<index_type, const S&>(index);
         return m_e.element(std::move(idx));
@@ -210,7 +210,7 @@ namespace xf
     {
         return const_stepper(this, size_type(0));
     }
-    
+
     template <class RV>
     template <class S>
     inline auto xreindex_data<RV>::stepper_end(const S& shape, xt::layout_type l) const noexcept -> const_stepper
