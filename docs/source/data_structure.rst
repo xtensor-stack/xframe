@@ -195,5 +195,20 @@ object. In the code below, the mapping is different from the previous defined va
                                         {"city",  xf::axis({"London", "Paris", "Brussels"})}}),
                         xf::dimension({"city", "group"}));
 
+Summary
+-------
+
++-------------------------+---------------------------------------------------------+
+| ``xaxis``               | mapping of labels - positions in a given dimension (1D) |
++-------------------------+---------------------------------------------------------+
+| ``xcoordinate``         | mapping of dimension names - ``xaxis``                  |
++-------------------------+---------------------------------------------------------+
+| ``xdimension``          | mapping of dimension names - dimension positions        |
++-------------------------+---------------------------------------------------------+
+| ``xcoordinate_system``  | ``xcoordinate`` + ``xdimension``                        |
++-------------------------+---------------------------------------------------------+
+| ``xvariable``           | ``xcoordinate_system`` + ``data``                       |
++-------------------------+---------------------------------------------------------+
+
 .. _pandas: https://pandas.pydata.org
 

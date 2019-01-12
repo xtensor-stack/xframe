@@ -601,7 +601,7 @@ namespace xf
     }
 
     /**
-     * Returns true is this axis and \d rhs are equivalent axes, i.e. they contain the same
+     * Returns true is this axis and \c rhs are equivalent axes, i.e. they contain the same
      * label - position pairs.
      * @rhs an axis.
      */
@@ -612,7 +612,7 @@ namespace xf
     }
 
     /**
-     * Returns true is this axis and \d rhs are not equivalent axes, i.e. they contain different
+     * Returns true is this axis and \c rhs are not equivalent axes, i.e. they contain different
      * label - position pairs.
      * @rhs an axis.
      */
