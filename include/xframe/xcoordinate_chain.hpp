@@ -111,7 +111,7 @@ namespace xf
 
     template <class OS, class C>
     std::ostream& operator<<(std::ostream& out, const xcoordinate_chain<C>& c);
-    
+
     template <class C>
     xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& new_coord);
 
@@ -211,7 +211,7 @@ namespace xf
         auto iter = m_reindex.find(key.first);
         return iter != m_reindex.end() ? (iter->second)[key.second] : m_sub_coordinate[key.first][key.second];
     }
-    
+
     template <class C>
     inline auto xcoordinate_chain<C>::initial_coordinates() const -> const coordinate_type&
     {

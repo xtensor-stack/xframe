@@ -264,13 +264,13 @@ namespace xf
 
     template <class L = XFRAME_DEFAULT_LABEL_LIST, class T>
     detail::enable_container_t<T, xaxis_slice<L>> keep(T&& indices);
-  
+
     template <class L = XFRAME_DEFAULT_LABEL_LIST, class T>
     detail::disable_container_t<T, xaxis_slice<L>> keep(T index);
 
     template <class L = XFRAME_DEFAULT_LABEL_LIST, class T0, class T1, class... Args>
     xaxis_slice<L> keep(T0 t0, T1 t1, Args... args);
-     
+
     template <class L = XFRAME_DEFAULT_LABEL_LIST, class T>
     detail::enable_container_t<T, xaxis_slice<L>> drop(T&& indices);
 
@@ -364,7 +364,7 @@ namespace xf
         res.normalize(axis.size());
         return res;
     }
-    
+
     /****************************
      * xaxis_drop_implemenation *
      ****************************/
@@ -496,7 +496,7 @@ namespace xf
     {
         return detail::common_drop_keep<xaxis_keep_slice, L>(std::forward<T>(indices));
     }
-  
+
     template <class L, class T>
     inline detail::disable_container_t<T, xaxis_slice<L>> keep(T index)
     {
@@ -514,7 +514,7 @@ namespace xf
     {
         return detail::common_drop_keep<xaxis_drop_slice, L>(std::forward<T>(indices));
     }
-  
+
     template <class L, class T>
     inline detail::disable_container_t<T, xaxis_slice<L>> drop(T index)
     {

@@ -17,7 +17,7 @@ namespace xf
     /*********************
      * xdynamic_variable *
      *********************/
-    
+
     // T should be one of the following options:
     // - xtl::any
     // - xtl::variant<T0, T1, ... Tn>

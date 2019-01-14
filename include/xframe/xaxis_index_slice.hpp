@@ -80,7 +80,7 @@ namespace xf
     /*********************
      * Builder functions *
      *********************/
-    
+
     template <class A>
     auto irange(A start_val);
 

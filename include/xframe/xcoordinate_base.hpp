@@ -225,7 +225,7 @@ namespace xf
     inline bool operator==(const xcoordinate_base<K, A1>& lhs, const xcoordinate_base<K, A2>& rhs)
     {
         bool res = lhs.size() == rhs.size();
-        
+
         auto liter = lhs.cbegin();
         auto lend = lhs.cend();
         auto riter = rhs.cbegin();

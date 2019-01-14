@@ -17,13 +17,10 @@
 
 namespace xf
 {
-    
+
     /*****************
      * xreindex_view *
      *****************/
-
-    template <class CT>
-    class xreindex_view;
 
     template <class CT>
     class xreindex_view : public xt::xexpression<xreindex_view<CT>>
@@ -39,7 +36,7 @@ namespace xf
         using const_pointer = pointer;
         using size_type = typename xexpression_type::size_type;
         using difference_type = typename xexpression_type::difference_type;
-        
+
         using shape_type = typename xexpression_type::shape_type;
         using data_type = xreindex_data<self_type>;
 
@@ -72,7 +69,7 @@ namespace xf
 
         template <class E>
         xreindex_view(E&& e, const coordinate_map& new_coord);
-        
+
         template <class E>
         xreindex_view(E&& e, coordinate_map&& new_coord);
 
@@ -97,10 +94,10 @@ namespace xf
 
         template <std::size_t N = dynamic()>
         const_reference element(index_type<N>&& index) const;
-    
+
         template <class... Args>
         const_reference locate(Args&&... args) const;
-    
+
         template <std::size_t N = dynamic()>
         const_reference locate_element(const locator_sequence_type<N>& locator) const;
 
@@ -165,7 +162,7 @@ namespace xf
     auto reindex_like(E1&& e1, const E2& e2);
 
     /********************************
-     * xreindex_view implmeentation *
+     * xreindex_view implementation *
      ********************************/
 
     template <class CT>
@@ -283,7 +280,7 @@ namespace xf
     {
         return element_impl<N>(std::move(index));
     }
-    
+
     template <class CT>
     template <class... Args>
     inline auto xreindex_view<CT>::locate(Args&&... args) const -> const_reference
@@ -292,7 +289,7 @@ namespace xf
         using loc_value_type = typename locator_sequence_type<N>::value_type;
         return locate_element_impl<N>(locator_sequence_type<N>{loc_value_type(args)...});
     }
-    
+
     template <class CT>
     template <std::size_t N>
     inline auto xreindex_view<CT>::locate_element(const locator_sequence_type<N>& locator) const -> const_reference
@@ -334,7 +331,7 @@ namespace xf
     {
         return iselect_impl<N>(std::move(selector));
     }
-    
+
     template <class CT>
     inline void xreindex_view<CT>::init_shape()
     {
@@ -345,7 +342,7 @@ namespace xf
             m_shape[i] = coordinates().find(dimension_labels()[i])->second.size();
         }
     }
-   
+
     template <class CT>
     template <std::size_t N, class IDX>
     inline auto xreindex_view<CT>::element_impl(IDX&& index) const -> const_reference
@@ -390,7 +387,7 @@ namespace xf
         }
         return m_e.template locate_element<N>(std::forward<L>(locator));
     }
-    
+
     template <class CT>
     template <class S>
     inline auto xreindex_view<CT>::select_impl(S&& selector) const -> const_reference

@@ -32,7 +32,7 @@ namespace xf
      * No copy is involved. This class is used as a building block for view on
      * coordinates. This class is intended to be used with \c xaxis_variant, so the
      * label template parameter is a type list rather than a simple type.
-     * 
+     *
      * @tparam L the type list of labels.
      * @tparam T the integer type used to represent positions.
      * @tparam MT the tag used for choosing the map type which holds the label-
@@ -428,7 +428,7 @@ namespace xf
 
     /**
      * Converts this view into a real axis. The view itself is not modified,
-     * a new axis is created from the filtered labels. 
+     * a new axis is created from the filtered labels.
      */
     template <class L, class T, class MT>
     inline auto xaxis_view<L, T, MT>::as_xaxis() const -> axis_type

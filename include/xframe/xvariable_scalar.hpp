@@ -87,7 +87,7 @@ namespace xf
     {
         return data().size();
     }
-    
+
     template <class CT>
     inline auto xvariable_scalar<CT>::dimension() const noexcept -> size_type
     {

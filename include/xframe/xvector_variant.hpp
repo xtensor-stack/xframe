@@ -88,7 +88,7 @@ namespace xf
 
         using iterator_traits = detail::xvector_variant_iterator_traits<false, traits>;
         using const_iterator_traits = detail::xvector_variant_iterator_traits<true, traits>;
-        
+
         using iterator = xvector_variant_iterator<iterator_traits>;
         using const_iterator = xvector_variant_iterator<const_iterator_traits>;
 
@@ -145,7 +145,7 @@ namespace xf
 
     protected:
 
-        template <class T, 
+        template <class T,
             std::enable_if_t<
                 !std::is_same<std::decay_t<T>, self_type>::value,
                 bool
@@ -220,7 +220,7 @@ namespace xf
 
         reference operator*() const;
         //pointer operator->() const;
-        
+
         bool equal(const self_type& rhs) const;
         bool less_than(const self_type& rhs) const;
 
@@ -266,7 +266,7 @@ namespace xf
     template <class... L>
     void swap(xvector_variant<L...>& lhs, xvector_variant<L...>& rhs);
 
-    template <class T, class... L> 
+    template <class T, class... L>
     std::vector<T>& xget_vector(xvector_variant<L...>& v);
 
     template <class T, class... L>
@@ -306,7 +306,7 @@ namespace xf
     template <class... L>
     void swap(xvector_variant_ref<L...>& lhs, xvector_variant_ref<L...>& rhs);
 
-    template <class T, class... L> 
+    template <class T, class... L>
     std::vector<T>& xget_vector(xvector_variant_ref<L...>& v);
 
     template <class T, class... L>
@@ -340,7 +340,7 @@ namespace xf
         xvector_variant_cref(self_type&&) = default;
     };
 
-    template <class T, class... L> 
+    template <class T, class... L>
     const std::vector<T>& xget_vector(xvector_variant_cref<L...>& v);
 
     template <class T, class... L>
@@ -406,7 +406,7 @@ namespace xf
     {
         xtl::visit([new_cap](auto& arg) { detail::unwrap(arg).reserve(new_cap); }, m_storage);
     }
-    
+
     template <class T>
     inline auto xvector_variant_base<T>::capacity() const -> size_type
     {
@@ -418,7 +418,7 @@ namespace xf
     {
         xtl::visit([](auto& arg) { detail::unwrap(arg).shrink_to_fit(); }, m_storage);
     }
-    
+
     template <class T>
     inline auto xvector_variant_base<T>::operator[](size_type i) -> reference
     {
@@ -458,7 +458,7 @@ namespace xf
         },
         m_storage);
     }
-    
+
     template <class T>
     inline auto xvector_variant_base<T>::front() -> reference
     {
@@ -468,7 +468,7 @@ namespace xf
         },
         m_storage);
     }
-    
+
     template <class T>
     inline auto xvector_variant_base<T>::front() const -> const_reference
     {
@@ -488,7 +488,7 @@ namespace xf
         },
         m_storage);
     }
-    
+
     template <class T>
     inline auto xvector_variant_base<T>::back() const -> const_reference
     {
@@ -510,7 +510,7 @@ namespace xf
     {
         return xtl::visit([](const auto& arg) { return const_pointer(detail::unwrap(arg).data()); }, m_storage);
     }
-    
+
     template <class T>
     inline auto xvector_variant_base<T>::storage() -> storage_type&
     {
@@ -588,7 +588,7 @@ namespace xf
     {
         return m_storage < rhs.m_storage;
     }
-    
+
     template <class T>
     inline void swap(xvector_variant_base<T>& lhs, xvector_variant_base<T>& rhs)
     {
@@ -729,7 +729,7 @@ namespace xf
         lhs.swap(rhs);
     }
 
-    template <class T, class... L> 
+    template <class T, class... L>
     inline std::vector<T>& xget_vector(xvector_variant<L...>& v)
     {
         return xtl::xget<std::vector<T>>(v.storage());
@@ -770,7 +770,7 @@ namespace xf
         lhs.swap(rhs);
     }
 
-    template <class T, class... L> 
+    template <class T, class... L>
     inline std::vector<T>& xget_vector(xvector_variant_ref<L...>& v)
     {
         return xtl::xget<std::vector<T>&>(v.storage());
@@ -805,7 +805,7 @@ namespace xf
     {
     }
 
-    template <class T, class... L> 
+    template <class T, class... L>
     const std::vector<T>& xget_vector(xvector_variant_cref<L...>& v)
     {
         return xtl::xget<const std::vector<T>&>(v.storage());
