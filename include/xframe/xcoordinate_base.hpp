@@ -22,6 +22,16 @@ namespace xf
      * xcoordinate_base *
      ********************/
 
+    /**
+     * @class xcoordinate_base
+     * @brief Base class for coordinates.
+     *
+     * The xcoordinate_base class defines the common interface for coordinates,
+     * which define the mapping of dimension names to axes.
+     *
+     * @tparam D The derived type, i.e. the inheriting class for which xcoordinate_base
+     *           provides the interface.
+     */
     template <class K, class A>
     class xcoordinate_base
     {
@@ -50,8 +60,8 @@ namespace xf
 
         bool contains(const key_type& key) const;
         bool contains(const key_type& key, const label_type& label) const;
-        const mapped_type& operator[](const key_type& key) const;
 
+        const mapped_type& operator[](const key_type& key) const;
         template <class KB, class LB>
         index_type operator[](const std::pair<KB, LB>& key) const;
 
@@ -129,24 +139,43 @@ namespace xf
     {
     }
 
+    /**
+     * Returns true if the coordinates is empty, i.e. it contains no mapping
+     * of axes with dimension names.
+     */
     template <class K, class A>
     inline bool xcoordinate_base<K, A>::empty() const
     {
         return m_coordinate.empty();
     }
 
+    /**
+     * Returns the number of axes in the coordinates.
+     */
     template <class K, class A>
     inline auto xcoordinate_base<K, A>::size() const -> size_type
     {
         return m_coordinate.size();
     }
 
+    /**
+     * Returns true if the coordinates contains the specified dimension
+     * name.
+     * @param key the dimension name to search for.
+     */
     template <class K, class A>
     inline bool xcoordinate_base<K, A>::contains(const key_type& key) const
     {
         return m_coordinate.find(key) != m_coordinate.end();
     }
 
+    /**
+     * Returns true if the coordinates contains the specified dimension
+     * name and if the axis mapped with this name contains the specified
+     * label.
+     * @param key the dimension name to search for.
+     * @param label the label to search for in the mapped axis.
+     */
     template <class K, class A>
     inline bool xcoordinate_base<K, A>::contains(const key_type& key, const label_type& label) const
     {
@@ -154,12 +183,23 @@ namespace xf
         return iter != m_coordinate.end() ? (iter->second).contains(label) : false;
     }
 
+    /**
+     * Returns the axis mapped to the specified dimension name. If this last one is not
+     * found, throws an exception.
+     * @param key the name of the dimension to search for.
+     */
     template <class K, class A>
     inline auto xcoordinate_base<K, A>::operator[](const key_type& key) const -> const mapped_type&
     {
         return m_coordinate.at(key);
     }
 
+    /**
+     * Returns the position of the specified labels of the axis mapped to the specified
+     * dimension name. Throws an exception if either the dimension name or the label is
+     * not part of this coordinate.
+     * @param key the pair dimension name - label to search for.
+     */
     template <class K, class A>
     template <class KB, class LB>
     inline auto xcoordinate_base<K, A>::operator[](const std::pair<KB, LB>& key) const -> index_type
@@ -167,48 +207,79 @@ namespace xf
         return (*this)[key.first][key.second];
     }
 
+    /**
+     * Returns the container of the dimension names to axes mapping.
+     */
     template <class K, class A>
     inline auto xcoordinate_base<K, A>::data() const noexcept -> const map_type&
     {
         return m_coordinate;
     }
 
+    /**
+     * Returns a constant iterator to the axis mapped to the specified dimension name.
+     * If no such element is found, past-the-end iterator is returned.
+     * @param key the dimension name to search for.
+     */
     template <class K, class A>
     inline auto xcoordinate_base<K, A>::find(const key_type& key) const -> const_iterator
     {
         return m_coordinate.find(key);
     }
 
+    /**
+     * Returns a constant iterator to the first element of the coordinates. Such an element
+     * is a pair dimension name - axis.
+     */
     template <class K, class A>
     inline auto xcoordinate_base<K, A>::begin() const noexcept -> const_iterator
     {
         return cbegin();
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element of
+     * the coordinates.
+     */
     template <class K, class A>
     inline auto xcoordinate_base<K, A>::end() const noexcept -> const_iterator
     {
         return cend();
     }
 
+    /**
+     * Returns a constant iterator to the first element of the coordinates. Such an element
+     * is a pair dimension name - axis.
+     */
     template <class K, class A>
     inline auto xcoordinate_base<K, A>::cbegin() const noexcept -> const_iterator
     {
         return m_coordinate.cbegin();
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element of
+     * the coordinates.
+     */
     template <class K, class A>
     inline auto xcoordinate_base<K, A>::cend() const noexcept -> const_iterator
     {
         return m_coordinate.cend();
     }
 
+    /**
+     * Returns a constant iterator to the first dimension name of the coordinates.
+     */
     template <class K, class A>
     inline auto xcoordinate_base<K, A>::key_begin() const noexcept -> key_iterator
     {
         return key_iterator(begin());
     }
 
+    /**
+     * Returns a constant iterator to the element following the last dimension name of
+     * the coordinates.
+     */
     template <class K, class A>
     inline auto xcoordinate_base<K, A>::key_end() const noexcept -> key_iterator
     {
@@ -221,6 +292,12 @@ namespace xf
         return m_coordinate;
     }
 
+    /**
+     * Returns true if \c lhs and \c rhs are equivalent coordinates, i.e. they hold the same
+     * axes mapped to the same dimension names.
+     * @param lhs a coordinate object.
+     * @param rhs a coordinate object.
+     */
     template <class K, class A1, class A2>
     inline bool operator==(const xcoordinate_base<K, A1>& lhs, const xcoordinate_base<K, A2>& rhs)
     {
@@ -238,6 +315,12 @@ namespace xf
         return res;
     }
 
+    /**
+     * Returns true if \c lhs and \c rhs are not equivalent coordinates, i.e. they hold different 
+     * axes or the dimension names to axes mappings are different.
+     * @param lhs a coordinate object.
+     * @param rhs a coordinate object.
+     */
     template <class K, class A1, class A2>
     inline bool operator!=(const xcoordinate_base<K, A1>& lhs, const xcoordinate_base<K, A2>& rhs)
     {

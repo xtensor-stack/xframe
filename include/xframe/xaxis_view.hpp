@@ -208,7 +208,7 @@ namespace xf
      * Converts this view into a real axis. The view itself is not modified,
      * a new axis is created from the filtered labels. This conversion operator
      * allows to pass a view to methods that accept regular axes, however it
-     * might not be convenient for explicit conversion. Prefer \as_xaxis in this
+     * might not be convenient for explicit conversion. Prefer as_xaxis in this
      * case.
      * @sa as_xaxis
      */
@@ -437,10 +437,10 @@ namespace xf
     }
 
     /**
-     * Returns true is \c lhs and \d rhs are equivalent axes, i.e. they contain the same
+     * Returns true is \c lhs and \c d rhs are equivalent axes, i.e. they contain the same
      * label - position pairs.
-     * @lhs an axis.
-     * @rhs an axis.
+     * @param lhs an axis.
+     * @param rhs an axis.
      */
     template <class L, class T, class MT>
     inline bool operator==(const xaxis_view<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
@@ -449,10 +449,10 @@ namespace xf
     }
 
     /**
-     * Returns true is \c lhs and \d rhs are not equivalent axes, i.e. they contain different
+     * Returns true is \c lhs and \c rhs are not equivalent axes, i.e. they contain different
      * label - position pairs.
-     * @lhs an axis.
-     * @rhs an axis.
+     * @param lhs an axis.
+     * @param rhs an axis.
      */
     template <class L, class T, class MT>
     inline bool operator!=(const xaxis_view<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
@@ -461,10 +461,10 @@ namespace xf
     }
 
     /**
-     * Returns true is \c lhs and \d rhs are equivalent axes, i.e. they contain the same
+     * Returns true is \c lhs and \c rhs are equivalent axes, i.e. they contain the same
      * label - position pairs.
-     * @lhs an axis.
-     * @rhs an axis.
+     * @param lhs an axis.
+     * @param rhs an axis.
      */
     template <class L, class T, class MT>
     inline bool operator==(const xaxis_view<L, T, MT>& lhs, const xaxis_variant<L, T, MT>& rhs) noexcept
@@ -473,10 +473,10 @@ namespace xf
     }
 
     /**
-     * Returns true is \c lhs and \d rhs are equivalent axes, i.e. they contain the same
+     * Returns true is \c lhs and \c rhs are equivalent axes, i.e. they contain the same
      * label - position pairs.
-     * @lhs an axis.
-     * @rhs an axis.
+     * @param lhs an axis.
+     * @param rhs an axis.
      */
     template <class L, class T, class MT>
     inline bool operator==(const xaxis_variant<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
@@ -485,10 +485,10 @@ namespace xf
     }
 
     /**
-     * Returns true is \c lhs and \d rhs are not equivalent axes, i.e. they contain different
+     * Returns true is \c lhs and \c rhs are not equivalent axes, i.e. they contain different
      * label - position pairs.
-     * @lhs an axis.
-     * @rhs an axis.
+     * @param lhs an axis.
+     * @param rhs an axis.
      */
     template <class L, class T, class MT>
     inline bool operator!=(const xaxis_view<L, T, MT>& lhs, const xaxis_variant<L, T, MT>& rhs) noexcept
@@ -497,10 +497,10 @@ namespace xf
     }
 
     /**
-     * Returns true is \c lhs and \d rhs are not equivalent axes, i.e. they contain different
+     * Returns true is \c lhs and \c rhs are not equivalent axes, i.e. they contain different
      * label - position pairs.
-     * @lhs an axis.
-     * @rhs an axis.
+     * @param lhs an axis.
+     * @param rhs an axis.
      */
     template <class L, class T, class MT>
     inline bool operator!=(const xaxis_variant<L, T, MT>& lhs, const xaxis_view<L, T, MT>& rhs) noexcept
