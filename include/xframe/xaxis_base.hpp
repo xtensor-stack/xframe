@@ -28,8 +28,8 @@ namespace xf
      * @class xaxis_base
      * @brief Base class for axes.
      *
-     * The xaxis_base class defines the common interface for axes, which define
-     * mapping of position in a given dimension with labels. The axis_base class
+     * The xaxis_base class defines the common interface for axes, which define the
+     * mapping of labels to positions in a given dimension. The axis_base class
      * embeds the list of labels only, the mapping is hold by the inheriting classes.
      *
      * @tparam D The derived type, i.e. the inheriting class for which xaxis_base
@@ -323,10 +323,10 @@ namespace xf
     }
 
     /**
-     * Returns true is \c lhs and \d rhs are equivalent axes, i.e. they contain the same
+     * Returns true is \c lhs and \c rhs are equivalent axes, i.e. they contain the same
      * label - position pairs.
-     * @lhs an axis.
-     * @rhs an axis.
+     * @param lhs an axis.
+     * @param rhs an axis.
      */
     template <class D1, class D2>
     inline bool operator==(const xaxis_base<D1>& lhs, const xaxis_base<D2>& rhs) noexcept
@@ -335,10 +335,10 @@ namespace xf
     }
 
     /**
-     * Returns true is \c lhs and \d rhs are not equivalent axes, i.e. they contain different
+     * Returns true is \c lhs and \c rhs are not equivalent axes, i.e. they contain different
      * label - position pairs.
-     * @lhs an axis.
-     * @rhs an axis.
+     * @param lhs an axis.
+     * @param rhs an axis.
      */
     template <class D1, class D2>
     inline bool operator!=(const xaxis_base<D1>& lhs, const xaxis_base<D2>& rhs) noexcept

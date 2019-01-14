@@ -11,7 +11,7 @@ Data structures
 Axes
 ----
 
-An axis is a mapping of positions in a given dimension with labels. It is the equivalent of
+An axis is a mapping of labels to positions in a given dimension. It is the equivalent of
 the ``index`` object from `pandas`_. `xframe` supports many types of labels, the most common
 are strings, char, integers and dates. An axis is creating from a list of labels, a builder
 function is provided so the type of the axis can be inferred. The following example illustrates
@@ -49,7 +49,7 @@ is to create them and then store them in a coordinate system.
 Coordinates
 -----------
 
-Coordinates are mappings of axes with dimension names. `xframe` provides different methods
+Coordinates are mappings of dimension names to axes. `xframe` provides different methods
 to easily create them:
 
 .. code::
@@ -97,7 +97,7 @@ specify a different type list:
 Dimension
 ---------
 
-A dimension object is the mapping of the dimension names with the dimension positions in the
+A dimension object is the mapping of the dimension names to the dimension positions in the
 data tensor. Creating a ``xdimension`` is as simple as creating an ``xcoordinate`` or an
 ``xaxis``:
 
@@ -198,17 +198,17 @@ object. In the code below, the mapping is different from the previous defined va
 Summary
 -------
 
-+-------------------------+---------------------------------------------------------+
-| ``xaxis``               | mapping of labels - positions in a given dimension (1D) |
-+-------------------------+---------------------------------------------------------+
-| ``xcoordinate``         | mapping of dimension names - ``xaxis``                  |
-+-------------------------+---------------------------------------------------------+
-| ``xdimension``          | mapping of dimension names - dimension positions        |
-+-------------------------+---------------------------------------------------------+
-| ``xcoordinate_system``  | ``xcoordinate`` + ``xdimension``                        |
-+-------------------------+---------------------------------------------------------+
-| ``xvariable``           | ``xcoordinate_system`` + ``data``                       |
-+-------------------------+---------------------------------------------------------+
++-------------------------+----------------------------------------------------------+
+| ``xaxis``               | mapping of labels to positions in a given dimension (1D) |
++-------------------------+----------------------------------------------------------+
+| ``xcoordinate``         | mapping of dimension names to ``xaxis``                  |
++-------------------------+----------------------------------------------------------+
+| ``xdimension``          | mapping of dimension names to dimension positions        |
++-------------------------+----------------------------------------------------------+
+| ``xcoordinate_system``  | ``xcoordinate`` + ``xdimension``                         |
++-------------------------+----------------------------------------------------------+
+| ``xvariable``           | ``xcoordinate_system`` + ``data``                        |
++-------------------------+----------------------------------------------------------+
 
 .. _pandas: https://pandas.pydata.org
 

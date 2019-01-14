@@ -60,6 +60,7 @@ for details.
    :maxdepth: 2
 
    api/axis_index
+   api/coordinate_index
 
 .. toctree::
    :caption: MISCELLANEOUS

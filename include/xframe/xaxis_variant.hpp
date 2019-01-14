@@ -603,7 +603,7 @@ namespace xf
     /**
      * Returns true is this axis and \c rhs are equivalent axes, i.e. they contain the same
      * label - position pairs.
-     * @rhs an axis.
+     * @param rhs an axis.
      */
     template <class L, class T, class MT>
     inline bool xaxis_variant<L, T, MT>::operator==(const self_type& rhs) const
@@ -614,7 +614,7 @@ namespace xf
     /**
      * Returns true is this axis and \c rhs are not equivalent axes, i.e. they contain different
      * label - position pairs.
-     * @rhs an axis.
+     * @param rhs an axis.
      */
     template <class L, class T, class MT>
     inline bool xaxis_variant<L, T, MT>::operator!=(const self_type& rhs) const

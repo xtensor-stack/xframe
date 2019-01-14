@@ -66,7 +66,7 @@ namespace xf
      * @brief Class modeling an axis in a coordinate system.
      *
      * The xaxis class is used for modeling general axes; an axis is a mapping
-     * of positions in a given dimension with labels. It is the equivalent of
+     * of labels to positions in a given dimension. It is the equivalent of
      * the \c Index object from <a href="pandas.pydata.org">pandas</a>.
      *
      * @tparam L the type of labels.
@@ -311,7 +311,7 @@ namespace xf
      * specifying if the labels list is sorted. This is an optimization
      * that prevents the constructor to check if the labels list is sorted.
      * The list is copied.
-     * @param labesl th list of labels.
+     * @param labels th list of labels.
      * @param is_sorted a boolean parameter indicating if the labels list
      *                  is sorted.
      */
@@ -327,7 +327,7 @@ namespace xf
      * that prevents the constructor to check if the labels list is sorted.
      * The list is moved and therefore invalid after the axis has been
      * constructed.
-     * @param labesl th list of labels.
+     * @param labels th list of labels.
      * @param is_sorted a boolean parameter indicating if the labels list
      *                  is sorted.
      */
