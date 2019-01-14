@@ -42,6 +42,7 @@ namespace xf
         using dimension_closure_type = dimension_type;
         using key_type = typename coordinate_type::key_type;
         using size_type = typename coordinate_type::size_type;
+        using label_list = typename coordinate_type::label_list;
     };
 
 }
@@ -57,12 +58,13 @@ namespace xt
         using xvariable_expression_type = typename base_type::xvariable_expression_type;
 
         using data_type = typename base_type::data_type;
-        using optional_type = typename data_type::value_type;
 
         using xaxis_expression_type = typename base_type::xaxis_expression_type;
-        using temporary_coordinate_type = xf::xcoordinate<typename base_type::key_type, typename base_type::size_type>;
-        using temporary_data_type = xt::xmasked_view<xarray<typename optional_type::value_type>, xarray<bool>>;
-        using temporary_type = xf::xvariable<temporary_coordinate_type, temporary_data_type>;
+        using temporary_coordinate_type = xf::xcoordinate<typename base_type::key_type,
+                                                          typename base_type::label_list,
+                                                          typename base_type::size_type>;
+        using temporary_data_type = typename std::decay_t<CTV>::temporary_type::data_type;
+        using temporary_type = xf::xvariable_container<temporary_coordinate_type, temporary_data_type>;
     };
 }
 

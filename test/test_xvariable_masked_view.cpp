@@ -235,7 +235,7 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
-        xt::noalias(masked_var) = test_var + 2;
+        masked_var = test_var + 2;
 
         ASSERT_NE(masked_var.data(), test_var.data());
         ASSERT_NE(var.data(), test_var.data());
