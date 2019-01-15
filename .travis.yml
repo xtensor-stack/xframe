@@ -108,12 +108,12 @@ install:
     - hash -r
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda
-    - conda install gtest cmake -c conda-forge
+    - conda install cmake -c conda-forge
     - conda install xtensor=0.19.1 -c conda-forge
     # Testing
     - mkdir build
     - cd build
-    - cmake -DBUILD_TESTS=ON ..;
+    - cmake -DDOWNLOAD_GTEST=ON ..;
     - make -j2 test_xframe
     - cd test
 script:
