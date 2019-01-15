@@ -228,6 +228,7 @@ namespace xf
         auto t20 = v.iselect({{"abscissa", 2}, {"ordinate", 0}});
         auto t21 = v.iselect({{"abscissa", 2}, {"ordinate", 1}});
         auto t22 = v.iselect({{"abscissa", 2}, {"ordinate", 2}});
+        auto t221 = v.iselect({{"abscissa", 2}, {"ordinate", 2}, {"missing_dimension", 1}});
 
         EXPECT_EQ(t00, v(0, 0));
         EXPECT_EQ(t01, v(0, 1));
@@ -238,6 +239,7 @@ namespace xf
         EXPECT_EQ(t20, v(2, 0));
         EXPECT_EQ(t21, v(2, 1));
         EXPECT_EQ(t22, v(2, 2));
+        EXPECT_EQ(t221, v(2, 2));
     }
 
     TEST(xvariable, locate)
