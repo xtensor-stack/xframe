@@ -56,8 +56,9 @@ set(XFRAME_HEADERS
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate_system.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xcoordinate_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xdimension.hpp
-    ${XFRAME_INCLUDE_DIR}/xframe/xdynamic_variable.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xdynamic_variable_impl.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xdynamic_variable.hpp
+    ${XFRAME_INCLUDE_DIR}/xframe/xexpand_dims_view.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_config.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_expression.hpp
     ${XFRAME_INCLUDE_DIR}/xframe/xframe_trace.hpp
