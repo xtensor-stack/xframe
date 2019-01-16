@@ -294,8 +294,9 @@ namespace xf
 
     /**
      * Constructs an axis with the given list of labels. The list is
-     * moved and therefors invalid after the axis has been constructed.
-     * The constructor internally checks whether the list is sorted.
+     * moved and therefore it is invalid after the axis has been
+     * constructed. The constructor internally checks whether the list
+     * is sorted.
      * @param labels the list of labels.
      */
     template <class L, class T, class MT>
@@ -819,7 +820,7 @@ namespace xf
     }
 
     /**
-     * Builds an return an axis from the specified list of labels.
+     * Builds an returns an axis from the specified list of labels.
      * @param init the list of labels.
      * @tparam T the integral type used for positions. Default value
      *           is \c std::size_t.
