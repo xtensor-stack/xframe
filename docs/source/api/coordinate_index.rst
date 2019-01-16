@@ -11,3 +11,4 @@ Coordinates
 .. toctree::
 
    xcoordinate_base
+   xcoordinate

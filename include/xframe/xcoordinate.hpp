@@ -51,6 +51,22 @@ namespace xf
      * xcoordinate *
      ***************/
 
+    /**
+     * @class xcoordinate
+     * @brief Class modeling coordinates
+     *
+     * The xcoordinate class is used for modeling coordinates. Coordinates are mapping
+     * of dimension names to axes. Axes in a xcoordinate object can have different label
+     * types.
+     *
+     * @tparam K the type of dimension names.
+     * @tparam L the type list of axes labels.
+     * @tparam S the integer type used to represent positions in axes. Default value
+     *           is \c std::size_t.
+     * @tparam MT the tag used for choosing the map type which holds the label-
+     *            position pairs in the axes. Possible values are \c map_tag and
+     *            \c hash_map_tag. Default value is \c hash_map_tag.
+     */
     template <class K, class L = XFRAME_DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
     class xcoordinate : public xcoordinate_base<K, xaxis_variant<L, S, MT>>
     {
@@ -220,24 +236,42 @@ namespace xf
     {
     }
 
+    /**
+     * Constructs an xcoordinate object with the given mapping of dimension names
+     * to axes. This mapping is copied.
+     * @param axes the dimension names to axes mapping.
+     */
     template <class K, class L, class S, class MT>
     inline xcoordinate<K, L, S, MT>::xcoordinate(const map_type& axes)
         : base_type(axes)
     {
     }
 
+    /**
+     * Constructs an xcoordinate object with the given mapping of dimension names
+     * to axes. This mapping is moved and therefore it is invalid after the
+     * xcoordinate has been constructed.
+     * @param axes the dimension names to axes mapping.
+     */
     template <class K, class L, class S, class MT>
     inline xcoordinate<K, L, S, MT>::xcoordinate(map_type&& axes)
         : base_type(std::move(axes))
     {
     }
 
+    /**
+     * Constructs an xcoordinate object from the given initializer list of
+     * dimension names - axes pairs.
+     */
     template <class K, class L, class S, class MT>
     inline xcoordinate<K, L, S, MT>::xcoordinate(std::initializer_list<value_type> init)
         : base_type(init)
     {
     }
 
+    /**
+     * Constructs an xcoordinate object from the given named axes.
+     */
     template <class K, class L, class S, class MT>
     template <class... K1, class... LT>
     inline xcoordinate<K, L, S, MT>::xcoordinate(xnamed_axis<K1, S, MT, L, LT>... axes)
@@ -245,12 +279,20 @@ namespace xf
     {
     }
 
+    /**
+     * Removes all the elements from the xcoordinate. After this call, \c size() returns
+     * zero.
+     */
     template <class K, class L, class S, class MT>
     inline void xcoordinate<K, L, S, MT>::clear()
     {
         this->coordinate().clear();
     }
 
+    /**
+     * Broadcast the specified coordinates to this xcoordinate.
+     * @param coordinates the coordinates to broadcast.
+     */
     template <class K, class L, class S, class MT>
     template <class Join, class... Args>
     inline xtrivial_broadcast xcoordinate<K, L, S, MT>::broadcast(const Args&... coordinates)
@@ -389,24 +431,45 @@ namespace xf
      * xcoordinate builders implementation *
      ***************************************/
 
+    /**
+     * Builds and returns an xcoordinate object from the specified
+     * mapping of dimension names to axes. The map is copied.
+     * @param axes the dimension names to axes mapping.
+     */
     template <class K, class L, class S, class MT>
     xcoordinate<K, L, S, MT> coordinate(const std::map<K, xaxis_variant<L, S, MT>>& axes)
     {
         return xcoordinate<K, L, S, MT>(axes);
     }
 
+    /**
+     * Builds and returns an xcoordinate object from the specified
+     * mapping of dimension names to axes. The map is moved, therefore
+     * it is invalid after the xcoordinate object has been built.
+     * @param axes the dimension names to axes mapping.
+     */
     template <class K, class L, class S, class MT>
     xcoordinate<K, L, S, MT> coordinate(std::map<K, xaxis_variant<L, S, MT>>&& axes)
     {
         return xcoordinate<K, L, S, MT>(std::move(axes));
     }
 
+    /**
+     * Builds and returns an xcoordinate object from the specified
+     * list of named axes.
+     * @param axes the list of named axes.
+     */
     template <class K, class... K1, class S, class MT, class L, class LT, class... LT1>
     xcoordinate<K, L, S, MT> coordinate(xnamed_axis<K, S, MT, L, LT> axis, xnamed_axis<K1, S, MT, L, LT1>... axes)
     {
         return xcoordinate<K, L, S, MT>(axis, axes...);
     };
 
+    /**
+     * Broadcast a list of coordinates to the specified output coordinate.
+     * @param output the xcoordinate result.
+     * @param coordinates the list of xcoordinate objects to broadcast.
+     */
     template <class Join, class K, class L, class S, class MT, class... Args>
     inline xtrivial_broadcast broadcast_coordinates(xcoordinate<K, L, S, MT>& output, const Args&... coordinates)
     {
