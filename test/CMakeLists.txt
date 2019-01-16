@@ -90,6 +90,7 @@ set(XFRAME_TESTS
     test_xcoordinate_view.cpp
     test_xdimension.cpp
     test_xdynamic_variable.cpp
+    test_xexpand_dims_view.cpp
     test_xframe_utils.cpp
     test_xnamed_axis.cpp
     test_xreindex_view.cpp
