@@ -19,6 +19,7 @@
 #include "xtensor/xstrided_view.hpp"
 
 #include "xaxis.hpp"
+#include "xcoordinate_expanded.hpp"
 #include "xvariable_base.hpp"
 #include "xvariable.hpp"
 
@@ -35,7 +36,8 @@ namespace xf
         using data_type = xt::xstrided_view<typename xexpression_type::data_type&, xt::svector<std::size_t>>;
         using data_closure_type = data_type;
 
-        using coordinate_type = typename xexpression_type::coordinate_type;
+        using subcoordinate_type = typename xexpression_type::coordinate_type;
+        using coordinate_type = xcoordinate_expanded<subcoordinate_type>;
         using coordinate_closure_type = coordinate_type;
         using dimension_type = typename xexpression_type::dimension_type;
         using dimension_closure_type = dimension_type;
@@ -92,8 +94,8 @@ namespace xf
 
         using shape_type = typename xexpression_type::shape_type;
 
-        using coordinate_type = typename xexpression_type::coordinate_type;
-        using dimension_type = typename xexpression_type::dimension_type;
+        using coordinate_type = typename inner_types::coordinate_type;
+        using dimension_type = typename inner_types::dimension_type;
         using dimension_list = typename dimension_type::label_list;
         using coordinate_map = typename coordinate_type::map_type;
         using key_type = typename coordinate_type::key_type;
@@ -185,13 +187,12 @@ namespace xf
     template <class E>
     inline auto xexpand_dims_view<CT>::init_coordinate(E&& e, const extra_dimensions_type& dims) const noexcept -> coordinate_type
     {
-        // TODO Avoid making a copy by creating something similar to xcoordinate_chain but for extended coordinates
-        auto orig_coordinates_cp = e.coordinates().data();
+        coordinate_map extra_dims;
         for (const auto& dim : dims)
         {
-            orig_coordinates_cp.insert(std::make_pair(dim.first, ::xf::axis(1)));
+            extra_dims.insert(std::make_pair(dim.first, ::xf::axis(1)));
         }
-        return coordinate_type(orig_coordinates_cp);
+        return expand_dims(e.coordinates(), std::move(extra_dims));
     }
 
     template <class CT>

@@ -148,6 +148,9 @@ namespace xf
     template <class C>
     class xcoordinate_chain;
 
+    template <class C>
+    class xcoordinate_expanded;
+
     namespace detail
     {
         template <class T>
@@ -167,6 +170,11 @@ namespace xf
 
         template <class C>
         struct is_coordinate_impl<xcoordinate_chain<C>> : std::true_type
+        {
+        };
+
+        template <class C>
+        struct is_coordinate_impl<xcoordinate_expanded<C>> : std::true_type
         {
         };
 
