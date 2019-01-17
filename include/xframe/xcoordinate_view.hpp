@@ -19,6 +19,23 @@ namespace xf
      * xcoordinate_view *
      ********************/
 
+    /**
+     * @class xcoordinate_view
+     * @brief view of an xcoordinate
+     *
+     * The xcoordinate_view is used for modeling a view on an existing xcoordinate,
+     * i.e. a subset of this xcoordinate. This is done by either ignoring some axes,
+     * or by holding views on axes of the underlying xcoordinate.
+     * 
+     * @tparam K the type of dimension names.
+     * @tparam L the type list of axes labels.
+     * @tparam S the integer type used to represent positions in axes. Default value
+     *           is \c std::size_t.
+     * @tparam MT the tag used for choosing the map type which holds the label-
+     *            position pairs in the axes. Possible values are \c map_tag and
+     *            \c hash_map_tag. Default value is \c hash_map_tag.
+     * @sa xaxis_view
+     */
     template <class K, class L = XFRAME_DEFAULT_LABEL_LIST, class S = std::size_t, class MT = hash_map_tag>
     class xcoordinate_view : public xcoordinate_base<K, xaxis_view<L, S, MT>>
     {
@@ -76,24 +93,46 @@ namespace xf
      * xcoordinate_view implementation *
      ***********************************/
 
+    /**
+     * Constructs an xcoordinate_view with the given mapping of dumension names
+     * to views on axes. The mapping is copied.
+     * @param axes the dimension names to views on axes mapping.
+     */
     template <class K, class L, class S, class MT>
     inline xcoordinate_view<K, L, S, MT>::xcoordinate_view(const map_type& axes)
         : base_type(axes)
     {
     }
 
+    /**
+     * Constructs an xcoordinate_view with the given mapping of dumension names
+     * to views on axes. This mapping is moved and therefore it is invalid after
+     * the xcoordinate_view has been constructed.
+     * @param axes the dimension names to views on axes mapping.
+     */
     template <class K, class L, class S, class MT>
     inline xcoordinate_view<K, L, S, MT>::xcoordinate_view(map_type&& axes)
         : base_type(std::move(axes))
     {
     }
 
+    /**
+     * Builds and returns an xcoordinate_view from the specified mapping of
+     * dimension names to views on axes. The map is copied.
+     * @param axes the dimension names to views on axes mapping.
+     */
     template <class K, class L, class S, class MT>
     inline xcoordinate_view<K, L, S, MT> coordinate_view(const std::map<K, xaxis_view<L, S, MT>>& axes)
     {
         return xcoordinate_view<K, L, S, MT>(axes);
     }
 
+    /**
+     * Builds and returns an xcoordinate_viewfrom the specified mapping of
+     * dimension names to views on axes. The map is moved, therefore it is
+     * invalid after the xcoordinate object has been built.
+     * @param axes the dimension names to views on axes mapping.
+     */
     template <class K, class L, class S, class MT>
     inline xcoordinate_view<K, L, S, MT> coordinate_view(std::map<K, xaxis_view<L, S, MT>>&& axes)
     {

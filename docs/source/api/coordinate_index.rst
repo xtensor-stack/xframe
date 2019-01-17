@@ -12,3 +12,4 @@ Coordinates
 
    xcoordinate_base
    xcoordinate
+   xcoordinate_view
