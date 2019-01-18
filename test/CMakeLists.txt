@@ -87,6 +87,7 @@ set(XFRAME_TESTS
     test_xaxis_view.cpp
     test_xcoordinate.cpp
     test_xcoordinate_chain.cpp
+    test_xcoordinate_expanded.cpp
     test_xcoordinate_view.cpp
     test_xdimension.cpp
     test_xdynamic_variable.cpp
