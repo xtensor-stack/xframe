@@ -106,12 +106,12 @@ namespace xf
         auto c = make_test_coordinate();
         auto cc = make_coordinate_chain(c);
 
-        auto iter = c.key_begin();
+        auto iter = cc.key_begin();
         EXPECT_EQ(*iter, "abscissa");
         ++iter;
         EXPECT_EQ(*iter, "ordinate");
         ++iter;
-        EXPECT_EQ(iter, c.key_end());
+        EXPECT_EQ(iter, cc.key_end());
     }
 
     TEST(xcoordinate_chain, comparison)
@@ -141,4 +141,3 @@ namespace xf
         EXPECT_EQ(cc, c2);
     }
 }
-
