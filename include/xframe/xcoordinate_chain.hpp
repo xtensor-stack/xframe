@@ -18,16 +18,6 @@ namespace xf
     template <class M>
     class xmap_chain_iterator;
 
-    namespace detail
-    {
-        template <class M>
-        struct map_chain_traits
-        {
-            using key_type = typename M::key_type;
-            using subiterator = xmap_chain_iterator<M>;
-        };
-    }
-
     /*********************
      * xcoordinate_chain *
      *********************/
@@ -54,7 +44,7 @@ namespace xf
         using size_type = typename coordinate_type::size_type;
         using difference_type = typename coordinate_type::difference_type;
         using const_iterator = xmap_chain_iterator<map_type>;
-        using key_iterator = xtl::xkey_iterator<detail::map_chain_traits<map_type>>;
+        using key_iterator = xtl::xkey_iterator<self_type>;
 
         xcoordinate_chain(const coordinate_type& sub_coord, const map_type& new_coord);
         xcoordinate_chain(const coordinate_type& sub_coord, map_type&& new_coord);
