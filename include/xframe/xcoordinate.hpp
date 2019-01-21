@@ -300,6 +300,8 @@ namespace xf
     /**
      * Broadcast the specified coordinates to this xcoordinate.
      * @param coordinates the coordinates to broadcast.
+     * @return an object specifying if the labels and the dimension of
+     *         the coordinates are the same.
      */
     template <class K, class L, class S, class MT>
     template <class Join, class... Args>
