@@ -41,7 +41,7 @@ asked a missing key:
         // The exception will be catch since "c" is not a label of s1
         std::cout << e.what() << std::endl;
     }
-    
+
 ``xaxis`` also provides iterators and methods to compute the union and the intersection of
 axes. However a user rarely needs to manipulate the axes directly, the most common operation
 is to create them and then store them in a coordinate system.
@@ -85,7 +85,7 @@ shown below:
 
 As you can notice, coordinates objects can store axes with different label types. By default,
 these types are ``int``, ``std::size_t``, ``char`` and ``xf::fstring``, you can
-specify a different type list: 
+specify a different type list:
 
 .. code::
 
@@ -140,7 +140,7 @@ an ``xdimension`` object. It is the C++ equivalent of the ``xarray.DataArray`` P
     auto dim = xf::dimension({"city", "group"});
 
     variable_type v1(d, c, dim);
-    
+
     // Coordinates and dimension can be built in place
     variable_type v2(d, xf::coordinate({{"group", xf::axis({"a", "b", "d", "e"})},
                                         {"city",  xf::axis({"London", "Paris", "Brussels"})}}),
@@ -169,7 +169,7 @@ A variable can also be created from a map of axes and a list of dimension names:
     variable_type v6(coord_map, dim_list);
 
 If the dimension object is omitted, the dimension mapping is inferred from the coordinate
-object. In the code below, the mapping is different from the previous defined variables, 
+object. In the code below, the mapping is different from the previous defined variables,
 ``group`` is the name of the first dimension and ``city`` is the name of the second one:
 
 .. code::
@@ -198,17 +198,7 @@ object. In the code below, the mapping is different from the previous defined va
 Summary
 -------
 
-+-------------------------+----------------------------------------------------------+
-| ``xaxis``               | mapping of labels to positions in a given dimension (1D) |
-+-------------------------+----------------------------------------------------------+
-| ``xcoordinate``         | mapping of dimension names to ``xaxis``                  |
-+-------------------------+----------------------------------------------------------+
-| ``xdimension``          | mapping of dimension names to dimension positions        |
-+-------------------------+----------------------------------------------------------+
-| ``xcoordinate_system``  | ``xcoordinate`` + ``xdimension``                         |
-+-------------------------+----------------------------------------------------------+
-| ``xvariable``           | ``xcoordinate_system`` + ``data``                        |
-+-------------------------+----------------------------------------------------------+
+.. image:: xframe_summary.png
+   :alt: xframe summay
 
 .. _pandas: https://pandas.pydata.org
-
