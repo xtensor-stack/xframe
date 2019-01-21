@@ -96,8 +96,8 @@ namespace xf
         EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "m"}, {"ordinate", 5}}), masked_value);
         EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "d"}, {"ordinate", 1}}), masked_value);
 
-        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "e"}, {"ordinate", 4}}), masked_value);
-        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "a"}, {"ordinate", 3}}), masked_value);
+        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "e"}, {"ordinate", 4}}), xtl::missing<double>());
+        EXPECT_EQ(masked_var.select<join::outer>({{"abscissa", "a"}, {"ordinate", 3}}), xtl::missing<double>());
     }
 
     TEST(xvariable_masked_view, shape)

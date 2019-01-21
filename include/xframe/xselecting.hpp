@@ -14,6 +14,8 @@
 #include "xtl/xsequence.hpp"
 #include "xtl/xoptional.hpp"
 
+#include "xtensor/xmasked_value.hpp"
+
 #include "xframe_utils.hpp"
 #include "xcoordinate.hpp"
 #include "xdimension.hpp"
@@ -36,6 +38,18 @@ namespace xf
                 static T val = T(0);
                 static B has_val = false;
                 return return_type(val, has_val);
+            }
+        };
+
+        template <class T, class B>
+        struct static_missing_impl<xt::xmasked_value<T, B>>
+        {
+            using return_type = xt::xmasked_value<T, B>;
+            static inline return_type get()
+            {
+                static T val = static_missing_impl<T>::get();
+                static B visible = true;
+                return return_type(val, visible);
             }
         };
 
