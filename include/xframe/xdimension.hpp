@@ -19,6 +19,20 @@ namespace xf
      * xdimension *
      **************/
 
+    /**
+     * @class xdimension
+     * @brief Class modeling dimensions
+     *
+     * The xdimension class is used for modeling the mapping of dimension names
+     * to their positions in a data tensor. This class is a special axis with
+     * a broadcast method instead of merge and intersect, thus its API is really
+     * close the one of \c xaxis.
+     *
+     * @tparam L the type of dimension name.
+     * @tparam T the integer type use to represent the positions of the dimensions.
+     *           Default value is \c std::size_t.
+     * @sa xaxis
+     */
     template <class L, class T = std::size_t>
     class xdimension : private xaxis<L, T, map_tag>
     {
@@ -152,30 +166,54 @@ namespace xf
      * xdimension implementation *
      *****************************/
 
+    /**
+     * Constructs an empty xdimension object.
+     */
     template <class L, class T>
     inline xdimension<L, T>::xdimension()
         : base_type()
     {
     }
 
+    /**
+     * Constructs an xdimension object with the given list of dimension
+     * labels. This list is copied.
+     * @param labels the list of dimension names.
+     */
     template <class L, class T>
     inline xdimension<L, T>::xdimension(const label_list& labels)
         : base_type(labels)
     {
     }
 
+    /**
+     * Constructs an xdimension object with the given list of dimension
+     * labels. This list is moved and therefore it is invalid after the
+     * xdimension object has been constructed.
+     * @param labels the list of dimension names.
+     */
     template <class L, class T>
     inline xdimension<L, T>::xdimension(label_list&& labels)
         : base_type(std::move(labels))
     {
     }
 
+    /**
+     * Constructs an xdimension object from the given initializer list of
+     * dimension names.
+     * @param init the list of dimension names.
+     */
     template <class L, class T>
     inline xdimension<L, T>::xdimension(std::initializer_list<key_type> init)
         : base_type(init)
     {
     }
 
+    /**
+     * Constructs an xdimension object from the content of the range [first, last)
+     * @param first An iterator to the first dimension name.
+     * @param last An iterator the the element following the last dimension name.
+     */
     template <class L, class T>
     template <class InputIt>
     inline xdimension<L, T>::xdimension(InputIt first, InputIt last)
@@ -184,6 +222,11 @@ namespace xf
     }
 
 
+    /**
+     * Broadcast the specified dimensions to this xdimension object.
+     * @param dims the xdimension objects to broadcast.
+     * @return true if the dimension objects are the same.
+     */
     template <class L, class T>
     template <class... Args>
     inline bool xdimension<L, T>::broadcast(const Args&... dims)
@@ -236,12 +279,24 @@ namespace xf
         return true;
     }
 
+    /**
+     * Returns true if \c lhs and \c rhs are equivalent dimension mappings, i.e. they contain
+     * the same dimension name - dimension position pairs.
+     * @param lhs an xdimension object.
+     * @param rhs an xdimension obejct.
+     */
     template <class L, class T>
     inline bool operator==(const xdimension<L, T>& lhs, const xdimension<L, T>& rhs) noexcept
     {
         return lhs.labels() == rhs.labels();
     }
 
+    /**
+     * Returns true if \c lhs and \c rhs are not equivalent dimension mappings, i.e. they contain
+     * different dimension name - dimension position pairs.
+     * @param lhs an xdimension object.
+     * @param rhs an xdimension obejct.
+     */
     template <class L, class T>
     inline bool operator!=(const xdimension<L, T>& lhs, const xdimension<L, T>& rhs) noexcept
     {

@@ -5,11 +5,12 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Coordinates
-===========
+Coordinates and dimensions
+==========================
 
 .. toctree::
 
    xcoordinate_base
    xcoordinate
    xcoordinate_view
+   xdimension
