@@ -10,7 +10,6 @@
 #ifndef XFRAME_XAXIS_MATH_HPP
 #define XFRAME_XAXIS_MATH_HPP
 
-#include "xtensor/xconcepts.hpp"
 #include "xtensor/xmath.hpp"
 
 #include "xframe_expression.hpp"
