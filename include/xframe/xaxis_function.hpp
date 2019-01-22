@@ -35,6 +35,7 @@ namespace xf
      * @tparam R the result type.
      * @tparam CT the function argument types.
      * @sa xaxis_expression_leaf
+     * @sa xnamed_axis
      */
     template <class F, class R, class... CT>
     class xaxis_function : public xt::xexpression<xaxis_function<F, R, CT...>>
@@ -103,7 +104,8 @@ namespace xf
      * \endcode
      *
      * @param selector a selector_sequence_type for selecting the position
-     * where you want to evaluate the function.
+     *                 where you want to evaluate the function.
+     * @return the evaluation of the xaxis_function
      */
     template <class F, class R, class... CT>
     template <std::size_t N>

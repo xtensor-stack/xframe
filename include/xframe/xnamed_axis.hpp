@@ -18,10 +18,18 @@
 namespace xf
 {
 
-    /***************
-     * xnamed_axis *
-     ***************/
-
+    /**
+     * @class xnamed_axis
+     * @brief Class modeling a dimension name - axis pair in a coordinate system.
+     *
+     * The xnamed_axis class stores a dimension name and an xaxis as an
+     * xaxis_variant.
+     *
+     * @tparam K the dimension name type.
+     * @tparam T the integer type used to represent positions in the underlying
+     *           xaxis_variant.
+     * @sa xaxis_variant, xaxis
+     */
     template <class K, class T, class MT = hash_map_tag, class L = XFRAME_DEFAULT_LABEL_LIST, class LT = xtl::mpl::cast_t<L, xtl::variant>>
     class xnamed_axis : public xt::xexpression<xnamed_axis<K, T, MT, L, LT>>
     {
@@ -58,6 +66,11 @@ namespace xf
      * xnamed_axis implementation *
      ******************************/
 
+    /**
+     * Builds an xnamed_axis.
+     * @param name the dimension name.
+     * @param axis the underlying xaxis.
+     */
     template <class K, class T, class MT, class L, class LT>
     template <class A>
     inline xnamed_axis<K, T, MT, L, LT>::xnamed_axis(const name_type& name, A&& axis)
@@ -65,6 +78,11 @@ namespace xf
     {
     }
 
+    /**
+     * Builds an xnamed_axis.
+     * @param name the dimension name.
+     * @param axis the underlying xaxis.
+     */
     template <class K, class T, class MT, class L, class LT>
     template <class A>
     inline xnamed_axis<K, T, MT, L, LT>::xnamed_axis(name_type&& name, A&& axis)
@@ -72,24 +90,50 @@ namespace xf
     {
     }
 
+    /**
+     * Returns the name of the xnamed_axis.
+     * @return the dimension name.
+     */
     template <class K, class T, class MT, class L, class LT>
     inline auto xnamed_axis<K, T, MT, L, LT>::name() const & noexcept -> const name_type&
     {
         return m_name;
     }
 
+    /**
+     * Returns the underlying xaxis_variant.
+     * @return the xaxis_variant.
+     * @sa xaxis_variant
+     */
     template <class K, class T, class MT, class L, class LT>
     inline auto xnamed_axis<K, T, MT, L, LT>::axis() const & noexcept -> const axis_variant_type&
     {
         return m_axis;
     }
 
+    /**
+     * Returns the label at the given position of the underlying xaxis.
+     * @param i the position.
+     * @return the label at the given position of the underlying xaxis.
+     */
     template <class K, class T, class MT, class L, class LT>
     inline auto xnamed_axis<K, T, MT, L, LT>::label(size_type i) const & noexcept -> const LT&
     {
         return get_labels<LT>(m_axis)[i];
     }
 
+    /******************
+     * xaxis builders *
+     ******************/
+
+    /**
+     * Builder function which creates an xnamed_axis.
+     * @param name the dimension name.
+     * @param axis the xaxis that you want to store in the xnamed_axis.
+     * @tparam K the dimension name type.
+     * @tparam A the axis type.
+     * @return the created xnamed_axis.
+     */
     template <class K, class A>
     inline auto named_axis(const K& name, A&& axis)
     {
