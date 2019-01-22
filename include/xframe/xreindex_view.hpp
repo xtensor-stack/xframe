@@ -161,6 +161,9 @@ namespace xf
     template <class E1, class E2>
     auto reindex_like(E1&& e1, const E2& e2);
 
+    template <class Join, class E1, class... E>
+    auto align(E1&& e1, E&&... e);
+
     /********************************
      * xreindex_view implementation *
      ********************************/
@@ -475,22 +478,40 @@ namespace xf
         return view_type(std::forward<E>(e), std::move(new_coord));
     }
 
+    namespace detail
+    {
+        template <class E1, class C>
+        inline auto reindex_like_coord(E1&& e1, const C& coords)
+        {
+            using view_type = xreindex_view<xtl::closure_type_t<E1>>;
+            using coordinate_map = typename view_type::coordinate_map;
+
+            coordinate_map new_coord;
+            for(auto iter = e1.coordinates().begin(); iter != e1.coordinates().end(); ++iter)
+            {
+                const auto& axis = coords[iter->first];
+                if(axis != iter->second)
+                {
+                    new_coord.insert(std::make_pair(iter->first, axis));
+                }
+            }
+            return view_type(std::forward<E1>(e1), std::move(new_coord));
+        }
+    }
+
     template <class E1, class E2>
     inline auto reindex_like(E1&& e1, const E2& e2)
     {
-        using view_type = xreindex_view<xtl::closure_type_t<E1>>;
-        using coordinate_map = typename view_type::coordinate_map;
+        return detail::reindex_like_coord(std::forward<E1>(e1), e2.coordinates());
+    }
 
-        coordinate_map new_coord;
-        for(auto iter = e1.coordinates().begin(); iter != e1.coordinates().end(); ++iter)
-        {
-            const auto& axis = e2.coordinates()[iter->first];
-            if(axis != iter->second)
-            {
-                new_coord.insert(std::make_pair(iter->first, axis));
-            }
-        }
-        return view_type(std::forward<E1>(e1), std::move(new_coord));
+    template <class Join, class E1, class... E>
+    inline auto align(E1&& e1, E&&... e)
+    {
+        auto coord = e1.coordinates();
+        broadcast_coordinates<Join>(coord, e.coordinates()...);
+        return std::make_tuple(detail::reindex_like_coord(std::forward<E1>(e1), coord),
+                               detail::reindex_like_coord(std::forward<E>(e), coord)...);
     }
 
     template <class CT>

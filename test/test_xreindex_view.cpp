@@ -34,6 +34,21 @@ namespace xf
         auto view2 = reindex(var, {{ "abscissa", xf::axis({"a", "b", "c", "d"})}});
         EXPECT_TRUE(view2.coordinates() == coordinate_res);
         EXPECT_EQ(view2.dimension_mapping(), var.dimension_mapping());
+
+        auto var3 = make_test_variable3();
+        auto res1 = align<join::inner>(var, var3);
+        auto coord = coordinate<fstring>({
+                {fstring("abscissa"), saxis_type({"a", "d"})},
+                {fstring("ordinate"), iaxis_type({1, 4})}
+        });
+        EXPECT_EQ(std::get<0>(res1).coordinates(), coord);
+        EXPECT_EQ(std::get<1>(res1).coordinates(), coord);
+
+        auto res2 = align<join::outer>(var, var3);
+        auto coord2 = coordinate<fstring>({
+                {fstring("abscissa"), saxis_type({"a", "c", "d", "e"})},
+                {fstring("ordinate"), iaxis_type({1, 2, 4, 5})}
+        });
     }
 
     TEST(xreindex_view, size)
