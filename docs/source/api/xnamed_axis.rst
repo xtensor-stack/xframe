@@ -5,16 +5,14 @@
 
    The full license is in the file LICENSE, distributed with this software.
 
-Axes
-====
+xnamed_axis
+===========
 
-.. toctree::
+Defined in ``xframe/xnamed_axis.hpp``
 
-   xaxis_base
-   xaxis
-   xaxis_default
-   xaxis_function
-   xaxis_expression_leaf
-   xaxis_view
-   xaxis_variant
-   xnamed_axis
+.. doxygenclass:: xf::xnamed_axis
+   :project: xframe
+   :members:
+
+.. doxygenfunction:: xf::named_axis(const K&, A&&)
+  :project: xframe
