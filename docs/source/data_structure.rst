@@ -13,7 +13,7 @@ Axes
 
 An axis is a mapping of labels to positions in a given dimension. It is the equivalent of
 the ``index`` object from `pandas`_. `xframe` supports many types of labels, the most common
-are strings, char, integers and dates. An axis is creating from a list of labels, a builder
+are strings, char, integers and dates. An axis is created from a list of labels, a builder
 function is provided so the type of the axis can be inferred. The following example illustrates
 the two main ways of creating an axis:
 
@@ -25,6 +25,14 @@ the two main ways of creating an axis:
     auto s2 = xf::axis({ "a", "b", "d", "e" });
     // s1 and s2 are similar axes
 
+It is also possible to create an axis given the size of the axis or the start, stop and step:
+
+.. code::
+
+    auto s3 = xf::axis(5);        // == xf::axis({ 0, 1, 2, 3, 4 });
+    auto s4 = xf::axis(2, 7);     // == xf::axis({ 2, 3, 4, 5, 6 });
+    auto s5 = xf::axis(0, 10, 2); // == xf::axis({ 0, 2, 4, 6, 8 });
+    auto s6 = xf::axis("a", "d"); // == xf::axis({ "a", "b", "c" });
 
 The axis API is similar to the one of a constant ``std::map`` that throws an exception when
 asked a missing key:
