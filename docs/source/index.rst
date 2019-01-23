@@ -22,7 +22,7 @@ expressions. It is built upon `xtensor`_ and provides similar features:
 - an API following the idioms of the C++ standard library.
 - tools to manipulate variable expressions and build upon *xframe*.
 
-The API of `xframe` is inspired by the ones of `pandas`_ and `xarray`_. 
+The API of `xframe` is inspired by the ones of `pandas`_ and `xarray`_.
 
 `xframe` requires a modern C++ compiler supporting C++14. The following C++
 compilers are supported:
@@ -61,6 +61,7 @@ for details.
 
    api/axis_index
    api/coordinate_index
+   api/variable_index
 
 .. toctree::
    :caption: MISCELLANEOUS

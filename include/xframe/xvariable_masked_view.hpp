@@ -82,6 +82,18 @@ namespace xf
      * xvariable_masked_view definition *
      ************************************/
 
+    /**
+     * @class xvariable_masked_view
+     * @brief View on a variable which will apply a mask on the variable, given
+     * an expression on the axes.
+     *
+     * The xvariable_masked_view class is used for applying a mask on a variable,
+     * avoiding assignment to masked values when assigning a scalar or an other
+     * variable to the view. The mask is created given an expression on the axes.
+     *
+     * @tparam CTV the closure type on the underlying variable.
+     * @tparam CTAX the closure type on the axes function.
+     */
     template <class CTV, class CTAX>
     class xvariable_masked_view : public xt::xview_semantic<xvariable_masked_view<CTV, CTAX>>,
                                   private xvariable_base<xvariable_masked_view<CTV, CTAX>>
@@ -181,6 +193,11 @@ namespace xf
      * xvariable_masked_view implementation *
      ****************************************/
 
+    /**
+     * Builds an xvariable_masked_view.
+     * @param variable_expr the underlying variable.
+     * @param axis_expr the axis expression.
+     */
     template <class CTV, class CTAX>
     template <class V, class AX>
     inline xvariable_masked_view<CTV, CTAX>::xvariable_masked_view(V&& variable_expr, AX&& axis_expr)
@@ -251,6 +268,22 @@ namespace xf
         return m_data;
     }
 
+    /**
+     * Apply a mask on a variable where the axis expression is false. e.g.
+     * ```
+     * // Will only assign 36 to values where the ordinate label is lower than 6
+     * where(var, var.axis<int>("ordinate") < 6) = 36;
+     *
+     * // Will only add 2.4 to values where the abscissa is not equal to 'm' and the ordinate is not equal to 1
+     * where(
+     *      var,
+     *      not_equal(var.axis<char>("abscissa"), 'm')) && not_equal(var.axis<int>("ordinate"), 1)
+     * ) += 2.4;
+     * ```
+     * @param variable_expr the variable.
+     * @param axis_expr the axis expression.
+     * @return an xvariable_masked_view.
+     */
     template <class EV, class EAX>
     inline auto where(EV&& variable_expr, EAX&& axis_expr)
     {
