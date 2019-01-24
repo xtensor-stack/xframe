@@ -26,7 +26,7 @@ namespace xt
     {
         using xexpression_type = std::decay_t<RV>;
         using inner_shape_type = typename xexpression_type::shape_type;
-        using const_stepper = xindexed_stepper<xexpression_type, true>;
+        using const_stepper = xindexed_stepper<xf::xreindex_data<RV>, true>;
         using stepper = const_stepper;
     };
 }
@@ -206,14 +206,14 @@ namespace xf
 
     template <class RV>
     template <class S>
-    inline auto xreindex_data<RV>::stepper_begin(const S& shape) const noexcept -> const_stepper
+    inline auto xreindex_data<RV>::stepper_begin(const S& /*shape*/) const noexcept -> const_stepper
     {
         return const_stepper(this, size_type(0));
     }
 
     template <class RV>
     template <class S>
-    inline auto xreindex_data<RV>::stepper_end(const S& shape, xt::layout_type l) const noexcept -> const_stepper
+    inline auto xreindex_data<RV>::stepper_end(const S& /*shape*/, xt::layout_type /*l*/) const noexcept -> const_stepper
     {
         return const_stepper(this, size(), true);
     }

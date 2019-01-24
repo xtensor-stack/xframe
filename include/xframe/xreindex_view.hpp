@@ -67,6 +67,9 @@ namespace xf
 
         static const_reference missing();
 
+        xreindex_view(self_type&& rhs);
+        xreindex_view(const self_type& rhs);
+
         template <class E>
         xreindex_view(E&& e, const coordinate_map& new_coord);
 
@@ -167,6 +170,26 @@ namespace xf
     /********************************
      * xreindex_view implementation *
      ********************************/
+
+    template <class CT>
+    inline xreindex_view<CT>::xreindex_view(self_type&& rhs)
+        : m_e(std::forward<decltype(rhs.m_e)>(rhs.m_e)),
+          m_coordinate(std::move(rhs.m_coordinate)),
+          m_dimension_mapping(m_e.dimension_mapping()),
+          m_data(*this)
+    {
+        init_shape();
+    }
+
+    template <class CT>
+    inline xreindex_view<CT>::xreindex_view(const self_type& rhs)
+        : m_e(rhs.m_e),
+          m_coordinate(rhs.m_coordinate),
+          m_dimension_mapping(m_e.dimension_mapping()),
+          m_data(*this)
+    {
+        init_shape();
+    }
 
     template <class CT>
     template <class E>
