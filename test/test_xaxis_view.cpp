@@ -22,15 +22,6 @@ namespace xf
         return slice_type(size_type(1), size_type(7), size_type(2));
     }
 
-    template <class T>
-    void print(T&&)
-    {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
-
-    template <class T>
-    struct DEBUG;
-
     TEST(xaxis_view, label)
     {
         auto a = make_variant_view_saxis();
