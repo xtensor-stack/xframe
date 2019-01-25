@@ -72,6 +72,15 @@ namespace xf
      * xexpand_dims_view *
      *********************/
 
+    /**
+     * @class xexpand_dims_view
+     * @brief View on a variable with additional axes
+     *
+     * The xvariable_masked_view class is used for creating a view on a variable
+     * with additional axes.
+     *
+     * @tparam CT the closure type on the underlying variable.
+     */
     template <class CT>
     class xexpand_dims_view : public xt::xexpression<xexpand_dims_view<CT>>,
                               private xvariable_base<xexpand_dims_view<CT>>
@@ -162,6 +171,12 @@ namespace xf
      * xexpand_dims_view implementation *
      ************************************/
 
+    /**
+     * Constructs an xexpand_dims_view given a map of extra dimensions
+     * @param e the variable expression on which to create the view.
+     * @param dims the map of extra dimensions, the key being the dimension name,
+     * the value the position where to put the new dimension.
+     */
     template <class CT>
     template <class E>
     inline xexpand_dims_view<CT>::xexpand_dims_view(E&& e, const extra_dimensions_type& dims)
@@ -235,12 +250,24 @@ namespace xf
         return xexpand_dims_view<xtl::closure_type_t<E>>(std::forward<E>(e), std::move(extra_dimensions));
     }
 
+    /**
+     * Creates a view on a variable expression with additional axes, given a list
+     * of extra dimension names
+     * @param e the variable expression on which to create the view.
+     * @param dim_names the list of extra dimension names.
+     */
     template <class E, class K>
     inline auto expand_dims(E&& e, std::initializer_list<K> dim_names)
     {
         return expand_dims_impl(std::forward<E>(e), dim_names);
     }
 
+    /**
+     * Creates a view on a variable expression with additional axes, given a list
+     * of extra dimensions
+     * @param e the variable expression on which to create the view.
+     * @param dims the extra dimensions as a mapping "dimension name" -> "position".
+     */
     template <class E>
     inline auto expand_dims(E&& e, std::initializer_list<std::pair<typename std::decay_t<E>::key_type, std::size_t>> dims)
     {

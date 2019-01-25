@@ -10,4 +10,5 @@ Variables
 
 .. toctree::
 
+   xexpand_dims_view
    xvariable_masked_view
