@@ -101,6 +101,9 @@ namespace xf
         template <class E>
         xvariable_container& operator=(const xt::xexpression<E>& e);
 
+        template <class E>
+        xt::disable_xexpression<E, xvariable_container>& operator=(const E& e);
+
     private:
 
         data_closure_type m_data;
@@ -250,6 +253,14 @@ namespace xf
     inline auto xvariable_container<CCT, ECT>::operator=(const xt::xexpression<E>& e) -> self_type&
     {
         return semantic_base::assign(e);
+    }
+
+    template <class CCT, class ECT>
+    template <class E>
+    inline auto xvariable_container<CCT, ECT>::operator=(const E& e) -> xt::disable_xexpression<E, xvariable_container>&
+    {
+        data_impl().fill(e);
+        return *this;
     }
 
     template <class CCT, class ECT>

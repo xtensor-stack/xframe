@@ -348,6 +348,17 @@ namespace xf
         }
     }
 
+    TEST(xvariable_assign, assign_scalar)
+    {
+        DEFINE_TEST_VARIABLES();
+
+        a = 3.;
+        for (const auto& val : a.data())
+        {
+            EXPECT_EQ(val, 3.);
+        }
+    }
+
 
 #define CHECK_COMPOSED_EQUALITY(RES, A, B, SL)                                 \
     for(std::size_t i = 0; i < sl.size(); ++i)                                 \
@@ -395,7 +406,7 @@ namespace xf
                 {"city", xf::axis({ "London", "Paris", "Brussels" })}
             }
         );
-        
+
         auto b = variable_type(
             make_test_data(),
             {
@@ -465,4 +476,3 @@ namespace xf
         EXPECT_EQ(res(1, 1), 9.);
     }
 }
-
