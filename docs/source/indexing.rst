@@ -293,7 +293,62 @@ variable given the set of coordinates of another variable:
     // view8 is equivalent to view7
 
 A reindexing view is a read-only view, it is not possible to change its value with indexing.
-This allows memory optimizations, the view doe snot have to store the missing values, it can
+This allows memory optimizations, the view does not have to store the missing values, it can
 return a proxy to a static-allocated missing value.
+
+The ``align`` function allows to reindex many variables with more flexible options:
+
+.. code::
+
+    auto t1 = xf::align<join::inner>(v, v5);
+    std::cout << std::get<0>(t1) << std::endl;
+    std::cout << std::get<1>(t1) << std::endl;
+
+The last lines print the same output:
+
++-------+---------+----------+
+|       | London  | Brussels |
++=======+=========+==========+
+| **a** | 16.3548 | 24.6887  |
++-------+---------+----------+
+| **b** | 17.2103 | 20.4722  |
++-------+---------+----------+
+| **d** | 16.8838 | 24.9646  |
++-------+---------+----------+
+| **e** | 24.6769 | 24.8111  |
++-------+---------+----------+
+| **g** | 16.0986 | 17.9703  |
++-------+---------+----------+
+| **h** | 15.0478 | 21.3976  |
++-------+---------+----------+
+
+In the following, the variables are aligned w.r.t the union of the coordinates instead
+of their intersection:
+
+.. code::
+
+    auto t2 = xf::align<join::outer>(v, v5);
+    std::cout << std::get<0>(t2) << std::endl;
+    std::cout << std::get<1>(t2) << std::endl;
+
+The first outuput is
+
++-------+---------+---------+----------+----------+
+|       | London  |  Paris  | Brussels | New York |
++=======+=========+=========+==========+==========+
+| **a** | 16.3548 | 23.3501 | 24.6887  |   N/A    |
++-------+---------+---------+----------+----------+
+| **b** | 17.2103 | 18.0817 | 20.4722  |   N/A    |
++-------+---------+---------+----------+----------+
+| **d** | 16.8838 | 24.9288 | 24.9646  |   N/A    |
++-------+---------+---------+----------+----------+
+| **e** | 24.6769 | 22.2584 | 24.8111  |   N/A    |
++-------+---------+---------+----------+----------+
+| **g** | 16.0986 | 22.9811 | 17.9703  |   N/A    |
++-------+---------+---------+----------+----------+
+| **h** | 15.0478 | 16.1246 | 21.3976  |   N/A    |
++-------+---------+---------+----------+----------+
+
+While the second have ``N/A`` in the ``Paris`` column.
 
 .. _xarray: https://xarray.pydata.org
