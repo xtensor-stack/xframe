@@ -304,6 +304,8 @@ namespace xf
 
     TEST(xreindex_view, data)
     {
+        auto missing = xtl::missing<double>();
+        using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
         auto var = make_test_variable();
         coordinate_map new_coord = make_new_coordinate();
         auto view = reindex(var, new_coord);
@@ -313,5 +315,12 @@ namespace xf
         EXPECT_EQ(d(0, 0), view(0, 0));
         std::array<size_t, 2> idx = {0u, 1u};
         EXPECT_EQ(d[idx], view(0, 1));
+
+        auto var3 = make_test_variable3();
+        auto res = align<join::inner>(var, var3);
+        data_type exp0 = {{1., missing}, {7., 9.}};
+        data_type exp1 = {{1., 2.}, {missing, 5.}};
+        EXPECT_EQ(std::get<0>(res).data(), exp0);
+        EXPECT_EQ(std::get<1>(res).data(), exp1);
     }
 }
