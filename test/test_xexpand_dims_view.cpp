@@ -236,6 +236,7 @@ namespace xf
     TEST(xexpand_dims, select)
     {
         auto var = make_test_variable();
+        auto missing = xtl::missing<double>();
 
         auto res = expand_dims(var, {{"new_dim", 2}});
         EXPECT_EQ(res.select({{"abscissa", "d"}, {"ordinate", 1}}), 7.0);
@@ -246,5 +247,7 @@ namespace xf
         EXPECT_EQ(res1.select({{"abscissa", "d"}, {"ordinate", 1}}), 7.0);
         EXPECT_EQ(res1.select({{"new_dim2", 0}, {"abscissa", "d"}, {"ordinate", 2}}), 8.0);
         EXPECT_EQ(res1.select({{"new_dim", 0}, {"new_dim2", 0}, {"abscissa", "d"}, {"ordinate", 4}}), 9.0);
+        EXPECT_ANY_THROW(res1.select({{"new_dim", 2}, {"new_dim2", 0}, {"abscissa", "d"}, {"ordinate", 4}}));
+        EXPECT_EQ(res1.select<join::outer>({{"new_dim", 2}, {"new_dim2", 0}, {"abscissa", "d"}, {"ordinate", 4}}), missing);
     }
 }
