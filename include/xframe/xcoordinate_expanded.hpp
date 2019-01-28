@@ -25,6 +25,17 @@ namespace xf
      * xcoordinate_expanded *
      ************************/
 
+    /**
+     * @class xcoordinate_expanded
+     * @brief view of an xcoordinate which expands the xcoordinate dimensions
+     *
+     * The xcoordinate_expanded is used for modeling an expanded view on an existing
+     * xcoordinate, i.e. a superset of this xcoordinate. This is done by holding new
+     * axes and keeping a reference to the underlying xcoordinate.
+     *
+     * @tparam C the type of the underlying xcoordinate.
+     * @sa xcoordinate
+     */
     template <class C>
     class xcoordinate_expanded
     {
@@ -152,6 +163,12 @@ namespace xf
      * xcoordinate_expanded implementation *
      ***************************************/
 
+    /**
+     * Constructs an xcoordinate_expanded, given the reference to an xcoordinate
+     * and the reference to the additional dimension mapping.
+     * @param sub_coord the reference to the underlying xcoordinate.
+     * @param new_coord the `dimension name <-> position` mapping of the additional coordinates.
+     */
     template <class C>
     inline xcoordinate_expanded<C>::xcoordinate_expanded(const coordinate_type& sub_coord, const map_type& new_coord)
         : m_sub_coordinate(sub_coord), m_extra_coordinate(new_coord)
@@ -159,6 +176,12 @@ namespace xf
         check_consistency();
     }
 
+    /**
+     * Constructs an xcoordinate_expanded, given the reference to an xcoordinate
+     * and the reference to the additional dimension mapping.
+     * @param sub_coord the reference to the underlying xcoordinate.
+     * @param new_coord the `dimension name <-> position` mapping of the additional coordinates.
+     */
     template <class C>
     inline xcoordinate_expanded<C>::xcoordinate_expanded(const coordinate_type& sub_coord, map_type&& new_coord)
         : m_sub_coordinate(sub_coord), m_extra_coordinate(std::move(new_coord))
@@ -166,24 +189,41 @@ namespace xf
         check_consistency();
     }
 
+    /**
+     * Returns true if the coordinates is empty, i.e. it contains no mapping
+     * of axes with dimension names.
+     */
     template <class C>
     inline bool xcoordinate_expanded<C>::empty() const
     {
         return m_sub_coordinate.empty() && m_extra_coordinate.empty();
     }
 
+    /**
+     * Returns the number of axes in the coordinates.
+     */
     template <class C>
     inline auto xcoordinate_expanded<C>::size() const -> size_type
     {
         return m_sub_coordinate.size() + m_extra_coordinate.size();
     }
 
+    /**
+     * Returns true if the coordinates contains the specified dimension
+     * name.
+     * @param key the dimension name to search for.
+     */
     template <class C>
     inline bool xcoordinate_expanded<C>::contains(const key_type& key) const
     {
         return (m_extra_coordinate.find(key) != m_extra_coordinate.end()) || m_sub_coordinate.contains(key);
     }
 
+    /**
+     * Returns the axis mapped to the specified dimension name. If this last one is not
+     * found, throws an exception.
+     * @param key the name of the dimension to search for.
+     */
     template <class C>
     inline auto xcoordinate_expanded<C>::operator[](const key_type& key) const -> const mapped_type&
     {
@@ -191,6 +231,12 @@ namespace xf
         return iter != m_extra_coordinate.end() ? iter->second : m_sub_coordinate[key];
     }
 
+    /**
+     * Returns the position of the specified labels of the axis mapped to the specified
+     * dimension name. Throws an exception if either the dimension name or the label is
+     * not part of this coordinate.
+     * @param key the pair dimension name - label to search for.
+     */
     template <class C>
     template <class KB, class LB>
     inline auto xcoordinate_expanded<C>::operator[](const std::pair<KB, LB>& key) const -> index_type
@@ -199,6 +245,11 @@ namespace xf
         return iter != m_extra_coordinate.end() ? (iter->second)[key.second] : m_sub_coordinate[key.first][key.second];
     }
 
+    /**
+     * Returns a constant iterator to the axis mapped to the specified dimension name.
+     * If no such element is found, past-the-end iterator is returned.
+     * @param key the dimension name to search for.
+     */
     template <class C>
     inline auto xcoordinate_expanded<C>::find(const key_type& key) const -> const_iterator
     {
@@ -210,36 +261,59 @@ namespace xf
         return const_iterator(iter, &m_sub_coordinate, &m_extra_coordinate);
     }
 
+    /**
+     * Returns a constant iterator to the first element of the coordinates. Such an element
+     * is a pair dimension name - axis.
+     */
     template <class C>
     inline auto xcoordinate_expanded<C>::begin() const noexcept -> const_iterator
     {
         return cbegin();
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element of
+     * the coordinates.
+     */
     template <class C>
     inline auto xcoordinate_expanded<C>::end() const noexcept -> const_iterator
     {
         return cend();
     }
 
+    /**
+     * Returns a constant iterator to the first element of the coordinates. Such an element
+     * is a pair dimension name - axis.
+     */
     template <class C>
     inline auto xcoordinate_expanded<C>::cbegin() const noexcept -> const_iterator
     {
         return const_iterator(m_sub_coordinate.cbegin(), &m_sub_coordinate, &m_extra_coordinate);
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element of
+     * the coordinates.
+     */
     template <class C>
     inline auto xcoordinate_expanded<C>::cend() const noexcept -> const_iterator
     {
         return const_iterator(m_extra_coordinate.cend(), &m_sub_coordinate, &m_extra_coordinate);
     }
 
+    /**
+     * Returns a constant iterator to the first dimension name of the coordinates.
+     */
     template <class C>
     inline auto xcoordinate_expanded<C>::key_begin() const noexcept -> key_iterator
     {
         return key_iterator(begin());
     }
 
+    /**
+     * Returns a constant iterator to the element following the last dimension name of
+     * the coordinates.
+     */
     template <class C>
     inline auto xcoordinate_expanded<C>::key_end() const noexcept -> key_iterator
     {
@@ -315,12 +389,24 @@ namespace xf
         return out;
     }
 
+    /**
+     * Expand the dimensions of an xcoordinate, given the reference to an xcoordinate
+     * and the reference to the additional dimension mapping.
+     * @param sub_coord the reference to the underlying xcoordinate.
+     * @param new_coord the `dimension name <-> position` mapping of the additional coordinates.
+     */
     template <class C>
     inline xcoordinate_expanded<C> expand_dims(const C& coordinate, const typename C::map_type& new_coord)
     {
         return xcoordinate_expanded<C>(coordinate, new_coord);
     }
 
+    /**
+     * Expand the dimensions of an xcoordinate, given the reference to an xcoordinate
+     * and the reference to the additional dimension mapping.
+     * @param sub_coord the reference to the underlying xcoordinate.
+     * @param new_coord the `dimension name <-> position` mapping of the additional coordinates.
+     */
     template <class C>
     inline xcoordinate_expanded<C> expand_dims(const C& coordinate, typename C::map_type&& new_coord)
     {

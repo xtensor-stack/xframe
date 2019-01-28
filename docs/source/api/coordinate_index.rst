@@ -12,5 +12,6 @@ Coordinates and dimensions
 
    xcoordinate_base
    xcoordinate
+   xcoordinate_expanded
    xcoordinate_view
    xdimension
