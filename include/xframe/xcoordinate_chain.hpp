@@ -22,6 +22,18 @@ namespace xf
      * xcoordinate_chain *
      *********************/
 
+    /**
+     * @class xcoordinate_chain
+     * @brief reindexed view of an xcoordinate.
+     *
+     * The xcoordinate_chain is used for creating a reindexed view on an existing
+     * xcoordinate. This is done by holding new axes and keeping a reference to
+     * the underlying xcoordinate.
+     *
+     * @tparam C the type of the underlying xcoordinate.
+     * @sa xcoordinate
+     * @sa xcoordinate_expanded
+     */
     template <class C>
     class xcoordinate_chain
     {
@@ -156,6 +168,12 @@ namespace xf
      * xcoordinate_chain implementation *
      ************************************/
 
+    /**
+     * Constructs an xcoordinate_chain, given the reference to an xcoordinate
+     * and the reference to the additional coordinates.
+     * @param sub_coord the reference to the underlying xcoordinate.
+     * @param new_coord the `dimension name <-> axis` mapping of the new coordinates.
+     */
     template <class C>
     inline xcoordinate_chain<C>::xcoordinate_chain(const coordinate_type& sub_coord, const map_type& new_coord)
         : m_sub_coordinate(sub_coord), m_reindex(new_coord)
@@ -163,6 +181,12 @@ namespace xf
         check_consistency();
     }
 
+    /**
+     * Constructs an xcoordinate_chain, given the reference to an xcoordinate
+     * and the reference to the additional coordinates.
+     * @param sub_coord the reference to the underlying xcoordinate.
+     * @param new_coord the `dimension name <-> axis` mapping of the new coordinates.
+     */
     template <class C>
     inline xcoordinate_chain<C>::xcoordinate_chain(const coordinate_type& sub_coord, map_type&& new_coord)
         : m_sub_coordinate(sub_coord), m_reindex(std::move(new_coord))
@@ -170,24 +194,43 @@ namespace xf
         check_consistency();
     }
 
+    /**
+     * Returns true if the coordinates is empty, i.e. it contains no mapping
+     * of axes with dimension names.
+     */
     template <class C>
     inline bool xcoordinate_chain<C>::empty() const
     {
         return m_sub_coordinate.empty();
     }
 
+    /**
+     * Returns the number of axes in the coordinates.
+     */
     template <class C>
     inline auto xcoordinate_chain<C>::size() const -> size_type
     {
         return m_sub_coordinate.size();
     }
 
+    /**
+     * Returns true if the coordinates contains the specified dimension
+     * name.
+     * @param key the dimension name to search for.
+     */
     template <class C>
     inline bool xcoordinate_chain<C>::contains(const key_type& key) const
     {
         return (m_reindex.find(key) != m_reindex.end()) || m_sub_coordinate.contains(key);
     }
 
+    /**
+     * Returns true if the coordinates contains the specified dimension
+     * name and if the axis mapped with this name contains the specified
+     * label.
+     * @param key the dimension name to search for.
+     * @param label the label to search for in the mapped axis.
+     */
     template <class C>
     inline bool xcoordinate_chain<C>::contains(const key_type& key, const label_type& label) const
     {
@@ -195,6 +238,11 @@ namespace xf
         return iter != end() ? (iter->second).contains(label) : false;
     }
 
+    /**
+     * Returns the axis mapped to the specified dimension name. If this last one is not
+     * found, throws an exception.
+     * @param key the name of the dimension to search for.
+     */
     template <class C>
     inline auto xcoordinate_chain<C>::operator[](const key_type& key) const -> const mapped_type&
     {
@@ -202,6 +250,12 @@ namespace xf
         return iter != m_reindex.end() ? iter->second : m_sub_coordinate[key];
     }
 
+    /**
+     * Returns the position of the specified labels of the axis mapped to the specified
+     * dimension name. Throws an exception if either the dimension name or the label is
+     * not part of this coordinate.
+     * @param key the pair dimension name - label to search for.
+     */
     template <class C>
     template <class KB, class LB>
     inline auto xcoordinate_chain<C>::operator[](const std::pair<KB, LB>& key) const -> index_type
@@ -229,6 +283,11 @@ namespace xf
         return iter != m_reindex.end() ? (iter->second).contains(label) : false;
     }
 
+    /**
+     * Returns a constant iterator to the axis mapped to the specified dimension name.
+     * If no such element is found, past-the-end iterator is returned.
+     * @param key the dimension name to search for.
+     */
     template <class C>
     inline auto xcoordinate_chain<C>::find(const key_type& key) const -> const_iterator
     {
@@ -240,36 +299,59 @@ namespace xf
         return const_iterator(iter, m_sub_coordinate.cend(), &m_reindex);
     }
 
+    /**
+     * Returns a constant iterator to the first element of the coordinates. Such an element
+     * is a pair dimension name - axis.
+     */
     template <class C>
     inline auto xcoordinate_chain<C>::begin() const noexcept -> const_iterator
     {
         return cbegin();
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element of
+     * the coordinates.
+     */
     template <class C>
     inline auto xcoordinate_chain<C>::end() const noexcept -> const_iterator
     {
         return cend();
     }
 
+    /**
+     * Returns a constant iterator to the first element of the coordinates. Such an element
+     * is a pair dimension name - axis.
+     */
     template <class C>
     inline auto xcoordinate_chain<C>::cbegin() const noexcept -> const_iterator
     {
         return const_iterator(m_sub_coordinate.cbegin(), m_sub_coordinate.cend(), &m_reindex);
     }
 
+    /**
+     * Returns a constant iterator to the element following the last element of
+     * the coordinates.
+     */
     template <class C>
     inline auto xcoordinate_chain<C>::cend() const noexcept -> const_iterator
     {
         return const_iterator(m_sub_coordinate.cend(), m_sub_coordinate.cend(), &m_reindex);
     }
 
+    /**
+     * Returns a constant iterator to the first dimension name of the coordinates.
+     */
     template <class C>
     inline auto xcoordinate_chain<C>::key_begin() const noexcept -> key_iterator
     {
         return key_iterator(begin());
     }
 
+    /**
+     * Returns a constant iterator to the element following the last dimension name of
+     * the coordinates.
+     */
     template <class C>
     inline auto xcoordinate_chain<C>::key_end() const noexcept -> key_iterator
     {
@@ -345,12 +427,24 @@ namespace xf
         return out;
     }
 
+    /**
+     * Creates a reindexed view on an xcoordinate, given the reference on the
+     * xcoordinate and the new coordinates.
+     * @param sub_coord the reference to the underlying xcoordinate.
+     * @param new_coord the `dimension name <-> axis` mapping of the new coordinates.
+     */
     template <class C>
     inline xcoordinate_chain<C> reindex(const C& coordinate, const typename C::map_type& new_coord)
     {
         return xcoordinate_chain<C>(coordinate, new_coord);
     }
 
+    /**
+     * Creates a reindexed view on an xcoordinate, given the reference on the
+     * xcoordinate and the new coordinates.
+     * @param sub_coord the reference to the underlying xcoordinate.
+     * @param new_coord the `dimension name <-> axis` mapping of the new coordinates.
+     */
     template <class C>
     inline xcoordinate_chain<C> reindex(const C& coordinate, typename C::map_type&& new_coord)
     {
