@@ -52,6 +52,13 @@ namespace xf
         EXPECT_TRUE(cc.contains("abscissa"));
         EXPECT_TRUE(cc.contains("ordinate"));
         EXPECT_FALSE(cc.contains("altitude"));
+
+        EXPECT_TRUE(cc.contains("abscissa", "c"));
+        EXPECT_FALSE(cc.contains("abscissa", "e"));
+        EXPECT_TRUE(cc.contains("ordinate", 2));
+        EXPECT_TRUE(cc.contains("ordinate", 4));
+        EXPECT_FALSE(cc.contains("ordinate", 6));
+        EXPECT_FALSE(cc.contains("altitude", "a"));
     }
 
     TEST(xcoordinate_chain, access)
