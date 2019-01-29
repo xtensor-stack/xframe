@@ -53,6 +53,7 @@ namespace xf
         size_type size() const;
 
         bool contains(const key_type& key) const;
+        bool contains(const key_type& key, const label_type& label) const;
         const mapped_type& operator[](const key_type& key) const;
 
         template <class KB, class LB>
@@ -185,6 +186,13 @@ namespace xf
     inline bool xcoordinate_chain<C>::contains(const key_type& key) const
     {
         return (m_reindex.find(key) != m_reindex.end()) || m_sub_coordinate.contains(key);
+    }
+
+    template <class C>
+    inline bool xcoordinate_chain<C>::contains(const key_type& key, const label_type& label) const
+    {
+        auto iter = find(key);
+        return iter != end() ? (iter->second).contains(label) : false;
     }
 
     template <class C>

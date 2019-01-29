@@ -67,6 +67,7 @@ namespace xf
         size_type size() const;
 
         bool contains(const key_type& key) const;
+        bool contains(const key_type& key, const label_type& label) const;
         const mapped_type& operator[](const key_type& key) const;
 
         template <class KB, class LB>
@@ -217,6 +218,20 @@ namespace xf
     inline bool xcoordinate_expanded<C>::contains(const key_type& key) const
     {
         return (m_extra_coordinate.find(key) != m_extra_coordinate.end()) || m_sub_coordinate.contains(key);
+    }
+
+    /**
+     * Returns true if the coordinates contains the specified dimension
+     * name and if the axis mapped with this name contains the specified
+     * label.
+     * @param key the dimension name to search for.
+     * @param label the label to search for in the mapped axis.
+     */
+    template <class C>
+    inline bool xcoordinate_expanded<C>::contains(const key_type& key, const label_type& label) const
+    {
+        auto iter = find(key);
+        return iter != end() ? (iter->second).contains(label) : false;
     }
 
     /**
