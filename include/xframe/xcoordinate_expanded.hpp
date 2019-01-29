@@ -30,11 +30,12 @@ namespace xf
      * @brief view of an xcoordinate which expands the xcoordinate dimensions
      *
      * The xcoordinate_expanded is used for modeling an expanded view on an existing
-     * xcoordinate, i.e. a superset of this xcoordinate. This is done by holding new
-     * axes and keeping a reference to the underlying xcoordinate.
+     * xcoordinate, i.e. a superset of this xcoordinate. This is done by holding an
+     * extra coordinate map and keeping a reference to the underlying xcoordinate.
      *
      * @tparam C the type of the underlying xcoordinate.
      * @sa xcoordinate
+     * @sa xcoordinate_chain
      */
     template <class C>
     class xcoordinate_expanded
@@ -168,7 +169,7 @@ namespace xf
      * Constructs an xcoordinate_expanded, given the reference to an xcoordinate
      * and the reference to the additional dimension mapping.
      * @param sub_coord the reference to the underlying xcoordinate.
-     * @param new_coord the `dimension name <-> position` mapping of the additional coordinates.
+     * @param new_coord the `dimension name <-> axis` mapping of the additional coordinates.
      */
     template <class C>
     inline xcoordinate_expanded<C>::xcoordinate_expanded(const coordinate_type& sub_coord, const map_type& new_coord)
@@ -181,7 +182,7 @@ namespace xf
      * Constructs an xcoordinate_expanded, given the reference to an xcoordinate
      * and the reference to the additional dimension mapping.
      * @param sub_coord the reference to the underlying xcoordinate.
-     * @param new_coord the `dimension name <-> position` mapping of the additional coordinates.
+     * @param new_coord the `dimension name <-> axis` mapping of the additional coordinates.
      */
     template <class C>
     inline xcoordinate_expanded<C>::xcoordinate_expanded(const coordinate_type& sub_coord, map_type&& new_coord)
@@ -408,7 +409,7 @@ namespace xf
      * Expand the dimensions of an xcoordinate, given the reference to an xcoordinate
      * and the reference to the additional dimension mapping.
      * @param sub_coord the reference to the underlying xcoordinate.
-     * @param new_coord the `dimension name <-> position` mapping of the additional coordinates.
+     * @param new_coord the `dimension name <-> axis` mapping of the additional coordinates.
      */
     template <class C>
     inline xcoordinate_expanded<C> expand_dims(const C& coordinate, const typename C::map_type& new_coord)
@@ -420,7 +421,7 @@ namespace xf
      * Expand the dimensions of an xcoordinate, given the reference to an xcoordinate
      * and the reference to the additional dimension mapping.
      * @param sub_coord the reference to the underlying xcoordinate.
-     * @param new_coord the `dimension name <-> position` mapping of the additional coordinates.
+     * @param new_coord the `dimension name <-> axis` mapping of the additional coordinates.
      */
     template <class C>
     inline xcoordinate_expanded<C> expand_dims(const C& coordinate, typename C::map_type&& new_coord)
