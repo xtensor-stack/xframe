@@ -53,6 +53,14 @@ namespace xf
         EXPECT_TRUE(cc.contains("ordinate"));
         EXPECT_TRUE(cc.contains("abscissa"));
         EXPECT_FALSE(cc.contains("unknown"));
+
+        EXPECT_TRUE(cc.contains("new_dim", "a"));
+        EXPECT_FALSE(cc.contains("new_dim", "e"));
+        EXPECT_TRUE(cc.contains("ordinate", 2));
+        EXPECT_TRUE(cc.contains("ordinate", 4));
+        EXPECT_FALSE(cc.contains("ordinate", 6));
+        EXPECT_TRUE(cc.contains("abscissa", "c"));
+        EXPECT_FALSE(cc.contains("abscissa", "e"));
     }
 
     TEST(xcoordinate_expanded, access)
