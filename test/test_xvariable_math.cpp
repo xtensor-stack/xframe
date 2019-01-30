@@ -345,15 +345,31 @@ namespace xf
         EXPECT_EQ(std::min(sa, a.select(sel)), minimum(sa, a).select(sel));
     }*/
 
-    // TODO: enable this once clamp functor is fixed in xtensor 
-    /*TEST(xvariable_math, clip)
+    TEST(xvariable_math, clip)
     {
+        auto missing = xtl::missing<double>();
+        using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
+
         variable_type a = make_test_variable();
-        dict_type sel = make_selector_aa();
-        xtl::xoptional<double> floor = 1.2;
-        xtl::xoptional<double> ceil = 2.4;
-        EXPECT_EQ(clip(a.select(sel), floor, ceil), clip(a, floor, ceil).select(sel));
-    }*/
+
+        variable_type res = clip(a, 2., 8.0);
+        data_type expected = {{      2,   2, missing},
+                              {missing,   5,       6},
+                              {      7,   8,       8}};
+        EXPECT_EQ(res.data(), expected);
+
+        variable_type res2 = clip(a, missing, missing);
+        data_type expected2 = {{missing, missing, missing},
+                               {missing, missing, missing},
+                               {missing, missing, missing}};
+        EXPECT_EQ(res2.data(), expected2);
+
+        variable_type res3 = clip(a, missing, 4.);
+        data_type expected3 = {{missing, missing, missing},
+                               {missing, missing, missing},
+                               {missing, missing, missing}};
+        EXPECT_EQ(res3.data(), expected3);
+    }
 
     TEST(xvariable_math, sign)
     {
