@@ -355,6 +355,21 @@ namespace xf
         EXPECT_EQ(clip(a.select(sel), floor, ceil), clip(a, floor, ceil).select(sel));
     }*/
 
+    TEST(xvariable_math, sign)
+    {
+        auto missing = xtl::missing<double>();
+        using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
+
+        variable_type a = make_test_variable();
+        a(0, 0) = -5.;
+
+        variable_type res = sign(a);
+        data_type expected = {{     -1,   1, missing},
+                              {missing,   1,       1},
+                              {      1,   1,       1}};
+        EXPECT_EQ(res.data(), expected);
+    }
+
     TEST(xvariable_math, exp)
     {
         variable_type a = make_test_variable();
