@@ -105,6 +105,7 @@ set(XFRAME_TESTS
     test_xvariable_scalar.cpp
     test_xvariable_view.cpp
     test_xvariable_view_assign.cpp
+    test_xvector_like_variant.cpp
     test_xvector_variant.cpp
 )
 
