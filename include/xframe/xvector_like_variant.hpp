@@ -102,6 +102,21 @@ namespace xf
             using const_pointer = typename value_traits::const_pointer;
             using size_type = typename size_traits::size_type;
             using difference_type = typename size_traits::difference_type;
+
+            using const_iterator = xtl::variant<typename V::const_iterator...>;
+            using iterator = std::conditional_t<is_const,
+                                                const_iterator,
+                                                xtl::variant<typename V::iterator...>>;
+        };
+
+        template <bool is_const, class traits>
+        struct xvlv_iterator_traits
+        {
+            using value_type = typename traits::value_type;
+            using reference = std::conditional_t<is_const, typename traits::const_reference, typename traits::reference>;
+            using pointer = std::conditional_t<is_const, typename traits::const_pointer, typename traits::pointer>;
+            using difference_type = typename traits::difference_type;
+            using iterator = std::conditional_t<is_const, typename traits::const_iterator, typename traits::iterator>;
         };
 
         template <class T1, class T2>
@@ -111,6 +126,9 @@ namespace xf
     /*****************************
      * xvector_like_variant_base *
      *****************************/
+
+    template <class traits>
+    class xvector_like_variant_iterator;
 
     template <class traits>
     class xvector_like_variant_base
@@ -127,6 +145,11 @@ namespace xf
         using difference_type = typename traits::difference_type;
         using storage_type = typename traits::storage_type;
 
+        using iterator_traits = detail::xvlv_iterator_traits<false, traits>;
+        using const_iterator_traits = detail::xvlv_iterator_traits<true, traits>;
+
+        using iterator = xvector_like_variant_iterator<iterator_traits>;
+        using const_iterator = xvector_like_variant_iterator<const_iterator_traits>;
         // Size and capacity
 
         bool empty() const;
@@ -160,6 +183,16 @@ namespace xf
         storage_type& storage();
         const storage_type& storage() const;
 
+        // Iterators
+
+        iterator begin();
+        iterator end();
+
+        const_iterator begin() const;
+        const_iterator end() const;
+
+        const_iterator cbegin() const;
+        const_iterator cend() const;
         // Comparison
 
         bool equal(const self_type& rhs) const;
@@ -205,6 +238,55 @@ namespace xf
 
     template <class T>
     bool operator>=(const xvector_like_variant_base<T>& lhs, const xvector_like_variant_base<T>& rhs);
+
+    /*********************************
+     * xvector_like_variant_iterator *
+     *********************************/
+
+    template <class traits>
+    class xvector_like_variant_iterator : public xtl::xrandom_access_iterator_base<xvector_like_variant_iterator<traits>,
+                                                                              typename traits::value_type,
+                                                                              typename traits::difference_type,
+                                                                              typename traits::pointer,
+                                                                              typename traits::reference>
+    {
+    public:
+
+        using self_type = xvector_like_variant_iterator<traits>;
+        using value_type = typename traits::value_type;
+        using reference = typename traits::reference;
+        using pointer = typename traits::pointer;
+        using difference_type = typename traits::difference_type;
+        using iterator_category = std::random_access_iterator_tag;
+        using subiterator = typename traits::iterator;
+
+        xvector_like_variant_iterator() = default;
+        xvector_like_variant_iterator(subiterator it);
+
+        self_type& operator++();
+        self_type& operator--();
+
+        self_type& operator+=(difference_type n);
+        self_type& operator-=(difference_type n);
+
+        difference_type operator-(const self_type& rhs) const;
+
+        reference operator*() const;
+        //pointer operator->() const;
+
+        bool equal(const self_type& rhs) const;
+        bool less_than(const self_type& rhs) const;
+
+    private:
+
+        subiterator m_it;
+    };
+
+    template <class T>
+    bool operator==(const xvector_like_variant_iterator<T>& lhs, const xvector_like_variant_iterator<T>& rhs);
+
+    template <class T>
+    bool operator<(const xvector_like_variant_iterator<T>& lhs, const xvector_like_variant_iterator<T>& rhs);
 
     /************************
      * xvector_like_variant *
@@ -478,6 +560,42 @@ namespace xf
     }
 
     template <class T>
+    inline auto xvector_like_variant_base<T>::begin() -> iterator
+    {
+        return xtl::visit([](auto& arg) { return iterator(detail::unwrap(arg).begin()); }, m_storage);
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_base<T>::end() -> iterator
+    {
+        return xtl::visit([](auto& arg) { return iterator(detail::unwrap(arg).end()); }, m_storage);
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_base<T>::begin() const -> const_iterator
+    {
+        return cbegin();
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_base<T>::end() const -> const_iterator
+    {
+        return cend();
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_base<T>::cbegin() const -> const_iterator
+    {
+        return xtl::visit([](const auto& arg) { return const_iterator(detail::unwrap(arg).cbegin()); }, m_storage);
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_base<T>::cend() const -> const_iterator
+    {
+        return xtl::visit([](const auto& arg) { return const_iterator(detail::unwrap(arg).cend()); }, m_storage);
+    }
+
+    template <class T>
     inline bool xvector_like_variant_base<T>::equal(const self_type& rhs) const
     {
         return m_storage == rhs.m_storage;
@@ -525,6 +643,80 @@ namespace xf
         return !(lhs < rhs);
     }
     
+    /*********************************
+     * xvector_like_variant_iterator *
+     *********************************/
+
+    template <class T>
+    inline xvector_like_variant_iterator<T>::xvector_like_variant_iterator(subiterator it)
+        : m_it(it)
+    {
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_iterator<T>::operator++() -> self_type&
+    {
+        xtl::visit([](auto& arg) { ++arg; }, m_it);
+        return *this;
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_iterator<T>::operator--() -> self_type&
+    {
+        xtl::visit([](auto& arg) { --arg; }, m_it);
+        return *this;
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_iterator<T>::operator+=(difference_type n) -> self_type&
+    {
+        xtl::visit([n](auto& arg) { arg += n; }, m_it);
+        return *this;
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_iterator<T>::operator-=(difference_type n) -> self_type&
+    {
+        xtl::visit([n](auto& arg) { arg -= n; }, m_it);
+        return *this;
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_iterator<T>::operator-(const self_type& rhs) const -> difference_type
+    {
+        return xtl::visit([&rhs](auto& arg) { return arg - xtl::xget<std::decay_t<decltype(arg)>>(rhs.m_it); }, m_it);
+    }
+
+    template <class T>
+    inline auto xvector_like_variant_iterator<T>::operator*() const -> reference
+    {
+        return xtl::visit([](auto& arg) { return reference(xtl::closure(*arg)); }, m_it);
+    }
+
+    template <class T>
+    inline bool xvector_like_variant_iterator<T>::equal(const self_type& rhs) const
+    {
+        return m_it == rhs.m_it;
+    }
+
+    template <class T>
+    inline bool xvector_like_variant_iterator<T>::less_than(const self_type& rhs) const
+    {
+        return m_it < rhs.m_it;
+    }
+
+    template <class T>
+    inline bool operator==(const xvector_like_variant_iterator<T>& lhs, const xvector_like_variant_iterator<T>& rhs)
+    {
+        return lhs.equal(rhs);
+    }
+
+    template <class T>
+    inline bool operator<(const xvector_like_variant_iterator<T>& lhs, const xvector_like_variant_iterator<T>& rhs)
+    {
+        return lhs.less_than(rhs);
+    }
+
     /***************************************
      * xvector_like_variant implementation *
      ***************************************/
