@@ -63,7 +63,7 @@ if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
     # Add googletest directly to our build. This defines
     # the gtest and gtest_main targets.
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-                     ${CMAKE_CURRENT_BINARY_DIR}/googletest-build)
+                     ${CMAKE_CURRENT_BINARY_DIR}/googletest-build EXCLUDE_FROM_ALL)
 
     set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include")
     set(GTEST_BOTH_LIBRARIES  gtest_main gtest)
@@ -108,12 +108,11 @@ set(XFRAME_TESTS
     test_xvector_variant.cpp
 )
 
-set(XFRAME_TARGET test_xframe)
-
-add_executable(${XFRAME_TARGET} ${XFRAME_TESTS} ${XFRAME_HEADERS})
+add_executable(test_xframe ${XFRAME_TESTS} ${XFRAME_HEADERS})
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
-    add_dependencies(${XFRAME_TARGET} gtest_main)
+    add_dependencies(test_xframe gtest_main)
 endif()
-target_link_libraries(${XFRAME_TARGET} ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(test_xframe ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories(test_xframe PRIVATE ${XFRAME_INCLUDE_DIR})
 
-add_custom_target(xtest COMMAND test_xframe DEPENDS ${XFRAME_TARGET})
+add_custom_target(xtest COMMAND test_xframe DEPENDS test_xframe)
