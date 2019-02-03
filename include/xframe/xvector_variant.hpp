@@ -16,41 +16,69 @@
 
 namespace xf
 {
+    namespace mpl = xtl::mpl;
 
     namespace detail
     {
         template <class L0, class...>
-        struct xvector_variant_size_type
+        struct xvector_variant_size_traits
         {
             using size_type = typename std::vector<L0>::size_type;
             using difference_type = typename std::vector<L0>::difference_type;
         };
 
-        template <bool is_const, bool is_ref, class... L>
-        struct xvector_variant_traits
+        template <bool is_const, class L>
+        struct xvector_variant_value_traits;
+
+        template <bool is_const, class T>
+        struct xvector_variant_value_traits<is_const, mpl::vector<T>>
         {
-            using storage_type =
-                std::conditional_t<is_ref,
-                                   std::conditional_t<is_const,
-                                                      xtl::variant<xtl::xclosure_wrapper<const std::vector<L>&>...>,
-                                                      xtl::variant<xtl::xclosure_wrapper<std::vector<L>&>...>>,
-                                   xtl::variant<std::vector<L>...>>;
-            using value_type = xtl::variant<L...>;
-            using const_reference = xtl::variant<xtl::xclosure_wrapper<const L&>...>;
+            using value_type = T;
+            using const_reference = const T&;
+            using reference = std::conditional_t<is_const, const_reference, T&>;
+            using const_pointer = const T*;
+            using pointer = std::conditional_t<is_const, const_pointer, T*>;
+        };
+
+        template <bool is_const, class... T>
+        struct xvector_variant_value_traits<is_const, mpl::vector<T...>>
+        {
+            using value_type = xtl::variant<T...>;
+            using const_reference = xtl::variant<xtl::xclosure_wrapper<const T&>...>;
             using reference = std::conditional_t<is_const,
                                                  const_reference,
-                                                 xtl::variant<xtl::xclosure_wrapper<L&>...>>;
-            using const_pointer = xtl::variant<const L*...>;
+                                                 xtl::variant<xtl::xclosure_wrapper<T&>...>>;
+            using const_pointer = xtl::variant<const T*...>;
             using pointer = std::conditional_t<is_const,
                                                const_pointer,
-                                               xtl::variant<L*...>>;
-            using size_type = typename xvector_variant_size_type<L...>::size_type;
-            using difference_type = typename xvector_variant_size_type<L...>::difference_type;
+                                               xtl::variant<T*...>>;
+        };
 
-            using const_iterator = xtl::variant<typename std::vector<L>::const_iterator...>;
+        template <bool is_const, bool is_ref, class... V>
+        struct xvector_variant_traits
+        {
+            using storage_type = 
+                std::conditional_t<is_ref,
+                                   std::conditional_t<is_const,
+                                                      xtl::variant<xtl::xclosure_wrapper<const V&>...>,
+                                                      xtl::variant<xtl::xclosure_wrapper<V&>...>>,
+                                   xtl::variant<V...>>;
+            using value_type_list = mpl::unique_t<mpl::vector<typename V::value_type...>>;
+            using value_traits = xvector_variant_value_traits<is_const, value_type_list>;
+            using size_traits = xvector_variant_size_traits<V...>;
+
+            using value_type = typename value_traits::value_type;
+            using reference = typename value_traits::reference;
+            using const_reference = typename value_traits::const_reference;
+            using pointer = typename value_traits::pointer;
+            using const_pointer = typename value_traits::const_pointer;
+            using size_type = typename size_traits::size_type;
+            using difference_type = typename size_traits::difference_type;
+
+            using const_iterator = xtl::variant<typename V::const_iterator...>;
             using iterator = std::conditional_t<is_const,
                                                 const_iterator,
-                                                xtl::variant<typename std::vector<L>::iterator...>>;
+                                                xtl::variant<typename V::iterator...>>;
         };
 
         template <bool is_const, class traits>
@@ -62,6 +90,9 @@ namespace xf
             using difference_type = typename traits::difference_type;
             using iterator = std::conditional_t<is_const, typename traits::const_iterator, typename traits::iterator>;
         };
+
+        template <class T1, class T2>
+        using is_unlike = xtl::negation<std::is_same<std::decay_t<T1>, std::decay_t<T2>>>;
     }
 
     /************************
@@ -76,7 +107,7 @@ namespace xf
     {
     public:
 
-        using self_type = xvector_variant_base<traits>;
+        using self_type = xvector_variant_base;
         using value_type = typename traits::value_type;
         using reference = typename traits::reference;
         using const_reference = typename traits::const_reference;
@@ -92,14 +123,16 @@ namespace xf
         using iterator = xvector_variant_iterator<iterator_traits>;
         using const_iterator = xvector_variant_iterator<const_iterator_traits>;
 
-        // Capacity
+        // Size and capacity
 
         bool empty() const;
         size_type size() const;
+        void resize(size_type new_size);
         size_type max_size() const;
-        void reserve(size_type new_cap);
         size_type capacity() const;
+        void reserve(size_type new_cap);
         void shrink_to_fit();
+        void clear();
 
         // Element access
 
@@ -132,10 +165,8 @@ namespace xf
         const_iterator cbegin() const;
         const_iterator cend() const;
 
-        // Modifiers
+        // swap
 
-        void clear();
-        void resize(size_type size);
         void swap(self_type& rhs);
 
         // Comparison
@@ -146,10 +177,7 @@ namespace xf
     protected:
 
         template <class T,
-            std::enable_if_t<
-                !std::is_same<std::decay_t<T>, self_type>::value,
-                bool
-            > = true>
+                  XTL_REQUIRES(detail::is_unlike<T, self_type>)>
         xvector_variant_base(T&& v)
             : m_storage(std::forward<T>(v))
         {
@@ -162,6 +190,7 @@ namespace xf
 
         self_type& operator=(const self_type& rhs) = default;
         self_type& operator=(self_type&& rhs) = default;
+
 
     private:
 
@@ -239,20 +268,21 @@ namespace xf
      * xvector_variant *
      *******************/
 
-    template <class... L>
-    class xvector_variant : public xvector_variant_base<detail::xvector_variant_traits<false, false, L...>>
+    template <class... V>
+    class xvector_variant : public xvector_variant_base<detail::xvector_variant_traits<false, false, V...>>
     {
     public:
 
-        using traits_type = detail::xvector_variant_traits<false, false, L...>;
+        using traits_type = detail::xvector_variant_traits<false, false, V...>;
         using base_type = xvector_variant_base<traits_type>;
-        using self_type = xvector_variant<L...>;
+        using self_type = xvector_variant<V...>;
 
-        template <class T>
-        xvector_variant(const std::vector<T>& v);
-
-        template <class T>
-        xvector_variant(std::vector<T>&& v);
+        template <class OV,
+                  XTL_REQUIRES(detail::is_unlike<OV, self_type>)>
+        inline xvector_variant(OV&& v)
+            : base_type(std::forward<OV>(v))
+        {
+        }
 
         ~xvector_variant() = default;
 
@@ -263,36 +293,40 @@ namespace xf
         self_type& operator=(self_type&&) = default;
     };
 
-    template <class... L>
-    void swap(xvector_variant<L...>& lhs, xvector_variant<L...>& rhs);
+    template <class... V>
+    void swap(xvector_variant<V...>& lhs, xvector_variant<V...>& rhs);
 
-    template <class T, class... L>
-    std::vector<T>& xget_vector(xvector_variant<L...>& v);
+    template <class T, class... V>
+    T& xget_vector(xvector_variant<V...>& v);
 
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(const xvector_variant<L...>& v);
+    template <class T, class... V>
+    const T& xget_vector(const xvector_variant<V...>& v);
 
-    template <class T, class... L>
-    std::vector<T>&& xget_vector(xvector_variant<L...>&& v);
+    template <class T, class... V>
+    T&& xget_vector(xvector_variant<V...>&& v);
 
-    template <class T, class... L>
-    const std::vector<T>&& xget_vector(const xvector_variant<L...>&& v);
+    template <class T, class... V>
+    const T&& xget_vector(const xvector_variant<V...>&& v);
 
-    /************************
-     *  xvector_variant_ref *
-     ************************/
+    /***********************
+     * xvector_variant_ref *
+     ***********************/
 
-    template <class... L>
-    class xvector_variant_ref : public xvector_variant_base<detail::xvector_variant_traits<false, true, L...>>
+    template <class ...V>
+    class xvector_variant_ref : public xvector_variant_base<detail::xvector_variant_traits<false, true, V...>>
     {
     public:
 
-        using traits_type = detail::xvector_variant_traits<false, true, L...>;
+        using traits_type = detail::xvector_variant_traits<false, true, V...>;
         using base_type = xvector_variant_base<traits_type>;
-        using self_type = xvector_variant_ref<L...>;
+        using self_type = xvector_variant_ref<V...>;
 
-        template <class T>
-        xvector_variant_ref(std::vector<T>& v);
+        template <class OV,
+                  XTL_REQUIRES(detail::is_unlike<OV, self_type>)>
+        inline xvector_variant_ref(OV& v)
+            : base_type(v)
+        {
+        }
 
         ~xvector_variant_ref() = default;
 
@@ -303,36 +337,40 @@ namespace xf
         self_type& operator=(self_type&&) = default;
     };
 
-    template <class... L>
-    void swap(xvector_variant_ref<L...>& lhs, xvector_variant_ref<L...>& rhs);
+    template <class... V>
+    void swap(xvector_variant_ref<V...>& lhs, xvector_variant_ref<V...>& rhs);
 
-    template <class T, class... L>
-    std::vector<T>& xget_vector(xvector_variant_ref<L...>& v);
+    template <class T, class... V>
+    T& xget_vector(xvector_variant_ref<V...>& v);
 
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(const xvector_variant_ref<L...>& v);
+    template <class T, class... V>
+    const T& xget_vector(const xvector_variant_ref<V...>& v);
 
-    template <class T, class... L>
-    std::vector<T>& xget_vector(xvector_variant_ref<L...>&& v);
+    template <class T, class... V>
+    T& xget_vector(xvector_variant_ref<V...>&& v);
 
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(const xvector_variant_ref<L...>&& v);
+    template <class T, class... V>
+    const T& xget_vector(const xvector_variant_ref<V...>&& v);
 
     /************************
      * xvector_variant_cref *
      ************************/
 
-    template <class... L>
-    class xvector_variant_cref : public xvector_variant_base<detail::xvector_variant_traits<true, true, L...>>
+    template <class ...V>
+    class xvector_variant_cref : public xvector_variant_base<detail::xvector_variant_traits<true, true, V...>>
     {
     public:
 
-        using traits_type = detail::xvector_variant_traits<true, true, L...>;
+        using traits_type = detail::xvector_variant_traits<true, true, V...>;
         using base_type = xvector_variant_base<traits_type>;
-        using self_type = xvector_variant_cref<L...>;
+        using self_type = xvector_variant_cref<V...>;
 
-        template <class T>
-        xvector_variant_cref(const std::vector<T>& v);
+        template <class OV,
+                  XTL_REQUIRES(detail::is_unlike<OV, self_type>)>
+        inline xvector_variant_cref(OV& v)
+            : base_type(v)
+        {
+        }
 
         ~xvector_variant_cref() = default;
 
@@ -340,17 +378,17 @@ namespace xf
         xvector_variant_cref(self_type&&) = default;
     };
 
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(xvector_variant_cref<L...>& v);
+    template <class T, class... V>
+    const T& xget_vector(xvector_variant_cref<V...>& v);
 
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(const xvector_variant_cref<L...>& v);
+    template <class T, class... V>
+    const T& xget_vector(const xvector_variant_cref<V...>& v);
 
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(xvector_variant_cref<L...>&& v);
+    template <class T, class... V>
+    const T& xget_vector(xvector_variant_cref<V...>&& v);
 
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(const xvector_variant_cref<L...>&& v);
+    template <class T, class... V>
+    const T& xget_vector(const xvector_variant_cref<V...>&& v);
 
     /***************************************
      * xvector_variant_base implementation *
@@ -396,15 +434,15 @@ namespace xf
     }
 
     template <class T>
-    inline auto xvector_variant_base<T>::max_size() const -> size_type
+    inline void xvector_variant_base<T>::resize(size_type size)
     {
-        return xtl::visit([](const auto& arg) { return detail::unwrap(arg).max_size(); }, m_storage);
+        xtl::visit([size](auto& arg) { detail::unwrap(arg).resize(size); }, m_storage);
     }
 
     template <class T>
-    inline void xvector_variant_base<T>::reserve(size_type new_cap)
+    inline auto xvector_variant_base<T>::max_size() const -> size_type
     {
-        xtl::visit([new_cap](auto& arg) { detail::unwrap(arg).reserve(new_cap); }, m_storage);
+        return xtl::visit([](const auto& arg) { return detail::unwrap(arg).max_size(); }, m_storage);
     }
 
     template <class T>
@@ -414,9 +452,21 @@ namespace xf
     }
 
     template <class T>
+    inline void xvector_variant_base<T>::reserve(size_type new_cap)
+    {
+        xtl::visit([new_cap](auto& arg) { detail::unwrap(arg).reserve(new_cap); }, m_storage);
+    }
+
+    template <class T>
     inline void xvector_variant_base<T>::shrink_to_fit()
     {
         xtl::visit([](auto& arg) { detail::unwrap(arg).shrink_to_fit(); }, m_storage);
+    }
+
+    template <class T>
+    inline void xvector_variant_base<T>::clear()
+    {
+        xtl::visit([](auto& arg) { detail::unwrap(arg).clear(); }, m_storage);
     }
 
     template <class T>
@@ -560,18 +610,6 @@ namespace xf
     }
 
     template <class T>
-    inline void xvector_variant_base<T>::clear()
-    {
-        xtl::visit([](auto& arg) { detail::unwrap(arg).clear(); }, m_storage);
-    }
-
-    template <class T>
-    inline void xvector_variant_base<T>::resize(size_type size)
-    {
-        xtl::visit([size](auto& arg) { detail::unwrap(arg).resize(size); }, m_storage);
-    }
-
-    template <class T>
     inline void xvector_variant_base<T>::swap(self_type& rhs)
     {
         m_storage.swap(rhs.m_storage);
@@ -587,12 +625,6 @@ namespace xf
     inline bool xvector_variant_base<T>::less_than(const self_type& rhs) const
     {
         return m_storage < rhs.m_storage;
-    }
-
-    template <class T>
-    inline void swap(xvector_variant_base<T>& lhs, xvector_variant_base<T>& rhs)
-    {
-        lhs.swap(rhs);
     }
 
     template <class T>
@@ -630,7 +662,7 @@ namespace xf
     {
         return !(lhs < rhs);
     }
-
+    
     /****************************
      * xvector_variant_iterator *
      ****************************/
@@ -709,48 +741,34 @@ namespace xf
      * xvector_variant implementation *
      **********************************/
 
-    template <class... L>
-    template <class T>
-    xvector_variant<L...>::xvector_variant(const std::vector<T>& v)
-        : base_type(v)
-    {
-    }
-
-    template <class... L>
-    template <class T>
-    xvector_variant<L...>::xvector_variant(std::vector<T>&& v)
-        : base_type(std::move(v))
-    {
-    }
-
-    template <class... L>
-    inline void swap(xvector_variant<L...>& lhs, xvector_variant<L...>& rhs)
+    template <class... V>
+    inline void swap(xvector_variant<V...>& lhs, xvector_variant<V...>& rhs)
     {
         lhs.swap(rhs);
     }
 
-    template <class T, class... L>
-    inline std::vector<T>& xget_vector(xvector_variant<L...>& v)
+    template <class T, class... V>
+    inline T& xget_vector(xvector_variant<V...>& v)
     {
-        return xtl::xget<std::vector<T>>(v.storage());
+        return xtl::xget<T>(v.storage());
     }
 
-    template <class T, class... L>
-    inline const std::vector<T>& xget_vector(const xvector_variant<L...>& v)
+    template <class T, class... V>
+    inline const T& xget_vector(const xvector_variant<V...>& v)
     {
-        return xtl::xget<std::vector<T>>(v.storage());
+        return xtl::xget<T>(v.storage());
     }
 
-    template <class T, class... L>
-    inline std::vector<T>&& xget_vector(xvector_variant<L...>&& v)
+    template <class T, class... V>
+    inline T&& xget_vector(xvector_variant<V...>&& v)
     {
-        return xtl::xget<std::vector<T>>(std::move(v.storage()));
+        return xtl::xget<T>(std::move(v.storage()));
     }
 
-    template <class T, class... L>
-    inline const std::vector<T>&& xget_vector(const xvector_variant<L...>&& v)
+    template <class T, class... V>
+    inline const T&& xget_vector(const xvector_variant<V...>&& v)
     {
-        return xtl::xget<std::vector<T>>(std::move(v.storage()));
+        return xtl::xget<T>(std::move(v.storage()));
     }
 
     /**************************************
@@ -758,76 +776,63 @@ namespace xf
      **************************************/
 
     template <class... L>
-    template <class T>
-    inline xvector_variant_ref<L...>::xvector_variant_ref(std::vector<T>& v)
-        : base_type(v)
-    {
-    }
-
-    template <class... L>
     inline void swap(xvector_variant_ref<L...>& lhs, xvector_variant_ref<L...>& rhs)
     {
         lhs.swap(rhs);
     }
 
-    template <class T, class... L>
-    inline std::vector<T>& xget_vector(xvector_variant_ref<L...>& v)
+    template <class T, class... V>
+    inline T& xget_vector(xvector_variant_ref<V...>& v)
     {
-        return xtl::xget<std::vector<T>&>(v.storage());
+        return xtl::xget<T&>(v.storage());
     }
 
-    template <class T, class... L>
-    inline const std::vector<T>& xget_vector(const xvector_variant_ref<L...>& v)
+    template <class T, class... V>
+    inline const T& xget_vector(const xvector_variant_ref<V...>& v)
     {
-        return xtl::xget<const std::vector<T>&>(v.storage());
+        return xtl::xget<const T&>(v.storage());
     }
 
-    template <class T, class... L>
-    inline std::vector<T>& xget_vector(xvector_variant_ref<L...>&& v)
+    template <class T, class... V>
+    inline T& xget_vector(xvector_variant_ref<V...>&& v)
     {
-        return xtl::xget<std::vector<T>&>(std::move(v.storage()));
+        return xtl::xget<T&>(std::move(v.storage()));
     }
 
-    template <class T, class... L>
-    inline const std::vector<T>& xget_vector(const xvector_variant_ref<L...>&& v)
+    template <class T, class... V>
+    inline const T& xget_vector(const xvector_variant_ref<V...>&& v)
     {
-        return xtl::xget<const std::vector<T>&>(std::move(v.storage()));
+        return xtl::xget<const T&>(std::move(v.storage()));
     }
 
     /***************************************
      * xvector_variant_cref implementation *
      ***************************************/
 
-    template <class... L>
-    template <class T>
-    inline xvector_variant_cref<L...>::xvector_variant_cref(const std::vector<T>& v)
-        : base_type(v)
+    template <class T, class... V>
+    const T& xget_vector(xvector_variant_cref<V...>& v)
     {
+        return xtl::xget<const T&>(v.storage());
     }
 
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(xvector_variant_cref<L...>& v)
+    template <class T, class... V>
+    const T& xget_vector(const xvector_variant_cref<V...>& v)
     {
-        return xtl::xget<const std::vector<T>&>(v.storage());
+        return xtl::xget<const T&>(v.storage());
     }
 
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(const xvector_variant_cref<L...>& v)
+    template <class T, class... V>
+    const T& xget_vector(xvector_variant_cref<V...>&& v)
     {
-        return xtl::xget<const std::vector<T>&>(v.storage());
+        return xtl::xget<const T&>(std::move(v.storage()));
     }
 
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(xvector_variant_cref<L...>&& v)
+    template <class T, class... V>
+    const T& xget_vector(const xvector_variant_cref<V...>&& v)
     {
-        return xtl::xget<const std::vector<T>&>(std::move(v.storage()));
-    }
-
-    template <class T, class... L>
-    const std::vector<T>& xget_vector(const xvector_variant_cref<L...>&& v)
-    {
-        return xtl::xget<const std::vector<T>&>(std::move(v.storage()));
+        return xtl::xget<const T&>(std::move(v.storage()));
     }
 }
 
 #endif
+
