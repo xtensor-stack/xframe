@@ -353,8 +353,7 @@ namespace xf
         EXPECT_EQ(v.size(), 8u);
     }
 
-    // Needs fix in xtensor
-    /*TEST(xvector_like_variant, max_size)
+    TEST(xvector_like_variant, max_size)
     {
         auto v = build_vector();
         variant_type vt(v);
@@ -398,7 +397,7 @@ namespace xf
 
         vt.clear();
         EXPECT_TRUE(vt.empty());
-    }*/
+    }
 
     /**********
      * Access *
@@ -438,7 +437,7 @@ namespace xf
         EXPECT_EQ(v[0], d);
     }
 
-    /*TEST(xvector_like_variant, at)
+    TEST(xvector_like_variant, at)
     {
         auto v = build_svector();
         variant_type vt(v);
@@ -476,7 +475,7 @@ namespace xf
         EXPECT_EQ(v[0], d);
 
         EXPECT_ANY_THROW(vt.at(6));
-    }*/
+    }
 
     TEST(xvector_like_variant, front)
     {
@@ -696,6 +695,106 @@ namespace xf
 
         EXPECT_EQ(vt.cend() - vt.cbegin(), 5);
         EXPECT_TRUE(vt.cbegin() < vt.cend());
+    }
+
+    /********
+     * swap *
+     ********/
+
+    TEST(xvector_like_variant, swap)
+    {
+        auto v1 = build_svector();
+        auto v2 = xt::svector<int>();
+
+        variant_type vt1(v1);
+        variant_type vt2(v2);
+
+        variant_type vt1_bu(v1);
+        variant_type vt2_bu(v2);
+
+        using std::swap;
+        swap(vt1, vt2);
+
+        EXPECT_EQ(vt1, vt2_bu);
+        EXPECT_EQ(vt2, vt1_bu);
+    }
+
+    TEST(xvector_like_variant_ref, swap)
+    {
+        auto v1 = build_svector();
+        auto v2 = xt::svector<int>();
+
+        auto v1_bu = v1;
+        auto v2_bu = v2;
+
+        variant_ref_type vt1(v1);
+        variant_ref_type vt2(v2);
+
+        using std::swap;
+        swap(vt1, vt2);
+        
+        EXPECT_EQ(v1, v2_bu);
+        EXPECT_EQ(v2, v1_bu);
+    }
+
+    /***************
+     * xget_vector *
+     ***************/
+
+    TEST(xvector_like_variant, xget_vector)
+    {
+        auto v = build_svector();
+        variant_type vt(v);
+        const variant_type& vt2(vt);
+
+        auto& vl = xget_vector<xt::svector<int>>(vt);
+        vl[0] = 4;
+        const auto& cvl = xget_vector<xt::svector<int>>(vt2);
+        EXPECT_EQ(cvl[0], 4);
+
+        xt::svector<int>&& rvl = xget_vector<xt::svector<int>>(std::move(vt));
+        EXPECT_EQ(rvl[0], 4);
+
+        const xt::svector<int>&& crvl = xget_vector<xt::svector<int>>(std::move(vt2));
+        EXPECT_EQ(crvl[0], 4);
+    }
+
+    TEST(xvector_like_variant_ref, xget_vector)
+    {
+        auto v = build_svector();
+        variant_ref_type vt(v);
+        const variant_ref_type& vt2(vt);
+
+        auto& vl = xget_vector<xt::svector<int>>(vt);
+        vl[0] = 4;
+        const auto& cvl = xget_vector<xt::svector<int>>(vt2);
+        EXPECT_EQ(cvl[0], 4);
+        EXPECT_EQ(v[0], 4);
+
+        auto& rvl = xget_vector<xt::svector<int>>(std::move(vt));
+        EXPECT_EQ(rvl[0], 4);
+
+        const auto& crvl = xget_vector<xt::svector<int>>(std::move(vt2));
+        EXPECT_EQ(crvl[0], 4);
+    }
+
+    TEST(xvector_like_variant_cref, xget_vector)
+    {
+        auto v = build_svector();
+        variant_cref_type vt(v);
+        const variant_cref_type& vt2(vt);
+
+        auto& vl = xget_vector<xt::svector<int>>(vt);
+        EXPECT_EQ(vl, v);
+
+        const auto& cvl = xget_vector<xt::svector<int>>(vt2);
+        EXPECT_EQ(cvl, v);
+
+        auto& rvl = xget_vector<xt::svector<int>>(std::move(vt));
+        EXPECT_EQ(rvl, v);
+
+        const auto& crvl = xget_vector<xt::svector<int>>(std::move(vt2));
+        EXPECT_EQ(crvl, v);
     }
 }
 

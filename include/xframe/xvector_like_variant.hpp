@@ -14,33 +14,6 @@
 #include "xtl/xmeta_utils.hpp"
 #include "xtl/xvariant.hpp"
 
-//TODO: move in xtl:
-namespace xtl
-{
-    namespace mpl
-    {
-        namespace detail
-        {
-            template <class L>
-            struct unique_impl;
-
-            template <template <class...> class L, class... T>
-            struct unique_impl<L<T...>>
-            {
-                using type = merge_set_t<L<>, L<T...>>;
-            };
-        }
-
-        template <class L>
-        struct unique : detail::unique_impl<L>
-        {
-        };
-
-        template <class L>
-        using unique_t = typename unique<L>::type;
-    }
-}
-
 namespace xf
 {
 
@@ -150,26 +123,25 @@ namespace xf
 
         using iterator = xvector_like_variant_iterator<iterator_traits>;
         using const_iterator = xvector_like_variant_iterator<const_iterator_traits>;
+
         // Size and capacity
 
         bool empty() const;
         size_type size() const;
         void resize(size_type new_size);
-        // Needs fix in xtensor
-        /*size_type max_size() const;
+        size_type max_size() const;
         size_type capacity() const;
         void reserve(size_type new_cap);
         void shrink_to_fit();
-        void clear();*/
+        void clear();
 
         // Element access
 
         reference operator[](size_type i);
         const_reference operator[](size_type i) const;
 
-        // Needs fix in xtensor
-        /*reference at(size_type i);
-        const_reference at(size_type i) const;*/
+        reference at(size_type i);
+        const_reference at(size_type i) const;
 
         reference front();
         const_reference front() const;
@@ -193,6 +165,11 @@ namespace xf
 
         const_iterator cbegin() const;
         const_iterator cend() const;
+
+        // swap
+
+        void swap(self_type& rhs);
+
         // Comparison
 
         bool equal(const self_type& rhs) const;
@@ -317,6 +294,21 @@ namespace xf
         self_type& operator=(self_type&&) = default;
     };
 
+    template <class... V>
+    void swap(xvector_like_variant<V...>& lhs, xvector_like_variant<V...>& rhs);
+
+    template <class T, class... V>
+    T& xget_vector(xvector_like_variant<V...>& v);
+
+    template <class T, class... V>
+    const T& xget_vector(const xvector_like_variant<V...>& v);
+
+    template <class T, class... V>
+    T&& xget_vector(xvector_like_variant<V...>&& v);
+
+    template <class T, class... V>
+    const T&& xget_vector(const xvector_like_variant<V...>&& v);
+
     /****************************
      * xvector_like_variant_ref *
      ****************************/
@@ -346,6 +338,21 @@ namespace xf
         self_type& operator=(self_type&&) = default;
     };
 
+    template <class... V>
+    void swap(xvector_like_variant_ref<V...>& lhs, xvector_like_variant_ref<V...>& rhs);
+
+    template <class T, class... V>
+    T& xget_vector(xvector_like_variant_ref<V...>& v);
+
+    template <class T, class... V>
+    const T& xget_vector(const xvector_like_variant_ref<V...>& v);
+
+    template <class T, class... V>
+    T& xget_vector(xvector_like_variant_ref<V...>&& v);
+
+    template <class T, class... V>
+    const T& xget_vector(const xvector_like_variant_ref<V...>&& v);
+
     /****************************
      * xvector_like_variant_cref *
      ****************************/
@@ -371,6 +378,18 @@ namespace xf
         xvector_like_variant_cref(const self_type&) = default;
         xvector_like_variant_cref(self_type&&) = default;
     };
+
+    template <class T, class... V>
+    const T& xget_vector(xvector_like_variant_cref<V...>& v);
+
+    template <class T, class... V>
+    const T& xget_vector(const xvector_like_variant_cref<V...>& v);
+
+    template <class T, class... V>
+    const T& xget_vector(xvector_like_variant_cref<V...>&& v);
+
+    template <class T, class... V>
+    const T& xget_vector(const xvector_like_variant_cref<V...>&& v);
 
     /********************************************
      * xvector_like_variant_base implementation *
@@ -421,8 +440,7 @@ namespace xf
         xtl::visit([size](auto& arg) { detail::unwrap(arg).resize(size); }, m_storage);
     }
 
-    // Needs fix in xtensor
-    /*template <class T>
+    template <class T>
     inline auto xvector_like_variant_base<T>::max_size() const -> size_type
     {
         return xtl::visit([](const auto& arg) { return detail::unwrap(arg).max_size(); }, m_storage);
@@ -450,7 +468,7 @@ namespace xf
     inline void xvector_like_variant_base<T>::clear()
     {
         xtl::visit([](auto& arg) { detail::unwrap(arg).clear(); }, m_storage);
-    }*/
+    }
 
     template <class T>
     inline auto xvector_like_variant_base<T>::operator[](size_type i) -> reference
@@ -472,8 +490,6 @@ namespace xf
         m_storage);
     }
 
-    // Needs a fix in xtensor
-    /*
     template <class T>
     inline auto xvector_like_variant_base<T>::at(size_type i) -> reference
     {
@@ -493,7 +509,6 @@ namespace xf
         },
         m_storage);
     }
-    */
 
     template <class T>
     inline auto xvector_like_variant_base<T>::front() -> reference
@@ -593,6 +608,12 @@ namespace xf
     inline auto xvector_like_variant_base<T>::cend() const -> const_iterator
     {
         return xtl::visit([](const auto& arg) { return const_iterator(detail::unwrap(arg).cend()); }, m_storage);
+    }
+
+    template <class T>
+    inline void xvector_like_variant_base<T>::swap(self_type& rhs)
+    {
+        m_storage.swap(rhs.m_storage);
     }
 
     template <class T>
@@ -720,6 +741,98 @@ namespace xf
     /***************************************
      * xvector_like_variant implementation *
      ***************************************/
+
+    template <class... V>
+    inline void swap(xvector_like_variant<V...>& lhs, xvector_like_variant<V...>& rhs)
+    {
+        lhs.swap(rhs);
+    }
+
+    template <class T, class... V>
+    inline T& xget_vector(xvector_like_variant<V...>& v)
+    {
+        return xtl::xget<T>(v.storage());
+    }
+
+    template <class T, class... V>
+    inline const T& xget_vector(const xvector_like_variant<V...>& v)
+    {
+        return xtl::xget<T>(v.storage());
+    }
+
+    template <class T, class... V>
+    inline T&& xget_vector(xvector_like_variant<V...>&& v)
+    {
+        return xtl::xget<T>(std::move(v.storage()));
+    }
+
+    template <class T, class... V>
+    inline const T&& xget_vector(const xvector_like_variant<V...>&& v)
+    {
+        return xtl::xget<T>(std::move(v.storage()));
+    }
+
+    /*******************************************
+     * xvector_like_variant_ref implementation *
+     *******************************************/
+
+    template <class... L>
+    inline void swap(xvector_like_variant_ref<L...>& lhs, xvector_like_variant_ref<L...>& rhs)
+    {
+        lhs.swap(rhs);
+    }
+
+    template <class T, class... V>
+    inline T& xget_vector(xvector_like_variant_ref<V...>& v)
+    {
+        return xtl::xget<T&>(v.storage());
+    }
+
+    template <class T, class... V>
+    inline const T& xget_vector(const xvector_like_variant_ref<V...>& v)
+    {
+        return xtl::xget<const T&>(v.storage());
+    }
+
+    template <class T, class... V>
+    inline T& xget_vector(xvector_like_variant_ref<V...>&& v)
+    {
+        return xtl::xget<T&>(std::move(v.storage()));
+    }
+
+    template <class T, class... V>
+    inline const T& xget_vector(const xvector_like_variant_ref<V...>&& v)
+    {
+        return xtl::xget<const T&>(std::move(v.storage()));
+    }
+
+    /********************************************
+     * xvector_like_variant_cref implementation *
+     ********************************************/
+
+    template <class T, class... V>
+    const T& xget_vector(xvector_like_variant_cref<V...>& v)
+    {
+        return xtl::xget<const T&>(v.storage());
+    }
+
+    template <class T, class... V>
+    const T& xget_vector(const xvector_like_variant_cref<V...>& v)
+    {
+        return xtl::xget<const T&>(v.storage());
+    }
+
+    template <class T, class... V>
+    const T& xget_vector(xvector_like_variant_cref<V...>&& v)
+    {
+        return xtl::xget<const T&>(std::move(v.storage()));
+    }
+
+    template <class T, class... V>
+    const T& xget_vector(const xvector_like_variant_cref<V...>&& v)
+    {
+        return xtl::xget<const T&>(std::move(v.storage()));
+    }
 }
 
 #endif
