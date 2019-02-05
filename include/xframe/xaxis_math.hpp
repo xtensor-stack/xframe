@@ -62,9 +62,8 @@ namespace xf
     using xt::fmax;
     using xt::fmin;
     using xt::fdim;
-    // Needs a fix in xtensor
-    //using xt::maximum;
-    //using xt::minimum;
+    using xt::maximum;
+    using xt::minimum;
     using xt::clip;
     using xt::sign;
 

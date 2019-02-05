@@ -323,32 +323,37 @@ namespace xf
         EXPECT_EQ(fdim(sa, a.select(sel)), fdim(sa, a).select(sel));
     }
 
-    // TODO: enable this when xoptional is fixed
-    /*TEST(xvariable_math, maximum)
+    TEST(xvariable_math, maximum)
     {
+        auto missing = xtl::missing<double>();
+        using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
+
         variable_type a = make_test_variable();
-        dict_type sel = make_selector_aa();
-        EXPECT_EQ(std::max(a.select(sel), a.select(sel)), maximum(a, a).select(sel));
+        variable_type b = make_test_variable2();
 
-        double sb = 1.2;
-        EXPECT_EQ(std::max(a.select(sel), sb), maximum(a, sb).select(sel));
-
-        double sa = 1.2;
-        EXPECT_EQ(std::max(sa, a.select(sel)), maximum(sa, a).select(sel));
+        variable_type res = maximum(a, b);
+        data_type expected = {{{      1,       2, missing},
+                               {missing, missing, missing}},
+                              {{     11,      12,      13},
+                               {missing,      15,      16}}};
+        EXPECT_EQ(res.data(), expected);
     }
 
     TEST(xvariable_math, minimum)
     {
+        auto missing = xtl::missing<double>();
+        using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
+
         variable_type a = make_test_variable();
-        dict_type sel = make_selector_aa();
-        EXPECT_EQ(std::min(a.select(sel), a.select(sel)), minimum(a, a).select(sel));
+        variable_type b = make_test_variable2();
 
-        double sb = 1.2;
-        EXPECT_EQ(std::min(a.select(sel), sb), minimum(a, sb).select(sel));
-
-        double sa = 1.2;
-        EXPECT_EQ(std::min(sa, a.select(sel)), minimum(sa, a).select(sel));
-    }*/
+        variable_type res = minimum(a, b);
+        data_type expected = {{{      1,       1, missing},
+                               {missing, missing, missing}},
+                              {{      7,       7,       7},
+                               {missing,       9,       9}}};
+        EXPECT_EQ(res.data(), expected);
+    }
 
     TEST(xvariable_math, clip)
     {
