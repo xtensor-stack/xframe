@@ -65,7 +65,7 @@ namespace xf
     // Needs a fix in xtensor
     //using xt::maximum;
     //using xt::minimum;
-    //using xt::clip;
+    using xt::clip;
     using xt::sign;
 
     using xt::exp;
