@@ -7,7 +7,12 @@
 ****************************************************************************/
 
 #include <algorithm>
+
 #include "gtest/gtest.h"
+
+#include "xtensor/xarray.hpp"
+#include "xtensor/xoptional_assembly.hpp"
+
 #include "test_fixture.hpp"
 
 namespace xf
@@ -278,7 +283,7 @@ namespace xf
 
         EXPECT_EQ(fma(sa, sb, a.select(sel)), xf::fma(sa, sb, a).select(sel));
     }
-    
+
     TEST(xvariable_math, fmax)
     {
         variable_type a = make_test_variable();
@@ -655,6 +660,29 @@ namespace xf
         variable_type a = make_test_variable();
         dict_type sel = make_selector_aa();
         EXPECT_EQ(isnan(a.select(sel)), xf::isnan(a).select(sel));
+    }
+
+    TEST(xvariable_math, where)
+    {
+        auto missing = xtl::missing<double>();
+        using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
+
+        variable_type a = make_test_variable();
+        variable_type b = make_test_variable2();
+
+        variable_type res = where(a < 6, b, a);
+
+        data_type expected = {{{     1.,      2., missing},
+                               {missing, missing, missing}},
+                              {{     7.,      7.,      7.},
+                               {     9.,      9.,      9.}}};
+        EXPECT_EQ(res.data(), expected);
+
+        variable_type res2 = where(a < 6, 0., a);
+        data_type expected2 = {{      0,   0, missing},
+                               {missing,   0,       6},
+                               {      7,   8,       9}};
+        EXPECT_EQ(res2.data(), expected2);
     }
 
     // Needs a fix in xtensor

@@ -114,6 +114,8 @@ namespace xf
     // Needs a fix in xtensor
     /*using xt::isclose;
     using xt::allclose;*/
+
+    using xt::where;
 }
 
 #endif
