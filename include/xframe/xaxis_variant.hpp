@@ -62,7 +62,7 @@ namespace xf
         {
             using tmp_storage_type = xtl::variant<xaxis<L, S, MT>...>;
             using storage_type = add_default_axis_t<tmp_storage_type, S, L...>;
-            using label_list = xvector_variant_cref<L...>;
+            using label_list = xvector_variant_cref<std::vector<L>...>;
             using key_type = xtl::variant<typename xaxis<L, S, MT>::key_type...>;
             using key_reference = xtl::variant<xtl::xclosure_wrapper<const typename xaxis<L, S, MT>::key_type&>...>;
             using mapped_type = S;
@@ -540,7 +540,7 @@ namespace xf
 
         inline const label_list& labels() const
         {
-            return xget_vector<key_type>(m_axis.labels());
+            return xget_vector<std::vector<key_type>>(m_axis.labels());
         };
 
         inline bool is_sorted() const noexcept
