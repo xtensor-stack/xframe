@@ -1,0 +1,8 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/include
+
+Name: xframe
+Description: xframe is a C++ library meant for numerical analysis with Multi-dimensional labeled arrays and data frame based on xtensor.
+Version: @xframe_VERSION@
+Cflags: -I${includedir}
