@@ -12,8 +12,7 @@
 #include <cstddef>
 
 #include "xtl/xbasic_fixed_string.hpp"
-
-#include "xtensor/xmasked_value.hpp"
+#include "xtl/xmasked_value.hpp"
 
 #include "xframe/xvariable_view.hpp"
 
@@ -28,7 +27,7 @@ namespace xf
     using coordinate_view_type = xcoordinate_view<fstring>;
     using dimension_type = xdimension<fstring, std::size_t>;
     using data_type = xt::xoptional_assembly<xt::xarray<double>, xt::xarray<bool>>;
-    using masked_data_type = xt::xarray<xt::xmasked_value<xtl::xoptional<double, bool>>>;
+    using masked_data_type = xt::xarray<xtl::xmasked_value<xtl::xoptional<double, bool>>>;
     using variable_type = xvariable_container<coordinate_type, data_type>;
     using variable_view_type = xvariable_view<variable_type&>;
     using slice_vector = variable_view_type::slice_vector;
@@ -103,7 +102,7 @@ namespace xf
         {
             for (std::size_t o = 4; o < val.shape()[1]; ++o)
             {
-                val(a, o) = xt::masked<xtl::xoptional<double, bool>>();
+                val(a, o) = xtl::masked<xtl::xoptional<double, bool>>();
             }
         }
         return val;
@@ -128,11 +127,11 @@ namespace xf
 
         for (std::size_t o = 0; o < val.shape()[1]; ++o)
         {
-            val(6, o) = xt::masked<xtl::xoptional<double, bool>>();
+            val(6, o) = xtl::masked<xtl::xoptional<double, bool>>();
         }
         for (std::size_t a = 0; a < val.shape()[0]; ++a)
         {
-            val(a, 0) = xt::masked<xtl::xoptional<double, bool>>();
+            val(a, 0) = xtl::masked<xtl::xoptional<double, bool>>();
         }
         return val;
     }
@@ -157,11 +156,11 @@ namespace xf
         val.fill(5.2);
         for (std::size_t o = 0; o < val.shape()[1]; ++o)
         {
-            val(6, o) = xt::masked<xtl::xoptional<double, bool>>();
+            val(6, o) = xtl::masked<xtl::xoptional<double, bool>>();
         }
         for (std::size_t a = 0; a < val.shape()[0]; ++a)
         {
-            val(a, 0) = xt::masked<xtl::xoptional<double, bool>>();
+            val(a, 0) = xtl::masked<xtl::xoptional<double, bool>>();
         }
         return val;
     }

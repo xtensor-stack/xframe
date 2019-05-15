@@ -11,10 +11,9 @@
 
 #include <limits>
 
+#include "xtl/xmasked_value.hpp"
 #include "xtl/xsequence.hpp"
 #include "xtl/xoptional.hpp"
-
-#include "xtensor/xmasked_value.hpp"
 
 #include "xframe_utils.hpp"
 #include "xcoordinate.hpp"
@@ -42,9 +41,9 @@ namespace xf
         };
 
         template <class T, class B>
-        struct static_missing_impl<xt::xmasked_value<T, B>>
+        struct static_missing_impl<xtl::xmasked_value<T, B>>
         {
-            using return_type = xt::xmasked_value<T, B>;
+            using return_type = xtl::xmasked_value<T, B>;
             static inline return_type get()
             {
                 static T val = static_missing_impl<T>::get();

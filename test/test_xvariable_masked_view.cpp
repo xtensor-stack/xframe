@@ -62,7 +62,7 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
-        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
+        auto masked_value = xtl::masked<xtl::xoptional<double, bool>>();
 
         auto expected = masked_var.select<join::inner, 2>({{{"abscissa", "a"}, {"ordinate", 12}}});
         EXPECT_EQ(expected, 6);
@@ -88,7 +88,7 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
-        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
+        auto masked_value = xtl::masked<xtl::xoptional<double, bool>>();
 
         auto expected = masked_var.select<join::outer, 2>({{{"abscissa", "a"}, {"ordinate", 12}}});
         EXPECT_EQ(expected, 6);
@@ -122,7 +122,7 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
-        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
+        auto masked_value = xtl::masked<xtl::xoptional<double, bool>>();
 
         EXPECT_EQ(masked_var(0, 6), 6);
         masked_var(0, 6) = 7;
@@ -148,7 +148,7 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
-        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
+        auto masked_value = xtl::masked<xtl::xoptional<double, bool>>();
         EXPECT_EQ(masked_var.element<2>({0, 6}), 6);
         EXPECT_EQ(const_masked_var.element({4, 3}), 35);
         EXPECT_EQ(masked_var.element({6, 3}), masked_value);
@@ -169,7 +169,7 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
-        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
+        auto masked_value = xtl::masked<xtl::xoptional<double, bool>>();
         EXPECT_EQ(masked_var.locate("a", 12), 6);
         EXPECT_EQ(const_masked_var.locate("g", 5), 35);
         EXPECT_EQ(masked_var.locate("m", 5), masked_value);
@@ -191,7 +191,7 @@ namespace xf
             not_equal(var.axis<int>("ordinate"), 1)
         );
 
-        auto masked_value = xt::masked<xtl::xoptional<double, bool>>();
+        auto masked_value = xtl::masked<xtl::xoptional<double, bool>>();
         EXPECT_EQ(masked_var.locate_element({"a", 12}), 6);
         EXPECT_EQ(const_masked_var.locate_element({"g", 5}), 35);
         EXPECT_EQ(masked_var.locate_element({"m", 5}), masked_value);
