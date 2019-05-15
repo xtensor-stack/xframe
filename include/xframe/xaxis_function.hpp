@@ -51,7 +51,7 @@ namespace xf
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using name_type = detail::common_name_type_t<std::decay_t<xaxis_expression_closure_t<CT>>...>;
-        using size_type = xt::detail::common_size_type_t<std::decay_t<xaxis_expression_closure_t<CT>>...>;
+        using size_type = xt::common_size_type_t<std::decay_t<xaxis_expression_closure_t<CT>>...>;
 
         template <std::size_t N = dynamic()>
         using selector_sequence_type = detail::xselector_sequence_t<std::pair<name_type, size_type>, N>;

@@ -52,8 +52,8 @@ namespace xf
         using const_reference = value_type;
         using pointer = value_type*;
         using const_pointer = const value_type*;
-        using size_type = xt::detail::common_size_type_t<std::decay_t<CT>...>;
-        using difference_type = xt::detail::common_difference_type_t<std::decay_t<CT>...>;
+        using size_type = xt::common_size_type_t<std::decay_t<CT>...>;
+        using difference_type = xt::common_difference_type_t<std::decay_t<CT>...>;
 
         using shape_type = typename data_type::shape_type;
 
