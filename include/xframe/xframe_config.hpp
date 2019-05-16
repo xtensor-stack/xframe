@@ -10,7 +10,7 @@
 #define XFRAME_CONFIG_HPP
 
 #define XFRAME_VERSION_MAJOR 0
-#define XFRAME_VERSION_MINOR 1
+#define XFRAME_VERSION_MINOR 2
 #define XFRAME_VERSION_PATCH 0
 
 #include "xtl/xbasic_fixed_string.hpp"
