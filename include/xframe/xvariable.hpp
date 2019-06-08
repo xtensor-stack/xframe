@@ -15,8 +15,6 @@
 #include "xvariable_base.hpp"
 #include "xvariable_math.hpp"
 
-double global_tolerance = 0.;
-
 namespace xf
 {
     /***********************
