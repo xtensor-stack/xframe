@@ -15,6 +15,11 @@
 #include "xtensor/xio.hpp"
 
 #ifdef __CLING__
+
+#include <nlohmann/json.hpp>
+
+namespace nl = nlohmann;
+
 namespace xf
 {
     template <class P, class T>
@@ -356,7 +361,7 @@ namespace xf
     }
 
     template <class T>
-    xeus::xjson mime_bundle_repr_impl(const T& expr)
+    nl::json mime_bundle_repr_impl(const T& expr)
     {
         std::stringstream out;
 
@@ -380,7 +385,7 @@ namespace xf
 
         xf::compute_nd_table(out, printer, expr, edge_items);
 
-        auto bundle = xeus::xjson::object();
+        auto bundle = nl::json::object();
         bundle["text/html"] = out.str();
         return bundle;
     }
@@ -389,7 +394,7 @@ namespace xf
     class xvariable_container;
 
     template <class CCT, class ECT>
-    xeus::xjson mime_bundle_repr(const xvariable_container<CCT, ECT>& expr)
+    nl::json mime_bundle_repr(const xvariable_container<CCT, ECT>& expr)
     {
         return xf::mime_bundle_repr_impl(expr);
     }
@@ -398,7 +403,7 @@ namespace xf
     class xvariable_function;
 
     template <class F, class R, class... CT>
-    xeus::xjson mime_bundle_repr(const xvariable_function<F, R, CT...>& expr)
+    nl::json mime_bundle_repr(const xvariable_function<F, R, CT...>& expr)
     {
         using temporary_type = typename xvariable_function<F, R, CT...>::temporary_type;
         temporary_type tmp(expr);
@@ -409,7 +414,7 @@ namespace xf
     class xvariable_view;
 
     template <class CT>
-    xeus::xjson mime_bundle_repr(const xvariable_view<CT>& expr)
+    nl::json mime_bundle_repr(const xvariable_view<CT>& expr)
     {
         return xf::mime_bundle_repr_impl(expr);
     }
@@ -418,7 +423,7 @@ namespace xf
     class xvariable_masked_view;
 
     template <class CTV, class CTAX>
-    xeus::xjson mime_bundle_repr(const xvariable_masked_view<CTV, CTAX>& expr)
+    nl::json mime_bundle_repr(const xvariable_masked_view<CTV, CTAX>& expr)
     {
         return xf::mime_bundle_repr_impl(expr);
     }
@@ -427,7 +432,7 @@ namespace xf
     class xreindex_view;
 
     template <class E>
-    xeus::xjson mime_bundle_repr(const xreindex_view<E>& expr)
+    nl::json mime_bundle_repr(const xreindex_view<E>& expr)
     {
         return xf::mime_bundle_repr_impl(expr);
     }
