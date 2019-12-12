@@ -269,6 +269,14 @@ namespace xf
                     }
                 }
             }
+            parse_colname_subheader(colname_subheader_vec, coltext_subheader_vec);
+            parse_collabel_subheader(collabs_subheader_vec, coltext_subheader_vec);
+            parse_colattr_subheader(colattr_subheader_vec);
+        }
+
+        void xsas7bdat_parser::parse_data()
+        {
+
         }
 
         inline void xsas7bdat_parser::parse_head()
@@ -322,15 +330,17 @@ namespace xf
             it = it + 2;
             for (auto idx = 0; idx < subheader_pointers_count; idx++)
             {
-                it = it + static_cast<uint8_t>(m_64bit ? subheader_pointer_offset::subheader_pointer_offset_64bit : subheader_pointer_offset::subheader_pointer_offset_32bit);
                 auto offset_to_subhead = m_64bit ? iterator_memory_data<uint64_t>(it, m_swap_endian) : iterator_memory_data<uint32_t>(it, m_swap_endian);
                 auto length = m_64bit ? iterator_memory_data<uint64_t>(it, m_swap_endian) : iterator_memory_data<uint32_t>(it, m_swap_endian);
+                if (length == 0)
+                    continue;
                 auto compression = iterator_memory_data<uint8_t>(it, m_swap_endian);
-                it = it + (m_64bit ? 8 : 4);
+                it = it + (m_64bit ? 7 : 3);
                 auto subheader_it = page_memory.begin() + static_cast<difference_type>(offset_to_subhead);
                 subheader sub_header;
                 sub_header.data = iterator_memory_data<memory_data_type>(subheader_it, length);
-                sub_header.signature = m_64bit ? iterator_memory_data<uint64_t>(subheader_it, m_swap_endian) : iterator_memory_data<uint32_t>(subheader_it, m_swap_endian);
+                sub_header.signature = m_64bit ? read_memory_data<uint64_t>(sub_header.data, 0, m_swap_endian)
+                                               : read_memory_data<uint32_t>(sub_header.data, 0, m_swap_endian);
                 sub_header.compression = compression;
                 ret_vec.emplace_back(sub_header);
             }
@@ -400,8 +410,6 @@ namespace xf
                 for (size_t idx = 0; idx < subheader_pointor_count; idx++)
                 {
                     auto it = pointor_it + static_cast<difference_type>(idx * (m_64bit ? 16 : 12));
-//                    auto offset = m_64bit ? iterator_memory_data<uint64_t>(it, m_swap_endian) : iterator_memory_data<uint32_t>(it, m_swap_endian);
-//                    auto length = iterator_memory_data<uint32_t>(it, m_swap_endian);
                     it = it + static_cast<difference_type>(m_64bit ? 14 : 10);
                     auto col_type = iterator_memory_data<uint8_t>(it, m_swap_endian);
                     m_coltype_vec.emplace_back(static_cast<column_type>(col_type));
