@@ -100,7 +100,27 @@ namespace xf
             {
                 none = 0x00,
                 trunc = 0x01,
-                row = 0x04
+                rle = 0x04
+            };
+
+            enum class rle_command : uint8_t
+            {
+                copy64 = 0,
+                unknown1 = 1,
+                unknown2 = 2,
+                unknown3 = 3,
+                insert_byte18 = 4,
+                insert_at17 = 5,
+                insert_blank17 = 6,
+                insert_zero17 = 7,
+                copy1 = 8,
+                copy17 = 9,
+                copy33 = 10,
+                copy49 = 11,
+                insert_byte3 = 12,
+                insert_at2 = 13,
+                insert_blank2 = 14,
+                insert_zero2 = 15
             };
 
 #pragma pack(push, 1)
@@ -336,13 +356,54 @@ namespace xf
                     continue;
                 auto compression = iterator_memory_data<uint8_t>(it, m_swap_endian);
                 it = it + (m_64bit ? 7 : 3);
-                auto subheader_it = page_memory.begin() + static_cast<difference_type>(offset_to_subhead);
-                subheader sub_header;
-                sub_header.data = iterator_memory_data<memory_data_type>(subheader_it, length);
-                sub_header.signature = m_64bit ? read_memory_data<uint64_t>(sub_header.data, 0, m_swap_endian)
-                                               : read_memory_data<uint32_t>(sub_header.data, 0, m_swap_endian);
-                sub_header.compression = compression;
-                ret_vec.emplace_back(sub_header);
+                if (static_cast<compression_type>(compression) == compression_type::none)
+                {
+                    auto subheader_it = page_memory.begin() + static_cast<difference_type>(offset_to_subhead);
+                    subheader sub_header;
+                    sub_header.data = iterator_memory_data<memory_data_type>(subheader_it, length);
+                    sub_header.signature = m_64bit ? read_memory_data<uint64_t>(sub_header.data, 0, m_swap_endian)
+                                                   : read_memory_data<uint32_t>(sub_header.data, 0, m_swap_endian);
+                    sub_header.compression = compression;
+                    ret_vec.emplace_back(sub_header);
+                }
+                else if (static_cast<compression_type>(compression) == compression_type::rle)
+                {
+                    auto subheader_it = page_memory.begin() + static_cast<difference_type>(offset_to_subhead);
+                    subheader sub_header;
+                    sub_header.data = iterator_memory_data<memory_data_type>(subheader_it, length);
+                    auto it = sub_header.data.begin();
+                    while (it != sub_header.data.end())
+                    {
+                        auto control = iterator_memory_data<uint8_t>(it, false);
+                        auto command = (control & 0xF0) >> 4;
+                        auto length = (control & 0x0F);
+                        switch (static_cast<rle_command>(command))
+                        {
+                        case rle_command::copy64:
+                        case rle_command::unknown1:
+                        case rle_command::unknown2:
+                        case rle_command::unknown3:
+                        case rle_command::insert_byte18:
+                        case rle_command::insert_at17:
+                        case rle_command::insert_blank17:
+                        case rle_command::insert_zero17:
+                        case rle_command::copy1:
+                        case rle_command::copy17:
+                        case rle_command::copy33:
+                        case rle_command::copy49:
+                        case rle_command::insert_byte3:
+                        case rle_command::insert_at2:
+                        case rle_command::insert_blank2:
+                        case rle_command::insert_zero2:
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // do nothing.
+                }
+
             }
             return ret_vec;
         }
