@@ -47,6 +47,7 @@ namespace xf
             using memory_data_iterator = std::vector<char>::iterator;
             using difference_type = typename memory_data_type::difference_type;
             using size_type = memory_data_type::size_type;
+            using value_type = memory_data_type::value_type;
 
             enum class endian : uint8_t
             {
@@ -377,25 +378,99 @@ namespace xf
                         auto control = iterator_memory_data<uint8_t>(it, false);
                         auto command = (control & 0xF0) >> 4;
                         auto length = (control & 0x0F);
+                        memory_data_type memory_data;
                         switch (static_cast<rle_command>(command))
                         {
                         case rle_command::copy64:
+                        {
+                            auto copy_len = iterator_memory_data<uint8_t>(it, false) + 64 + length * 256;
+                            memory_data = iterator_memory_data<memory_data_type>(it, static_cast<uint64_t>(copy_len));
+                            break;
+                        }
                         case rle_command::unknown1:
                         case rle_command::unknown2:
                         case rle_command::unknown3:
-                        case rle_command::insert_byte18:
-                        case rle_command::insert_at17:
-                        case rle_command::insert_blank17:
-                        case rle_command::insert_zero17:
-                        case rle_command::copy1:
-                        case rle_command::copy17:
-                        case rle_command::copy33:
-                        case rle_command::copy49:
-                        case rle_command::insert_byte3:
-                        case rle_command::insert_at2:
-                        case rle_command::insert_blank2:
-                        case rle_command::insert_zero2:
                             break;
+                        case rle_command::insert_byte18:
+                        {
+                            auto insert_len = iterator_memory_data<uint8_t>(it, false) + 18 + length * 256;
+                            auto insert_byte = iterator_memory_data<uint8_t>(it, false);
+                            memory_data.insert(memory_data.begin(), static_cast<size_type>(insert_len), static_cast<value_type>(insert_byte));
+                        }
+                            break;
+                        case rle_command::insert_at17:
+                        {
+                            auto insert_len = iterator_memory_data<uint8_t>(it, false) + 17 + length * 256;
+                            auto insert_byte = '@';
+                            memory_data.insert(memory_data.begin(), static_cast<size_type>(insert_len), static_cast<value_type>(insert_byte));
+                            break;
+                        }
+                        case rle_command::insert_blank17:
+                        {
+                            auto insert_len = iterator_memory_data<uint8_t>(it, false) + 17 + length * 256;
+                            auto insert_byte = ' ';
+                            memory_data.insert(memory_data.begin(), static_cast<size_type>(insert_len), static_cast<value_type>(insert_byte));
+                            break;
+                        }
+                        case rle_command::insert_zero17:
+                        {
+                            auto insert_len = iterator_memory_data<uint8_t>(it, false) + 17 + length * 256;
+                            auto insert_byte = '\0';
+                            memory_data.insert(memory_data.begin(), static_cast<size_type>(insert_len), static_cast<value_type>(insert_byte));
+                            break;
+                        }
+                        case rle_command::copy1:
+                        {
+                            auto copy_len = length + 1;
+                            memory_data = iterator_memory_data<memory_data_type>(it, static_cast<uint64_t>(copy_len));
+                            break;
+                        }
+                        case rle_command::copy17:
+                        {
+                            auto copy_len = length + 17;
+                            memory_data = iterator_memory_data<memory_data_type>(it, static_cast<uint64_t>(copy_len));
+                            break;
+                        }
+                        case rle_command::copy33:
+                        {
+                            auto copy_len = length + 33;
+                            memory_data = iterator_memory_data<memory_data_type>(it, static_cast<uint64_t>(copy_len));
+                            break;
+                        }
+                        case rle_command::copy49:
+                        {
+                            auto copy_len = length + 49;
+                            memory_data = iterator_memory_data<memory_data_type>(it, static_cast<uint64_t>(copy_len));
+                            break;
+                        }
+                        case rle_command::insert_byte3:
+                        {
+                            auto insert_len = length + 3;
+                            auto insert_byte = iterator_memory_data<uint8_t>(it, false);
+                            memory_data.insert(memory_data.begin(), static_cast<size_type>(insert_len), static_cast<value_type>(insert_byte));
+                            break;
+                        }
+                        case rle_command::insert_at2:
+                        {
+                            auto insert_len = length + 2;
+                            auto insert_byte = '@';
+                            memory_data.insert(memory_data.begin(), static_cast<size_type>(insert_len), static_cast<value_type>(insert_byte));
+                            break;
+                        }
+                        case rle_command::insert_blank2:
+                        {
+                            auto insert_len = length + 2;
+                            auto insert_byte = ' ';
+                            memory_data.insert(memory_data.begin(), static_cast<size_type>(insert_len), static_cast<value_type>(insert_byte));
+                            break;
+                        }
+                        case rle_command::insert_zero2:
+                        {
+                            auto insert_len = length + 2;
+                            auto insert_byte = '\0';
+                            memory_data.insert(memory_data.begin(), static_cast<size_type>(insert_len), static_cast<value_type>(insert_byte));
+                            break;
+                        }
                         }
                     }
                 }
