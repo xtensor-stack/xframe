@@ -82,4 +82,4 @@ installation mode you choose, you can add ``xframe`` to your project using cmake
     target_include_directories(your_target PUBLIC ${xframe_INCLUDE_DIRS})
     target_link_libraries(your_target PUBLIC xframe)
 
-.. _xtensor: https://github.com/QuantStack/xtensor
+.. _xtensor: https://github.com/xtensor-stack/xtensor

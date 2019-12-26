@@ -201,5 +201,5 @@ value is missing or not:
 
 .. _pandas: https://pandas.pydata.org
 .. _xarray: https://xarray.pydata.org
-.. _xtensor: https://github.com/QuantStack/xtensor
+.. _xtensor: https://github.com/xtensor-stack/xtensor
 
