@@ -1,5 +1,5 @@
 language: cpp
-dist: trusty
+dist: xenial
 matrix:
   include:
     - os: linux
@@ -32,25 +32,14 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-4.9
-            - clang-3.6
-      env: COMPILER=clang CLANG=3.6
+            - g++-7
+      env: COMPILER=gcc GCC=7
     - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-3.9
-          packages:
-            - g++-4.9
-            - clang-3.9
-      env: COMPILER=clang CLANG=3.9
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-4.0
+            - llvm-toolchain-xenial-4.0
           packages:
             - g++-4.9
             - clang-4.0
@@ -60,7 +49,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-5.0
+            - llvm-toolchain-xenial-5.0
           packages:
             - g++-4.9
             - clang-5.0
@@ -70,7 +59,7 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
+            - llvm-toolchain-xenial-6.0
           packages:
             - clang-6.0
       env: COMPILER=clang CLANG=6.0
