@@ -101,7 +101,7 @@ install:
     - conda install setuptools
     - conda update -q conda
     - conda install cmake -c conda-forge
-    - conda install xtensor=0.20.5 -c conda-forge
+    - conda install xtensor=0.21.4 -c conda-forge
     # Testing
     - mkdir build
     - cd build
