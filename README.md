@@ -12,6 +12,10 @@
 
 `xframe` is a dataframe for C++, based on [xtensor](https://github.com/xtensor-stack/xtensor) and [xtl](https://github.com/xtensor-stack/xtl).
 
+For more information on using `xframe`, check out the reference documentation
+
+https://xframe.readthedocs.io/
+
 ## Dependencies
 
 `xframe` depends on the [xtensor](https://github.com/xtensor-stack/xtensor) library:
