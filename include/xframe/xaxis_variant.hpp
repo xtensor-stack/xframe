@@ -685,9 +685,6 @@ namespace xf
         }, m_it);
     }
 
-    template <class T>
-    struct DEBUG;
-
     template <class L, class T, class MT>
     inline auto xaxis_variant_iterator<L, T, MT>::operator->() const -> pointer
     {
