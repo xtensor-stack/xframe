@@ -21,9 +21,9 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - conda install gtest cmake -c conda-forge
-  - conda install xtensor=0.21.4 -c conda-forge
-  - cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -DBUILD_TESTS=ON .
+  - conda env create --file environment-dev.yml
+  - CALL conda.bat activate xframe
+  - cmake -G "NMake Makefiles" -D CMAKE_INSTALL_PREFIX=%MINICONDA%\\LIBRARY -DDOWNLOAD_GTEST=ON .
   - nmake test_xframe
   - cd test
 
