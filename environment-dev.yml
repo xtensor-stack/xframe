@@ -1,0 +1,7 @@
+name: xframe
+channels:
+  - conda-forge
+dependencies:
+  - cmake
+  - xtensor=0.21.4
+
