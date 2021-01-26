@@ -1,0 +1,28 @@
+steps:
+  - script: |
+      conda config --set always_yes yes --set changeps1 no
+      conda update -q conda
+      conda env create --file environment-dev.yml
+      source activate xframe
+
+  - script: |
+      source activate xframe
+      mkdir build
+      cd build
+      cmake -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DDOWNLOAD_GTEST=ON $(Build.SourcesDirectory)
+    displayName: Configure xframe
+    workingDirectory: $(Build.BinariesDirectory)
+
+  - script: |
+      source activate xxframe
+      make -j2 test_xframe
+    displayName: Build xframe
+    workingDirectory: $(Build.BinariesDirectory)/build
+
+  - script: |
+      source activate xframe
+      cd test
+      ./test_xframe
+    displayName: Test xframe
+    workingDirectory: $(Build.BinariesDirectory)/build/test
+          
