@@ -4,13 +4,13 @@ jobs:
       matrix:
         gcc_4:
           gcc_version: '4.9'
-        gcc_5_disable_xsimd:
+        gcc_5:
           gcc_version: '5'
-        gcc_6_disable_exception:
+        gcc_6:
           gcc_version: '6'
         gcc_7:
           gcc_version: '7'
-        gcc_8_bound_checks:
+        gcc_8:
           gcc_version: '8'
         gcc_9:
           gcc_version: '9'
