@@ -61,13 +61,17 @@ if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
         message(FATAL_ERROR "Build step for googletest failed: ${result}")
     endif()
 
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     # Add googletest directly to our build. This defines
     # the gtest and gtest_main targets.
     add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                      ${CMAKE_CURRENT_BINARY_DIR}/googletest-build EXCLUDE_FROM_ALL)
 
     set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include")
-    set(GTEST_BOTH_LIBRARIES  gtest_main gtest)
+    add_library(GTest::GTest INTERFACE IMPORTED)
+    target_link_libraries(GTest::GTest INTERFACE gtest)
+    add_library(GTest::Main INTERFACE IMPORTED)
+    target_link_libraries(GTest::Main INTERFACE gtest_main)
 else()
     find_package(GTest REQUIRED)
 endif()
@@ -113,7 +117,7 @@ add_executable(test_xframe ${XFRAME_TESTS} ${XFRAME_HEADERS})
 if(DOWNLOAD_GTEST OR GTEST_SRC_DIR)
     add_dependencies(test_xframe gtest_main)
 endif()
-target_link_libraries(test_xframe ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(test_xframe GTest::GTest GTest::Main ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(test_xframe PRIVATE ${XFRAME_INCLUDE_DIR})
 
 add_custom_target(xtest COMMAND test_xframe DEPENDS test_xframe)
