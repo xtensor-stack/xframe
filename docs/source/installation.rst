@@ -31,14 +31,14 @@ cmake's ``find_package`` to locate xframe headers.
 
 .. image:: conda.svg
 
-Using the conda package
------------------------
+Using the conda-forge package
+-----------------------------
 
-A package for xframe is available on the conda package manager.
+A package for xframe is available for the mamba (or conda) package manager.
 
 .. code::
 
-    conda install -c conda-forge xframe
+    mamba install -c conda-forge xframe
 
 .. image:: cmake.svg
 
