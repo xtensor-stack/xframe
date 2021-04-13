@@ -16,6 +16,16 @@ For more information on using `xframe`, check out the reference documentation
 
 https://xframe.readthedocs.io/
 
+# Installation
+
+## Package managers
+
+We provide a package for the mamba (or conda) package manager:
+
+```
+mamba install -c conda-forge xtensor
+```
+
 ## Dependencies
 
 `xframe` depends on the [xtensor](https://github.com/xtensor-stack/xtensor) library:
