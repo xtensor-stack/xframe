@@ -283,7 +283,7 @@ namespace xf
     auto locate(E&& e, S&&... slices);
 
     template <class E, class L = XFRAME_DEFAULT_LABEL_LIST>
-    auto select(E&& e, std::map<typename std::decay_t<E>::key_type, xaxis_slice<L>>&& slices);
+    auto select(E&& e, std::map<typename std::decay_t<E>::key_type, xaxis_slice<L>>&& slices, double tolerance=0.);
 
     template <class E, class T = typename std::decay_t<E>::difference_type>
     auto iselect(E&& e, std::map<typename std::decay_t<E>::key_type, xt::xdynamic_slice<T>>&& slices);
@@ -1091,8 +1091,9 @@ namespace xf
     }
 
     template <class E, class L>
-    inline auto select(E&& e, std::map<typename std::decay_t<E>::key_type, xaxis_slice<L>>&& slices)
+    inline auto select(E&& e, std::map<typename std::decay_t<E>::key_type, xaxis_slice<L>>&& slices, double tolerance)
     {
+        global_tolerance = tolerance;
         using coordinate_type = typename std::decay_t<E>::coordinate_type;
         using dimension_type = typename std::decay_t<E>::dimension_type;
         using dimension_label_list = typename dimension_type::label_list;

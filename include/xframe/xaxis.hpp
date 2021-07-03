@@ -11,6 +11,8 @@
 #ifndef XFRAME_XAXIS_HPP
 #define XFRAME_XAXIS_HPP
 
+extern double global_tolerance;
+
 #include <initializer_list>
 #include <iterator>
 #include <algorithm>
@@ -116,6 +118,10 @@ namespace xf
 
         bool contains(const key_type& key) const;
         mapped_type operator[](const key_type& key) const;
+        mapped_type tolerance(const key_type& key, std::true_type) const;
+        mapped_type tolerance(const key_type& key, std::false_type) const;
+        mapped_type with_tolerance(const key_type& key) const;
+        mapped_type without_tolerance(const key_type& key) const;
 
         template <class F>
         self_type filter(const F& f) const noexcept;
@@ -406,6 +412,45 @@ namespace xf
         return m_index.count(key) != typename map_type::size_type(0);
     }
 
+    template <class L, class T, class MT>
+    inline auto xaxis<L, T, MT>::tolerance(const key_type& key, std::true_type) const -> mapped_type
+    {
+        return with_tolerance(key);
+    }
+
+    template <class L, class T, class MT>
+    inline auto xaxis<L, T, MT>::tolerance(const key_type& key, std::false_type) const -> mapped_type
+    {
+        return without_tolerance(key);
+    }
+
+    template <class L, class T, class MT>
+    inline auto xaxis<L, T, MT>::with_tolerance(const key_type& key) const -> mapped_type
+    {
+        if (global_tolerance > 0.)
+        {
+            double smallest;
+            int position = -1;
+            for (const auto& it: m_index)
+            {
+                double diff = fabs(double(it.first) - key);
+                if ((diff <= global_tolerance) && ((position < 0) || (diff < smallest)))
+                {
+                    smallest = diff;
+                    position = it.second;
+                }
+            }
+            return position >= 0 ? position : m_index.at(key);
+        }
+        return m_index.at(key);
+    }
+
+    template <class L, class T, class MT>
+    inline auto xaxis<L, T, MT>::without_tolerance(const key_type& key) const -> mapped_type
+    {
+        return m_index.at(key);
+    }
+
     /**
      * Returns the position of the specified label. If this last one is
      * not found, an exception is thrown.
@@ -414,7 +459,7 @@ namespace xf
     template <class L, class T, class MT>
     inline auto xaxis<L, T, MT>::operator[](const key_type& key) const -> mapped_type
     {
-        return m_index.at(key);
+        return tolerance(key, std::integral_constant<bool, std::is_floating_point<key_type>::value>{});
     }
     //@}
 
