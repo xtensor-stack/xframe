@@ -162,7 +162,7 @@ is to accept and return expressions:
         return sqrt(de1 * de1 + de2 * de2);
     }
 
-This function can work with both tnesor and variable expressions, performing
+This function can work with both tensor and variable expressions, performing
 broadcasting according to the rules of `xtensor` or `xframe` depending on
 its argument type:
 
