@@ -32,7 +32,7 @@ mamba install -c conda-forge xtensor
 
 |  xframe  |  xtensor  |
 |----------|-----------|
-|  master  |  ^0.21.4  |
+|  master  |  ^0.24.0  |
 |   0.3.0  |  ^0.21.4  |
 |   0.2.0  |  ^0.20.0  |
 |   0.1.0  |  ^0.19.1  |
