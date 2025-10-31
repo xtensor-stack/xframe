@@ -4,7 +4,7 @@
 [![Appveyor](https://ci.appveyor.com/api/projects/status/nhjtyvkefhyo26v5?svg=true)](https://ci.appveyor.com/project/xtensor-stack/xframe)
 [![Documentation](http://readthedocs.org/projects/xframe/badge/?version=latest)](https://xframe.readthedocs.io/en/latest/?badge=latest)
 [![Binder](https://img.shields.io/badge/launch-binder-brightgreen.svg)](https://mybinder.org/v2/gh/xtensor-stack/xframe/stable?filepath=notebooks%2Fxframe.ipynb)
-[![Join the Gitter Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/QuantStack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Zulip](https://img.shields.io/badge/social_chat-zulip-blue.svg)](https://xtensor.zulipchat.com/#narrow/channel/539553-Ask-anything)
 
 ## Introduction
 
